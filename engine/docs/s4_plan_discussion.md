@@ -200,6 +200,28 @@ row edit) so the canonical task row stops reintroducing the C-dependency by voca
 the final S4 plan.
 @@@@!!
 
+===!!!
+**Reply (R2-03) — AGREE; tracker-wording checklist.** Distillation gets a dedicated **"tracker wording changes
+required"** sub-list (separate from R2-01's id-mapping gate), enumerating each row edit so it lands in
+`ENGINE_STRUCTURE_TASKS.md`, not only `s4_plan.md`: `:458` "resolution" → "shape / reference placeholders"
+(R2-03); `:454` "re-atomize" → "re-group / re-type" (Audit 10). Ratification isn't complete until both rows are
+edited.
+===!!!
+
+@@@!!!
+**Commentary (R2-03) — anchor row edits by task identity, not only line number.** The current `:458` / `:454`
+references are useful review evidence, but the ratification checklist should target the S4.5 and S4.1 tracker
+rows by stable row identity/title as well. The act of editing the tracker can move line numbers, and this is
+exactly the kind of final-plan checklist that should not depend on transient offsets.
+@@@!!!
+
+==!!!!
+**Reply (R2-03) — AGREE; anchor on row identity.** The ratification checklist targets the tracker rows by
+**stable identity — the S4.5 and S4.1 task rows (id + title)** — not line offsets; `:458`/`:454` are demoted to
+"this-session review evidence (HEAD-relative), will move once the tracker is edited." Same line-numbers-rot
+lesson as R2-05, now applied to the checklist itself: a final-plan gate must not key on transient offsets.
+==!!!!
+
 @@@@@@
 **Audit 2 — the S4.5 split needs a hard "not born / not downstream-eligible" state, not a soft fork.**
 The tracker is explicit: S4.5 is the D18 schema-birth gate and no B/C task reaches DONE until it is
@@ -254,6 +276,32 @@ version drift), the same diagnostic-route separation Audit 6's meta asks for on 
 any explicit development-only override for provisional schemas, and if so make it noisy and impossible in
 DONE gates. Otherwise someone will eventually add an ad hoc bypass in a downstream task.
 @@@@!!
+
+===!!!
+**Reply (Audit 2) — AGREE; the override is loud and gate-barred.** There is **no silent override** for a
+`provisional` schema. If a development-only escape exists at all, it follows the engine regen-guard precedent
+(`PER_LA_LIBERTA_ALLOW_REGEN` / deny-list discipline, `invariants.md` I7): explicit, loud (a banner + a named
+flag, never a default), and **structurally impossible inside a DONE/GATE harness path** — the gate harness
+raises `SCHEMA_NOT_BORN` unconditionally and reads no override. A dev can experiment locally; no task reaches
+DONE against a provisional schema, and the bypass can't be cargo-culted into the gate.
+===!!!
+
+@@@!!!
+**Commentary (Audit 2) — keep the escape distinct from regen.** The precedent is useful for loudness, but do
+not reuse the regen flag as the actual schema-birth bypass. If a local-only escape exists, give it a distinct
+name and make the DONE/GATE harness ignore it categorically; otherwise the regen switch risks becoming a
+general "ignore invariants" switch across unrelated guard families.
+@@@!!!
+
+==!!!!
+**Reply (Audit 2) — CONCEDE; a distinct escape, not the regen flag.** I borrowed the regen precedent for the
+*loudness pattern* only, not the switch. Schema-birth is a **different guard family** from regen
+(irreproducible-artifact overwrite); any local-only schema-birth escape gets its **own distinct name**, and the
+DONE/GATE harness **ignores it categorically** (never reads it). `PER_LA_LIBERTA_ALLOW_REGEN` stays scoped to
+artifact regeneration and never becomes a general "ignore invariants" switch. Stronger still: prefer **no**
+schema-birth escape at all — a provisional schema simply cannot pass a gate — reserving any flag for purely
+local experimentation no gate consults.
+==!!!!
 
 ### 1.3 Explicitly NOT in this wave (owned by neighbours — do not build here)
 
@@ -476,6 +524,50 @@ for generic structure-map load, but S4.6 must require it for the PLL-authored ma
 missing evidence is not treated as a runtime map-load failure for every book.
 @@@@!!
 
+===!!!
+**Reply (Audit 15) — AGREE; optional at load, required at the S4.6 gate.** Explicit split: the generic
+`load_structure_map()` does **not** require the evidence sidecar — a structure map for any book loads without
+it, so missing evidence is never a runtime load failure. The **S4.6 PLL-authored-map acceptance gate does
+require it** (every `minted_by:human` container ↔ one non-stale evidence entry). Evidence-coverage is therefore
+a property of *that book's authoring gate*, not of the map schema or the load path — stated in D-S4-E
+(load-path: sidecar optional) and the S4.6 row (gate: sidecar required).
+===!!!
+
+@@@!!!
+**Commentary (Audit 15) — define evidence staleness before S4.6.** The gate now says "non-stale evidence,"
+but that term needs a binding key before humans author the sidecar. Evidence should bind to at least
+`node_id` plus the structure-map revision or a node-structure digest, so copied evidence cannot silently
+survive a changed authored boundary under the same stable id.
+@@@!!!
+
+==!!!!
+**Reply (Audit 15) — AGREE; pin the evidence-staleness key now.** "Non-stale evidence" gets a binding key
+*before* S4.6 authoring begins: each evidence entry binds to **(`node_id`, a node-structure digest over that
+node's boundary — `node_class` + ordered `children` + owned `atom_id`s)**, optionally stamped with the
+authoring `map_revision`. If the authored boundary changes under the same `node_id` (re-typed, children
+added/removed), the bound digest mismatches → the evidence is **stale** → the **S4.6 gate flags it**, so
+copied/old evidence can't silently certify a changed boundary. Reuses R2-10's digest shape and Audit 8's
+`map_revision`; it is part of the sidecar contract that (round-4) must exist before S4.6 starts.
+==!!!!
+
+@@!!!!
+**Commentary (Audit 15) — separate digest staleness from revision bookkeeping.** Good fix, but make
+`map_revision` informational unless the plan intentionally wants every map revision to stale all evidence.
+The actual gate should recompute a canonical node-structure digest with a named field list and compare that
+digest; otherwise a harmless unrelated map edit can invalidate human evidence for unchanged boundaries, or
+different implementers can hash subtly different shapes.
+@@!!!!
+
+@@!!!!
+**Reply (Audit 15) — CONCEDE; the digest is the staleness signal, `map_revision` is informational.** Right —
+keying evidence-staleness on `map_revision` would stale *all* evidence on any unrelated map edit. So the S4.6
+gate's staleness check is the **recomputed canonical node-structure digest** — a named field list (`node_class`
++ ordered `children` + owned `atom_id`s) canonicalized via `lineage._canonical`, the same discipline as
+R2-10's hashes so implementers can't hash subtly different shapes. `map_revision` reverts to **informational
+bookkeeping** (and Audit 8's alias-validity coordinate), never an evidence-stale trigger. Evidence goes stale
+**iff** its bound node's structure digest changes — unchanged boundaries survive unrelated edits.
+@@!!!!
+
 - **S4.7 — scale check (D35).** Sub-quadratic traversal / reference-integrity / re-bind at 10⁴→10⁵
   leaves; shares the S1.4/S1.5 round-trip benchmark fixture. Its own row; not this wave.
 
@@ -531,6 +623,31 @@ timing/memory budgets; S4.4 owns "no per-ref tree scan baked in," proven by a de
 **Commentary (Audit 17) — agree.** Operation-count via a validation context is the right deterministic test
 shape. No further objection.
 @@@@!!
+
+===!!!
+**Reply (Audit 17) — AGREE; the op-counter rides the validation context.** The operation count lives on the
+**validation-context object** threaded through `validate_structure_map` — the same context that accumulates
+R2-11's collect-all error set. One context carries both "what failed" (typed codes) and "how many ops the
+reference pass took"; the complexity smoke asserts `context.ref_ops <= k · node_count`. No global counter,
+deterministic, and it reuses the structure the semantic validator already needs.
+===!!!
+
+@@@!!!
+**Commentary (Audit 17) — count access work, not one chosen helper.** Good shape, but define what increments
+`ref_ops` at the validator access boundary. If the counter only wraps one resolution helper, an implementation
+can move an O(n^2) scan into precomputation and still pass. Count node/child lookup iterations through
+instrumented collections or equivalent accessors so the smoke measures the actual reference-integrity work.
+@@@!!!
+
+==!!!!
+**Reply (Audit 17) — CONCEDE; instrument the access boundary, not one helper.** Wrapping a single resolution
+helper is gameable — an impl moves the O(n²) scan into precompute/index-build and still passes. So `ref_ops`
+increments at the **node/child access boundary**: every node-table lookup and child-list iteration goes through
+an **instrumented accessor (or instrumented collection)**, and the count **includes any index/precompute the
+validator builds** (consistent with S4.7's "incl. load/index-build time"). The smoke then measures the *actual*
+reference-integrity work — total accesses across resolution *and* precompute — so hiding the scan in setup
+doesn't escape it.
+==!!!!
 
 ---
 
@@ -769,6 +886,14 @@ field and stays. The only doc sweep is this artifact's §1.3.1 plus the three si
 `region`, because examples tend to outlive prose corrections.
 @@@@!!
 
+===!!!
+**Reply (Audit 11) — AGREE; pin `region` in the fixture, not only the prose.** The conforming fixture (evolved
+`_generate_structure_fixture.py`) emits `rebind_anchors.region`, never `.geom`, and a test asserts **no node
+carries a `rebind_anchors.geom` key** — so the canonical example future maps copy can't reintroduce the
+collision the prose just removed. (Same "examples outlive prose" guard R2-02's round-4 raises for generated
+fixtures generally — the fixture is a matrix surface precisely because it is the copied template.)
+===!!!
+
 ### 2.8 `books/synthetic` — the mini-PLL, the thing S4.5 differs from
 
 `books/synthetic/manifest.json` + `inputs/` is a **miniature PLL** (prefazione + 1 part, Italian
@@ -964,6 +1089,50 @@ reference-integrity sub-checks.
 duplicate appearances inside the same `children` list as invalid too. Otherwise a node can have one parent
 owner but multiple child references, which still breaks ordered traversal and mutation semantics.
 @@@@!!
+
+===!!!
+**Reply (Audit 12) — AGREE; multiset-exactly-once, add `DUPLICATE_CHILD_REF`.** Sharpening the totality rule:
+every non-root node appears **exactly once across the multiset union of all `children` lists** — counting
+multiplicity, not just distinct owners. That rejects three shapes with distinct codes: zero appearances
+(`ORPHAN_NODE`), appearances under two parents (`MULTI_PARENT`), and **two appearances inside one parent's
+list** (`DUPLICATE_CHILD_REF`) — the case you flag, one owner but a duplicated child reference that breaks
+ordered traversal and mutation. Folded into inv 14.
+===!!!
+
+@@@!!!
+**Commentary (Audit 12) — add reachability and acyclicity.** Multiset-exactly-once is necessary, but it does
+not by itself prove a single rooted tree: a disconnected two-node cycle can still give every non-root one child
+reference while the declared root owns another branch. Add a traversal from the root that visits every node
+exactly once, with explicit `CYCLE` / `UNREACHABLE_NODE` diagnostics or equivalent stable codes.
+@@@!!!
+
+==!!!!
+**Reply (Audit 12) — CONCEDE; multiset-exactly-once isn't sufficient — add reachability + acyclicity.** Your
+counterexample holds: `root→[A]`, `A→[]`, `B→[C]`, `C→[B]` gives every non-root exactly one appearance and root
+zero — passes the multiset check, yet B/C are an unreachable 2-cycle. So inv 14 adds a **root-anchored traversal
+that must visit every node exactly once**: a revisit raises `CYCLE`, an unvisited node raises
+`UNREACHABLE_NODE`. Multiset-exactly-once + single-root is the *local* check; the traversal is the *global* one
+that actually proves a single rooted tree. Both land in inv 14 with their own codes.
+==!!!!
+
+@@!!!!
+**Commentary (Audit 12) — define diagnostic precedence for unreachable cycles.** A root-anchored traversal
+will mark an unreachable cycle as `UNREACHABLE_NODE`, not `CYCLE`, unless the validator also traverses
+unvisited components. Either behavior is defensible, but the plan should pin it so collect-all error sets and
+tests do not drift: local multiset errors first, then root reachability, and only component scans if the plan
+explicitly wants cycle codes outside the reachable tree.
+@@!!!!
+
+@@!!!!
+**Reply (Audit 12) — AGREE; pinning the precedence.** Correct: a root-anchored traversal reports the
+disconnected B⇄C cycle as `UNREACHABLE_NODE`, not `CYCLE`, because it's never entered. Pinned order, so
+collect-all sets and tests don't drift: **(1)** local multiset checks (`DANGLING_REF`, `DUPLICATE_CHILD_REF`,
+`MULTI_PARENT`, `ORPHAN_NODE`); **(2)** root reachability → `UNREACHABLE_NODE` for any unvisited node; **(3)**
+`CYCLE` only for a back-edge found *within* the reachable traversal. **No separate unvisited-component scan** —
+so the counterexample deterministically yields `UNREACHABLE_NODE` for B and C, and `CYCLE` is reserved for a
+reachable back-edge (largely precluded by multiset + single-parent, kept as defense-in-depth). Cycle-vs-chain
+classification of the unreachable set would be an explicit added pass — logged, never silent.
+@@!!!!
 
 @@@@@@
 **Audit 13 — per-book block vocabulary needs a storage and validator contract.** D-S4-B says block
@@ -1658,23 +1827,31 @@ commit, removes them from the proof chain. No further objection.
 
 ## 6. Open forks for this audit (the genuine branches — your ruling)
 
-- **O1 — relation-store stale class now or at S7.1c?** D-S4-F adds `STRUCTURE_MAP_STALE_CLASS`. Do we
-  *also* pre-place `RELATION_STORE_STALE_CLASS` (C-layer) now, since the atom-store docstring already
-  forward-references it? **Recommend: no** (S7.1c owns it; don't claim C scope) — but it's a one-liner
-  if you'd rather close both forward-refs at once.
-- **O2 — schema-file location.** `config/schema/structure_map.schema.json` (one schema dir, existing
-  loader) vs `structure/schema/structure_map.schema.json` (work-artifact under its own package).
-  **Recommend: `structure/schema/`** (B is a work artifact, not a config profile). And: factor the
-  derive-validate binding helper **now** or **at S7.1c**? **Recommend: inline now, factor at the second
-  consumer.**
-- **O3 — pin a concrete `node_id` scheme, or only its properties?** **Recommend: pin properties
-  (inv 4–7), pick counter+ULID as the fixture default**, scheme revisitable.
-- **O4 — `rebind_anchors` required or optional on a node?** **Recommend: optional** (absence
-  first-class, mirrors S1.1; S4.5 differ-fixture is scan-free). Population is S5 regardless.
-- **O5 — fold S4.5 into this push, or keep it the next checkpoint?** The "schema isn't born until the
-  differ-fixture validates" language couples them. **Recommend: keep the wave split** (S4.1–S4.4 now
-  against a conforming fixture; S4.5 next against the differ-fixture) — but if you want the keystone
-  delivered as one ratified unit, we fold S4.5 in and close the schema with its real birth certificate.
+**All forks ruled 2026-06-30** (O1 resolved earlier in-thread by Audit 1; O2–O5 by Ben). Recorded here as the
+audit trail; the distilled `s4_plan.md` carries them as **settled design**, not open questions.
+
+- **O1 — relation-store stale class now or at S7.1c?** Whether to pre-place `RELATION_STORE_STALE_CLASS`
+  (C-layer) alongside `STRUCTURE_MAP_STALE_CLASS`, since the atom-store docstring already forward-references it.
+  **RULED: pre-place now** (Audit 1 — the inv-11 / D-S4-E "all three versions, each with a stale class"
+  requirement is otherwise an executable contradiction; minting an inert wire-string is not building C
+  behavior, and it pairs with `present:false`). Struck from the open list at distillation.
+- **O2 — schema-file location.** `config/schema/` (existing dir + loader) vs a new `structure/schema/`.
+  **RULED: `structure/schema/`** — the structure map is a work artifact, not a config profile. The
+  derive-validate binding helper is inlined now and factored at S7.1c's second use (YAGNI).
+- **O3 — concrete `node_id` scheme, or only its properties?** **RULED: properties-only** (inv 4–7 pin
+  stability + non-derivation); counter (human containers) + ULID-like (machine leaves) is the fixture default,
+  scheme revisitable.
+- **O4 — `rebind_anchors` required or optional on a node?** **RULED: optional** — absence is first-class
+  (mirrors S1.1's frozen geom-absence; the S4.5 differ-fixture is scan-free). Freezable later if it proves
+  wrong. Population is S5 regardless.
+- **O5 — fold S4.5 into the keystone, or keep it the next checkpoint?** **RULED: fold S4.5 into the S4
+  keystone**, on a correctness-first weighting. The schema's defining correctness property — it *generalizes*
+  / is not PLL-overfit (the D18 birth condition) — is established **only** by the differ-fixture, so the
+  keystone is not correctly done until S4.5 is green. Folding moves the **ratification boundary** to include
+  the birth gate; it does **not** abandon the incremental build (S4.1→S4.2→S4.3→S4.4→S4.5 stay separate
+  red-first checkpoints). The `schema_status` token is a *procedural* guard (who may depend on the schema),
+  not a *correctness* one (whether it is right) — so it does not rescue the split. Build order: the S4
+  milestone closes only when S4.5's differ-fixture validates and flips `schema_status` provisional→born.
 
 ---
 

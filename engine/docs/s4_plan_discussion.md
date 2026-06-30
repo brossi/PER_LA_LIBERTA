@@ -119,6 +119,19 @@ a new test-only helper can still shape architecture. If a helper is not producti
 fixture/validator path, it still needs a matrix row or an explicit non-goal.
 @@@@@!
 
+====!!
+**Reply (R2-02) — AGREE; the matrix rule covers test-only surfaces.** The amendment rule reads "any
+helper/module/**fixture-or-validator path** introduced during S4 maps to a matrix row or amends the matrix in
+the same commit" — production and test-only code alike. A fixture generator or a validator helper (e.g.
+`schema_version_const`, Audit 3) is therefore a matrix row, not invisible architecture.
+====!!
+
+@@@@!!
+**Commentary (R2-02) — agree; include generated fixtures as surfaces.** Test-only helpers are covered, but
+fixture generators deserve explicit mention too: they define the canonical examples future code will copy.
+Any generator that shapes the structure-map artifact should map to the matrix or amend it in the same review.
+@@@@!!
+
 ### 1.2 The closing gate (next checkpoint, not this wave) — **S4.5, D18 schema-born**
 
 S4.5 hand-authors a **second-structure synthetic fixture built to DIFFER from PLL** (depth-0 body,
@@ -173,6 +186,20 @@ tracker wording, not just this discussion artifact, or the old "resolution" phra
 being the canonical task row.
 @@@@@!
 
+====!!
+**Reply (R2-03) — AGREE; tracker-wording edit logged.** Verified the S4.5 tracker row
+(`ENGINE_STRUCTURE_TASKS.md:458`) literally lists "relation-endpoint **resolution**" — so the rename is not
+doc-only. A ratification tracker edit changes that row to "relation-endpoint **shape / reference
+placeholders**," reserving "resolution" for S7/S9.4. Added to the §6 ratification actions (beside the Audit-10
+row edit) so the canonical task row stops reintroducing the C-dependency by vocabulary.
+====!!
+
+@@@@!!
+**Commentary (R2-03) — agree.** This is now correctly scoped. The distillation should carry a small
+"tracker wording changes required" checklist so this edit lands in `ENGINE_STRUCTURE_TASKS.md`, not only in
+the final S4 plan.
+@@@@!!
+
 @@@@@@
 **Audit 2 — the S4.5 split needs a hard "not born / not downstream-eligible" state, not a soft fork.**
 The tracker is explicit: S4.5 is the D18 schema-birth gate and no B/C task reaches DONE until it is
@@ -214,6 +241,19 @@ That answers both your questions (where enforcement lives; not persisted in the 
 schema, it should fail with a typed "schema not born" diagnostic that names S4.5 as the repair, not a generic
 stale/schema error. This keeps the lifecycle gate distinct from ordinary version mismatch.
 @@@@@!
+
+====!!
+**Reply (Audit 2) — AGREE; typed `SCHEMA_NOT_BORN` diagnostic.** A downstream harness meeting a `provisional`
+schema raises a distinct, typed `SCHEMA_NOT_BORN` error naming **S4.5** as the repair — never a generic
+stale/version-mismatch. That keeps "schema not yet born" legible apart from ordinary M3 staleness (a real
+version drift), the same diagnostic-route separation Audit 6's meta asks for on `handle_renderer_version`.
+====!!
+
+@@@@!!
+**Commentary (Audit 2) — agree; define override policy.** The typed diagnostic is right. Add whether there is
+any explicit development-only override for provisional schemas, and if so make it noisy and impossible in
+DONE gates. Otherwise someone will eventually add an ad hoc bypass in a downstream task.
+@@@@!!
 
 ### 1.3 Explicitly NOT in this wave (owned by neighbours — do not build here)
 
@@ -308,6 +348,18 @@ remove O1 from the open-forks section in the same distillation pass, or the reso
 open.
 @@@@@!
 
+====!!
+**Reply (Audit 1) — AGREE; O1 struck at distillation.** Confirmed O1 is still physically listed in §6 of this
+draft (it reads as open). It stays *here* as the audit trail — its resolution is recorded inline — but the
+distilled `s4_plan.md` omits O1 from the fork list and folds "pre-place `RELATION_STORE_STALE_CLASS`" into
+D-S4-F as settled. Logged in the §6 ratification actions so the resolved fork can't resurface.
+====!!
+
+@@@@!!
+**Commentary (Audit 1) — agree.** No further objection. The important part is that O1 disappears from the
+fork list at distillation, because leaving a resolved fork listed as open undermines the audit trail.
+@@@@!!
+
 4. **The three orthogonal read-axes** (`role` / `authorship` / `content_provenance_class`) → **S6.1.**
    S4.1 carries the *fields* the §11.2 sketch shows (`role`, `designation`, `title`, `authorship`
    override), but the derived-flag policy (`translatable` / `counts_for_retention` / …) and the
@@ -350,6 +402,18 @@ a field that doesn't exist. (R2-07's class-vs-role separation then activates at 
 **Meta-review (Audit 14) — agree.** Omitting the fields until S6 is stronger than reserved-null. Just make
 sure `designation` and `title` remain clearly classified as handle/display inputs, not read-axis policy.
 @@@@@!
+
+====!!
+**Reply (Audit 14) — ACK; designation/title stay handle/display.** With `role`/`authorship` omitted until S6,
+S4's only node metadata beyond `node_class` is `designation`/`title`, both typed explicitly as **handle/display
+inputs** in D-S4-D — never read-axis policy. R2-07's reply carries the same split; nothing in S4 lets a display
+field act as a matter role.
+====!!
+
+@@@@!!
+**Commentary (Audit 14) — agree.** The model is clean now: S4 owns display/handle inputs, S6 owns policy
+axes. No further objection.
+@@@@!!
 
 ### 1.4 Forward, with their own tracker rows (named, not silently dropped)
 
@@ -398,6 +462,20 @@ the sidecar still needs a deterministic key scheme and schema before S4.6 starts
 can pass with ad hoc notes that cannot be checked.
 @@@@@!
 
+====!!
+**Reply (Audit 15) — AGREE; the sidecar contract precedes S4.6.** The authoring-evidence sidecar gets a
+**deterministic key scheme (`node_id`) + its own schema, authored before S4.6 begins** — so the human task is
+checkable (every `minted_by:human` container ↔ exactly one evidence entry) rather than ad-hoc notes. The
+schema/version owner stays S4.6 (it's an authoring artifact), but the *contract* — key scheme, shape, coverage
+rule — is a precondition the S4.6 row depends on, not something S4.6 invents mid-authoring.
+====!!
+
+@@@@!!
+**Commentary (Audit 15) — agree; make the sidecar optionality explicit.** S4.4 should not require the sidecar
+for generic structure-map load, but S4.6 must require it for the PLL-authored map gate. State that split so
+missing evidence is not treated as a runtime map-load failure for every book.
+@@@@!!
+
 - **S4.7 — scale check (D35).** Sub-quadratic traversal / reference-integrity / re-bind at 10⁴→10⁵
   leaves; shares the S1.4/S1.5 round-trip benchmark fixture. Its own row; not this wave.
 
@@ -441,6 +519,18 @@ tree scan baked in." This is the right seam — it guards the shape without pres
 **Meta-review (Audit 17) — agree.** Operation-count is preferable to wall-clock for the S4.4 smoke; wall-clock
 is too machine-sensitive. S4.7 can own timing budgets.
 @@@@@!
+
+====!!
+**Reply (Audit 17) — AGREE; operation-count, not wall-clock.** The S4.4 complexity smoke asserts via
+**operation-count** (a counter on the reference-resolution path, bounded ~O(n) against node count), dropping the
+"generous wall-clock ceiling" alternative — wall-clock is machine-sensitive and flaky in CI. S4.7 owns the real
+timing/memory budgets; S4.4 owns "no per-ref tree scan baked in," proven by a deterministic op-count.
+====!!
+
+@@@@!!
+**Commentary (Audit 17) — agree.** Operation-count via a validation context is the right deterministic test
+shape. No further objection.
+@@@@!!
 
 ---
 
@@ -666,6 +756,19 @@ keep them apart. §2.7 / D-S4-H / inv 13 updated to `region`.
 Make sure the old `geom` wording is also removed from §1.3 and the tracker row references, not just §2.7.
 @@@@@!
 
+====!!
+**Reply (Audit 11) — AGREE on §1.3; tracker already clean.** Adding **§1.3.1** to the rename sweep — its
+"anchor sub-object (geom region + …)" becomes "region …" — so §1.3.1 / §2.7 / D-S4-H / inv 13 all read `region`,
+not just §2.7. On the tracker: verified row `ENGINE_STRUCTURE_TASKS.md:108` already says `rebind_anchors` with
+**no `.geom`**, so there's nothing to strike there; the atom-level `geom` (S1.1 row `:231`) is the authoritative
+field and stays. The only doc sweep is this artifact's §1.3.1 plus the three sites already noted.
+====!!
+
+@@@@!!
+**Commentary (Audit 11) — agree.** Good sweep boundary. Also ensure any future fixture field name is
+`region`, because examples tend to outlive prose corrections.
+@@@@!!
+
 ### 2.8 `books/synthetic` — the mini-PLL, the thing S4.5 differs from
 
 `books/synthetic/manifest.json` + `inputs/` is a **miniature PLL** (prefazione + 1 part, Italian
@@ -848,6 +951,20 @@ explicit semantic check for "every non-root node appears in exactly one `childre
 are total and unambiguous.
 @@@@@!
 
+====!!
+**Reply (Audit 12) — AGREE; totality check added.** The semantic validator gains an explicit rule: **every
+non-root node appears in exactly one node's `children` list**, and exactly one node (the root) appears in none.
+That makes derived `parent` total and unambiguous on load — a node in zero child-lists (orphan, non-root) or in
+two (double-parent) each fail loud with stable codes (`ORPHAN_NODE` / `MULTI_PARENT`). Folded into inv 14's
+reference-integrity sub-checks.
+====!!
+
+@@@@!!
+**Commentary (Audit 12) — agree; count references, not just parent owners.** The totality check should treat
+duplicate appearances inside the same `children` list as invalid too. Otherwise a node can have one parent
+owner but multiple child references, which still breaks ordered traversal and mutation semantics.
+@@@@!!
+
 @@@@@@
 **Audit 13 — per-book block vocabulary needs a storage and validator contract.** D-S4-B says block
 `class` is an open string vocabulary validated against a per-book registered set, but the plan does not
@@ -936,6 +1053,18 @@ your call. Logged as a low-stakes naming fork, not blocking.
 name. The schema description should use the phrase "conceptual minting authority" verbatim so the meaning is
 not inferred from the field name.
 @@@@@!
+
+====!!
+**Reply (R2-08) — ACCEPT; fork resolved, verbatim phrase pinned.** Naming fork closed: **keep `minted_by`**
+(verified the S4.2 tracker row uses it, `ENGINE_STRUCTURE_TASKS.md:455` — tracker fidelity). The field's schema
+`description` uses the phrase **"conceptual minting authority"** verbatim, and a test asserts that wording is
+present, so the meaning is read from the description, not inferred from the name. No rename to the tracker.
+====!!
+
+@@@@!!
+**Commentary (R2-08) — agree.** Keeping `minted_by` for tracker fidelity is fine now that the schema
+description pins the exact semantics. No further objection.
+@@@@!!
 
 @@@@@@
 **Audit 5 — `node_id` non-derivation is under-proven.** Inv 6 catches the obvious cheat
@@ -1062,6 +1191,19 @@ diagnostic route distinct from structure-map schema staleness. A renderer rule c
 review/alias migration, not a schema migration.
 @@@@@!
 
+====!!
+**Reply (Audit 6) — AGREE; distinct repair route.** A `handle_renderer_version` mismatch routes to a
+**handle-review / alias-migration** diagnostic, not a schema-migration one: a renderer-rule change rewrites
+rendered handles (citation / provenance / revision keys), which needs alias records minted for the retired
+handles — a content action, not a schema bump. The stale-class taxonomy carries it as its own route, beside
+`SCHEMA_NOT_BORN` (Audit 2) and ordinary M3 staleness — three mismatches, three named repairs.
+====!!
+
+@@@@!!
+**Commentary (Audit 6) — agree.** The distinct handle-review/alias-migration route is the right repair
+boundary. No further objection.
+@@@@!!
+
 @@@@@@
 **Audit 7 — alias collision handling is too late if S4.3 ships a resolver.** D-S4-D says S4.3 builds
 the alias record and resolve behavior, while collision-in-scope negatives land later with governance.
@@ -1136,6 +1278,19 @@ but clarify whether retired aliases remain resolvable for historical lookup. If 
 resolve, `status:retired` plus a closed interval should still be queryable under an explicit historical mode.
 @@@@@!
 
+====!!
+**Reply (Audit 8) — AGREE; retired aliases stay historically resolvable.** A `status:retired` alias keeps its
+closed `[valid_from, valid_to]` interval and **remains queryable under an explicit historical mode** —
+`resolve(handle, at_revision=N)` returns the node whose alias interval contained N. The *default* resolve
+(current `map_revision`) returns only `status:active` aliases, so a retired handle never shadows a live one;
+historical resolution is opt-in by revision. That is what makes retiring (vs deleting) an alias meaningful.
+====!!
+
+@@@@!!
+**Commentary (Audit 8) — agree.** Default active-only resolution plus explicit historical lookup is the right
+split. No further objection.
+@@@@!!
+
 ### D-S4-E — `structure_map.json` schema + lineage manifest (S4.4): build to the **ROW**, not the §11.2 sketch
 The §11.2 jsonc (PLAN:717–764) **predates S1.5/S3.0** — its `lineage` block lacks the three
 persisted-layer versions and the S3.0 resource/normalizer record the **S4.4 *row* now requires**. Build
@@ -1193,6 +1348,19 @@ S4.4 sub-decision.
 **Meta-review (R2-10) — agree.** Splitting content and geometry hashes fixes the routing problem. No further
 objection, provided each hash has an explicit participating field list and canonicalization rule.
 @@@@@!
+
+====!!
+**Reply (R2-10) — ACK; proviso met.** Each split hash carries an explicit **participating-field list +
+canonicalization rule** in D-S4-E: `canonical_content_hash` over `{atom_id, text, raw_span, raw_source_hash}`;
+`canonical_geometry_hash` over the geom-region fields (membership firming at S2.1, per the verified
+`Geom.absent()` floor); both canonicalized via `lineage._canonical` (sort_keys / fixed separators). No implicit
+"hash whatever's in the dict" — the field set is named, so stale-routing stays reviewable.
+====!!
+
+@@@@!!
+**Commentary (R2-10) — agree.** The explicit field lists and canonicalization rule satisfy the remaining
+concern. No further objection.
+@@@@!!
 
 @@@@@@
 **Audit 16 — D33's regen-guard implication is missing from the build shape.** D33 says the structure map
@@ -1316,6 +1484,18 @@ set is the raised exception's payload.)
 module and treated as part of the public validator contract. Avoid deriving them from exception class names
 or message text, which will drift.
 @@@@@!
+
+====!!
+**Reply (R2-11) — AGREE; codes are a declared contract.** The stable error codes live in **one module as an
+explicit enum/constant set** — part of the public `validate_structure_map` contract — never derived from
+exception class names or message strings (which drift silently). S8.1 routes on the declared code value; a test
+pins the code set, so renaming an internal exception class can't change a wire-visible code.
+====!!
+
+@@@@!!
+**Commentary (R2-11) — agree.** Declared error-code constants as the public contract are the right boundary.
+No further objection.
+@@@@!!
 
 1. **No-double-ownership** — across a multi-node map, every `atom_id` is owned by exactly one node;
    a heading atom is not also a body atom. Mutation: drop the dedup check → a shared atom passes.

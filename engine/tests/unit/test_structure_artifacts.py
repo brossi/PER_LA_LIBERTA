@@ -94,3 +94,177 @@ def test_all_public_exports_resolve_on_the_package():
     # otherwise reached only transitively through the accessors (feedback_validate_bindings).
     for name in structure.__all__:
         assert hasattr(structure, name), f"{name!r} is in __all__ but not importable from engine.structure"
+
+
+# --- S4.0 / B-1: structure-map + relation-store stale classes; schema_status map (inv 12a) ------ #
+
+# Every stale class the structure core exports. M3's whole point is that a lineage stale-check names
+# *which* layer changed, so these must be pairwise-distinct wire strings.
+STALE_CLASS_NAMES = (
+    "ATOM_STORE_STALE_CLASS",
+    "STRUCTURE_MAP_STALE_CLASS",
+    "RELATION_STORE_STALE_CLASS",
+    "RESOURCE_STALE_CLASS",
+    "NORMALIZER_STALE_CLASS",
+)
+
+# The relation surface S4 is *allowed* to expose: two inert layer-identity constants + the path
+# accessors. NONE is a relation-store loader/reader — that behaviour is deferred to S7.1c. This is
+# the inertness binding (inv 12a), not prose: a new relation-y public name breaks the equality.
+ALLOWED_RELATION_EXPORTS = {
+    "RELATION_STORE_SCHEMA_VERSION",
+    "RELATION_STORE_STALE_CLASS",
+    "RELATIONS_FILENAME",
+    "relations_path",
+}
+
+
+@pytest.mark.parametrize("name", ("STRUCTURE_MAP_STALE_CLASS", "RELATION_STORE_STALE_CLASS"))
+def test_s4_stale_class_is_a_nonempty_exported_string(name):
+    # inv 12a: both new stale classes exist, are non-empty wire strings, and are on the public
+    # surface. A dropped re-export AttributeErrors here rather than passing green (validate_bindings).
+    assert name in structure.__all__, f"{name!r} not exported from engine.structure"
+    value = getattr(structure, name)
+    assert isinstance(value, str) and value.strip(), f"{name!r} is not a non-empty string"
+
+
+def test_all_stale_classes_are_pairwise_distinct():
+    # inv 12a: a schema change to one layer must be able to name *that* layer — so every exported
+    # stale class is a distinct wire string. Red-proof: alias STRUCTURE_MAP_STALE_CLASS to the
+    # atom-store value and this length-equality drops.
+    values = [getattr(structure, n) for n in STALE_CLASS_NAMES]
+    assert all(isinstance(v, str) and v.strip() for v in values)
+    assert len(set(values)) == len(values), f"stale classes collide: {values}"
+
+
+def test_no_relation_named_export_beyond_the_inert_set():
+    # inv 12a (inertness), TARGETED check: the relation surface named with "relation" is exactly the
+    # two inert constants + path accessors — no relation-named loader. This is a readable, specific
+    # signal, but it is a name substring, so it cannot catch a relation/C-layer loader exported under
+    # a name lacking "relation" (load_graph, GraphStore, edges_path). The TOTAL backstop for that is
+    # test_public_export_surface_is_bounded below (R2-02): any new export, however named, trips it.
+    relationy = {n for n in structure.__all__ if "relation" in n.lower()}
+    assert relationy == ALLOWED_RELATION_EXPORTS, (
+        "a relation-store loader/reader leaked into engine.structure's S4 surface (inertness, inv 12a):\n"
+        f"  unexpected: {relationy - ALLOWED_RELATION_EXPORTS}\n"
+        f"  missing:    {ALLOWED_RELATION_EXPORTS - relationy}"
+    )
+
+
+# --- R2-02 bounded-surface guard: the public export set is fixed, amendment-gated ---------------- #
+
+# The exact public surface of engine.structure. The §1.5 amendment rule: any export added during S4
+# (production OR test-only helper promoted to the package) must be added here in the same commit —
+# so a leak of ANY kind (a relation/C-layer loader under any name, a smuggled book-shaped helper, an
+# accidental re-export) trips test_public_export_surface_is_bounded, not just relation-named ones.
+# Grouped as engine/structure/__init__.py groups them, newest milestones first.
+EXPECTED_PUBLIC_SURFACE = frozenset(
+    {
+        # persisted-layer schema versions
+        "ATOM_STORE_SCHEMA_VERSION",
+        "STRUCTURE_MAP_SCHEMA_VERSION",
+        "RELATION_STORE_SCHEMA_VERSION",
+        "ATOM_STORE_STALE_CLASS",
+        # S4.0 — structure-map + relation-store stale classes; schema birth-status map; EC code set
+        "STRUCTURE_MAP_STALE_CLASS",
+        "RELATION_STORE_STALE_CLASS",
+        "SCHEMA_STATUS_PROVISIONAL",
+        "SCHEMA_STATUS_BORN",
+        "STRUCTURE_MAP_SCHEMA_STATUS",
+        "EC",
+        # S3.0 — resource + normalization-policy lineage
+        "RESOURCE_LINEAGE_SCHEMA_VERSION",
+        "RESOURCE_STALE_CLASS",
+        "NORMALIZER_STALE_CLASS",
+        # S0.1 — fixed artifact locations
+        "ATOMS_AREA",
+        "ATOMS_SUBDIR",
+        "STRUCTURE_MAP_FILENAME",
+        "RELATIONS_FILENAME",
+        "atoms_dir",
+        "structure_map_path",
+        "relations_path",
+        # S1.1 — L1 atom model
+        "Atom",
+        "Geom",
+        "AtomDerivation",
+        "duplicate_atom_ids",
+        "PROCESSING_SCOPE_INCLUDED",
+        "PROCESSING_SCOPE_EXCLUDED",
+        # S0.4 — block-classifier seam
+        "BlockClassifier",
+        "BlockClassification",
+        "DegenerateBlockClassifier",
+        "UNKNOWN",
+        "DEGENERATE_CLASSIFIER_NAME",
+        # S1.2 — raw/normalized round-trip floor
+        "hash_raw",
+        "reconstruct_raw",
+        "ReversibleTransform",
+        "apply_forward",
+        "apply_inverse",
+        "is_reversible",
+        "verify_atom_roundtrip",
+        # S1.3a — raw addressed capture
+        "capture_witness",
+        "build_canonical",
+        "align_streams",
+        "assert_capture_tiles",
+        "PAGE_UNMAPPED",
+        # S1.4 — production round-trip gate
+        "GapRecord",
+        "gap_records",
+        "reconstruct_source",
+        "assert_no_wholesale_exclusion",
+        "assert_production_roundtrip",
+        "DEFAULT_MIN_INCLUDED_FRACTION",
+        # S1.3b — typed projection
+        "TypedAtom",
+        "typed_projection",
+        "ReviewItem",
+        "CompletenessReport",
+        "check_completeness",
+        # S1.5 — persisted atom store
+        "AtomStream",
+        "WITNESS",
+        "CANONICAL",
+        "save_stream",
+        "load_stream",
+        "stream_path",
+        "stream_ids",
+        "assert_stream_roundtrip",
+        "assert_atom_hashes",
+        "assert_reference_integrity",
+    }
+)
+
+
+def test_public_export_surface_is_bounded():
+    # R2-02: engine.structure's public surface is exactly the amendment-gated allowlist. A new export
+    # of ANY name (the complete backstop the "relation"-substring inertness check cannot provide) —
+    # or a dropped one — trips this. Red-proof: add any name to __all__ without updating the set here.
+    actual = set(structure.__all__)
+    assert actual == EXPECTED_PUBLIC_SURFACE, (
+        "engine.structure public surface drifted from the bounded allowlist (R2-02 / §1.5 amendment rule):\n"
+        f"  unexpected exports: {sorted(actual - EXPECTED_PUBLIC_SURFACE)}\n"
+        f"  missing exports:    {sorted(EXPECTED_PUBLIC_SURFACE - actual)}"
+    )
+    # __all__ carries no duplicate entries (a set-equality above would silently tolerate a dup).
+    assert len(structure.__all__) == len(actual), "duplicate name(s) in engine.structure.__all__"
+
+
+# --- S4.0 / B-1: structure-map schema birth-status map (§1.2.2) --------------------------------- #
+
+
+def test_schema_status_map_marks_current_structure_map_version_provisional():
+    # B-1 ships the schema_status map: a module-level {version: status} beside the version constant
+    # (§1.2.2). The structure-map schema is *born* only once S4.5's differ-fixture validates (inv 23,
+    # B-6); until then the current version is *provisional*. The born-gate assert_schema_born() (B-5)
+    # reads this map — here we pin its initial state, its export, and that the two states differ.
+    assert "STRUCTURE_MAP_SCHEMA_STATUS" in structure.__all__
+    status_map = structure.STRUCTURE_MAP_SCHEMA_STATUS
+    assert isinstance(status_map, dict)
+    assert status_map[structure.STRUCTURE_MAP_SCHEMA_VERSION] == structure.SCHEMA_STATUS_PROVISIONAL
+    # provisional and born are distinct wire strings — an alias would make the born flip (inv 23) a
+    # no-op that reads green.
+    assert structure.SCHEMA_STATUS_PROVISIONAL != structure.SCHEMA_STATUS_BORN

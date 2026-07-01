@@ -763,7 +763,10 @@ gate (23), vocab hygiene (§4.5).
   `assert_schema_born()`, evolve the generator → conforming + author the `invalid/*.json` negative set, manifest
   assembly + `schema_version_const()` + regen-guarded `write_structure_map()`; inv 2, 10, 11, 12b, 13, 14, 17,
   20, 21, 22, 24, 25, 15 + §4.2–4.5. **Phase-2: re-route every Tier-2 invariant through `load_structure_map`**
-  (the wiring proof).
+  (the wiring proof). **When the schema file lands, extend the S0.2 neutrality scan
+  (`test_structure_neutrality.py`) from `*.py`-only to also glob `structure/schema/*.json`** — inv 15's stated
+  scope (`structure/*.py` + `structure/schema/*.json`) and inv 22's "a PLL `node_class` `enum` in the schema"
+  mutation both depend on `.json` coverage that the B-1 scan does not yet provide (B-1 audit F4).
 - **B-6 — S4.5 differ-fixture birth gate:** author the **conforming** `differ_structure_map.json`; it shape- +
   semantically-validates through the born-agnostic loader; **a human edit flips `schema_status`→`born`** (the
   ratification act, §1.2.2), and the test (inv 23) **asserts** — as two unconditional asserts — that the

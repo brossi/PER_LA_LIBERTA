@@ -45,8 +45,36 @@ ATOM_STORE_SCHEMA_VERSION = 1
 ATOM_STORE_STALE_CLASS = "atom-stream"
 #: L2 structure-map schema version (containers/projections + lineage manifest). Bound by S4.4.
 STRUCTURE_MAP_SCHEMA_VERSION = 1
+#: The L2 structure-map stale class — the M3 discriminator the lineage manifest stamps and S8.1
+#: routes on, so a structure-map schema change names *this* layer (not the atom store or relation
+#: store). A distinct wire string from every other stale class (inv 12a). Built at S4.0; stamped
+#: into the manifest at S4.4.
+STRUCTURE_MAP_STALE_CLASS = "structure-map"
 #: L3 relation-store schema version (graph + cross-language alignment). Bound by S7.1c.
 RELATION_STORE_SCHEMA_VERSION = 1
+#: The L3 relation-store stale class — pre-placed **inert** in S4.0 (O1/D-S4-F): it declares a
+#: future layer identity, *not* the existence of a relation schema, reader, or artifact. No
+#: relation-store loader is exported from ``engine.structure`` until S7.1c, and every S4-era manifest
+#: example pins the relation layer ``present: false``. A distinct wire string from every other stale
+#: class (inv 12a). Bound by S7.1c.
+RELATION_STORE_STALE_CLASS = "relation-store"
+
+# --- structure-map schema birth status (S4.0 / §1.2.2) ---------------------------------- #
+
+#: The two lifecycle states a structure-map schema *version* can occupy. ``provisional``: the schema
+#: shape exists but is not yet proven to generalize beyond the first book; ``born``: S4.5's
+#: differ-fixture (a *conforming* non-PLL-shaped map) has validated against it. This lifecycle is a
+#: property of the schema version, tracked here beside the version constant — it never persists in
+#: any map file (Audit 2).
+SCHEMA_STATUS_PROVISIONAL = "provisional"
+SCHEMA_STATUS_BORN = "born"
+#: ``{structure-map schema version → birth status}``. A version stays ``provisional`` until S4.5's
+#: differ-fixture test flips it (a human edit to this literal, bound by inv 23); a version bump
+#: (e.g. S6's role/authorship addition) re-enters ``provisional`` and needs its own birth gate. The
+#: born-gate ``assert_schema_born()`` (S4.4) reads this map, and a *missing* key is fail-safe
+#: (treated as ``provisional`` → raise). Nothing here makes ``load_structure_map`` born-aware — that
+#: loader is deliberately born-agnostic (§1.2.3); the gate is a separate call.
+STRUCTURE_MAP_SCHEMA_STATUS: dict[int, str] = {STRUCTURE_MAP_SCHEMA_VERSION: SCHEMA_STATUS_PROVISIONAL}
 
 # --- resource + normalization-policy lineage (S3.0) ------------------------------------- #
 

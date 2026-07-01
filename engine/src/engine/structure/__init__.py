@@ -20,15 +20,21 @@ from engine.structure.artifacts import (
     ATOMS_SUBDIR,
     NORMALIZER_STALE_CLASS,
     RELATION_STORE_SCHEMA_VERSION,
+    RELATION_STORE_STALE_CLASS,
     RELATIONS_FILENAME,
     RESOURCE_LINEAGE_SCHEMA_VERSION,
     RESOURCE_STALE_CLASS,
+    SCHEMA_STATUS_BORN,
+    SCHEMA_STATUS_PROVISIONAL,
     STRUCTURE_MAP_FILENAME,
+    STRUCTURE_MAP_SCHEMA_STATUS,
     STRUCTURE_MAP_SCHEMA_VERSION,
+    STRUCTURE_MAP_STALE_CLASS,
     atoms_dir,
     relations_path,
     structure_map_path,
 )
+from engine.structure.errors import EC
 from engine.structure.atom_store import (
     CANONICAL,
     WITNESS,
@@ -93,6 +99,13 @@ __all__ = [
     "ATOM_STORE_STALE_CLASS",
     "STRUCTURE_MAP_SCHEMA_VERSION",
     "RELATION_STORE_SCHEMA_VERSION",
+    # S4.0 — structure-map + relation-store stale classes; schema birth-status map; EC code set
+    "STRUCTURE_MAP_STALE_CLASS",
+    "RELATION_STORE_STALE_CLASS",
+    "SCHEMA_STATUS_PROVISIONAL",
+    "SCHEMA_STATUS_BORN",
+    "STRUCTURE_MAP_SCHEMA_STATUS",
+    "EC",
     # S3.0 — resource + normalization-policy lineage constants
     "RESOURCE_LINEAGE_SCHEMA_VERSION",
     "RESOURCE_STALE_CLASS",

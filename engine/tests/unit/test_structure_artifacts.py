@@ -172,6 +172,14 @@ EXPECTED_PUBLIC_SURFACE = frozenset(
         "SCHEMA_STATUS_BORN",
         "STRUCTURE_MAP_SCHEMA_STATUS",
         "EC",
+        # S4.1 — L2 projection model (nodes + flat map + per-module validator + carrier error)
+        "Node",
+        "ContainerNode",
+        "LeafNode",
+        "FurnitureAtom",
+        "ProjectionMap",
+        "validate_projection",
+        "StructureValidationError",
         # S3.0 — resource + normalization-policy lineage
         "RESOURCE_LINEAGE_SCHEMA_VERSION",
         "RESOURCE_STALE_CLASS",

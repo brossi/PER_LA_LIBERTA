@@ -28,14 +28,18 @@ P3A-5 co-fire defect §4.1's two-phase design exists to prevent). The buckets:
   ``assert_schema_born`` (never the validator, never the born-agnostic loader).
 
 Carries no language/book/typeface literal (invariant I4; the S0.2 neutrality scan covers this module
-by dynamic glob). **No exception type lives here yet** (YAGNI): the first raiser is B-2's projection
-validator, which will own the exception that carries a collected code payload; it is added when that
-raiser exists, not pre-populated here.
+by dynamic glob). The **carrier exception** :class:`StructureValidationError` — the type that raises
+a collected :class:`EC` payload — lives here too (added at B-2, its first raiser, beside the codes it
+carries): a single home for the wire vocabulary *and* its carrier means the per-module validators
+(``projection.py``, ``handles.py``) and the aggregate ``validate_structure_map`` all import one type,
+with no cross-validator module coupling.
 """
 
 from __future__ import annotations
 
 import enum
+
+from engine.errors import EngineError
 
 
 class EC(enum.StrEnum):
@@ -140,3 +144,41 @@ BORN_GATE_CODES = frozenset({EC.SCHEMA_NOT_BORN})
 #: **upward** from the two explicit validator buckets; the test cross-checks it against the
 #: complement ``EC - WRITER - BORN_GATE`` so a mis-enumerated ``TIER_2B_CODES`` is caught.
 VALIDATOR_CODES = TIER_2A_CODES | TIER_2B_CODES
+
+
+class StructureValidationError(EngineError):
+    """A structure projection/map failed Tier-2 semantic validation — the carrier for a collected
+    :class:`EC` payload (s4_plan §4.1).
+
+    One exception type serves both raise disciplines: a **Tier-2a precondition** short-circuits with a
+    single code (``DUPLICATE_NODE_ID`` at :class:`~engine.structure.projection.ProjectionMap`
+    construction; ``ROOT_ID_DANGLING`` at B-5), and a **Tier-2b** pass collects every remaining code
+    and raises **once** with the whole set as payload. Consumers (and the invariant tests) read
+    :attr:`codes` — an ``EC.X in err.codes`` membership check — and S8.1 routes remediation on those
+    values; :attr:`findings` keeps each code paired with the diagnostic that located it.
+
+    An :class:`~engine.errors.EngineError` so a known validation failure surfaces as a clean CLI exit
+    code, not a traceback — the integrity-violation family (``RoundTripError`` / ``CaptureError`` /
+    ``StaleArtifactError``), continued at the next free code. Constructing it with **no** findings is a
+    programming error (an empty payload would read as "valid, yet raised"), so it fails loud.
+    """
+
+    exit_code = 11
+
+    def __init__(self, findings):
+        # Normalize each code through ``EC(...)`` so a stray string can't ride in as a pseudo-code and
+        # a member passes through unchanged. An empty payload is rejected: the exception exists to
+        # carry ≥1 concrete reason.
+        self.findings = tuple((EC(code), str(message)) for code, message in findings)
+        if not self.findings:
+            raise ValueError(
+                "StructureValidationError requires at least one (code, message) finding — an empty "
+                "payload would signal a validation failure with no stated reason."
+            )
+        super().__init__("; ".join(f"{code}: {message}" for code, message in self.findings))
+
+    @property
+    def codes(self) -> tuple[EC, ...]:
+        """The collected codes in discovery order (with multiplicity) — the membership surface the
+        invariant tests and S8.1 routing read (``EC.X in err.codes``)."""
+        return tuple(code for code, _ in self.findings)

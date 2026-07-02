@@ -3,17 +3,35 @@
   "root_id": "d-root",
   "map_revision": 1,
   "block_vocabulary": [
-    {"name": "codex", "kind": "container", "status": "active"},
-    {"name": "aphorism", "kind": "leaf", "status": "active"},
-    {"name": "marginalia", "kind": "either", "status": "reserved"}
+    {
+      "name": "codex",
+      "kind": "container",
+      "status": "active"
+    },
+    {
+      "name": "aphorism",
+      "kind": "leaf",
+      "status": "active"
+    },
+    {
+      "name": "marginalia",
+      "kind": "either",
+      "status": "reserved"
+    }
   ],
   "handle_policies": {
     "codex": "designation-string",
     "aphorism": "designation-string"
   },
   "furniture_atoms": [
-    {"atom_id": "wf_00000", "capture_role": "running-head"},
-    {"atom_id": "wf_00003", "capture_role": "catchword"}
+    {
+      "atom_id": "wdiffer-a_00000",
+      "capture_role": "running-head"
+    },
+    {
+      "atom_id": "wdiffer-a_00003",
+      "capture_role": "catchword"
+    }
   ],
   "aliases": [
     {
@@ -48,30 +66,68 @@
     }
   ],
   "manifest": {
-    "source_artifacts": [{"witness": "wdiffer", "hash": "sha256:differ-fixture-witness"}],
+    "source_artifacts": [
+      {
+        "witness": "wdiffer-a",
+        "hash": "sha256:93828a393b93fbc09e40255d94d45daaba2ce6be754524c9ff6b4d2e846e44f2"
+      },
+      {
+        "witness": "wdiffer-b",
+        "hash": "sha256:04b715b88d740d2da60b3d41bc38f9a3f64deb89b633d44c236e5e052c44a135"
+      }
+    ],
     "atom_streams": [
-      {"id": "canonical", "hash": "sha256:differ-fixture-canonical"},
-      {"id": "wdiffer", "hash": "sha256:differ-fixture-stream"}
+      {
+        "id": "canonical",
+        "hash": "sha256:c0731b26983a4d71ed9875cbc96d2491618006f33e5c380cc95ed5b3a8918bf4"
+      },
+      {
+        "id": "wdiffer-a",
+        "hash": "sha256:959e1d99cbf5c9f96eb5109dd0c815c820402434626091f5d98c0a0eea2c18a9"
+      },
+      {
+        "id": "wdiffer-b",
+        "hash": "sha256:897c2a81a175d57641886f8b6e1d0cf140d516789530e9baa9044efd077f2ed7"
+      }
     ],
     "canonical_stream_id": "canonical",
-    "canonical_content_hash": "sha256:differ-fixture-content",
-    "canonical_geometry_hash": "sha256:differ-fixture-geometry",
+    "canonical_content_hash": "sha256:0dae745726ce5fe8a47b90f7f91462edf61210f51581b01f8e8acf4571e6fe84",
+    "canonical_geometry_hash": "sha256:e02565e0bd71cd2787425cad5ba529635c1233cb9ae02232351c2e4bf54184a1",
     "layers": {
-      "atom_store": {"schema_version": 1, "stale_class": "atom-stream", "present": true},
-      "structure_map": {"schema_version": 1, "stale_class": "structure-map", "present": true},
-      "relation_store": {"schema_version": 1, "stale_class": "relation-store", "present": false}
+      "atom_store": {
+        "schema_version": 1,
+        "stale_class": "atom-stream",
+        "present": true
+      },
+      "structure_map": {
+        "schema_version": 1,
+        "stale_class": "structure-map",
+        "present": true
+      },
+      "relation_store": {
+        "schema_version": 1,
+        "stale_class": "relation-store",
+        "present": false
+      }
     },
     "resource_lineage": {
       "schema_version": 1,
       "resource": {
         "version": "sha256:differ-fixture-resource",
         "stale_class": "resource-set",
-        "descriptor": {"oracle_min": 1, "frequency": "sha256:differ-frequency", "members": []}
+        "descriptor": {
+          "frequency": "sha256:differ-frequency",
+          "members": [],
+          "oracle_min": 1
+        }
       },
       "normalizer": {
         "version": "sha256:differ-fixture-normalizer",
         "stale_class": "normalization-policy",
-        "descriptor": {"accent_fold": {}, "case_fold": "none"}
+        "descriptor": {
+          "accent_fold": {},
+          "case_fold": "none"
+        }
       }
     },
     "profile_version": "differ-profile-1",
@@ -83,7 +139,11 @@
       "node_id": "d-root",
       "node_class": "codex",
       "minted_by": "human",
-      "children": ["aph-one", "aph-two", "aph-three"],
+      "children": [
+        "aph-one",
+        "aph-two",
+        "aph-three"
+      ],
       "designation": "The Differ Codex",
       "title": "A Codex of Aphorisms"
     },
@@ -91,14 +151,20 @@
       "node_id": "aph-one",
       "node_class": "aphorism",
       "minted_by": "machine",
-      "body_atoms": ["dc_00000", "dc_00002"],
+      "body_atoms": [
+        "canonical_00000",
+        "canonical_00002"
+      ],
       "designation": "Of Silence"
     },
     {
       "node_id": "aph-two",
       "node_class": "aphorism",
       "minted_by": "machine",
-      "body_atoms": ["dc_00001", "dc_00003"],
+      "body_atoms": [
+        "canonical_00001",
+        "canonical_00003"
+      ],
       "designation": "Of Masks",
       "decision": "plugin-suggested"
     },
@@ -106,9 +172,13 @@
       "node_id": "aph-three",
       "node_class": "aphorism",
       "minted_by": "machine",
-      "body_atoms": ["dc_00004"],
+      "body_atoms": [
+        "canonical_00004"
+      ],
       "designation": "Of Endings",
-      "rebind_anchors": {"region": null}
+      "rebind_anchors": {
+        "region": null
+      }
     }
   ]
 }

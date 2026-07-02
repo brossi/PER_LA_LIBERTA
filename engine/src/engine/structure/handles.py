@@ -628,6 +628,9 @@ def validate_block_vocabulary(
     - ``VOCAB_DUPLICATE`` — two entries sharing one normalized form.
     - ``VOCAB_UNUSED`` — an ``active`` entry no node's ``node_class`` uses (``reserved`` is exempt —
       the honest way to hold a name for later).
+    - ``CLASS_NOT_IN_VOCAB`` — a node whose ``node_class`` the vocabulary does not declare (the
+      mirror direction; added post-B-7 audit, user-ratified 2026-07-02 — without it an undeclared
+      class with a per-node ``handle_policy`` override validated completely clean).
 
     Usage is matched by the **declared name exactly** (the same key ``kind_by_class`` and the policy
     table resolve by), not the normalized form — normalization exists to catch *collisions between
@@ -635,6 +638,22 @@ def validate_block_vocabulary(
     """
     findings: list[tuple[EC, str]] = []
     used = {node.node_class for node in pmap.nodes}
+    declared = {spec.name for spec in block_vocabulary}
+    # CLASS_NOT_IN_VOCAB (post-B-7 audit): the mirror of VOCAB_UNUSED — every USED class must be
+    # declared. Without this, an undeclared class riding a per-node handle_policy override escaped
+    # every check (kind lookup skips, the override short-circuits POLICY_UNRESOLVED). Matched by the
+    # declared name exactly, like usage; a RESERVED entry is still a declaration (using it is not an
+    # error in S4 — whether use should force active status is S6/S8 policy, not invented here).
+    for node in pmap.nodes:
+        if node.node_class not in declared:
+            findings.append(
+                (
+                    EC.CLASS_NOT_IN_VOCAB,
+                    f"node {node.node_id!r} uses node_class {node.node_class!r}, which "
+                    f"block_vocabulary does not declare — the vocabulary is open per-book but "
+                    f"always declared (§3.B.2)",
+                )
+            )
     first_declared: dict[str, str] = {}
     for spec in block_vocabulary:
         normalized = _normalized_vocab_name(spec.name)

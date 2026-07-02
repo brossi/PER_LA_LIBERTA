@@ -149,7 +149,7 @@
     "rebind_anchors": {
       "type": "object",
       "additionalProperties": false,
-      "description": "Optional re-bind checkpoint sub-object (D-S4-H, inv 13/24). The only admitted key is region — a present/geom key is rejected by additionalProperties:false (node-level anchors are never the atom-level Geom). Population is S5.1.",
+      "description": "Optional re-bind checkpoint sub-object (D-S4-H, inv 13/24). The only admitted key is region — a present/geom key is rejected by additionalProperties:false (node-level anchors are never the atom-level Geom). Population is S5.1. Coordinate contract (s4_plan §0.3 A-3, BR-022): region's page and bbox_region are expressed in the same coordinate space as the atom-level Geom the S2.1 matcher emits — one space shared with atom geometry, never a second convention — so a stored region is directly comparable to an atom's box at re-bind time. The concrete space (and any witness/space discriminator field) is an S5-planning decision; widening this shape is a schema-version bump that re-enters provisional and re-runs the birth gate.",
       "properties": {
         "region": {
           "type": ["object", "null"],

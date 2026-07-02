@@ -95,6 +95,20 @@ Convergent (≥2 reviewers) marked **‡**.
 | **P3B-9** inv 26 (empty-container, a pure projection check) filed at S4.4 not S4.1 | LOW | §1.5, Done-when, B-2/B-5 |
 | **P3B-3/6, P3B-7, P3B-10, P3B-11, P3A-6, P3C-4/5/6** test-specificity / mechanization / dangling-tag tightenings | LOW | inv 18/23/25/27, §3.E.10, §4.4, §8.3, B-N cites |
 
+
+### §0.3 Post-keystone dispositions (2026-07-02, user-ratified after the B-7 adversarial audit)
+
+B-5/B-6 shipped; the pre-commit audit pair (plan-fidelity 14/14 SATISFIED; correctness) plus the
+user's review produced these ratified amendments — recorded here so the plan stays the authority:
+
+| Disposition | Fix location |
+|-------------|--------------|
+| **A-1 `CLASS_NOT_IN_VOCAB` added to the closed code set** — a node using an UNDECLARED `node_class` while carrying a per-node `handle_policy` override validated completely clean (kind lookup skips undeclared classes; the override short-circuits `POLICY_UNRESOLVED`; `VOCAB_*` reads declared entries only). The mirror of `VOCAB_UNUSED`. Producer: `validate_block_vocabulary` (handles.py), Tier-2b. Reserved-but-used stays legal in S4 (a reservation is still a declaration). | §4.0 table, inv 19, §3.B.2; `test_structure_handles.py::test_undeclared_node_class_fires_even_with_a_policy_override` |
+| **A-2 `aliases` is a required header-level array** — §3.J's header enumeration omitted it, but inv 18's eager load check requires aliases on disk and the Node schema's `additionalProperties:false` bars per-node nesting; header-level is the only consistent placement (implemented at B-5; plan text now matches). | §3.J header list |
+| **A-3 `rebind_anchors.region` coordinate-space contract locked, space itself deferred** — region shares the atom-level `Geom`'s coordinate space (whatever S2.1 pins), never a second convention; the space's concrete definition + any witness/space discriminator field are S5-planning decisions (BR-022). Widening the region shape later is a schema-version bump → re-enters `provisional` → re-birth (§1.2.2) — cost known and accepted. | schema `rebind_anchors` description; BR-022; `test_structure_map.py::test_region_description_pins_the_shared_coordinate_space_contract` |
+| **A-4 writer crash-state recovery routed to S8.1** — the licensed supersede is per-file-atomic but not one transaction; a process kill between the snapshot write and the live write leaves snapshot-present/live-stale, and the retry is indistinguishable from a snapshot clobber. S8.1's recovery runbook owns the idempotent-retry rule (permit re-supersede when the existing snapshot's bytes equal the live map's). | §1.3.2; tracker S8.1 row |
+| **A-5 two writer letter-deviations ratified** — the writer *validates* the caller's `map_revision` tick (CAS) rather than incrementing (§3.D.5's letter), and "explicit output target" is implemented as naming the exact stored revision being superseded. Both judged stricter than the letter. | §3.E.8 (as-built), `structure_map.write_structure_map` docstring |
+
 ---
 
 ## 1. Scope & boundaries
@@ -167,7 +181,8 @@ per inv 11, M9) belongs to the **negative-fixture set** (§1.2.0/§3.B.5), **not
 1. **§1.3.1 — `rebind_anchors.region` *population* / the re-attach algorithm → S5.1.** S4.4's schema *admits*
    the optional anchor sub-object (`{region?}`); populating it and the bind/fail-loud logic are S5. The slot is
    `region`, never `geom` (D-S4-H, Audit 11).
-2. **§1.3.2 — the stale-fail *loader* / migration router → S8.1.** S4.4 *produces and stamps* the manifest +
+2. **§1.3.2 — the stale-fail *loader* / migration router → S8.1.** *(Also S8.1's, per §0.3 A-4:
+   the writer's snapshot-present/live-stale crash state + the idempotent-retry recovery rule.)* S4.4 *produces and stamps* the manifest +
    stale classes; S8.1 *consumes* and compares stored-vs-live (including the `handle_renderer_version` mismatch
    **routing**, §3.D.6, M9). **Vanished-artifact detection is S8.1's** (R2-04). `map_revision` cross-write
    monotonicity is also **S8.1** (LOW).
@@ -316,6 +331,8 @@ A node is **container** (owns ordered `children` + optional `heading_atoms`/`sig
     multi-witness selection is an S5/S7 forward.
 - **§3.B.2 — `node_class`** is an **open string vocabulary** declared in the header's `block_vocabulary`
   (§3.J), never a core enum; a **distinct axis** from `role` (S6, absent in S4) and `handle_policy` (R2-07).
+  **Open never means undeclared:** every used `node_class` must appear in `block_vocabulary`
+  (`CLASS_NOT_IN_VOCAB`, §0.3 A-1).
   Each `block_vocabulary` entry declares a **`kind` (`container|leaf|either`)**; the validator checks a node's
   slot usage matches its class kind (EC.CLASS_KIND_MISMATCH, inv 19, M7).
 - **§3.B.3 — Correction scope:** B re-groups + re-types **at the node level** over existing atom ids; true
@@ -479,7 +496,9 @@ The single canonical Node field list S4.4's JSON-Schema enumerates (`additionalP
 | `decision` | both | reserved | schema (present, inert) + inv 25 | `human-approved\|plugin-suggested\|inherited`; value-semantics S8.2; **no S4 code reads it (inv 25)** |
 
 Header-level (not per node): `root_id`, `block_vocabulary[{name,kind,status}]`, `handle_policies`,
-`furniture_atoms[{atom_id, capture_role}]`, `map_revision`, the manifest block (§3.E). **Omitted until S6:**
+`furniture_atoms[{atom_id, capture_role}]`, **`aliases[…]` (the §3.D.4 records — header-level, since
+inv 18 checks them eagerly at load and `additionalProperties:false` bars per-node nesting; §0.3 A-2)**,
+`map_revision`, the manifest block (§3.E). **Omitted until S6:**
 node-level `role`, `authorship` (§1.3.4). `oneOf` enforces container-xor-leaf (inv 2 is **Tier-1**, LOW).
 
 ---
@@ -562,6 +581,7 @@ that fails.
 | `NODE_ID_DERIVED` | validator | `node_id` matching any enumerated cheat (eq / casefold / slug(designation) / slug(title) / substring-of-handle / position-path) (X11) |
 | `MINTED_BY_SPLIT` | validator | a container with `minted_by:machine` **or** a leaf with `minted_by:human` (H4/A-6) |
 | `CLASS_KIND_MISMATCH` | validator | a node whose slot usage contradicts its `node_class` kind (M7) |
+| `CLASS_NOT_IN_VOCAB` | validator | a node using a `node_class` that `block_vocabulary` does not declare — incl. the audit repro: undeclared class + per-node `handle_policy` override, which previously validated clean (§0.3 A-1) |
 | `POLICY_NOT_IN_VOCAB` | validator | a `handle_policies` key not in `block_vocabulary` (M7) |
 | `POLICY_UNRESOLVED` | validator | a used `node_class` with no resolvable policy, or a per-node `handle_policy` override naming an unknown policy (M7) |
 | `VOCAB_UNKNOWN_COLLISION` / `VOCAB_EMPTY` / `VOCAB_DUPLICATE` / `VOCAB_UNUSED` | validator | a normalized `block_vocabulary` entry `== "unknown"` / empty-or-whitespace / normalized-duplicate / declared-unused-and-not-reserved (Audit 13, X17) |
@@ -676,7 +696,10 @@ gate (23), vocab hygiene (§4.5).
     well-formed interval so `INTERVAL_INVALID` cannot co-fire (P3B-6).
 20. **inv 19 — handle-policy resolvability (M7):** `handle_policies` keys ⊆ `block_vocabulary`
     (`POLICY_NOT_IN_VOCAB`); every used `node_class` resolves to a policy and every per-node `handle_policy`
-    override names a known policy (`POLICY_UNRESOLVED`); class-kind ↔ slot (`CLASS_KIND_MISMATCH`).
+    override names a known policy (`POLICY_UNRESOLVED`); class-kind ↔ slot (`CLASS_KIND_MISMATCH`);
+    **every used `node_class` is declared in `block_vocabulary`** (`CLASS_NOT_IN_VOCAB`, §0.3 A-1 —
+    mutation: drop the declared-membership check → the undeclared-class-with-override fixture passes
+    clean, caught).
 21. **inv 20 — determinism (M5/X8):** `dump→load→dump` is byte-identical; `canonical_content_hash` is stable
     under re-serialize and changes under a **content** edit. For geometry: the fixture **synthesizes one
     `Geom.matched(...)` atom** (a real factory, even though `capture.py` emits only `Geom.absent()`), then

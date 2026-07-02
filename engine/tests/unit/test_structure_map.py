@@ -224,6 +224,16 @@ def test_minted_by_description_carries_the_conceptual_authority_phrase():
     assert "conceptual minting authority" in smod.load_schema()["$defs"]["minted_by"]["description"]
 
 
+def test_region_description_pins_the_shared_coordinate_space_contract():
+    # s4_plan §0.3 A-3 / BR-022: the one thing locked about region BEFORE S5 planning is that it
+    # shares the atom-level Geom's coordinate space (whatever S2.1 pins) — never a second
+    # convention. The sentence is normative (S5's re-bind comparability rests on it), so it is
+    # pinned verbatim like the minted_by authority phrase; the space itself stays an S5 decision.
+    description = smod.load_schema()["$defs"]["rebind_anchors"]["description"]
+    assert "same coordinate space as the atom-level Geom" in description
+    assert "BR-022" in description
+
+
 # --- inv 13 / 24 — rebind_anchors: optional, region-only shape ------------------------------------ #
 
 
@@ -1018,3 +1028,23 @@ def test_phase2_node_id_derived_from_rendered_handle_routes_through_the_loader(t
     leaf_a["handle_policy"] = "designation-string"
     doc["nodes"][1]["children"] = ["p-sile"]
     assert EC.NODE_ID_DERIVED in _load_codes(tmp_path, doc)
+
+
+def test_phase2_undeclared_node_class_with_override_no_longer_loads_clean(tmp_path):
+    # CLASS_NOT_IN_VOCAB (post-B-7 audit disposition): before the fix this exact doc — an undeclared
+    # class + a per-node policy override — loaded CLEAN through the full loader (the audit's
+    # confirmed repro). Now the loader surfaces the one code that owns it.
+    doc = _fresh_doc()
+    doc["nodes"][3]["node_class"] = "phantom-class"
+    doc["nodes"][3]["handle_policy"] = "position-path"
+    assert EC.CLASS_NOT_IN_VOCAB in _load_codes(tmp_path, doc)
+
+
+def test_phase2_undeclared_node_class_without_override_co_fires_policy_unresolved(tmp_path):
+    # Without the override the class also fails policy resolution — both codes surface in the one
+    # collected payload (Tier-2b), pinning that the new code did not absorb/shadow the old one.
+    doc = _fresh_doc()
+    doc["nodes"][3]["node_class"] = "phantom-class"
+    codes = _load_codes(tmp_path, doc)
+    assert EC.CLASS_NOT_IN_VOCAB in codes
+    assert EC.POLICY_UNRESOLVED in codes

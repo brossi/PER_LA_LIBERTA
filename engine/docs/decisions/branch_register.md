@@ -492,3 +492,32 @@
   BR-004 (book title lifted out of the plugin — precedent for structure facts leaking in, extracted
   case-by-case), BR-006 (ordinal garbles entangled in the plugin), BR-002 (generalization unproven
   with one fixture). Children: BR-019, BR-020.
+
+## BR-022 — `rebind_anchors.region` coordinate space + witness discriminator: locked to "shares atom-Geom's space", concrete space deferred to S5 planning
+
+- **Date / owner:** 2026-07-02, S4 keystone close (B-7 dispositions, user-ratified).
+- **Context:** S4.4 froze the region shape as a plain nullable `{page, bbox_region}` (D-S4-H:
+  no `present` flag, no atom-`Geom` sub-object). The S4 build surfaced that the plan never says
+  *which* coordinate space those values live in — page-image pixels vs PDF points, and which
+  page numbering (the live PLL tree needs a `SCAN_LEAF_OFFSET=6` to reconcile scan leaves with
+  printed pages; only copy3 carries a page map at all — canonical atoms are `PAGE_UNMAPPED`
+  until S7.1b). S5.1's re-bind is exactly the consumer that must compare a stored region against
+  `Atom.geom`.
+- **Decision (the lock):** region is DEFINED to share the atom-level `Geom`'s coordinate space —
+  whatever space S2.1's matcher pins for `atom.geom` is region's space, one convention, never
+  two. Normative sentence lives in the schema's `rebind_anchors` description, pinned by
+  `test_structure_map.py::test_region_description_pins_the_shared_coordinate_space_contract`.
+  This is the property S5 needs (region ↔ atom-box comparability) without prematurely choosing
+  the space itself.
+- **Deferred (the open fork):** (a) the concrete space definition (falls out of S2.1's as-built
+  backend — PyMuPDF/Tesseract page raster coordinates are the expected shape, decided there, not
+  here); (b) whether region needs a witness and/or space discriminator field (a two-witness
+  re-bind may need to know WHOSE scan the bbox indexes).
+- **Cost if reopened:** adding any field to region is a Node-schema change → structure-map
+  schema-version bump → the version re-enters `provisional` (s4_plan §1.2.2) → the D18 birth
+  gate re-runs on the differ fixture. Known, accepted, and cheap while the only committed maps
+  are fixtures — the reason to decide at S5 planning and not after S4.6's hand-authored PLL map
+  exists.
+- **Revisit condition:** S5 planning (mandatory agenda item), informed by S2.1's as-built
+  coordinate output. If S4.6 authoring starts before S5 planning settles this, authored maps
+  must leave `rebind_anchors` absent (it is optional, O4) rather than guess a space.

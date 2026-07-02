@@ -86,6 +86,9 @@ class EC(enum.StrEnum):
     NODE_ID_DERIVED = "NODE_ID_DERIVED"
     MINTED_BY_SPLIT = "MINTED_BY_SPLIT"
     CLASS_KIND_MISMATCH = "CLASS_KIND_MISMATCH"
+    # a used node_class that block_vocabulary does not declare (§3.B.2; added post-B-7 audit,
+    # user-ratified 2026-07-02 — closes the undeclared-class + per-node-override silent pass)
+    CLASS_NOT_IN_VOCAB = "CLASS_NOT_IN_VOCAB"
     # -- handle policy --
     POLICY_NOT_IN_VOCAB = "POLICY_NOT_IN_VOCAB"
     POLICY_UNRESOLVED = "POLICY_UNRESOLVED"
@@ -128,6 +131,7 @@ TIER_2B_CODES = frozenset(
         EC.NODE_ID_DERIVED,
         EC.MINTED_BY_SPLIT,
         EC.CLASS_KIND_MISMATCH,
+        EC.CLASS_NOT_IN_VOCAB,
         EC.POLICY_NOT_IN_VOCAB,
         EC.POLICY_UNRESOLVED,
         EC.VOCAB_UNKNOWN_COLLISION,

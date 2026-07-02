@@ -808,3 +808,50 @@ def test_handle_renderer_version_is_a_positive_int():
     # positive, non-bool int beside the renderer it versions.
     assert isinstance(HANDLE_RENDERER_VERSION, int) and not isinstance(HANDLE_RENDERER_VERSION, bool)
     assert HANDLE_RENDERER_VERSION >= 1
+
+
+# --- CLASS_NOT_IN_VOCAB (post-B-7 audit disposition, user-ratified 2026-07-02) -------------------- #
+#
+# The audit's confirmed silent-pass: a node whose node_class is UNDECLARED escaped every hygiene
+# check whenever it also carried a per-node handle_policy override (kind lookup .get() -> None skips
+# both CLASS_KIND_MISMATCH branches; the override short-circuits POLICY_UNRESOLVED; VOCAB_* only
+# inspects declared entries). §3.B.2's "an open string vocabulary DECLARED in the header" now has
+# its own code: every used node_class must be declared. Red mutation (B-7 family): drop the
+# declared-membership check -> the override repro below passes clean again.
+
+
+def test_undeclared_node_class_fires_even_with_a_policy_override():
+    # The exact audit repro shape: the undeclared class rides a per-node override, so no other code
+    # can catch it — CLASS_NOT_IN_VOCAB is the only tripwire. Seen red before the check existed.
+    nodes = _map("r", (
+        _cont("r", children=("l",), node_class="section"),
+        _leaf("l", node_class="phantom-class", handle_policy="position-path"),
+    ))
+    with pytest.raises(StructureValidationError) as ei:
+        validate_block_vocabulary(
+            (NodeClassSpec(name="section", kind="container"), NodeClassSpec(name="para", kind="leaf")),
+            nodes,
+        )
+    codes = {c for c in ei.value.codes}
+    assert EC.CLASS_NOT_IN_VOCAB in codes
+    assert EC.VOCAB_UNUSED in codes  # "para" is declared-active-unused here — collect-all keeps both
+
+
+def test_reserved_class_in_use_is_not_undeclared():
+    # Deliberate S4 scope: a RESERVED entry is still a declaration — using it does not fire
+    # CLASS_NOT_IN_VOCAB (whether use should force active status is an S6/S8 policy question,
+    # not invented here).
+    validate_block_vocabulary(
+        (
+            NodeClassSpec(name="section", kind="container"),
+            NodeClassSpec(name="para", kind="leaf"),
+        ),
+        _vocab_map(),
+    )  # clean baseline unchanged
+    validate_block_vocabulary(
+        (
+            NodeClassSpec(name="section", kind="container"),
+            NodeClassSpec(name="para", kind="either", status="reserved"),
+        ),
+        _vocab_map(),
+    )  # "para" reserved-but-used: declared, so no CLASS_NOT_IN_VOCAB (and reserved exempts UNUSED)

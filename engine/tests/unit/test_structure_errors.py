@@ -59,6 +59,7 @@ EXPECTED_CODES = {
     "NODE_ID_DERIVED",
     "MINTED_BY_SPLIT",
     "CLASS_KIND_MISMATCH",
+    "CLASS_NOT_IN_VOCAB",  # added post-B-7 audit (user-ratified 2026-07-02): used-but-undeclared class
     # handle policy
     "POLICY_NOT_IN_VOCAB",
     "POLICY_UNRESOLVED",

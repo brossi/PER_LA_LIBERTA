@@ -41,6 +41,7 @@ from engine.structure.projection import (
     LeafNode,
     Node,
     ProjectionMap,
+    mint_node_id,
     validate_projection,
 )
 from engine.structure.atom_store import (
@@ -122,6 +123,8 @@ __all__ = [
     "ProjectionMap",
     "validate_projection",
     "StructureValidationError",
+    # S4.2 — node_id identity + minting split (mint_node_id seam; minted_by/designation/title fields)
+    "mint_node_id",
     # S3.0 — resource + normalization-policy lineage constants
     "RESOURCE_LINEAGE_SCHEMA_VERSION",
     "RESOURCE_STALE_CLASS",

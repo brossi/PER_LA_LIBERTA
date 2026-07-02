@@ -180,6 +180,8 @@ EXPECTED_PUBLIC_SURFACE = frozenset(
         "ProjectionMap",
         "validate_projection",
         "StructureValidationError",
+        # S4.2 — node_id identity + minting split (mint_node_id seam)
+        "mint_node_id",
         # S3.0 — resource + normalization-policy lineage
         "RESOURCE_LINEAGE_SCHEMA_VERSION",
         "RESOURCE_STALE_CLASS",

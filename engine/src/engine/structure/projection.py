@@ -21,20 +21,112 @@ Pure core: a node's ``node_class`` is an open per-book string (the profile/map d
 vocabulary, §3.B.2), never an enum here; no language/ordinal/book-structure literal lives in this
 module (the S0.2 neutrality guard scans it via the ``structure/*.py`` glob, inv 15).
 
-Not here (owned by neighbours): identity minting + the ``minted_by`` split (S4.2/B-3);
-handles/aliases/``handle_policy`` (S4.3/B-4); root topology + reference-integrity traversal
-(``root_id`` resolution, ``NO_ROOT``/``MULTIPLE_ROOTS``/``ORPHAN_NODE``/``CYCLE``), the JSON schema,
-and atom *existence* (``DANGLING_ATOM_REF`` via ``atom_store.contains()``) — all S4.4/B-5.
+Identity (S4.2/B-3) lives here too: the opaque ``node_id`` is minted by :func:`mint_node_id` — an
+arg-free-of-content seam that never sees a designation/title/path/content, so a ``node_id`` *cannot*
+be derived from them (the primary non-derivation control, §3.C.3) — and ``minted_by`` records the
+conceptual minting authority (``human`` ⇒ a container, ``machine`` ⇒ a leaf), a split the validator
+enforces **both** ways (``MINTED_BY_SPLIT``, inv 7). The validator also rejects a ``node_id`` that
+matches an enumerated derivation cheat (``NODE_ID_DERIVED``, inv 6) — the belt-and-braces for a
+hand-authored map, since the seam cannot stop a human from *typing* a derived id. ``designation`` /
+``title`` are the optional handle/display inputs those cheats compare against (§3.J).
+
+Not here (owned by neighbours): handles/aliases/``handle_policy`` + the substring-of-rendered-handle
+derivation cheat (S4.3/B-4); root topology + reference-integrity traversal (``root_id`` resolution,
+``NO_ROOT``/``MULTIPLE_ROOTS``/``ORPHAN_NODE``/``CYCLE``), the JSON schema, and atom *existence*
+(``DANGLING_ATOM_REF`` via ``atom_store.contains()``) — all S4.4/B-5.
 """
 
 from __future__ import annotations
 
+import re
+import unicodedata
 from collections.abc import Iterator, Mapping
 from dataclasses import dataclass, field
 from types import MappingProxyType
 
 from engine.structure.atoms import PROCESSING_SCOPE_EXCLUDED
 from engine.structure.errors import EC, StructureValidationError
+
+#: The two conceptual minting authorities (§3.C.2): a **human** mints a container, the **extractor**
+#: **machine** mints a leaf. Not the runtime writer — the authority that *decided* the node exists.
+#: Process-role wire tokens, not language/book literals (they pass the inv-15 neutrality scan).
+MINTED_BY_HUMAN = "human"
+MINTED_BY_MACHINE = "machine"
+
+#: Default ``node_id`` scheme (§3.C.4) — **revisitable, fixture-only**. Human containers get a plain
+#: counter, machine leaves a ULID-like token. The ``"n-"`` human prefix is load-bearing: a bare
+#: integer id (``"0"``) would collide with the root's ``"0"`` position-path and spuriously trip the
+#: ``NODE_ID_DERIVED`` position cheat — the prefix keeps a legitimately-minted id off every derivation
+#: form. Crockford base32 (no ``I``/``L``/``O``/``U``) gives the leaf id its opaque ULID shape.
+_HUMAN_ID_PREFIX = "n-"
+_CROCKFORD32 = "0123456789ABCDEFGHJKMNPQRSTVWXYZ"
+_ULID_LIKE_WIDTH = 26
+
+
+def mint_node_id(minted_by: str, seq: int) -> str:
+    """Mint a fresh opaque ``node_id`` — the S4.2 identity **seam** (§3.C.3/§3.C.4).
+
+    The seam is the *primary* non-derivation control (inv 6): it takes only the minting
+    **authority** and a monotonic mint **ordinal** — **never** a designation, title, position-path,
+    or content — so a minted ``node_id`` *structurally cannot* encode any of them. ``seq`` is the
+    mint-order counter, **not** a tree position (which would re-derive on a move, inv 5); it is
+    assigned once and travels with the node.
+
+    Scheme (revisitable, fixture-only, §3.C.4): a human authority mints a container id as a plain
+    counter (``n-0``, ``n-1``, …); a machine authority mints a leaf id as a ULID-like Crockford-base32
+    token. An unknown authority is a caller programming error (``ValueError``) — the human/machine
+    *split* over an already-built map is the validator's job (``MINTED_BY_SPLIT``), but you cannot
+    *mint* under an authority that names no scheme.
+    """
+    if seq < 0:
+        raise ValueError(f"mint_node_id seq must be a non-negative mint ordinal, got {seq!r}")
+    if minted_by == MINTED_BY_HUMAN:
+        return f"{_HUMAN_ID_PREFIX}{seq}"
+    if minted_by == MINTED_BY_MACHINE:
+        return _ulid_like(seq)
+    raise ValueError(
+        f"mint_node_id: unknown minting authority {minted_by!r} — expected "
+        f"{MINTED_BY_HUMAN!r} (container) or {MINTED_BY_MACHINE!r} (leaf)"
+    )
+
+
+def _ulid_like(seq: int) -> str:
+    """A deterministic, opaque, fixed-width Crockford-base32 token for a machine-minted leaf (§3.C.4).
+
+    Deterministic in ``seq`` (not a real timestamp+random ULID) so fixtures/tests are reproducible;
+    the shape — 26 base32 chars — is what makes it read as an opaque leaf id, distinct from the human
+    ``n-<counter>`` form. Fixture-only and revisitable: the production minter is the extractor.
+    """
+    digits = []
+    n = seq
+    for _ in range(_ULID_LIKE_WIDTH):
+        n, rem = divmod(n, 32)
+        digits.append(_CROCKFORD32[rem])
+    return "".join(reversed(digits))
+
+
+def _slug(text: str) -> str:
+    """The canonical id-derivation slug used **only** by the ``NODE_ID_DERIVED`` cheat check.
+
+    Lowercase, **NFKD-decompose and drop the combining marks** (accent-fold), then collapse every run
+    of non-``a-z0-9`` characters to a single hyphen and strip leading/trailing hyphens. The two-step
+    fold is load-bearing on a non-English book: NFKD splits an accented Latin letter into base +
+    combining mark, and dropping the mark (``unicodedata.combining``) leaves the bare base letter — so
+    ``"Città"`` → ``"citta"`` and ``"Über"`` → ``"uber"`` (mark **anywhere** in the word, not only
+    word-final), matching the id a real slugifier would mint. Dropping the mark is essential:
+    normalizing alone would turn the freed combining mark into a hyphen (``"Über"`` → ``"u-ber"``) and
+    still miss an internal-accent derivation, while a plain ``[^a-z0-9]`` filter with no NFKD drops the
+    accented letter whole (``"Città"`` → ``"citt"``). This mirrors the de-facto slugify convention
+    (NFKD → strip-combining → ASCII → lower). Carries no language/book literal (inv 15). Honest scope:
+    a **fully non-Latin** script (Cyrillic/CJK/Greek — no ASCII base after decomposition) still folds
+    to empty here; catching *those* transliterated derivations is B-4's substring-of-rendered-handle
+    cheat over the real ``render_handle``, not this belt-and-braces. It is *not* the B-4 renderer's
+    per-policy, versioned ``html_slug`` — it only has to recognise the ``node_id ==
+    slug(designation/title)`` derivation shape.
+    """
+    decomposed = unicodedata.normalize("NFKD", text.lower())
+    deaccented = "".join(ch for ch in decomposed if not unicodedata.combining(ch))
+    return re.sub(r"[^a-z0-9]+", "-", deaccented).strip("-")
 
 
 def _require_identity(node_id: str, node_class: str) -> None:
@@ -58,13 +150,21 @@ class ContainerNode:
     authorship is S6). It owns no ``body_atoms`` — that slot exists only on :class:`LeafNode`, which
     is how container-xor-leaf holds by construction. ``parent`` is **not** stored: it is derived from
     the ``children`` edges on load (§3.B.4, the single-source-of-truth storage posture).
+
+    ``minted_by`` is the conceptual minting authority (§3.C.2): a container is **human**-minted, a
+    split :func:`validate_projection` enforces (``MINTED_BY_SPLIT``). ``designation`` / ``title`` are
+    optional handle/display inputs (§3.J) — inert here except that ``node_id`` may not be *derived*
+    from them (``NODE_ID_DERIVED``).
     """
 
     node_id: str
     node_class: str
+    minted_by: str
     children: tuple[str, ...] = ()
     heading_atoms: tuple[str, ...] = ()
     signature_atoms: tuple[str, ...] = ()
+    designation: str = ""
+    title: str = ""
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "children", tuple(self.children))
@@ -78,11 +178,18 @@ class LeafNode:
     """A leaf node: owns ``body_atoms`` — the atom ids of its running text, ordered by **strictly
     ascending canonical-stream index** and permitted to be non-contiguous (it may interleave around
     excluded furniture, §3.B.6). It owns no ``children``; a leaf is a terminal in the projection tree.
+
+    ``minted_by`` is the conceptual minting authority (§3.C.2): a leaf is **machine**-minted (the
+    extractor), the mirror of the container's human split (``MINTED_BY_SPLIT``). ``designation`` /
+    ``title`` are optional handle/display inputs; ``node_id`` may not be *derived* from them.
     """
 
     node_id: str
     node_class: str
+    minted_by: str
     body_atoms: tuple[str, ...] = ()
+    designation: str = ""
+    title: str = ""
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "body_atoms", tuple(self.body_atoms))
@@ -182,16 +289,21 @@ def validate_projection(pmap: ProjectionMap, atom_store) -> None:
       atom smuggled into a node slot (``OWNED_EXCLUDED_ATOM``, inv 1b).
 
     Atom *existence* (``contains()`` → ``DANGLING_ATOM_REF``, inv 17) and root topology (inv 14) are
-    B-5 and are **not** consulted here.
+    B-5 and are **not** consulted here. The two identity checks (``MINTED_BY_SPLIT`` /
+    ``NODE_ID_DERIVED``) are pure projection-model checks — they read only node type + ``minted_by`` /
+    ``node_id`` / ``designation`` / ``title`` and the ``children`` edges, never the ``atom_store``.
 
     Collected codes: ``DUP_OWNERSHIP`` (inv 1a), ``UNOWNED_INCLUDED_ATOM`` / ``OWNED_EXCLUDED_ATOM``
-    (inv 1b), ``EMPTY_CONTAINER`` (inv 26), ``BODY_ATOMS_UNORDERED`` (inv 27).
+    (inv 1b), ``EMPTY_CONTAINER`` (inv 26), ``BODY_ATOMS_UNORDERED`` (inv 27), ``MINTED_BY_SPLIT``
+    (inv 7), ``NODE_ID_DERIVED`` (inv 6).
     """
     findings: list[tuple[EC, str]] = []
     _check_ownership_disjoint(pmap, findings)
     _check_coverage(pmap, atom_store, findings)
     _check_empty_containers(pmap, findings)
     _check_body_atom_order(pmap, atom_store, findings)
+    _check_minted_by(pmap, findings)
+    _check_node_id_not_derived(pmap, findings)
     if findings:
         raise StructureValidationError(findings)
 
@@ -312,3 +424,92 @@ def _check_body_atom_order(pmap: ProjectionMap, atom_store, findings: list[tuple
                 )
                 break
             previous = i
+
+
+def _check_minted_by(pmap: ProjectionMap, findings: list[tuple[EC, str]]) -> None:
+    """inv 7 — ``minted_by`` recorded + the human/machine split enforced **both** ways →
+    ``MINTED_BY_SPLIT`` (§3.C.2).
+
+    One comparison covers all three failure modes the plan enumerates: a container must be
+    ``human``-minted and a leaf ``machine``-minted, so ``minted_by != expected`` fires on a blank
+    ``minted_by`` (**presence**: neither token), on a container carrying ``machine`` / a leaf carrying
+    ``human`` (**split**, either direction), and on any out-of-vocabulary value (§3.C.1d). The
+    authority is the *conceptual* minter, not the runtime writer — a machine cannot mint a container,
+    a human cannot mint a leaf.
+    """
+    for node in pmap.nodes:
+        is_container = isinstance(node, ContainerNode)
+        expected = MINTED_BY_HUMAN if is_container else MINTED_BY_MACHINE
+        if node.minted_by != expected:
+            kind = "container" if is_container else "leaf"
+            findings.append(
+                (
+                    EC.MINTED_BY_SPLIT,
+                    f"{kind} node {node.node_id!r} has minted_by={node.minted_by!r}; a {kind} must be "
+                    f"minted_by={expected!r} (conceptual minting authority, §3.C.2)",
+                )
+            )
+
+
+def _position_paths(pmap: ProjectionMap) -> dict[str, str]:
+    """Assign each node reachable from ``root_id`` its **position-path** — the dot-joined child-index
+    trail from the root (root ``"0"``, its i-th child ``"0.<i>"``, and so on).
+
+    A pre-order walk over the ``children`` edges resolved through ``by_id``. Cheap and local (no full
+    inv-14 traversal, which is B-5): it visits each id once, tolerates a dangling/duplicate ``children``
+    ref (skips the missing target, guards re-entry) so it cannot loop on a malformed map, and simply
+    omits any node unreachable from the root — a node with no position-path has no position cheat to
+    check, and its unreachability is inv 14's report at B-5, not this helper's.
+    """
+    paths: dict[str, str] = {}
+    stack: list[tuple[str, str]] = [(pmap.root_id, "0")]
+    while stack:
+        node_id, path = stack.pop()
+        if node_id in paths:
+            continue  # already placed — a MULTI_PARENT/CYCLE artifact (inv 14, B-5); do not re-walk
+        node = pmap.by_id.get(node_id)
+        if node is None:
+            continue  # dangling children ref (DANGLING_REF, inv 14, B-5)
+        paths[node_id] = path
+        if isinstance(node, ContainerNode):
+            for i, child in enumerate(node.children):
+                stack.append((child, f"{path}.{i}"))
+    return paths
+
+
+def _check_node_id_not_derived(pmap: ProjectionMap, findings: list[tuple[EC, str]]) -> None:
+    """inv 6 — reject a ``node_id`` that matches an enumerated **derivation cheat** → ``NODE_ID_DERIVED``
+    (§3.C.3, closed list).
+
+    The seam (:func:`mint_node_id`) is the primary control — it structurally cannot derive — but it
+    cannot stop a *hand-authored* map from typing a derived id, so the validator re-checks the closed
+    set: ``node_id`` equal to the ``designation`` (exact), to the ``designation`` under casefold, to
+    ``_slug(designation)`` / ``_slug(title)``, or to the node's own position-path string. An empty
+    ``designation`` / ``title`` is not a derivation source (skipped). The
+    **substring-of-rendered-handle** cheat needs ``render_handle`` and so re-runs at S4.3/B-4 (§3.C.3).
+    """
+    paths = _position_paths(pmap)
+    for node in pmap.nodes:
+        nid = node.node_id
+        cheats: list[str] = []
+        designation = node.designation
+        title = node.title
+        if designation:
+            if nid == designation:
+                cheats.append("exact designation")
+            elif nid.casefold() == designation.casefold():
+                cheats.append("casefold(designation)")
+            if nid == _slug(designation):
+                cheats.append("slug(designation)")
+        if title and nid == _slug(title):
+            cheats.append("slug(title)")
+        if nid == paths.get(nid):
+            cheats.append("position-path")
+        if cheats:
+            findings.append(
+                (
+                    EC.NODE_ID_DERIVED,
+                    f"node_id {nid!r} appears derived from {', '.join(cheats)} — a node_id is opaque and "
+                    f"minted independently (§3.C.3); it must not encode a designation/title/position",
+                )
+            )

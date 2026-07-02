@@ -218,18 +218,32 @@ def test_missing_profile_ref_is_a_clean_error(tmp_path):
         load_book("mp", books_dir=books, profiles_dir=REAL_PROFILES)
 
 
-def test_profile_schema_guards_its_builder(tmp_path):
-    # A malformed *profile* (not just the manifest) must fail validation — the only test
-    # that exercises the profile-level schema path. A language profile missing oracle_min
-    # would otherwise KeyError in the builder; the schema turns it into a clean ConfigError.
-    prof = tmp_path / "profiles" / "languages"
-    prof.mkdir(parents=True)
-    lang = json.loads((REAL_PROFILES / "languages" / "italian_1900_1922.json").read_text())
-    del lang["oracle_min"]
-    (prof / "italian_1900_1922.json").write_text(json.dumps(lang), encoding="utf-8")
-    books = _write_book(tmp_path, "bp", _real_manifest())
+@pytest.mark.parametrize(
+    "profile, field_path",
+    [
+        ("languages/italian_1900_1922.json", ("oracle_min",)),          # profile-level schema path (else KeyError in the builder)
+        ("languages/italian_1900_1922.json", ("case_fold",)),           # S3.0 normalization field, schema-first (no baked default)
+        ("languages/italian_1900_1922.json", ("coverage", "letters")),  # a nested required sub-field
+        ("source_noise/bodoni_didone.json", ("substitution_rules",)),   # the source-noise profile is validated too
+        ("typefaces/spectral_fraunces.json", ("display_family",)),      # ...and the typeface profile (the third _validate call)
+    ],
+)
+def test_profile_schema_rejects_a_missing_required_field(tmp_path, profile, field_path):
+    # A malformed *profile* (not just the manifest) fails validation cleanly (ConfigError) rather than
+    # KeyError-ing later in a builder. Parametrized across every validated profile so each _validate
+    # call — language / source-noise / typeface — is exercised, including a nested sub-field. Adding a
+    # newly-required profile field is a one-line param here.
+    prof = _stage_profiles(tmp_path)
+    p = prof.joinpath(*profile.split("/"))
+    data = json.loads(p.read_text())
+    target = data
+    for key in field_path[:-1]:
+        target = target[key]
+    del target[field_path[-1]]
+    p.write_text(json.dumps(data), encoding="utf-8")
+    books = _write_book(tmp_path, "bad", _real_manifest())
     with pytest.raises(ConfigError, match="schema validation"):
-        load_book("bp", books_dir=books, profiles_dir=tmp_path / "profiles")
+        load_book("bad", books_dir=books, profiles_dir=prof)
 
 
 def test_override_is_validated_after_merge(tmp_path):
@@ -270,44 +284,6 @@ def _stage_profiles(tmp_path) -> Path:
     return dst
 
 
-def test_source_noise_schema_is_enforced(tmp_path):
-    # Proves load_book validates the source-noise profile, not only the language one.
-    prof = _stage_profiles(tmp_path)
-    p = prof / "source_noise" / "bodoni_didone.json"
-    data = json.loads(p.read_text())
-    del data["substitution_rules"]
-    p.write_text(json.dumps(data), encoding="utf-8")
-    books = _write_book(tmp_path, "sn", _real_manifest())
-    with pytest.raises(ConfigError, match="schema validation"):
-        load_book("sn", books_dir=books, profiles_dir=prof)
-
-
-def test_typeface_schema_is_enforced(tmp_path):
-    # ...and the typeface profile (the third _validate call).
-    prof = _stage_profiles(tmp_path)
-    p = prof / "typefaces" / "spectral_fraunces.json"
-    data = json.loads(p.read_text())
-    del data["display_family"]
-    p.write_text(json.dumps(data), encoding="utf-8")
-    books = _write_book(tmp_path, "tf", _real_manifest())
-    with pytest.raises(ConfigError, match="schema validation"):
-        load_book("tf", books_dir=books, profiles_dir=prof)
-
-
-def test_malformed_coverage_fails_schema(tmp_path):
-    # The coverage object's shape is schema-enforced — a missing required sub-field is a clean
-    # ConfigError, not a KeyError in the builder. (The set-membership design has no regex to be
-    # malformed, so there is nothing deeper to guard.)
-    prof = _stage_profiles(tmp_path)
-    lp = prof / "languages" / "italian_1900_1922.json"
-    data = json.loads(lp.read_text())
-    del data["coverage"]["letters"]
-    lp.write_text(json.dumps(data), encoding="utf-8")
-    books = _write_book(tmp_path, "bad_cov", _real_manifest())
-    with pytest.raises(ConfigError, match="schema validation"):
-        load_book("bad_cov", books_dir=books, profiles_dir=prof)
-
-
 def test_language_profile_requires_a_monolingual_period_dictionary(tmp_path):
     # adjudicate._build_oracle binds its membership oracle to a *monolingual* period dictionary
     # and raises if none — a bare ValueError that escapes the CLI exception taxonomy as a raw
@@ -326,20 +302,6 @@ def test_language_profile_requires_a_monolingual_period_dictionary(tmp_path):
     books = _write_book(tmp_path, "nomono", _real_manifest())
     with pytest.raises(ConfigError, match="schema validation"):
         load_book("nomono", books_dir=books, profiles_dir=prof)
-
-
-def test_case_fold_is_required(tmp_path):
-    # case_fold is a required language-profile field (S3.0): the normalization policy reads it, so a
-    # profile omitting it must fail at LOAD (ConfigError) — not later as a KeyError in _build_language
-    # nor a silent fallback to a baked default. Same gate as test_missing_edition_year_…: schema-first.
-    prof = _stage_profiles(tmp_path)
-    lp = prof / "languages" / "italian_1900_1922.json"
-    data = json.loads(lp.read_text())
-    del data["case_fold"]
-    lp.write_text(json.dumps(data), encoding="utf-8")
-    books = _write_book(tmp_path, "nocf", _real_manifest())
-    with pytest.raises(ConfigError, match="schema validation"):
-        load_book("nocf", books_dir=books, profiles_dir=prof)
 
 
 def test_case_fold_enum_rejects_an_unknown_value(tmp_path):

@@ -107,6 +107,17 @@ NORMALIZER_STALE_CLASS = "normalization-policy"
 #: boundary like every persisted engine artifact.
 STREAM_FREEZE_SCHEMA_VERSION = 1
 
+#: Schema version of the authoring-evidence sidecar (``structure/evidence.py`` — S4.6a): the
+#: per-book companion to ``structure_map.json`` holding the prose evidence behind each
+#: hand-authored container. Independently versioned per M3 (s4_plan §1.4.1); its hash does NOT
+#: enter structure-map lineage (§1.4.1b) — evidence freshness keys on the per-node structure
+#: digest, never on this version or on ``map_revision``.
+AUTHORING_EVIDENCE_SCHEMA_VERSION = 1
+#: Stale class for the authoring-evidence sidecar — the M3 discriminator S8.1 routes on, so an
+#: evidence-schema change names *this* layer and its repair (re-author/refresh the evidence),
+#: distinct from every persisted-layer and input-lineage class (inv 12a: a distinct wire string).
+AUTHORING_EVIDENCE_STALE_CLASS = "authoring-evidence"
+
 # --- fixed work-tree locations ---------------------------------------------------------- #
 
 #: Workspace area + subdirectory the L1 atom streams live under (``<work>/data/atoms/``).
@@ -116,6 +127,9 @@ ATOMS_SUBDIR = "atoms"
 #: the work root, not under an area, by design (§11.2/§11.3) — the top-level book artifacts.
 STRUCTURE_MAP_FILENAME = "structure_map.json"
 RELATIONS_FILENAME = "relations.json"
+#: Work-root filename of the authoring-evidence sidecar — the per-book committed companion to
+#: ``structure_map.json`` (s4_plan §1.4.1), beside the map it evidences.
+AUTHORING_EVIDENCE_FILENAME = "authoring_evidence.json"
 #: Where the regen-guarded writer (S4.4, s4_plan §3.E.8) snapshots the superseded structure map
 #: before its licensed overwrite — one immutable ``structure_map.rev{N}.json`` per superseded
 #: ``map_revision``, beside the live map at the work root.
@@ -149,3 +163,9 @@ def structure_map_snapshot_path(workspace: BookWorkspace, revision: int) -> Path
 def relations_path(workspace: BookWorkspace) -> Path:
     """Path to the relation store (``<work>/relations.json``)."""
     return workspace.resolve_root(RELATIONS_FILENAME)
+
+
+def authoring_evidence_path(workspace: BookWorkspace) -> Path:
+    """Path to the authoring-evidence sidecar (``<work>/authoring_evidence.json``) — the committed
+    companion to the structure map (s4_plan §1.4.1), at the work root beside it."""
+    return workspace.resolve_root(AUTHORING_EVIDENCE_FILENAME)

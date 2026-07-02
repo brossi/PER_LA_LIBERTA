@@ -18,6 +18,9 @@ from engine.structure.artifacts import (
     ATOM_STORE_STALE_CLASS,
     ATOMS_AREA,
     ATOMS_SUBDIR,
+    AUTHORING_EVIDENCE_FILENAME,
+    AUTHORING_EVIDENCE_SCHEMA_VERSION,
+    AUTHORING_EVIDENCE_STALE_CLASS,
     NORMALIZER_STALE_CLASS,
     RELATION_STORE_SCHEMA_VERSION,
     RELATION_STORE_STALE_CLASS,
@@ -31,6 +34,7 @@ from engine.structure.artifacts import (
     STRUCTURE_MAP_SCHEMA_VERSION,
     STRUCTURE_MAP_STALE_CLASS,
     atoms_dir,
+    authoring_evidence_path,
     relations_path,
     structure_map_path,
 )
@@ -58,7 +62,16 @@ from engine.structure.structure_map import (
     render_structure_map,
     schema_version_const,
     validate_structure_map,
+    workspace_reader,
     write_structure_map,
+)
+from engine.structure.evidence import (
+    AuthoringEvidence,
+    EvidenceEntry,
+    assert_evidence_gate,
+    evidence_schema_version_const,
+    load_authoring_evidence,
+    node_structure_digest,
 )
 from engine.structure.atom_store import (
     CANONICAL,
@@ -68,6 +81,7 @@ from engine.structure.atom_store import (
     assert_reference_integrity,
     assert_stream_roundtrip,
     load_stream,
+    load_workspace_streams,
     save_stream,
     stream_ids,
     stream_path,
@@ -232,4 +246,17 @@ __all__ = [
     "load_freeze_record",
     "write_freeze_record",
     "assert_freeze_matches",
+    # S4.6a — authoring-evidence sidecar (engine half) + store-backed reader glue
+    "AUTHORING_EVIDENCE_SCHEMA_VERSION",
+    "AUTHORING_EVIDENCE_STALE_CLASS",
+    "AUTHORING_EVIDENCE_FILENAME",
+    "authoring_evidence_path",
+    "EvidenceEntry",
+    "AuthoringEvidence",
+    "node_structure_digest",
+    "load_authoring_evidence",
+    "assert_evidence_gate",
+    "evidence_schema_version_const",
+    "load_workspace_streams",
+    "workspace_reader",
 ]

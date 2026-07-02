@@ -507,3 +507,55 @@ def assert_reference_integrity(
                     f"canonical atom {atom.atom_id!r} back-link {deriv.witness}:{deriv.atom_id!r} "
                     f"resolves to no atom in that witness stream — reference integrity violated"
                 )
+
+
+# --- store-backed loading of a whole workspace (S4.6a reader glue) ----------------------------- #
+
+
+def load_workspace_streams(
+    workspace: BookWorkspace, *, canonical_stream_id: str = "canonical"
+) -> dict[str, AtomStream]:
+    """Load **every** persisted stream in ``workspace``, reference-integrity asserted (S4.6a).
+
+    The store half of the reader glue (runway §3 item 2): each stream comes through
+    :func:`load_stream` (its per-stream round-trip + hash tiers), then the cross-stream
+    :func:`assert_reference_integrity` tier runs over the set — a persisted canonical stream with
+    a dangling ``derived_from`` back-link reds here (``CaptureError``), never rides silently into
+    a reader. One canonical anchor per workspace: the stream named ``canonical_stream_id`` must be
+    canonical-kind and every other stream witness-kind — either fault is a stale substrate
+    (:class:`~engine.errors.StaleArtifactError`), since a map cannot anchor on an ambiguous
+    canonical. An absent substrate (no streams, or no stream under the canonical id) is
+    :class:`~engine.errors.MissingInputError` — absent, not stale.
+    """
+    ids = stream_ids(workspace)
+    if not ids:
+        raise MissingInputError(
+            f"no persisted atom streams under {atoms_dir(workspace)} — capture and save the "
+            f"streams first (the S4.6-pre freeze step for a real book)"
+        )
+    if canonical_stream_id not in ids:
+        raise MissingInputError(
+            f"canonical stream {canonical_stream_id!r} is not among the persisted streams {ids} "
+            f"— the substrate has witnesses but no canonical projection to anchor on"
+        )
+    streams = {stream_id: load_stream(workspace, stream_id) for stream_id in ids}
+    canonical = streams[canonical_stream_id]
+    if canonical.kind != CANONICAL:
+        raise StaleArtifactError(
+            f"stream {canonical_stream_id!r} is kind {canonical.kind!r}, not {CANONICAL!r} — the "
+            f"named canonical stream must be the canonical projection"
+        )
+    rogue = sorted(
+        stream_id
+        for stream_id, stream in streams.items()
+        if stream_id != canonical_stream_id and stream.kind != WITNESS
+    )
+    if rogue:
+        raise StaleArtifactError(
+            f"streams {rogue} are canonical-kind but not the named canonical "
+            f"({canonical_stream_id!r}) — one canonical anchor per workspace; a second is an "
+            f"ambiguous substrate, not a witness"
+        )
+    witnesses = {sid: s for sid, s in streams.items() if sid != canonical_stream_id}
+    assert_reference_integrity(canonical, witnesses)
+    return streams

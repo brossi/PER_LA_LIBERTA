@@ -74,7 +74,7 @@ from engine.structure.artifacts import (
     structure_map_path,
     structure_map_snapshot_path,
 )
-from engine.structure.atom_store import CANONICAL, WITNESS, AtomStream
+from engine.structure.atom_store import CANONICAL, WITNESS, AtomStream, load_workspace_streams
 from engine.structure.atom_store import to_json as stream_envelope_json
 from engine.structure.atoms import PROCESSING_SCOPE_INCLUDED
 from engine.structure.errors import EC, StructureValidationError
@@ -396,6 +396,23 @@ class StreamAtomReader:
 
     def scope_of(self, atom_id: str) -> str | None:
         return self._scope.get(atom_id)
+
+
+def workspace_reader(
+    workspace: BookWorkspace, *, canonical_stream_id: str = "canonical"
+) -> StreamAtomReader:
+    """The store-backed reader glue (S4.6a; runway §3 item 2): a workspace's **persisted** streams,
+    loaded and cross-checked, wired into a :class:`StreamAtomReader`.
+
+    Composes :func:`~engine.structure.atom_store.load_workspace_streams` (per-stream round-trip +
+    hash tiers, one-canonical-anchor discipline, and ``assert_reference_integrity`` across the
+    set) with the thin reader the validators take — the seam the S4.6 authoring gate and S5's
+    re-bind consume. Inherits the loader's failure contract; adds nothing of its own.
+    """
+    return StreamAtomReader(
+        load_workspace_streams(workspace, canonical_stream_id=canonical_stream_id),
+        canonical_stream_id,
+    )
 
 
 # --- lineage manifest assembly (§3.E) ---------------------------------------------------------------- #

@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Authoring-evidence sidecar — prose evidence behind hand-authored containers (S4.6a, s4_plan 1.4.1)",
+  "description": "Tier-1 shape validation only: field presence, types, and no extra keys (additionalProperties:false throughout). Everything the shape cannot say is the gate's (assert_evidence_gate): digest staleness, the one-entry-per-human-container correspondence, and orphan/misbound binding. node_digest is the 1.4.1b canonical node-structure digest (node_class + ordered children + owned atom ids), produced only by node_structure_digest — never hand-computed. authored_at_revision is informational bookkeeping (the map_revision current when the entry was written); it is NEVER a staleness trigger. The schema_version const is bound to the live AUTHORING_EVIDENCE_SCHEMA_VERSION by evidence_schema_version_const() + the version-derived conforming fixture, never a free-floating literal.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "entries"],
+  "properties": {
+    "schema_version": {
+      "type": "integer",
+      "const": 1,
+      "description": "The sidecar document schema version. Bound to AUTHORING_EVIDENCE_SCHEMA_VERSION via evidence_schema_version_const() — a bump here without the Python constant (or vice versa) fails the binding test."
+    },
+    "entries": {
+      "type": "array",
+      "description": "One entry per hand-authored container, keyed by node_id (duplicates are rejected at the typed build — a keyed table cannot hold two). May be empty: the sidecar is optional at generic load (1.4.1a); coverage is demanded by the S4.6 gate, not the shape.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["node_id", "node_digest", "evidence", "authored_at_revision"],
+        "properties": {
+          "node_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The bound node's opaque id. Resolution against the live map is the gate's (orphan/misbound findings), not the shape's."
+          },
+          "node_digest": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The 1.4.1b canonical node-structure digest of the bound node at authoring time — the ONLY staleness key: evidence is stale iff the recomputed live digest differs."
+          },
+          "evidence": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The prose rationale for this container (scan-grounded authoring evidence). Whitespace-only prose is rejected at the typed build — minLength cannot see it."
+          },
+          "authored_at_revision": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "The map_revision current when this entry was authored. Bookkeeping only (1.4.1b) — never consulted by the staleness check."
+          }
+        }
+      }
+    }
+  }
+}

@@ -109,6 +109,9 @@ PUBLIC_SURFACE_BY_CONCERN = {
                 "marker_page_binding"),
     "freeze": ("build_freeze_record", "render_freeze_record", "load_freeze_record",
                "write_freeze_record", "assert_freeze_matches"),
+    "evidence": ("EvidenceEntry", "AuthoringEvidence", "node_structure_digest",
+                 "load_authoring_evidence", "assert_evidence_gate", "evidence_schema_version_const",
+                 "authoring_evidence_path"),
     "roundtrip": ("hash_raw", "reconstruct_raw", "ReversibleTransform", "apply_forward",
                   "apply_inverse", "is_reversible", "verify_atom_roundtrip"),
     "typed": ("TypedAtom", "typed_projection", "ReviewItem", "CompletenessReport", "check_completeness"),
@@ -120,6 +123,7 @@ PUBLIC_SURFACE_BY_CONCERN = {
     "structure_map": ("StructureMap", "StreamAtomReader", "validate_structure_map",
                       "load_structure_map", "write_structure_map", "render_structure_map",
                       "build_manifest", "schema_version_const", "assert_schema_born"),
+    "reader_glue": ("load_workspace_streams", "workspace_reader"),
 }
 
 
@@ -140,6 +144,7 @@ STALE_CLASS_NAMES = (
     "RELATION_STORE_STALE_CLASS",
     "RESOURCE_STALE_CLASS",
     "NORMALIZER_STALE_CLASS",
+    "AUTHORING_EVIDENCE_STALE_CLASS",
 )
 
 # The relation surface S4 is *allowed* to expose: two inert layer-identity constants + the path
@@ -300,6 +305,19 @@ EXPECTED_PUBLIC_SURFACE = frozenset(
         "load_freeze_record",
         "write_freeze_record",
         "assert_freeze_matches",
+        # S4.6a — authoring-evidence sidecar (engine half) + store-backed reader glue
+        "AUTHORING_EVIDENCE_SCHEMA_VERSION",
+        "AUTHORING_EVIDENCE_STALE_CLASS",
+        "AUTHORING_EVIDENCE_FILENAME",
+        "authoring_evidence_path",
+        "EvidenceEntry",
+        "AuthoringEvidence",
+        "node_structure_digest",
+        "load_authoring_evidence",
+        "assert_evidence_gate",
+        "evidence_schema_version_const",
+        "load_workspace_streams",
+        "workspace_reader",
     }
 )
 

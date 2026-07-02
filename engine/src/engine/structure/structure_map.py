@@ -317,7 +317,8 @@ def load_structure_map(path: Path, atom_store) -> StructureMap:
     **Born-agnostic** (§1.2.3): this loader never reads the schema birth status — the born check is
     :func:`assert_schema_born`, called separately by DONE/GATE harness paths. The failure contract
     is **total** (the ``atom_store.from_json`` precedent): a missing file is
-    :class:`~engine.errors.MissingInputError`; non-UTF-8 / non-JSON / non-finite-float (``NaN`` /
+    :class:`~engine.errors.MissingInputError`; an unreadable file / non-UTF-8 / non-JSON
+    (including a parse-depth blowup) / non-finite-float (``NaN`` /
     ``Infinity`` — legal to ``json.loads`` but not RFC 8259, and fatal to the ``allow_nan=False``
     re-render inv 20 depends on) / Tier-1-malformed content — and any model-level
     ``ValueError``/``TypeError`` out of the typed build, e.g. a zero-fraction float in an int field
@@ -329,9 +330,21 @@ def load_structure_map(path: Path, atom_store) -> StructureMap:
     if not path.is_file():
         raise MissingInputError(f"structure map not found at {path}")
     try:
-        doc = json.loads(path.read_text(encoding="utf-8"), parse_constant=_reject_non_finite)
+        text = path.read_text(encoding="utf-8")
+    except OSError as exc:
+        # is_file() passed but the read failed (permissions, TOCTOU): still inside the total
+        # contract, never a PermissionError traceback.
+        raise StaleArtifactError(f"structure map at {path} is unreadable: {exc}") from exc
     except UnicodeDecodeError as exc:
         raise StaleArtifactError(f"structure map at {path} is not valid UTF-8: {exc}") from exc
+    try:
+        doc = json.loads(text, parse_constant=_reject_non_finite)
+    except RecursionError as exc:
+        # A pathologically nested document blows json's recursive parser — unparseable content,
+        # not an engine crash.
+        raise StaleArtifactError(
+            f"structure map at {path} is not valid JSON: nested beyond parseable depth"
+        ) from exc
     except ValueError as exc:  # json.JSONDecodeError subclasses ValueError; also _reject_non_finite
         raise StaleArtifactError(f"structure map at {path} is not valid JSON: {exc}") from exc
     _tier1_validate(doc)

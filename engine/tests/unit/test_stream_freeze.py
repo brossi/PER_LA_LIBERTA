@@ -32,7 +32,7 @@ from pathlib import Path
 
 import pytest
 
-from engine.errors import StaleArtifactError
+from engine.errors import MissingInputError, StaleArtifactError
 from engine.structure import (
     AtomStream,
     assert_freeze_matches,
@@ -188,9 +188,22 @@ def test_load_freeze_record_is_a_total_contract(tmp_path, doc):
         load_freeze_record(path)
 
 
-def test_load_freeze_record_missing_file_fails_loud(tmp_path):
-    with pytest.raises(StaleArtifactError, match="missing"):
+def test_load_freeze_record_missing_file_is_missing_input(tmp_path):
+    # Post-audit alignment with the shared load-boundary taxonomy (errors.py): an ABSENT artifact
+    # is MissingInputError everywhere; StaleArtifactError is reserved for present-but-unloadable.
+    with pytest.raises(MissingInputError):
         load_freeze_record(tmp_path / "absent.json")
+
+
+def test_load_freeze_record_unreadable_file_is_stale(tmp_path):
+    path = tmp_path / "freeze.json"
+    path.write_text("{}", encoding="utf-8")
+    path.chmod(0o000)
+    try:
+        with pytest.raises(StaleArtifactError, match="unreadable"):
+            load_freeze_record(path)
+    finally:
+        path.chmod(0o644)
 
 
 # --- assert_freeze_matches: every drift axis fails loud, naming the stream ---------------- #

@@ -66,12 +66,19 @@ from engine.structure.structure_map import (
     write_structure_map,
 )
 from engine.structure.evidence import (
+    EVIDENCE_FINDING_KINDS,
     AuthoringEvidence,
     EvidenceEntry,
+    EvidenceGateError,
     assert_evidence_gate,
+    build_evidence_entry,
+    decision_digest,
+    evidence_findings,
     evidence_schema_version_const,
+    extent_digest,
     load_authoring_evidence,
-    node_structure_digest,
+    render_authoring_evidence,
+    write_authoring_evidence,
 )
 from engine.structure.atom_store import (
     CANONICAL,
@@ -253,10 +260,19 @@ __all__ = [
     "authoring_evidence_path",
     "EvidenceEntry",
     "AuthoringEvidence",
-    "node_structure_digest",
+    "decision_digest",
+    "extent_digest",
     "load_authoring_evidence",
     "assert_evidence_gate",
     "evidence_schema_version_const",
     "load_workspace_streams",
     "workspace_reader",
+    # S4.6a post-audit remediation (user-ratified 2026-07-02): typed gate error + findings
+    # producer + the engine writer
+    "EvidenceGateError",
+    "EVIDENCE_FINDING_KINDS",
+    "evidence_findings",
+    "build_evidence_entry",
+    "render_authoring_evidence",
+    "write_authoring_evidence",
 ]

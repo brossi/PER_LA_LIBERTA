@@ -170,6 +170,24 @@ def test_loader_missing_file_and_non_json_fail_loud(tmp_path):
         structure.load_structure_map(bad, GEN.conforming_atom_store())
 
 
+def test_loader_unreadable_and_depth_blowup_stay_inside_the_total_contract(tmp_path):
+    # Post-audit fix: OSError (is_file passed, read fails) and RecursionError (pathological
+    # nesting blows json's recursive parser) must land as StaleArtifactError, never escape as a
+    # PermissionError/RecursionError traceback through the "nothing else escapes" contract.
+    locked = tmp_path / "locked.json"
+    locked.write_text("{}", encoding="utf-8")
+    locked.chmod(0o000)
+    try:
+        with pytest.raises(StaleArtifactError, match="unreadable"):
+            structure.load_structure_map(locked, GEN.conforming_atom_store())
+    finally:
+        locked.chmod(0o644)
+    deep = tmp_path / "deep.json"
+    deep.write_text("[" * 100_000, encoding="utf-8")
+    with pytest.raises(StaleArtifactError, match="not valid JSON"):
+        structure.load_structure_map(deep, GEN.conforming_atom_store())
+
+
 # --- inv 10 — schema const ↔ constant (the two-assertion binding, §3.E.5) ------------------------- #
 
 

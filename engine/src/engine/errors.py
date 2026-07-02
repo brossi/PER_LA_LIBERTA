@@ -6,12 +6,17 @@ Deliberately minimal (F7): a category is added only when a real raiser exists �
 "for completeness" (YAGNI). Exit codes ``1`` (config) and ``2`` (unported stub) are owned by the
 CLI; the step failures below start at ``3``.
 
-Current raisers (M4a):
-  - ``MissingInputError`` — ``reconcile`` (OCR copies absent) / ``ocr`` (source scan PDF absent) /
-    a config-referenced asset that does not resolve (``paths.require_asset``);
-  - ``AcquisitionError`` — ``download`` network/HTTP failure;
-  - ``BackendError``     — ``ocr`` rendering or transcription backend failure (an unreadable scan
-    PDF at page-count, the vision-model call, or a missing key).
+Two structure-owned :class:`EngineError` subclasses live beside their raisers rather than here
+(the carrier-beside-the-vocabulary posture), continuing the exit-code sequence:
+``StructureValidationError`` (``11``, ``structure/errors.py`` — Tier-2 semantic findings carrying
+the closed ``EC`` payload) and ``EvidenceGateError`` (``12``, ``structure/evidence.py`` — the
+authoring-evidence gate's typed ``(kind, message)`` findings). The CLI maps every
+:class:`EngineError` generically via ``exc.exit_code``, so subclassing elsewhere costs nothing
+here; a new code must stay unique across BOTH files.
+
+The shared load-boundary taxonomy every persisted engine artifact obeys: an **absent** artifact is
+:class:`MissingInputError`; a **present-but-unloadable** one (malformed, unreadable, stale-version,
+wrong stale class) is :class:`StaleArtifactError`; nothing else escapes a loader.
 """
 
 from __future__ import annotations
@@ -112,19 +117,28 @@ class IncompleteTypingError(EngineError):
 
 
 class StaleArtifactError(EngineError):
-    """A persisted structure-substrate artifact cannot be loaded as a valid current-schema stream
-    (``structure.atom_store``; S1.5, §3.5/§3.6, D21).
+    """A persisted engine artifact is present but cannot be loaded as a valid current-schema
+    document (S1.5/S4, §3.5/§3.6, D21).
 
     The fail-loud the lineage governance rests on (§3.6 "Stale = fail-loud"): a *load* boundary
-    failure, distinct from the in-memory integrity violations above. Raised when a persisted atom
-    store carries a ``schema_version`` that is not the current registered one (genuinely **stale** —
-    refresh or migrate, the M3/S8.1 stale-class hook), declares the wrong ``stale_class``, is missing a
-    required envelope key, or is otherwise structurally malformed (a model-invariant violation a
-    ``ValueError`` would raise in memory is wrapped here at the load boundary, so ``from_json`` has a
-    total contract: a valid ``AtomStream`` or this error). One human action — do not trust the file —
-    so one exit code; the message distinguishes a stale version from a corrupt envelope. A *missing*
-    store file is :class:`MissingInputError` (absent, not stale); a persisted stream whose text drifted
-    off its span is :class:`RoundTripError` (the anchored round-trip self-check).
+    failure, distinct from the in-memory integrity violations above. One family of raisers, one
+    contract, across every governed persisted layer — atom streams (``structure.atom_store``),
+    structure maps (``structure.structure_map``), stream-freeze records (``structure.freeze``),
+    and authoring-evidence sidecars (``structure.evidence``) — plus the deny-by-default writers
+    (``write_freeze_record``/``write_authoring_evidence``), where refusing to overwrite differing
+    hand-tuned content is the same "do not trust the silent path" posture. Raised when a persisted
+    document carries a ``schema_version`` that is not the current registered one (genuinely
+    **stale** — refresh or migrate, the M3/S8.1 stale-class hook), declares the wrong
+    ``stale_class``, is missing a required key, is unreadable or unparseable (``OSError``/
+    ``RecursionError``/non-UTF-8/non-JSON wrapped at the boundary), or is otherwise structurally
+    malformed (a model-invariant violation a ``ValueError`` would raise in memory is wrapped here,
+    so every loader has a total contract: a valid object or this error). ``assert_freeze_matches``
+    also raises it: a drifted freeze pin *is* a stale artifact. One human action — do not trust
+    the file — so one exit code; the message distinguishes the cases. A *missing* file is
+    :class:`MissingInputError` (absent, not stale); a persisted stream whose text drifted off its
+    span is :class:`RoundTripError` (the anchored round-trip self-check); an evidence sidecar that
+    loads fine but no longer *corresponds* to the live map is
+    ``structure.evidence.EvidenceGateError`` (the correspondence/staleness taxonomy line).
     """
 
     exit_code = 10

@@ -94,20 +94,25 @@ Italian — it binds this tracker back to the live-edition program (the deploy-h
 
 ## 3. Unlisted work flagged (needed before "ready", currently on no row)
 
-1. **Freeze + persist the PLL atom streams (new; proposed as an S4.6 predecessor task).**
-   Canonical atom ids are positional (`canonical_NNNNN` from capture) — a capture-algorithm change
-   renumbers the stream, and S4.6's hand-authored map references those ids *before* S5's re-bind
-   machinery exists. The mitigation is procedural: persist the streams once through the S1.5
-   store, treat them as the frozen authoring substrate (the manifest's stream hashes make any
-   later drift an S8.1-detectable staleness, not silent corruption). Cheap; must precede S4.6.
-2. **Store-backed reader glue (new; fold into S4.6a).** `StreamAtomReader` takes in-memory
-   streams; nothing yet loads a workspace's persisted streams into a reader. Both the S4.6
-   authoring gate and S5's re-bind need it; `assert_reference_integrity` should compose on load.
+1. ~~**Freeze + persist the PLL atom streams (new; proposed as an S4.6 predecessor task).**~~
+   **DONE 2026-07-02** as S4.6-pre (#31, `83d7a7c`): streams captured through the live producers,
+   persisted via the S1.5 store, pinned by the committed `stream_freeze.json` +
+   `assert_freeze_matches` tripwire.
+2. ~~**Store-backed reader glue (new; fold into S4.6a).**~~ **DONE 2026-07-02** as part of S4.6a
+   (#32, `ebd7f11`): `load_workspace_streams` / `workspace_reader` in
+   `structure/atom_store.py`/`structure_map.py`, with `assert_reference_integrity` composed on
+   load.
 3. **S4.6 authoring-loop tooling (under-specified on the row).** The row pins the workflow
    (skeleton seeds candidates, evidence recorded) but no one owns the mechanics: a candidate-map
    seeder from the known PLL skeleton, and a validate-on-save runner (the loader over the frozen
    streams) so authoring errors surface per-edit, not at the end. `CLASS_NOT_IN_VOCAB` et al. only
-   protect an authoring loop that actually runs the validator.
+   protect an authoring loop that actually runs the validator. Named deliverables (post-audit,
+   2026-07-02): a **freeze×evidence composite gate** (one command = `assert_freeze_matches` over
+   the workspace streams + `load_structure_map` + `assert_evidence_gate` — the full "is this
+   authored map trustworthy" check); a **digest-diff explainer** (given a `stale-decision` /
+   `stale-extent` finding, show WHICH children/atoms moved, not just the hashes); and a
+   **non-raising status listing** consuming `evidence_findings()` (the worklist view, kinds as
+   columns).
 4. **Branch/program reconciliation (outside this tracker, gating "ready").** The spike carries
    `engine-framework`'s history, and that branch's remaining port work (M4b cleanup step —
    mid-port, not written; M4c translate/typeset) lives in `ENGINE_M4b_PLAN.md`, not here. "Engine

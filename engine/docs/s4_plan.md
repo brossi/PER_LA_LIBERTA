@@ -215,11 +215,31 @@ per inv 11, M9) belongs to the **negative-fixture set** (§1.2.0/§3.B.5), **not
   schema + digest-staleness validator is §1.4.1c.
   - **§1.4.1a** The sidecar is **optional at load** (generic `load_structure_map()` never requires it) and
     **required at the S4.6 PLL-authored-map gate** (every `minted_by:human` container ↔ one non-stale evidence
-    entry, Audit 15).
-  - **§1.4.1b** Evidence-staleness keys on a **recomputed canonical node-structure digest** (named field list:
-    `node_class` + ordered `children` + owned `atom_id`s, via `lineage._canonical` + `_sha256_bytes`); evidence
-    is stale **iff its bound node's digest changes**. `map_revision` is **informational bookkeeping, NOT** a
-    staleness trigger (Audit 15). The sidecar hash does **not** enter structure-map lineage.
+    entry, Audit 15). Gate failures are `EvidenceGateError` (exit 12, beside its raiser in
+    `structure/evidence.py`) carrying typed `(kind, message)` findings from the closed
+    `EVIDENCE_FINDING_KINDS` set (`missing | orphaned | misbound | stale-decision | stale-extent` —
+    deliberately NOT `EC` codes, §4.0 stays the closed structure-map vocabulary), produced by the ONE
+    non-raising `evidence_findings()` the S4.6 tooling status listing also consumes.
+  - **§1.4.1b** *(amended 2026-07-02, post-audit remediation, user-ratified — supersedes the single
+    node-structure digest, which conflated two change domains).* Evidence-staleness keys on **two recomputed
+    canonical digests per entry**, both via THE producer (`_hash_canonical` = `lineage._canonical` +
+    `_sha256_bytes`, D-S4-I):
+    - **decision digest** — exact payload `{"node_class": <str>, "children": [<ordered child node ids>]}` (a
+      leaf contributes `[]`). Witnesses the human's **topology decision**; re-bind-stable by D33
+      store-and-rebind (a re-bind renames atoms, never node ids) and therefore **never machine-refreshed** —
+      a drift always means a human changed the map's shape.
+    - **extent digest** — exact payload `{"extent": [<sorted set of the node's transitive subtree atom
+      coverage>]}` (own `heading_atoms` + `signature_atoms` + every descendant leaf's `body_atoms`,
+      slot-flattened, set-canonicalized). Witnesses the **substrate binding**; semantics that fall out: a
+      boundary move stales exactly the subtrees whose union changed (an unchanged-union ancestor stays
+      fresh), content addition cascades to every ancestor (honest), re-slotting within one node stales
+      nothing. Mechanically re-stampable at S5 where a re-bind is unique + above threshold (protocol owned
+      by S5.1).
+
+    Evidence is stale **iff either digest changes**, each half its own finding kind (`stale-decision` /
+    `stale-extent`). `map_revision` is **informational bookkeeping, NOT** a staleness trigger (Audit 15).
+    The sidecar hash does **not** enter structure-map lineage; the document persists its own
+    `schema_version` + `stale_class` + `book` (loader `expected_book` binding).
   - **§1.4.1c — sidecar engine half (forward engine row, named — M9/X20).** The sidecar **schema + the digest-
     staleness validator** are *engine code* (not prose Ben authors), so they get an explicit forward tracker
     row with an **engine owner**, scheduled **immediately before S4.6 (predecessor: S4.4 schema; successor:
@@ -237,6 +257,12 @@ per inv 11, M9) belongs to the **negative-fixture set** (§1.2.0/§3.B.5), **not
 
 **Amendment rule:** any helper / module / **fixture generator / validator path** introduced during S4 —
 production *or* test-only — **either maps to a row here or amends this matrix in the same commit**.
+
+> **Successor ambiguity (flagged 2026-07-02, decide at S5 planning):** this rule says "during S4" and the
+> matrix rows stop at M-S4.5, but S4.6-pre/S4.6a work (freeze, evidence, reader glue) already landed under
+> the *export-surface pin* (`test_structure_artifacts.py`) rather than new matrix rows. Which instrument
+> governs post-S4 additions — a per-milestone matrix like this one, or the pin alone — is undecided; the
+> pin is currently doing the whole job. Decide when S5's plan is drafted, not ad hoc per commit.
 
 | Id | Step | Module(s) | Public exports | Schema / fixture path | Acceptance tests | Non-goals (defers to) |
 |----|------|-----------|----------------|-----------------------|------------------|-----------------------|

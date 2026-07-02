@@ -24,7 +24,7 @@ import json
 from collections.abc import Mapping
 from pathlib import Path
 
-from engine.errors import StaleArtifactError
+from engine.errors import MissingInputError, StaleArtifactError
 from engine.structure.artifacts import STREAM_FREEZE_SCHEMA_VERSION
 from engine.structure.atom_store import CANONICAL, WITNESS, AtomStream
 from engine.structure.atom_store import to_json as stream_envelope_json
@@ -77,15 +77,20 @@ def _malformed(path: Path, why: str) -> StaleArtifactError:
 
 
 def load_freeze_record(path: Path) -> dict:
-    """Load a committed freeze record — total contract: a valid record or ``StaleArtifactError``.
+    """Load a committed freeze record — total contract: a valid record,
+    ``MissingInputError`` (absent, not stale — the taxonomy every persisted engine artifact
+    shares), or ``StaleArtifactError`` (present but unloadable).
 
     Validates the registered ``stream_freeze_schema_version``, the required top-level keys, and
     each entry's required fields (witness entries must carry their ``source_hash`` anchor).
     """
+    path = Path(path)
+    if not path.is_file():
+        raise MissingInputError(f"stream-freeze record not found at {path}")
     try:
         text = path.read_text(encoding="utf-8")
     except OSError as exc:
-        raise _malformed(path, f"missing or unreadable ({exc})") from exc
+        raise _malformed(path, f"unreadable ({exc})") from exc
     try:
         doc = json.loads(text)
     except ValueError as exc:

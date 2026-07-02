@@ -18,8 +18,8 @@ Invariants (each proven red on violation — red-first, ENGINE_STRUCTURE_PLAN §
     non-UNKNOWN classes — a stub-bound consumer fails ``test_seam_is_injectable``.
   - UNKNOWN is a distinct, non-empty engine sentinel, not a real class — ``test_unknown_sentinel_…``.
   - classifications are immutable (frozen) — ``test_classification_is_frozen``.
-  - exports resolve on the package — ``test_public_exports_resolve`` (and S0.1's
-    ``test_all_public_exports_resolve_on_the_package`` once the names are in ``__all__``).
+  - exports resolve on the package — verified centrally in ``test_public_names_per_concern_resolve``
+    and ``test_all_public_exports_resolve_on_the_package`` (test_structure_artifacts).
 """
 
 from __future__ import annotations
@@ -28,7 +28,6 @@ import dataclasses
 
 import pytest
 
-import engine.structure as structure
 from engine.structure import (
     DEGENERATE_CLASSIFIER_NAME,
     UNKNOWN,
@@ -103,15 +102,3 @@ def test_classification_rejects_anonymous_typed_by():
     # which the "never an anonymous label" guarantee forbids — enforced at construction.
     with pytest.raises(ValueError, match="never anonymous"):
         BlockClassification(UNKNOWN, typed_by="", confidence=0.0)
-
-
-def test_public_exports_resolve():
-    for name in (
-        "BlockClassifier",
-        "BlockClassification",
-        "DegenerateBlockClassifier",
-        "UNKNOWN",
-        "DEGENERATE_CLASSIFIER_NAME",
-    ):
-        assert name in structure.__all__, f"{name!r} missing from structure.__all__"
-        assert hasattr(structure, name), f"{name!r} not importable from engine.structure"

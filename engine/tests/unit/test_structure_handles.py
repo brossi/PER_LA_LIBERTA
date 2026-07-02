@@ -32,7 +32,6 @@ import inspect
 
 import pytest
 
-import engine.structure as structure
 from engine.structure import (
     Alias,
     ContainerNode,
@@ -697,10 +696,3 @@ def test_node_class_spec_rejects_unknown_kind():
         NodeClassSpec("document", "not-a-kind")
     with pytest.raises(ValueError):
         NodeClassSpec("", "container")  # empty name
-
-
-def test_handle_surface_is_exported():
-    # R2-02 amendment: the S4.3 public surface (render_handle / resolve / Alias) resolves on the
-    # package. A dropped re-export AttributeErrors here rather than passing green (validate_bindings).
-    for name in ("render_handle", "resolve", "Alias"):
-        assert hasattr(structure, name), f"{name!r} not exported from engine.structure"

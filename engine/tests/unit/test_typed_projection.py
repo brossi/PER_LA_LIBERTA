@@ -68,7 +68,6 @@ import dataclasses
 
 import pytest
 
-import engine.structure as structure
 from engine.errors import IncompleteTypingError
 from engine.structure import (
     PROCESSING_SCOPE_EXCLUDED,
@@ -518,15 +517,3 @@ def test_typed_records_are_frozen():
     report = CompletenessReport((), 0)
     with pytest.raises(dataclasses.FrozenInstanceError):
         report.processed_count = 5  # type: ignore[misc]
-
-
-def test_public_exports_resolve():
-    for name in (
-        "TypedAtom",
-        "typed_projection",
-        "ReviewItem",
-        "CompletenessReport",
-        "check_completeness",
-    ):
-        assert name in structure.__all__, f"{name!r} missing from structure.__all__"
-        assert hasattr(structure, name), f"{name!r} not importable from engine.structure"

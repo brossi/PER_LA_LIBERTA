@@ -20,7 +20,6 @@ from pathlib import Path
 
 import pytest
 
-import engine.structure as structure
 import engine.structure.capture as capture_mod
 from engine.errors import CaptureError
 from engine.structure import (
@@ -362,11 +361,3 @@ def test_junk_policy_guard_discriminates_explicit_from_implicit():
 
 
 # --- exports ---------------------------------------------------------------------------- #
-
-def test_public_exports_resolve():
-    for name in (
-        "capture_witness", "build_canonical", "align_streams", "assert_capture_tiles",
-        "PAGE_UNMAPPED", "PROCESSING_SCOPE_INCLUDED", "PROCESSING_SCOPE_EXCLUDED",
-    ):
-        assert name in structure.__all__, f"{name!r} missing from structure.__all__"
-        assert hasattr(structure, name), f"{name!r} not importable from engine.structure"

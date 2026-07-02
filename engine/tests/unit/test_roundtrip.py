@@ -31,7 +31,6 @@ import re
 
 import pytest
 
-import engine.structure as structure
 from engine.errors import RoundTripError
 from engine.structure import (
     Atom,
@@ -235,17 +234,3 @@ def test_norm_layer_label_does_not_fake_the_floor():
     a = _raw_atom(source, 0, 8, text="THE REAL", norm_layer="raw")   # claims verbatim, lies
     with pytest.raises(RoundTripError):
         verify_atom_roundtrip(a, source)                            # transforms default to ()
-
-
-def test_public_exports_resolve():
-    for name in (
-        "hash_raw",
-        "reconstruct_raw",
-        "ReversibleTransform",
-        "apply_forward",
-        "apply_inverse",
-        "is_reversible",
-        "verify_atom_roundtrip",
-    ):
-        assert name in structure.__all__, f"{name!r} missing from structure.__all__"
-        assert hasattr(structure, name), f"{name!r} not importable from engine.structure"

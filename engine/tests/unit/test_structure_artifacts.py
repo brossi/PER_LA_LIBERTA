@@ -96,6 +96,34 @@ def test_all_public_exports_resolve_on_the_package():
         assert hasattr(structure, name), f"{name!r} is in __all__ but not importable from engine.structure"
 
 
+# The specific public names each structure concern contributes. The bounded gate
+# (test_public_export_surface_is_bounded) pins __all__ to an exact allowlist and the test above proves
+# every __all__ name imports — but both stay green if a real export is dropped from __all__ *and* the
+# allowlist together. These per-concern lists pin that the specific names survive that consistent
+# removal, so it still reds. Consolidated here from the former per-module test_public_exports_resolve /
+# test_handle_surface_is_exported / test_structure_validation_error_is_exported copies (audit 4.8).
+PUBLIC_SURFACE_BY_CONCERN = {
+    "atoms": ("Atom", "Geom", "AtomDerivation", "duplicate_atom_ids"),
+    "capture": ("capture_witness", "build_canonical", "align_streams", "assert_capture_tiles",
+                "PAGE_UNMAPPED", "PROCESSING_SCOPE_INCLUDED", "PROCESSING_SCOPE_EXCLUDED"),
+    "roundtrip": ("hash_raw", "reconstruct_raw", "ReversibleTransform", "apply_forward",
+                  "apply_inverse", "is_reversible", "verify_atom_roundtrip"),
+    "typed": ("TypedAtom", "typed_projection", "ReviewItem", "CompletenessReport", "check_completeness"),
+    "classify": ("BlockClassifier", "BlockClassification", "DegenerateBlockClassifier",
+                 "UNKNOWN", "DEGENERATE_CLASSIFIER_NAME"),
+    "handles": ("render_handle", "resolve", "Alias"),
+    "projection": ("Node", "ContainerNode", "LeafNode", "FurnitureAtom", "ProjectionMap",
+                   "validate_projection", "StructureValidationError", "mint_node_id"),
+}
+
+
+@pytest.mark.parametrize("concern", sorted(PUBLIC_SURFACE_BY_CONCERN))
+def test_public_names_per_concern_resolve(concern):
+    for name in PUBLIC_SURFACE_BY_CONCERN[concern]:
+        assert name in structure.__all__, f"{name!r} ({concern}) missing from structure.__all__"
+        assert hasattr(structure, name), f"{name!r} ({concern}) not importable from engine.structure"
+
+
 # --- S4.0 / B-1: structure-map + relation-store stale classes; schema_status map (inv 12a) ------ #
 
 # Every stale class the structure core exports. M3's whole point is that a lineage stale-check names

@@ -64,7 +64,6 @@ import inspect
 
 import pytest
 
-import engine.structure as structure
 from engine.errors import EngineError
 from engine.structure import (
     PROCESSING_SCOPE_EXCLUDED,
@@ -494,14 +493,6 @@ def test_structure_validation_error_is_an_engine_error_with_a_code_payload():
     assert err.exit_code == 11  # the reserved code (next free after StaleArtifactError=10)
     with pytest.raises(ValueError):
         StructureValidationError([])
-
-
-def test_structure_validation_error_is_exported():
-    # R2-02 amendment: the B-2 public surface (the exception + the model + the validator) is on the
-    # package. Bindings resolve — a dropped re-export AttributeErrors, not passes green.
-    for name in ("Node", "ContainerNode", "LeafNode", "FurnitureAtom", "ProjectionMap",
-                 "validate_projection", "StructureValidationError", "mint_node_id"):
-        assert hasattr(structure, name), f"{name!r} not exported from engine.structure"
 
 
 # --- construction hygiene: degenerate node identity fails loud ---------------------------------- #

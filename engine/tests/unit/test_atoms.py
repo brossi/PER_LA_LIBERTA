@@ -29,7 +29,8 @@ Invariants (each proven red on violation — red-first, ENGINE_STRUCTURE_PLAN §
   - **atom_id is the identity key — uniqueness is checkable**: ``duplicate_atom_ids`` reports ids
     appearing more than once (empty = all unique) — ``test_duplicate_atom_ids_*`` and the property
     ``test_atom_ids_unique_over_a_generated_stream`` (red-input: helper that never reports a dup).
-  - exports resolve on the package — ``test_public_exports_resolve``.
+  - exports resolve on the package — verified centrally in ``test_public_names_per_concern_resolve``
+    (test_structure_artifacts).
 """
 
 from __future__ import annotations
@@ -38,7 +39,6 @@ import dataclasses
 
 import pytest
 
-import engine.structure as structure
 from engine.structure import (
     PROCESSING_SCOPE_EXCLUDED,
     PROCESSING_SCOPE_INCLUDED,
@@ -290,9 +290,3 @@ def test_atom_ids_unique_over_a_generated_stream():
     assert duplicate_atom_ids(stream) == []
     stream.append(_atom("ac_0100"))  # re-mint an id that already exists
     assert duplicate_atom_ids(stream) == ["ac_0100"]
-
-
-def test_public_exports_resolve():
-    for name in ("Atom", "Geom", "AtomDerivation", "duplicate_atom_ids"):
-        assert name in structure.__all__, f"{name!r} missing from structure.__all__"
-        assert hasattr(structure, name), f"{name!r} not importable from engine.structure"

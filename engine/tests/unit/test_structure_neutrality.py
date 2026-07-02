@@ -18,6 +18,12 @@ OR ``\\u00ab``/``\\xab`` escape form), or baked part/chapter count appears in ``
 ``test_no_language_or_structure_literal_…`` is green on the package; ``test_guard_catches_a_planted_literal``
 is the non-vacuity red-proof — it plants each forbidden term and asserts the scan flags it, so the
 guard is known to go red on a real reintroduction, not merely green on a clean tree.
+
+Scope (extended at S4.4/B-5 per s4_plan inv 15 / B-1 audit F4): the scan walks the LIVE package
+contents dynamically — every ``structure/**/*.py`` **and every ``structure/schema/*.json``** — so
+the Tier-1 schema is inside the neutrality boundary too. inv 22's mutation (a PLL ``node_class``
+``enum`` in the schema) lands here as well as in the schema-shape test: PLL block names are
+source-language words the term scan flags.
 """
 
 from __future__ import annotations
@@ -29,6 +35,8 @@ import pytest
 
 STRUCTURE_SRC = Path(__file__).resolve().parents[2] / "src" / "engine" / "structure"
 PY_FILES = sorted(STRUCTURE_SRC.rglob("*.py"))
+SCHEMA_JSON_FILES = sorted((STRUCTURE_SRC / "schema").glob("*.json"))
+SCANNED_FILES = PY_FILES + SCHEMA_JSON_FILES
 
 # Language / ordinal / structure literals that must live in the profile or structure map, never in
 # the structure core. Three categories the S0.2 done-when names: heading grammar, guillemets, count.
@@ -60,13 +68,17 @@ def _hits(term: str, files: list[Path]) -> list[str]:
 
 def test_structure_src_has_python_files():
     # Guard against a vacuous green: an empty glob would pass every assertion below by scanning
-    # nothing (the single-fixture-blind-spot trap).
+    # nothing (the single-fixture-blind-spot trap). Both globs must be non-empty: the schema dir
+    # exists from S4.4/B-5 on, so an empty JSON glob means the scan silently lost its Tier-1 arm.
     assert PY_FILES, f"no .py files under {STRUCTURE_SRC}; the neutrality scan would pass vacuously"
+    assert SCHEMA_JSON_FILES, (
+        f"no schema .json under {STRUCTURE_SRC / 'schema'}; the inv 15/22 JSON arm would pass vacuously"
+    )
 
 
 @pytest.mark.parametrize("term", FORBIDDEN)
 def test_no_language_or_structure_literal_in_structure_core(term):
-    hits = _hits(term, PY_FILES)
+    hits = _hits(term, SCANNED_FILES)
     assert not hits, (
         f"language/structure literal {term!r} leaked into engine.structure core — move it to the "
         f"structure profile/map:\n" + "\n".join(hits)
@@ -80,3 +92,12 @@ def test_guard_catches_a_planted_literal(tmp_path, term):
     planted = tmp_path / "leak.py"
     planted.write_text(f'HEADING_MARKER = "{term} ..."\n', encoding="utf-8")
     assert _hits(term, [planted]), f"the guard failed to catch a planted {term!r} — scan is vacuous"
+
+
+@pytest.mark.parametrize("term", FORBIDDEN)
+def test_guard_catches_a_planted_literal_in_schema_json(tmp_path, term):
+    # The JSON arm's non-vacuity proof (inv 15/22): a book-shaped enum value planted in a schema
+    # file — e.g. `"enum": ["capitolo", …]` — is flagged by the same term scan.
+    planted = tmp_path / "leak.schema.json"
+    planted.write_text(f'{{"node_class": {{"enum": ["{term}"]}}}}\n', encoding="utf-8")
+    assert _hits(term, [planted]), f"the JSON arm failed to catch a planted {term!r} — scan is vacuous"

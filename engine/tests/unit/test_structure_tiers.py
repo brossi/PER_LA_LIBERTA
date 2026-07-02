@@ -6,16 +6,18 @@ live-parity targets — the net-new substrate has no live referent, so its synth
 **fixture**, never a golden). This file is the first inhabitant of four tiers the structure
 done-whens lean on; S1+ join it with per-concern tier tests:
 
-- **fixture / round-trip** — a generator-produced trivial artifact survives a write→read cycle
-  through the real ``structure_map`` location accessor.
+- **fixture / round-trip** — the generator-produced CONFORMING artifact (evolved trivial →
+  conforming at S4.4/B-5, s4_plan §1.5 M-S4.4) survives a write→read cycle through the real
+  ``structure_map`` location accessor. Its full two-tier load is exercised in
+  ``test_structure_map.py``; here it drives the location/binding spine only.
 - **reference-integrity (binding)** — the fixture's declared ``schema_version`` resolves to the
   live ``STRUCTURE_MAP_SCHEMA_VERSION`` constant (``feedback_validate_bindings``).
 - **property** — an invariant over synthetic book ids, not one fixture.
 - **negative (fail-loud)** — the binding's failure branch raises, no skip-masking
   (``feedback_no_cheating_results``).
 
-The fixture is produced by ``tests/fixtures/_generate_structure_fixture.py`` (dev-time, not
-imported here — generators are run by hand to refresh, mirroring ``tests/golden``).
+The fixture is produced by ``tests/fixtures/_generate_structure_fixture.py`` (dev-time,
+imported here only to bind the committed bytes to the generator's current output).
 
 Each tier's binding is proven red on violation (red-first, §9): the committed↔generator match goes
 red on any drift, content *or* bytes; the version binding raises on a bumped/missing constant
@@ -37,7 +39,7 @@ import engine.structure as structure
 from engine.paths import BookWorkspace
 
 FIXTURES_ROOT = Path(__file__).resolve().parents[1] / "fixtures"
-FIXTURE = FIXTURES_ROOT / "structure" / "trivial_structure_map.json"
+FIXTURE = FIXTURES_ROOT / "structure" / "conforming_structure_map.json"
 GENERATOR = FIXTURES_ROOT / "_generate_structure_fixture.py"
 
 

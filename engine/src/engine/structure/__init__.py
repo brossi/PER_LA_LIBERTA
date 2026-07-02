@@ -49,6 +49,17 @@ from engine.structure.handles import (
     render_handle,
     resolve,
 )
+from engine.structure.structure_map import (
+    StreamAtomReader,
+    StructureMap,
+    assert_schema_born,
+    build_manifest,
+    load_structure_map,
+    render_structure_map,
+    schema_version_const,
+    validate_structure_map,
+    write_structure_map,
+)
 from engine.structure.atom_store import (
     CANONICAL,
     WITNESS,
@@ -134,6 +145,16 @@ __all__ = [
     "Alias",
     "render_handle",
     "resolve",
+    # S4.4 — structure_map.json schema + loader + manifest + born-gate + regen-guarded writer
+    "StructureMap",
+    "StreamAtomReader",
+    "validate_structure_map",
+    "load_structure_map",
+    "write_structure_map",
+    "render_structure_map",
+    "build_manifest",
+    "schema_version_const",
+    "assert_schema_born",
     # S3.0 — resource + normalization-policy lineage constants
     "RESOURCE_LINEAGE_SCHEMA_VERSION",
     "RESOURCE_STALE_CLASS",

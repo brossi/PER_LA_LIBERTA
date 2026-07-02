@@ -114,6 +114,9 @@ PUBLIC_SURFACE_BY_CONCERN = {
     "handles": ("render_handle", "resolve", "Alias"),
     "projection": ("Node", "ContainerNode", "LeafNode", "FurnitureAtom", "ProjectionMap",
                    "validate_projection", "StructureValidationError", "mint_node_id"),
+    "structure_map": ("StructureMap", "StreamAtomReader", "validate_structure_map",
+                      "load_structure_map", "write_structure_map", "render_structure_map",
+                      "build_manifest", "schema_version_const", "assert_schema_born"),
 }
 
 
@@ -214,6 +217,16 @@ EXPECTED_PUBLIC_SURFACE = frozenset(
         "Alias",
         "render_handle",
         "resolve",
+        # S4.4 — structure_map.json schema + loader + manifest + born-gate + regen-guarded writer
+        "StructureMap",
+        "StreamAtomReader",
+        "validate_structure_map",
+        "load_structure_map",
+        "write_structure_map",
+        "render_structure_map",
+        "build_manifest",
+        "schema_version_const",
+        "assert_schema_born",
         # S3.0 — resource + normalization-policy lineage
         "RESOURCE_LINEAGE_SCHEMA_VERSION",
         "RESOURCE_STALE_CLASS",

@@ -102,6 +102,10 @@ ATOMS_SUBDIR = "atoms"
 #: the work root, not under an area, by design (§11.2/§11.3) — the top-level book artifacts.
 STRUCTURE_MAP_FILENAME = "structure_map.json"
 RELATIONS_FILENAME = "relations.json"
+#: Where the regen-guarded writer (S4.4, s4_plan §3.E.8) snapshots the superseded structure map
+#: before its licensed overwrite — one immutable ``structure_map.rev{N}.json`` per superseded
+#: ``map_revision``, beside the live map at the work root.
+STRUCTURE_MAP_SNAPSHOT_DIRNAME = "structure_map.snapshots"
 
 
 def atoms_dir(workspace: BookWorkspace) -> Path:
@@ -116,6 +120,16 @@ def atoms_dir(workspace: BookWorkspace) -> Path:
 def structure_map_path(workspace: BookWorkspace) -> Path:
     """Path to the durable structure map (``<work>/structure_map.json``)."""
     return workspace.resolve_root(STRUCTURE_MAP_FILENAME)
+
+
+def structure_map_snapshot_path(workspace: BookWorkspace, revision: int) -> Path:
+    """Path to the pre-overwrite snapshot of the superseded map at ``map_revision == revision``
+    (``<work>/structure_map.snapshots/structure_map.rev{revision}.json``), containment-checked.
+
+    Returns the path only; creating the directory (and refusing to clobber an existing snapshot)
+    is the regen-guarded writer's job (``structure_map.write_structure_map``, s4_plan §3.E.8).
+    """
+    return workspace.resolve_root(STRUCTURE_MAP_SNAPSHOT_DIRNAME, f"structure_map.rev{revision}.json")
 
 
 def relations_path(workspace: BookWorkspace) -> Path:

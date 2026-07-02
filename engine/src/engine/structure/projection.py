@@ -30,12 +30,22 @@ matches an enumerated derivation cheat (``NODE_ID_DERIVED``, inv 6) — the belt
 hand-authored map, since the seam cannot stop a human from *typing* a derived id. ``designation`` /
 ``title`` are the optional handle/display inputs those cheats compare against (§3.J).
 
+The S4.4/B-5 slice lives here too (single-sourced per-module, aggregated by
+``validate_structure_map`` — s4_plan §4.2 producer note): :func:`validate_reference_integrity` (the
+inv 14 root-topology + traversal family — ``DANGLING_REF``/``ORPHAN_NODE``/``MULTI_PARENT``/
+``DUPLICATE_CHILD_REF``/``NO_ROOT``/``MULTIPLE_ROOTS``/``CYCLE``/``UNREACHABLE_NODE``) and
+:func:`validate_atom_existence` (inv 17, ``DANGLING_ATOM_REF`` via ``atom_store.contains()``). Both
+are deliberately **separate functions** from :func:`validate_projection`, so B-2's contract (a thin
+store without ``contains()``) is unchanged. Reference resolution goes through the injectable
+:class:`NodeTableAccess` seam (§3.E.10) so the §4.4 complexity smoke can count every node and
+child-list-element access.
+
 Not here (owned by neighbours): handle *rendering* / aliases / ``handle_policy`` *resolution* + the
 substring-of-rendered-handle derivation cheat (S4.3/B-4, :mod:`engine.structure.handles`) — the
 per-node ``handle_policy`` override is a stored slot on the node here, but its resolution order and
-the rendered handle live there; root topology + reference-integrity traversal (``root_id`` resolution,
-``NO_ROOT``/``MULTIPLE_ROOTS``/``ORPHAN_NODE``/``CYCLE``), the JSON schema, and atom *existence*
-(``DANGLING_ATOM_REF`` via ``atom_store.contains()``) — all S4.4/B-5.
+the rendered handle live there; ``root_id`` *resolution* itself (``ROOT_ID_DANGLING``) is the
+aggregate's Tier-2a precondition, and the JSON schema + loader are S4.4/B-5's
+:mod:`engine.structure.structure_map`.
 """
 
 from __future__ import annotations
@@ -526,3 +536,193 @@ def _check_node_id_not_derived(pmap: ProjectionMap, findings: list[tuple[EC, str
                     f"minted independently (§3.C.3); it must not encode a designation/title/position",
                 )
             )
+
+
+# --- S4.4 / B-5 — reference integrity (inv 14) + atom existence (inv 17) ------------------------- #
+
+
+class NodeTableAccess:
+    """The injectable node-table/child-list accessor (§3.E.10) reference validation resolves through.
+
+    Owns the two access shapes :func:`validate_reference_integrity` is allowed: ``node(node_id)``
+    (id-keyed table resolution — never a tree scan, §3.B.4) and ``child_ids(node)`` (a node's stored
+    child list). The §4.4 complexity smoke injects a counting subclass whose ``ref_ops`` increments at
+    every ``node()`` call **and every yielded child element**, so the classic quadratic
+    (``if node in parent.children`` per reference) cannot hide from the two-size ratio assertion.
+    Honest scope (§3.E.10): "no raw handle escapes" is a design/review constraint — the validator is
+    *written* to route all resolution here, but nothing mechanically stops a future edit from
+    bypassing it; the smoke's ratio is a heuristic floor, not a proof (S4.7 owns the real 10⁵ tier).
+    """
+
+    def __init__(self, pmap: ProjectionMap) -> None:
+        self._pmap = pmap
+
+    def node(self, node_id: str) -> Node | None:
+        """Resolve ``node_id`` through the flat id-keyed table (``None`` for a dangling ref)."""
+        return self._pmap.by_id.get(node_id)
+
+    def child_ids(self, node: Node) -> Iterator[str]:
+        """Yield the node's stored child ids in reading order (empty for a leaf)."""
+        if isinstance(node, ContainerNode):
+            yield from node.children
+
+
+def validate_reference_integrity(pmap: ProjectionMap, *, access: NodeTableAccess | None = None) -> None:
+    """Run the inv 14 reference-integrity family (Tier-2b, collect-all); raise
+    :class:`~engine.structure.errors.StructureValidationError` with the collected codes, or return
+    ``None`` when the topology is clean.
+
+    Precondition: ``pmap.root_id`` resolves. Its failure is the aggregate's Tier-2a
+    ``ROOT_ID_DANGLING`` (short-circuit, §4.1) — raised there and only there (I5 single-sourcing) —
+    so a direct call with an unresolved root is a caller programming error (``ValueError``), not a
+    second producer of the code.
+
+    Three passes, all linear in nodes + child references, resolving only through ``access``:
+
+    - **local (occurrences):** every ``children`` entry resolves (``DANGLING_REF``); a child twice in
+      one list is ``DUPLICATE_CHILD_REF``; a child in two different parents' lists is
+      ``MULTI_PARENT``; a non-root node with zero occurrences is ``ORPHAN_NODE`` (root exempt — and
+      necessarily co-firing ``MULTIPLE_ROOTS``, since orphan ∈ Z ∧ root ∈ Z, P3A-4).
+    - **root (the |Z| total order over the zero-occurrence set — X3/A-1):** ``|Z|==0`` → ``NO_ROOT``
+      (fully-parented / pure cycle); ``|Z|>1`` → ``MULTIPLE_ROOTS``; ``|Z|==1`` → the node must equal
+      ``root_id`` (else ``MULTIPLE_ROOTS``) **and** be a container (else ``NO_ROOT``). No input fires
+      two root codes.
+    - **global (traversal from root_id):** three-colour DFS in stored child order. An **on-stack**
+      back-edge is ``CYCLE`` (which also terminates the walk — its load-bearing job; a finished-node
+      revisit, the DAG diamond, is deliberately not one); any node never visited is
+      ``UNREACHABLE_NODE`` — including every member of a disconnected cycle (no unvisited-component
+      cycle scan, by design).
+    """
+    if access is None:
+        access = NodeTableAccess(pmap)
+    root = access.node(pmap.root_id)
+    if root is None:
+        raise ValueError(
+            f"validate_reference_integrity: root_id {pmap.root_id!r} does not resolve — the aggregate's "
+            f"Tier-2a ROOT_ID_DANGLING precondition owns this failure and must run first (s4_plan §4.1)"
+        )
+    findings: list[tuple[EC, str]] = []
+
+    # local: one sweep over every stored child reference
+    occurrences: dict[str, int] = {}
+    first_parent: dict[str, str] = {}
+    for parent in pmap.nodes:
+        seen_here: set[str] = set()
+        for child in access.child_ids(parent):
+            if access.node(child) is None:
+                findings.append(
+                    (EC.DANGLING_REF, f"{parent.node_id!r} lists child {child!r} which names no node")
+                )
+                continue
+            occurrences[child] = occurrences.get(child, 0) + 1
+            if child in seen_here:
+                findings.append(
+                    (EC.DUPLICATE_CHILD_REF, f"{child!r} appears twice in {parent.node_id!r}.children")
+                )
+                continue
+            seen_here.add(child)
+            if child in first_parent and first_parent[child] != parent.node_id:
+                findings.append(
+                    (
+                        EC.MULTI_PARENT,
+                        f"{child!r} is a child of both {first_parent[child]!r} and {parent.node_id!r}",
+                    )
+                )
+            else:
+                first_parent.setdefault(child, parent.node_id)
+
+    # root: the total order on Z (the zero-occurrence set), root_id already resolved
+    zero = [n.node_id for n in pmap.nodes if occurrences.get(n.node_id, 0) == 0]
+    for node_id in zero:
+        if node_id != pmap.root_id:  # the root legitimately has zero occurrences (§3.B.0)
+            findings.append(
+                (EC.ORPHAN_NODE, f"{node_id!r} appears in no children list (and is not the root)")
+            )
+    if not zero:
+        findings.append(
+            (EC.NO_ROOT, "no zero-occurrence node: the graph is fully parented (a pure cycle back into the tree)")
+        )
+    elif len(zero) > 1:
+        findings.append(
+            (EC.MULTIPLE_ROOTS, f"{len(zero)} parentless nodes {zero!r} — a valid map has exactly one")
+        )
+    elif zero[0] != pmap.root_id:
+        findings.append(
+            (
+                EC.MULTIPLE_ROOTS,
+                f"root_id {pmap.root_id!r} resolves but is parented; the topological root is {zero[0]!r}",
+            )
+        )
+    elif not isinstance(root, ContainerNode):
+        findings.append(
+            (EC.NO_ROOT, f"root {pmap.root_id!r} is a leaf — the root must be a container (§3.B.0)")
+        )
+
+    # global: three-colour DFS from root_id, stored child order, on-stack back-edge = CYCLE
+    grey, black = 1, 2
+    colour: dict[str, int] = {pmap.root_id: grey}
+    stack: list[tuple[str, Iterator[str]]] = [(pmap.root_id, access.child_ids(root))]
+    while stack:
+        node_id, children = stack[-1]
+        descended = False
+        for child in children:
+            state = colour.get(child, 0)
+            if state == grey:
+                findings.append(
+                    (EC.CYCLE, f"on-stack back-edge {node_id!r} -> {child!r} (a reachable cycle)")
+                )
+                continue  # do not descend — this is what terminates the walk on a cycle
+            if state == black:
+                continue  # finished node revisited: a DAG diamond, MULTI_PARENT's business, never CYCLE
+            child_node = access.node(child)
+            if child_node is None:
+                continue  # DANGLING_REF already reported in the local pass
+            colour[child] = grey
+            stack.append((child, access.child_ids(child_node)))
+            descended = True
+            break
+        if not descended:
+            colour[node_id] = black
+            stack.pop()
+    for node in pmap.nodes:
+        if colour.get(node.node_id, 0) != black:
+            findings.append(
+                (EC.UNREACHABLE_NODE, f"{node.node_id!r} is not reachable from root {pmap.root_id!r}")
+            )
+
+    if findings:
+        raise StructureValidationError(findings)
+
+
+def validate_atom_existence(pmap: ProjectionMap, atom_store) -> None:
+    """inv 17's existence axis: every owned-or-furniture ``atom_id`` satisfies
+    ``atom_store.contains()`` → else ``DANGLING_ATOM_REF`` (Tier-2b, collect-all).
+
+    ``atom_store`` here needs the third capability of the §4-header contract: ``contains(atom_id)``
+    over the **full** atom population across streams — canonical *and* witness, since furniture
+    entries carry witness ids (§3.B.1) — which is why this is not folded into
+    :func:`validate_projection` (whose B-2 store contract deliberately has no ``contains()``).
+    The wrong-scope sibling (``OWNED_EXCLUDED_ATOM``) stays :func:`validate_projection`'s — an atom
+    that *exists* with the wrong scope is a different fault from one that exists nowhere.
+    """
+    findings: list[tuple[EC, str]] = []
+    for node in pmap.nodes:
+        for slot_name, atoms in _owning_slots(node):
+            for atom_id in dict.fromkeys(atoms):
+                if not atom_store.contains(atom_id):
+                    findings.append(
+                        (
+                            EC.DANGLING_ATOM_REF,
+                            f"{node.node_id}.{slot_name} references atom {atom_id!r}, absent from every stream",
+                        )
+                    )
+    for atom_id in dict.fromkeys(fa.atom_id for fa in pmap.furniture_atoms):
+        if not atom_store.contains(atom_id):
+            findings.append(
+                (
+                    EC.DANGLING_ATOM_REF,
+                    f"header furniture_atoms references atom {atom_id!r}, absent from every stream",
+                )
+            )
+    if findings:
+        raise StructureValidationError(findings)

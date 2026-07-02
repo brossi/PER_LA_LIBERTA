@@ -28,6 +28,11 @@ What lives here (S4.3 / M-S4.3):
 - :func:`validate_aliases` — active-alias uniqueness, target/scope liveness, and the §3.D.5 temporal
   rules (``ALIAS_COLLISION`` / ``ALIAS_DANGLING_TARGET`` / ``ALIAS_INTERVAL_INVALID`` /
   ``ALIAS_TEMPORAL_INCOMPLETE``, inv 18).
+- :func:`validate_block_vocabulary` (S4.4/B-5, single-sourced here beside :class:`NodeClassSpec`) —
+  the §3.E.7/§4.5 vocab hygiene (``VOCAB_UNKNOWN_COLLISION`` / ``VOCAB_EMPTY`` / ``VOCAB_DUPLICATE`` /
+  ``VOCAB_UNUSED``), normalized exact-match only (NFC + casefold + strip, X17). ``NodeClassSpec``
+  gained its persisted ``status`` (active|reserved) at B-5, and ``HANDLE_RENDERER_VERSION`` lives
+  here for the S4.4 manifest to stamp (§3.D.6).
 
 Neutral core (inv 15): every policy / format / kind / status token is a **structural** wire string —
 no source-language heading, book entity, or typeface literal (the S0.2 scan globs this module).
@@ -49,6 +54,7 @@ import unicodedata
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 
+from engine.structure.classify import UNKNOWN
 from engine.structure.errors import EC, StructureValidationError
 from engine.structure.projection import ContainerNode, Node, ProjectionMap
 
@@ -78,6 +84,19 @@ NODE_CLASS_KINDS = frozenset({KIND_CONTAINER, KIND_LEAF, KIND_EITHER})
 ALIAS_ACTIVE = "active"
 ALIAS_RETIRED = "retired"
 
+#: A ``block_vocabulary`` entry's lifecycle status (§3.E.7): ``active`` entries must be used by some
+#: node (else ``VOCAB_UNUSED``); ``reserved`` is the honest way to declare a name held for a later
+#: book/milestone without tripping the dead-config check. Closed set, validated at construction.
+STATUS_ACTIVE = "active"
+STATUS_RESERVED = "reserved"
+NODE_CLASS_STATUSES = frozenset({STATUS_ACTIVE, STATUS_RESERVED})
+
+#: The rendered-handle rule version (§3.D.6): **stamped** into the structure-map manifest by S4.4's
+#: assembly and bumped whenever a slug/disambiguation/format rule in this module changes, so S8.1 can
+#: later compare stored-vs-live and route a handle-review/alias-migration diagnostic. S4 reserves and
+#: stamps the field only — no mismatch comparison is implemented here.
+HANDLE_RENDERER_VERSION = 1
+
 #: The global resolution namespace (§3.D.4). Any other ``scope`` must name a live **container** node.
 SCOPE_GLOBAL = "global"
 
@@ -88,14 +107,15 @@ HandlePolicies = Mapping[str, str]
 
 @dataclass(frozen=True, slots=True)
 class NodeClassSpec:
-    """A ``block_vocabulary`` header entry (§3.E.7): a ``node_class`` name + the slot ``kind`` it
-    admits. The persisted ``status`` (active|reserved) and the vocab-hygiene checks that read it are
-    S4.4/B-5 — S4.3 needs only ``name`` → ``kind`` (for ``CLASS_KIND_MISMATCH``) and the set of declared
-    names (for ``POLICY_NOT_IN_VOCAB``).
+    """A ``block_vocabulary`` header entry (§3.E.7): a ``node_class`` name, the slot ``kind`` it
+    admits, and its lifecycle ``status``. S4.3 reads ``name`` → ``kind`` (for ``CLASS_KIND_MISMATCH``)
+    and the set of declared names (for ``POLICY_NOT_IN_VOCAB``); S4.4/B-5's
+    :func:`validate_block_vocabulary` reads ``status`` for the ``VOCAB_UNUSED`` exemption.
     """
 
     name: str
     kind: str
+    status: str = STATUS_ACTIVE
 
     def __post_init__(self) -> None:
         if not self.name:
@@ -103,6 +123,10 @@ class NodeClassSpec:
         if self.kind not in NODE_CLASS_KINDS:
             raise ValueError(
                 f"NodeClassSpec.kind must be one of {sorted(NODE_CLASS_KINDS)}, got {self.kind!r}"
+            )
+        if self.status not in NODE_CLASS_STATUSES:
+            raise ValueError(
+                f"NodeClassSpec.status must be one of {sorted(NODE_CLASS_STATUSES)}, got {self.status!r}"
             )
 
 
@@ -580,5 +604,70 @@ def validate_aliases(
                 )
             )
 
+    if findings:
+        raise StructureValidationError(findings)
+
+
+def _normalized_vocab_name(name: str) -> str:
+    """The §3.E.7/X17 comparison key: Unicode NFC + casefold + strip. Exact-match after this fold is
+    the ONLY de-duplication — no fuzzy near-duplicate metric, which would risk rejecting legitimately
+    distinct per-book classes."""
+    return unicodedata.normalize("NFC", name).casefold().strip()
+
+
+def validate_block_vocabulary(
+    block_vocabulary: Sequence[NodeClassSpec], pmap: ProjectionMap
+) -> None:
+    """Raise :class:`~engine.structure.errors.StructureValidationError` with the collected
+    vocab-hygiene codes (§3.E.7 / §4.5, Tier-2b), or return ``None`` when the vocabulary is clean:
+
+    - ``VOCAB_UNKNOWN_COLLISION`` — an entry that normalizes to :data:`engine.structure.classify.UNKNOWN`
+      (a block class indistinguishable from the classifier's abstain sentinel — the S9.1 footgun).
+    - ``VOCAB_EMPTY`` — an entry that normalizes to nothing (whitespace-only; the constructor already
+      rejects the empty string).
+    - ``VOCAB_DUPLICATE`` — two entries sharing one normalized form.
+    - ``VOCAB_UNUSED`` — an ``active`` entry no node's ``node_class`` uses (``reserved`` is exempt —
+      the honest way to hold a name for later).
+
+    Usage is matched by the **declared name exactly** (the same key ``kind_by_class`` and the policy
+    table resolve by), not the normalized form — normalization exists to catch *collisions between
+    declarations*, not to widen what counts as use.
+    """
+    findings: list[tuple[EC, str]] = []
+    used = {node.node_class for node in pmap.nodes}
+    first_declared: dict[str, str] = {}
+    for spec in block_vocabulary:
+        normalized = _normalized_vocab_name(spec.name)
+        if not normalized:
+            findings.append(
+                (EC.VOCAB_EMPTY, f"block_vocabulary entry {spec.name!r} normalizes to nothing")
+            )
+            continue
+        if normalized == UNKNOWN:
+            findings.append(
+                (
+                    EC.VOCAB_UNKNOWN_COLLISION,
+                    f"block_vocabulary entry {spec.name!r} collides with the classifier abstain "
+                    f"sentinel {UNKNOWN!r} after normalization",
+                )
+            )
+        if normalized in first_declared:
+            findings.append(
+                (
+                    EC.VOCAB_DUPLICATE,
+                    f"block_vocabulary entry {spec.name!r} collides with {first_declared[normalized]!r} "
+                    f"after NFC+casefold+strip normalization",
+                )
+            )
+        else:
+            first_declared[normalized] = spec.name
+        if spec.status != STATUS_RESERVED and spec.name not in used:
+            findings.append(
+                (
+                    EC.VOCAB_UNUSED,
+                    f"block_vocabulary entry {spec.name!r} is active but no node uses it — reserve it "
+                    f"or remove it (dead vocabulary, §3.E.7)",
+                )
+            )
     if findings:
         raise StructureValidationError(findings)

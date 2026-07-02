@@ -78,6 +78,7 @@ from engine.structure import (
     mint_node_id,
     validate_projection,
 )
+from engine.structure.projection import validate_atom_existence, validate_reference_integrity
 
 
 # --- atom_store double (the thin reader S4 takes — §4 header) ------------------------------------ #
@@ -777,3 +778,236 @@ def test_collect_all_includes_the_new_identity_codes():
     with pytest.raises(StructureValidationError) as ei:
         validate_projection(ProjectionMap(root_id="root", nodes=(root, leaf)), _DERIV_STORE)
     assert {EC.MINTED_BY_SPLIT, EC.NODE_ID_DERIVED} <= _codes(ei.value)
+
+
+# === S4.4 / B-5 — reference-integrity (inv 14) + atom existence (inv 17), Phase-1 direct ========= #
+#
+# These two per-module validators are B-5-owned but single-sourced HERE in projection.py (s4_plan
+# §4.2 producer note): the aggregate validate_structure_map composes them, and the Phase-2 battery in
+# test_structure_map.py re-routes every code below through the public load_structure_map. Direct
+# tests keep the topology semantics (co-fires, the |Z| total order, traversal termination) isolated.
+#
+# Invariants (red-first; each named mutation below is run in the B-7 hunt under
+# PYTHONDONTWRITEBYTECODE=1):
+#   - inv 14 (local): DANGLING_REF / ORPHAN_NODE / MULTI_PARENT / DUPLICATE_CHILD_REF. Mutations:
+#     drop the access.node(child) None-check → dangling test red; drop the root exemption → the
+#     clean baseline itself reds (root has zero occurrences); drop the per-parent seen set →
+#     duplicate-child test red; drop the parents_of comparison → multi-parent test red.
+#   - inv 14 (root, |Z| total order): NO_ROOT / MULTIPLE_ROOTS per the X3/A-1 rewrite. Mutations:
+#     invert any |Z| branch → its named fixture reds. ORPHAN_NODE necessarily co-fires
+#     MULTIPLE_ROOTS (orphan ∈ Z ∧ root ∈ Z ⇒ |Z|≥2), so the orphan test asserts the SPECIFIC token
+#     in the collected payload (P3A-4), never a bare raise.
+#   - inv 14 (global): CYCLE on a reachable on-stack back-edge (co-fires MULTI_PARENT — X5 — so the
+#     cycle test asserts the token); UNREACHABLE_NODE for nodes unvisited from root_id, INCLUDING a
+#     disconnected cycle (no unvisited-component cycle scan); the DAG diamond pins MULTI_PARENT with
+#     no spurious CYCLE (the §4.1.x LOW pin). Mutation: drop the GRAY on-stack check → cycle test
+#     red; drop the BLACK skip → the diamond test reds with a spurious CYCLE.
+#   - inv 17: every owned-or-furniture atom_id satisfies atom_store.contains() → DANGLING_ATOM_REF.
+#     Mutation: drop either contains() sweep → its test red. (OWNED_EXCLUDED_ATOM stays
+#     validate_projection's — single-sourced, not re-raised here.)
+
+
+class _FullStore(_Store):
+    """The B-5 store: adds ``contains()`` over the full canonical+witness population (§4 header,
+    P3B-1) — the capability inv 17 needs and B-2's ``_Store`` deliberately lacks."""
+
+    def contains(self, atom_id: str) -> bool:
+        return atom_id in self._scope
+
+
+def _ri_codes(nodes, root_id="root") -> set[EC]:
+    """Collected codes from validate_reference_integrity over an in-memory map."""
+    with pytest.raises(StructureValidationError) as ei:
+        validate_reference_integrity(ProjectionMap(root_id=root_id, nodes=nodes))
+    return _codes(ei.value)
+
+
+def _cont_ri(node_id, children=(), heading=("h",)):
+    """A container for topology fixtures — heading_atoms default non-empty so EMPTY_CONTAINER (a
+    validate_projection code, not reference-integrity's) can never co-fire in these shapes."""
+    return ContainerNode(node_id=node_id, node_class="section", minted_by="human", children=children, heading_atoms=heading)
+
+
+def _leaf_ri(node_id):
+    return LeafNode(node_id=node_id, node_class="para", minted_by="machine", body_atoms=())
+
+
+def test_reference_integrity_clean_on_the_base_map():
+    # The known-good floor: the base tree resolves every ref, has exactly one zero-occurrence node
+    # (the root), and traverses every node once. A false positive here masks every isolation below.
+    validate_reference_integrity(_base_map())  # no raise
+
+
+def test_reference_integrity_requires_a_resolved_root():
+    # Caller contract: root_id resolution is the Tier-2a precondition (ROOT_ID_DANGLING), owned by
+    # validate_structure_map — this per-module validator cannot anchor a traversal on a missing root,
+    # so calling it directly with one is a programming error (ValueError), NOT a second producer of
+    # the Tier-2a code (single-sourcing, I5).
+    with pytest.raises(ValueError, match="root_id"):
+        validate_reference_integrity(ProjectionMap(root_id="ghost", nodes=(_cont_ri("a", children=("b",)), _leaf_ri("b"))))
+
+
+def test_dangling_children_ref_fires_dangling_ref():
+    codes = _ri_codes((
+        _cont_ri("root", children=("real", "ghost")),
+        _leaf_ri("real"),
+    ))
+    assert EC.DANGLING_REF in codes
+
+
+def test_orphan_node_asserts_its_token_and_co_fires_multiple_roots():
+    # P3A-4/X5: an orphan ∈ Z and the root ∈ Z ⇒ |Z| ≥ 2, so ORPHAN_NODE cannot fire alone. The test
+    # asserts the SPECIFIC token in the collected payload — a bare "raises" would stay green if the
+    # orphan check itself were deleted (MULTIPLE_ROOTS still fires), the exact surviving mutant.
+    codes = _ri_codes((
+        _cont_ri("root", children=("kept",)),
+        _leaf_ri("kept"),
+        _leaf_ri("stray"),  # in no children list
+    ))
+    assert EC.ORPHAN_NODE in codes
+    assert EC.MULTIPLE_ROOTS in codes  # the pinned co-fire
+
+
+def test_multi_parent_fires_on_a_node_in_two_parents():
+    codes = _ri_codes((
+        _cont_ri("root", children=("ch1", "shared")),
+        _cont_ri("ch1", children=("shared",)),
+        _leaf_ri("shared"),
+    ))
+    assert EC.MULTI_PARENT in codes
+    assert EC.DUPLICATE_CHILD_REF not in codes  # two lists, not twice-in-one — the codes stay distinct
+
+
+def test_duplicate_child_ref_fires_on_a_twice_listed_child():
+    codes = _ri_codes((
+        _cont_ri("root", children=("twin", "twin")),
+        _leaf_ri("twin"),
+    ))
+    assert EC.DUPLICATE_CHILD_REF in codes
+    assert EC.MULTI_PARENT not in codes  # one parent's list — not the two-parents code
+
+
+def test_fully_parented_graph_is_no_root():
+    # |Z| == 0 (X3/P3A-2): a pure cycle back into the named root leaves no zero-occurrence node. The
+    # back-edge also surfaces CYCLE — but NO_ROOT is the token under test; note no MULTI_PARENT
+    # co-fires (each node occurs exactly once), isolating the |Z|==0 branch from the occurrence codes.
+    codes = _ri_codes((
+        _cont_ri("root", children=("a",)),
+        _cont_ri("a", children=("root",)),
+    ))
+    assert EC.NO_ROOT in codes
+    assert EC.MULTI_PARENT not in codes
+
+
+def test_single_leaf_as_root_is_no_root():
+    # |Z| == 1 and the zero-occurrence node IS root_id but is NOT a container (the X3 leaf-only
+    # sub-case / the non-container-root negative fixture shape): a leaf cannot anchor the tree.
+    codes = _ri_codes((_leaf_ri("root"),))
+    assert codes == {EC.NO_ROOT}
+
+
+def test_two_parentless_containers_are_multiple_roots():
+    # |Z| > 1: a second parentless node. The non-root member of Z is also an orphan (the pinned
+    # co-fire, asserted in its own test above).
+    codes = _ri_codes((
+        _cont_ri("root", children=("kept",)),
+        _leaf_ri("kept"),
+        _cont_ri("other", children=("kept2",), heading=("h2",)),
+        _leaf_ri("kept2"),
+    ))
+    assert EC.MULTIPLE_ROOTS in codes
+
+
+def test_root_id_not_the_topological_root_is_multiple_roots():
+    # |Z| == 1 but the zero-occurrence node ≠ root_id (root_id resolves yet sits under another node):
+    # the declared root is not the topological root → MULTIPLE_ROOTS (X3), not NO_ROOT.
+    codes = _ri_codes((
+        _cont_ri("top", children=("root",)),
+        _cont_ri("root", children=("kept",)),
+        _leaf_ri("kept"),
+    ))
+    assert EC.MULTIPLE_ROOTS in codes
+    assert EC.NO_ROOT not in codes
+
+
+def test_reachable_cycle_asserts_cycle_token():
+    # X5: root→A→B→A — the entry node A gains a second occurrence, so CYCLE necessarily co-fires
+    # MULTI_PARENT; asserting the CYCLE token (not a bare raise) is what makes deleting the on-stack
+    # check a caught mutant. That the call RETURNS proves traversal terminates on the back-edge —
+    # CYCLE's load-bearing job.
+    codes = _ri_codes((
+        _cont_ri("root", children=("a",)),
+        _cont_ri("a", children=("b",)),
+        _cont_ri("b", children=("a",)),
+    ))
+    assert EC.CYCLE in codes
+    assert EC.MULTI_PARENT in codes  # the pinned co-fire
+
+
+def test_dag_diamond_is_multi_parent_only_no_spurious_cycle():
+    # The §4.1.x LOW pin: a diamond (two parents, no back-edge) is MULTI_PARENT, never CYCLE — a
+    # traversal that flags any revisit (skipping the on-stack/finished distinction) reds here.
+    codes = _ri_codes((
+        _cont_ri("root", children=("a", "b")),
+        _cont_ri("a", children=("c",)),
+        _cont_ri("b", children=("c",)),
+        _leaf_ri("c"),
+    ))
+    assert EC.MULTI_PARENT in codes
+    assert EC.CYCLE not in codes
+
+
+def test_disconnected_cycle_reports_unreachable_not_cycle():
+    # inv 14 (global): the traversal runs from root_id only — no unvisited-component cycle scan. A
+    # disconnected 2-cycle is reported as UNREACHABLE_NODE (both members), with NO CYCLE token; each
+    # member occurs exactly once (the other's child), so no occurrence code co-fires either.
+    codes = _ri_codes((
+        _cont_ri("root", children=("kept",)),
+        _leaf_ri("kept"),
+        _cont_ri("x", children=("y",)),
+        _cont_ri("y", children=("x",)),
+    ))
+    assert EC.UNREACHABLE_NODE in codes
+    assert EC.CYCLE not in codes
+
+
+def test_self_loop_is_a_cycle():
+    # The smallest on-stack back-edge: a container listing itself. Under the multiset-union rule the
+    # node genuinely has two parents (root's list AND its own), so MULTI_PARENT co-fires — the
+    # CYCLE-vs-occurrence isolation is the pure-cycle test above; here we pin the self-edge shape.
+    codes = _ri_codes((
+        _cont_ri("root", children=("a",)),
+        _cont_ri("a", children=("a",)),
+    ))
+    assert EC.CYCLE in codes
+    assert EC.MULTI_PARENT in codes  # a is a child of root and of itself — two parents, honestly
+
+
+# --- inv 17 — atom-ref existence (DANGLING_ATOM_REF) --------------------------------------------- #
+
+
+def test_atom_existence_clean_when_every_ref_resolves():
+    store = _FullStore(included=("a0", "a1", "a2", "a3", "a4", "a5"), excluded=("f0",))
+    m = _base_map(furniture=(FurnitureAtom(atom_id="f0", capture_role="page-number"),))
+    validate_atom_existence(m, store)  # no raise
+
+
+def test_node_slot_atom_absent_from_every_stream_is_dangling():
+    # A leaf references an atom no stream knows. This is inv 17's existence axis — distinct from
+    # OWNED_EXCLUDED_ATOM (an atom that EXISTS with the wrong scope, validate_projection's code).
+    nodes = list(_base_nodes())
+    nodes[2] = LeafNode(node_id="leaf1a", node_class="para", minted_by="machine", body_atoms=("a2", "phantom"))
+    with pytest.raises(StructureValidationError) as ei:
+        validate_atom_existence(_base_map(nodes=tuple(nodes)), _base_full_store())
+    assert EC.DANGLING_ATOM_REF in _codes(ei.value)
+
+
+def test_furniture_atom_absent_from_every_stream_is_dangling():
+    m = _base_map(furniture=(FurnitureAtom(atom_id="ghost-furniture", capture_role="page-number"),))
+    with pytest.raises(StructureValidationError) as ei:
+        validate_atom_existence(m, _base_full_store())
+    assert EC.DANGLING_ATOM_REF in _codes(ei.value)
+
+
+def _base_full_store() -> _FullStore:
+    return _FullStore(included=("a0", "a1", "a2", "a3", "a4", "a5"))

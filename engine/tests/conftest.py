@@ -2,10 +2,18 @@
 
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
+
+# Stale-.pyc discipline (s4_plan §4.1.x / X13, feedback_mutation_pyc_staleness): mutation hunts run
+# sub-second patch→test→revert cycles that defeat CPython's second-granularity .pyc mtime check —
+# a stale cache serves pre-mutation bytecode and turns a caught mutant into a false GREEN. Pinning
+# dont_write_bytecode here wires the discipline into every pytest run (conftest imports before the
+# SUT), instead of trusting each harness to remember PYTHONDONTWRITEBYTECODE=1.
+sys.dont_write_bytecode = True
 
 ENGINE_ROOT = Path(__file__).resolve().parents[1]
 SYNTHETIC_INPUTS = ENGINE_ROOT / "books" / "synthetic" / "inputs"

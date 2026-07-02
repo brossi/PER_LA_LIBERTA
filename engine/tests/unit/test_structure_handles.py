@@ -43,8 +43,10 @@ from engine.structure import (
     resolve,
 )
 from engine.structure.handles import (
+    HANDLE_RENDERER_VERSION,
     NodeClassSpec,
     validate_aliases,
+    validate_block_vocabulary,
     validate_handle_policies,
 )
 
@@ -696,3 +698,113 @@ def test_node_class_spec_rejects_unknown_kind():
         NodeClassSpec("document", "not-a-kind")
     with pytest.raises(ValueError):
         NodeClassSpec("", "container")  # empty name
+
+
+# === S4.4 / B-5 — block_vocabulary hygiene (§3.E.7 / §4.5), Phase-1 direct ======================= #
+#
+# The vocab-hygiene validator is B-5-owned but single-sourced here in handles.py beside
+# NodeClassSpec (the entry model it reads); validate_structure_map composes it, and the Phase-2
+# battery re-routes each VOCAB_* code through load_structure_map. Normalization is pinned to
+# **Unicode NFC + casefold + strip** — exact-match after normalization, deliberately NO fuzzy
+# near-duplicate metric (X17: that would risk rejecting legitimately distinct per-book classes).
+#
+# Red mutations (B-7 hunt): drop the NFC step → the composed-vs-decomposed duplicate test reds;
+# drop the casefold → the case-collision test reds; drop the UNKNOWN comparison → the collision
+# test reds; drop the reserved exemption → the clean baseline reds (its reserved entry is unused);
+# drop the unused check → the VOCAB_UNUSED test reds.
+
+
+def _vocab_map():
+    """Two used classes (section on a container, para on a leaf) under a root — the usage floor the
+    VOCAB_UNUSED check reads."""
+    return _map("r", (
+        _cont("r", children=("l",), node_class="section", designation="Root"),
+        _leaf("l", node_class="para"),
+    ))
+
+
+def _vocab_codes(specs) -> set[EC]:
+    with pytest.raises(StructureValidationError) as ei:
+        validate_block_vocabulary(specs, _vocab_map())
+    return {c for c in ei.value.codes}
+
+
+def test_clean_vocabulary_passes_including_a_reserved_unused_entry():
+    # The floor: used active entries + one RESERVED unused entry (the §3.E.7(d) exemption — reserved
+    # means "declared for a later book/milestone", not dead). A false positive here masks the rest.
+    validate_block_vocabulary(
+        (
+            NodeClassSpec(name="section", kind="container"),
+            NodeClassSpec(name="para", kind="leaf"),
+            NodeClassSpec(name="annex", kind="either", status="reserved"),
+        ),
+        _vocab_map(),
+    )  # no raise
+
+
+def test_entry_normalizing_to_unknown_collides_with_the_sentinel():
+    # §3.E.7(a): "Unknown" NFC+casefold+strips to classify.UNKNOWN — the sentinel alias footgun S9.1
+    # names; a block class indistinguishable from the classifier's abstain token is rejected.
+    codes = _vocab_codes((
+        NodeClassSpec(name="section", kind="container"),
+        NodeClassSpec(name="para", kind="leaf"),
+        NodeClassSpec(name="Unknown", kind="leaf", status="reserved"),
+    ))
+    assert EC.VOCAB_UNKNOWN_COLLISION in codes
+
+
+def test_whitespace_only_entry_is_vocab_empty():
+    # §3.E.7(b): NodeClassSpec's own constructor rejects "", so the semantic catch is the
+    # whitespace-only name that survives construction but strips to nothing.
+    codes = _vocab_codes((
+        NodeClassSpec(name="section", kind="container"),
+        NodeClassSpec(name="para", kind="leaf"),
+        NodeClassSpec(name="   ", kind="leaf", status="reserved"),
+    ))
+    assert EC.VOCAB_EMPTY in codes
+
+
+def test_case_colliding_entries_are_vocab_duplicate():
+    codes = _vocab_codes((
+        NodeClassSpec(name="section", kind="container"),
+        NodeClassSpec(name="para", kind="leaf"),
+        NodeClassSpec(name="Para ", kind="leaf", status="reserved"),  # casefold+strip collides
+    ))
+    assert EC.VOCAB_DUPLICATE in codes
+
+
+def test_composed_and_decomposed_forms_are_vocab_duplicate():
+    # The NFC clause: U+00E9 (é composed) vs e + U+0301 (decomposed) are one entry after NFC. Raw
+    # string comparison would call them distinct — dropping the NFC step reds exactly here.
+    codes = _vocab_codes((
+        NodeClassSpec(name="section", kind="container"),
+        NodeClassSpec(name="para", kind="leaf"),
+        NodeClassSpec(name="exposé", kind="leaf", status="reserved"),
+        NodeClassSpec(name="exposé", kind="leaf", status="reserved"),
+    ))
+    assert EC.VOCAB_DUPLICATE in codes
+
+
+def test_declared_unused_active_entry_is_vocab_unused():
+    # §3.E.7(d): active-but-unused is dead config (the I10 posture applied to the vocabulary);
+    # reserving is the honest way to hold a name.
+    codes = _vocab_codes((
+        NodeClassSpec(name="section", kind="container"),
+        NodeClassSpec(name="para", kind="leaf"),
+        NodeClassSpec(name="tercet", kind="leaf"),  # active, no node uses it
+    ))
+    assert EC.VOCAB_UNUSED in codes
+
+
+def test_node_class_spec_rejects_an_unknown_status():
+    # The status vocabulary is closed (active|reserved) at the model level — a typo'd status is a
+    # construction error, not a silently-ignored exemption.
+    with pytest.raises(ValueError, match="status"):
+        NodeClassSpec(name="section", kind="container", status="retired")
+
+
+def test_handle_renderer_version_is_a_positive_int():
+    # §3.D.6: the manifest stamps HANDLE_RENDERER_VERSION for S8.1 to compare; it must exist as a
+    # positive, non-bool int beside the renderer it versions.
+    assert isinstance(HANDLE_RENDERER_VERSION, int) and not isinstance(HANDLE_RENDERER_VERSION, bool)
+    assert HANDLE_RENDERER_VERSION >= 1

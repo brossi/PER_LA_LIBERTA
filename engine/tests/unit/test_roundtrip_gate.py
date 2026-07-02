@@ -239,11 +239,11 @@ def test_wholesale_exclusion_floor_is_tunable():
 
 # --- assert_production_roundtrip: the single gate entry --------------------------------------- #
 
-def test_production_roundtrip_returns_declared_gaps_on_clean_input():
+def test_production_roundtrip_delegates_to_the_gap_floor():
+    # The single gate entry wraps gap_records + reconstruct: clean input returns the declared gaps;
+    # dropping a body atom propagates the gap floor's silent-loss failure. (Merged from the former
+    # _returns_declared_gaps_on_clean_input / _raises_on_silent_loss delegation pair — audit 4.3.)
     gaps = assert_production_roundtrip(ATOMS, SOURCE)
     assert [g.raw_span for g in gaps] == [(1, 3), (5, 7)]
-
-
-def test_production_roundtrip_raises_on_silent_loss():
     with pytest.raises(CaptureError, match="silent loss"):
         assert_production_roundtrip([ATOMS[0], ATOMS[2]], SOURCE)

@@ -114,18 +114,6 @@ def test_absent_geom_round_trips_as_absent(tmp_path):
     assert all(a.geom.bbox is None and a.geom.page is None for a in loaded.atoms)  # never invented
 
 
-def test_addressing_fields_round_trip_as_tuples(tmp_path):
-    # End-to-end property: raw_span / page_range come back as tuples, not the JSON lists they serialize
-    # to. NOTE this is enforced by Atom.__post_init__'s unconditional tuple() coercion, not by the
-    # store — dropping the tuple() in _atom_from_json would NOT red this (the model re-coerces). It
-    # documents the through-the-store invariant, not a store-owned guard.
-    ws = _ws(tmp_path)
-    stream = _witness_stream("one\n\ntwo\n")
-    save_stream(ws, stream)
-    a = load_stream(ws, "copy1").atoms[0]
-    assert isinstance(a.raw_span, tuple) and isinstance(a.page_range, tuple)
-
-
 def test_mixed_whitespace_gap_persists_bytes_not_width(tmp_path):
     # The carried S1.4-audit decision in one assertion: a width-3 gap of "\t \n" is NOT recoverable
     # from the span width alone. The store must persist the gap *bytes*; an atoms-only / width-only

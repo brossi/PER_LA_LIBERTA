@@ -267,11 +267,8 @@ def test_derivation_is_frozen():
 # --- atom_id uniqueness primitive (the "ids unique" done-when) ----------------------------- #
 
 def test_duplicate_atom_ids_empty_when_unique():
+    assert duplicate_atom_ids([]) == []  # empty stream: no crash, no false positive
     assert duplicate_atom_ids([_atom("ac_0001"), _atom("ac_0002"), _atom("ac_0003")]) == []
-
-
-def test_duplicate_atom_ids_empty_on_empty_stream():
-    assert duplicate_atom_ids([]) == []
 
 
 def test_duplicate_atom_ids_detects_planted_collision():

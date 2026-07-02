@@ -185,13 +185,19 @@ def test_align_streams_marks_insert_and_delete():
 
 
 def test_align_streams_normalizes_case_and_whitespace_for_matching():
-    # The neutral key folds case + run-length so OCR-variant blocks still align — without an accent
-    # or language rule. Same words, different case/spacing → matched, not replaced.
-    p, _ = _body(["The  QUICK fox"], "copy1")
-    s, _ = _body(["the quick fox"], "copy2")
+    # The neutral key folds case + whitespace-run so an OCR-variant block still aligns to its clean
+    # twin — without any accent/language rule. The fixture is built so folding changes the *pairing*,
+    # not just an opcode label: two primary blocks fold to the same key, and only the variant block
+    # ("THE   FOX") should claim the single secondary "the fox" (difflib matches the earliest equal
+    # key). A broken identity key pairs the *other* primary block instead, orphaning the variant, so
+    # this reds if _alignment_key stops folding — which the old single-block form could not detect,
+    # since a 1-1 replace also yields a non-None pair.
+    p, _ = _body(["THE   FOX", "the fox"], "copy1")   # block 0: case+spacing variant of "the fox"
+    s, _ = _body(["the fox"], "copy2")
     aligned = align_streams(p, s)
-    assert len(aligned) == 1
-    assert aligned[0][0] is not None and aligned[0][1] is not None
+    variant = [(pa, sa) for pa, sa in aligned if pa is not None and pa.text == "THE   FOX"]
+    assert len(variant) == 1
+    assert variant[0][1] is not None and variant[0][1].text == "the fox"  # folded variant found its twin
 
 
 # --- build_canonical: the S1.3a done-when property -------------------------------------- #

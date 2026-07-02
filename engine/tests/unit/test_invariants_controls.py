@@ -70,8 +70,16 @@ def test_governance_docs_cite_only_resolvable_test_names():
     actual = _actual_test_names()
     assert "test_cleanup_golden" in actual, "self-check: the new cleanup tests are discoverable"
 
+    # I6's scope (docs/invariants.md) is the *decision record* — the divergence ledger, branch
+    # register, invariants.md, port_discipline.md, decisions/, and the standing plan/tracker.
+    # Point-in-time probe/audit reports under docs/probes/ are dated snapshots, not the decision
+    # record: an audit that documents a test *removal* legitimately names the removed test, so holding
+    # those reports to "every cited name still resolves" would forbid recording what was cut. Excluded.
+    probes_dir = DOCS_DIR / "probes"
     cited: dict[str, list[str]] = {}
     for doc in sorted(DOCS_DIR.rglob("*.md")):
+        if probes_dir in doc.parents:
+            continue
         for m in re.finditer(r"\btest_[A-Za-z0-9_]+", doc.read_text(encoding="utf-8")):
             cited.setdefault(m.group(0), []).append(str(doc.relative_to(DOCS_DIR)))
 

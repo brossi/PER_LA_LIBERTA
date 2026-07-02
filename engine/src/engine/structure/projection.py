@@ -30,8 +30,10 @@ matches an enumerated derivation cheat (``NODE_ID_DERIVED``, inv 6) — the belt
 hand-authored map, since the seam cannot stop a human from *typing* a derived id. ``designation`` /
 ``title`` are the optional handle/display inputs those cheats compare against (§3.J).
 
-Not here (owned by neighbours): handles/aliases/``handle_policy`` + the substring-of-rendered-handle
-derivation cheat (S4.3/B-4); root topology + reference-integrity traversal (``root_id`` resolution,
+Not here (owned by neighbours): handle *rendering* / aliases / ``handle_policy`` *resolution* + the
+substring-of-rendered-handle derivation cheat (S4.3/B-4, :mod:`engine.structure.handles`) — the
+per-node ``handle_policy`` override is a stored slot on the node here, but its resolution order and
+the rendered handle live there; root topology + reference-integrity traversal (``root_id`` resolution,
 ``NO_ROOT``/``MULTIPLE_ROOTS``/``ORPHAN_NODE``/``CYCLE``), the JSON schema, and atom *existence*
 (``DANGLING_ATOM_REF`` via ``atom_store.contains()``) — all S4.4/B-5.
 """
@@ -119,10 +121,15 @@ def _slug(text: str) -> str:
     accented letter whole (``"Città"`` → ``"citt"``). This mirrors the de-facto slugify convention
     (NFKD → strip-combining → ASCII → lower). Carries no language/book literal (inv 15). Honest scope:
     a **fully non-Latin** script (Cyrillic/CJK/Greek — no ASCII base after decomposition) still folds
-    to empty here; catching *those* transliterated derivations is B-4's substring-of-rendered-handle
-    cheat over the real ``render_handle``, not this belt-and-braces. It is *not* the B-4 renderer's
-    per-policy, versioned ``html_slug`` — it only has to recognise the ``node_id ==
-    slug(designation/title)`` derivation shape.
+    to empty here — and, crucially, **so does B-4's ``render_handle``**: its ``_slugify`` shares this
+    same Latin-only ``[^a-z0-9]`` fold, so a *transliterated* derivation (``node_id="moskva"`` from a
+    Cyrillic ``"Москва"`` designation) folds to ``""`` in both and is caught by **neither** the S4.2
+    field cheats nor the S4.3 rendered-handle cheat. That non-Latin gap in the belt-and-braces is a
+    known limitation, **not** something B-4 closes; the **primary** non-derivation control is the
+    arg-free :func:`mint_node_id` seam, which structurally cannot encode a designation regardless of
+    script. Closing the transliteration gap would need script-aware slugging (deferred). This ``_slug``
+    is *not* the B-4 renderer's per-policy, versioned ``html_slug`` — it only has to recognise the
+    ``node_id == slug(designation/title)`` derivation shape.
     """
     decomposed = unicodedata.normalize("NFKD", text.lower())
     deaccented = "".join(ch for ch in decomposed if not unicodedata.combining(ch))
@@ -154,7 +161,9 @@ class ContainerNode:
     ``minted_by`` is the conceptual minting authority (§3.C.2): a container is **human**-minted, a
     split :func:`validate_projection` enforces (``MINTED_BY_SPLIT``). ``designation`` / ``title`` are
     optional handle/display inputs (§3.J) — inert here except that ``node_id`` may not be *derived*
-    from them (``NODE_ID_DERIVED``).
+    from them (``NODE_ID_DERIVED``). ``handle_policy`` is the optional per-node policy override
+    (§3.D.1): a stored data slot here, resolved/rendered by :mod:`engine.structure.handles` (S4.3) —
+    empty means "inherit the nearest ancestor override, else the class default".
     """
 
     node_id: str
@@ -165,6 +174,7 @@ class ContainerNode:
     signature_atoms: tuple[str, ...] = ()
     designation: str = ""
     title: str = ""
+    handle_policy: str = ""
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "children", tuple(self.children))
@@ -182,6 +192,8 @@ class LeafNode:
     ``minted_by`` is the conceptual minting authority (§3.C.2): a leaf is **machine**-minted (the
     extractor), the mirror of the container's human split (``MINTED_BY_SPLIT``). ``designation`` /
     ``title`` are optional handle/display inputs; ``node_id`` may not be *derived* from them.
+    ``handle_policy`` is the optional per-node policy override (§3.D.1), a stored slot resolved by
+    :mod:`engine.structure.handles` (S4.3); empty means inherit/default.
     """
 
     node_id: str
@@ -190,6 +202,7 @@ class LeafNode:
     body_atoms: tuple[str, ...] = ()
     designation: str = ""
     title: str = ""
+    handle_policy: str = ""
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "body_atoms", tuple(self.body_atoms))

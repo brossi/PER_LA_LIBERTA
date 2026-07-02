@@ -44,6 +44,11 @@ from engine.structure.projection import (
     mint_node_id,
     validate_projection,
 )
+from engine.structure.handles import (
+    Alias,
+    render_handle,
+    resolve,
+)
 from engine.structure.atom_store import (
     CANONICAL,
     WITNESS,
@@ -125,6 +130,10 @@ __all__ = [
     "StructureValidationError",
     # S4.2 — node_id identity + minting split (mint_node_id seam; minted_by/designation/title fields)
     "mint_node_id",
+    # S4.3 — handle policy + rendered handles + alias records (render_handle/resolve; Alias record)
+    "Alias",
+    "render_handle",
+    "resolve",
     # S3.0 — resource + normalization-policy lineage constants
     "RESOURCE_LINEAGE_SCHEMA_VERSION",
     "RESOURCE_STALE_CLASS",

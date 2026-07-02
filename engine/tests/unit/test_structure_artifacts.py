@@ -182,6 +182,10 @@ EXPECTED_PUBLIC_SURFACE = frozenset(
         "StructureValidationError",
         # S4.2 — node_id identity + minting split (mint_node_id seam)
         "mint_node_id",
+        # S4.3 — handle policy + rendered handles + alias records
+        "Alias",
+        "render_handle",
+        "resolve",
         # S3.0 — resource + normalization-policy lineage
         "RESOURCE_LINEAGE_SCHEMA_VERSION",
         "RESOURCE_STALE_CLASS",

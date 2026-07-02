@@ -279,8 +279,17 @@ def test_canonical_with_source_hash_raises():
 
 
 def test_witness_without_source_hash_raises():
-    with pytest.raises(ValueError, match="must carry a source_hash"):
+    with pytest.raises(ValueError, match="must carry a non-empty source_hash"):
         AtomStream(stream_id="copy1", kind=WITNESS, atoms=())
+
+
+def test_witness_with_empty_source_hash_raises():
+    # An empty-string anchor is as anchor-less as None, but the former `is None` guard let it
+    # through — and build_manifest (S4.4) now emits source_hash into the lineage manifest, where
+    # only Tier-1's minLength would catch it much later (post-B-7 audit smell, user-directed fix).
+    # Unreachable via the witness() factory (which derives a real hash); rejected at the model.
+    with pytest.raises(ValueError, match="must carry a non-empty source_hash"):
+        AtomStream(stream_id="copy1", kind=WITNESS, atoms=(), source_hash="")
 
 
 def test_bad_kind_raises():

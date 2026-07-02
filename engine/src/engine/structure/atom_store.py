@@ -150,10 +150,13 @@ class AtomStream:
                     "a canonical stream has no single source — source_hash must be None (there is no one "
                     "witness source to anchor a whole-artifact round-trip against)"
                 )
-        elif self.source_hash is None:
+        elif not self.source_hash:
+            # `not` (not `is None`): an empty-string anchor is as anchor-less as a missing one, and
+            # it would ride into the S4.4 lineage manifest as {"hash": ""} — reject both at the model.
             raise ValueError(
-                "a witness stream must carry a source_hash anchor (hash_raw of the witness source it "
-                "tiles) — the non-vacuous round-trip self-check resolves against it; use AtomStream.witness()"
+                "a witness stream must carry a non-empty source_hash anchor (hash_raw of the witness "
+                "source it tiles) — the non-vacuous round-trip self-check resolves against it; use "
+                "AtomStream.witness()"
             )
 
     @classmethod

@@ -35,7 +35,6 @@ from __future__ import annotations
 
 import json
 import re
-from bisect import bisect_right
 from collections.abc import Callable
 from difflib import SequenceMatcher
 from pathlib import Path
@@ -52,6 +51,7 @@ from engine.structure import (
     build_canonical,
     capture_witness,
     duplicate_atom_ids,
+    marker_page_binding,
     reconstruct_raw,
 )
 
@@ -126,31 +126,14 @@ def _read(path: Path) -> str:
 
 
 def _pll_copy3_binding(text: str):
-    """The PLL copy3 per-book binding: a ``classify_line`` that tags ``⟨PAGE:N⟩`` lines as
-    page-furniture, and a ``page_of`` that reads copy3's page map (and parses a marker's own page).
-    This grammar is source-noise — it lives here, never in ``structure/`` core."""
+    """The PLL copy3 per-book binding: the ``⟨PAGE:N⟩`` grammar + copy3's page map, supplied HERE
+    (this grammar is source-noise — it lives book-side, never in ``structure/`` core) to the neutral
+    ``marker_page_binding`` factory (S4.6-pre moved the mechanism into core; the page-attribution
+    tests below are its behavior anchors)."""
     assert PAGE_MAP.is_file(), f"frozen PLL page map missing: {PAGE_MAP}"
     page_map = json.loads(PAGE_MAP.read_text(encoding="utf-8"))
     assert page_map, "copy3 page map is empty"
-    starts = [p["char_start"] for p in page_map]
-
-    def page_at(off: int) -> int | None:
-        i = bisect_right(starts, off) - 1
-        if 0 <= i < len(page_map) and page_map[i]["char_start"] <= off < page_map[i]["char_end"]:
-            return page_map[i]["page"]
-        return None
-
-    def classify_line(line: str) -> str | None:
-        return "page-furniture" if PAGE_MARKER.fullmatch(line.strip()) else None
-
-    def page_of(start: int, end: int) -> tuple[int, int]:
-        m = PAGE_MARKER.fullmatch(text[start:end].strip())
-        if m:
-            return (int(m.group(1)), int(m.group(1)))
-        a, b = page_at(start), page_at(max(start, end - 1))
-        return (a if a is not None else -1, b if b is not None else -1)
-
-    return classify_line, page_of
+    return marker_page_binding(text, marker=PAGE_MARKER, page_map=page_map)
 
 
 # --- capture completeness on the real witness ------------------------------------------- #

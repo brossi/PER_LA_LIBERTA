@@ -27,11 +27,17 @@ Three neutral primitives, no language/book opinion (the S0.2 neutrality guard sc
   in-bounds, ordered, non-overlapping, and every byte outside an atom is whitespace (no *silent
   loss*). Furniture is atoms here, so the gaps are pure inter-atom whitespace — the validator needs
   no furniture grammar and stays neutral. This is the invariant S1.4 promotes to the production gate.
+
+Plus one binding *factory*, :func:`marker_page_binding` — the mechanism half of the common per-book
+shape "page furniture is a single-line marker + a char-offset page map" (PLL's copy3). The grammar
+and the map stay caller-supplied data, so the factory carries no book opinion; consumers are the
+real-input capture tests, the S4.6-pre stream freeze, and (later) S7.1b's copy3↔canonical work.
 """
 
 from __future__ import annotations
 
 import re
+from bisect import bisect_right
 from collections.abc import Callable, Mapping, Sequence
 from difflib import SequenceMatcher
 
@@ -137,6 +143,45 @@ def capture_witness(
         pos = n if nl == -1 else nl + 1
     flush_body()
     return atoms
+
+
+def marker_page_binding(
+    source: str,
+    *,
+    marker: re.Pattern[str],
+    page_map: Sequence[Mapping[str, int]],
+    furniture_class: str = "page-furniture",
+) -> tuple[ClassifyLine, PageOf]:
+    """Capture binding for a witness whose page furniture is single-line markers over a char-offset map.
+
+    Mechanism only — the marker grammar and the page map are per-book source-noise supplied by the
+    caller (the S0.2 neutrality boundary stays intact; PLL's ``⟨PAGE:N⟩`` literal lives in the book
+    binding, never here). Returns a ``classify_line`` that tags full-line ``marker`` matches as
+    ``furniture_class``, and a ``page_of`` that gives a marker span its own announced page (the
+    marker's first group must capture the page number) and resolves every other span through
+    ``page_map`` (entries ``{"page", "char_start", "char_end"}``, ordered by ``char_start``),
+    falling back to :data:`PAGE_UNMAPPED`'s components for offsets no map entry covers.
+    """
+    starts = [entry["char_start"] for entry in page_map]
+
+    def _page_at(offset: int) -> int | None:
+        i = bisect_right(starts, offset) - 1
+        if 0 <= i < len(page_map) and page_map[i]["char_start"] <= offset < page_map[i]["char_end"]:
+            return page_map[i]["page"]
+        return None
+
+    def classify_line(line: str) -> str | None:
+        return furniture_class if marker.fullmatch(line.strip()) else None
+
+    def page_of(start: int, end: int) -> tuple[int, int]:
+        m = marker.fullmatch(source[start:end].strip())
+        if m:
+            page = int(m.group(1))
+            return (page, page)
+        a, b = _page_at(start), _page_at(max(start, end - 1))
+        return (a if a is not None else PAGE_UNMAPPED[0], b if b is not None else PAGE_UNMAPPED[1])
+
+    return classify_line, page_of
 
 
 def _raw_atom(

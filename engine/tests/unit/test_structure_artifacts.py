@@ -105,7 +105,10 @@ def test_all_public_exports_resolve_on_the_package():
 PUBLIC_SURFACE_BY_CONCERN = {
     "atoms": ("Atom", "Geom", "AtomDerivation", "duplicate_atom_ids"),
     "capture": ("capture_witness", "build_canonical", "align_streams", "assert_capture_tiles",
-                "PAGE_UNMAPPED", "PROCESSING_SCOPE_INCLUDED", "PROCESSING_SCOPE_EXCLUDED"),
+                "PAGE_UNMAPPED", "PROCESSING_SCOPE_INCLUDED", "PROCESSING_SCOPE_EXCLUDED",
+                "marker_page_binding"),
+    "freeze": ("build_freeze_record", "render_freeze_record", "load_freeze_record",
+               "write_freeze_record", "assert_freeze_matches"),
     "roundtrip": ("hash_raw", "reconstruct_raw", "ReversibleTransform", "apply_forward",
                   "apply_inverse", "is_reversible", "verify_atom_roundtrip"),
     "typed": ("TypedAtom", "typed_projection", "ReviewItem", "CompletenessReport", "check_completeness"),
@@ -266,6 +269,7 @@ EXPECTED_PUBLIC_SURFACE = frozenset(
         "align_streams",
         "assert_capture_tiles",
         "PAGE_UNMAPPED",
+        "marker_page_binding",
         # S1.4 — production round-trip gate
         "GapRecord",
         "gap_records",
@@ -290,6 +294,12 @@ EXPECTED_PUBLIC_SURFACE = frozenset(
         "assert_stream_roundtrip",
         "assert_atom_hashes",
         "assert_reference_integrity",
+        # S4.6-pre — the committed stream-freeze pin (id-stability substrate for S4.6 authoring)
+        "build_freeze_record",
+        "render_freeze_record",
+        "load_freeze_record",
+        "write_freeze_record",
+        "assert_freeze_matches",
     }
 )
 

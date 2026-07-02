@@ -99,6 +99,14 @@ RESOURCE_STALE_CLASS = "resource-set"
 #: every persisted-layer class. Bound by S3.0.
 NORMALIZER_STALE_CLASS = "normalization-policy"
 
+#: Schema version of the stream-freeze record (``structure/freeze.py`` — S4.6-pre): the committed
+#: per-book pin over the persisted atom streams' envelope hashes, the id-stability substrate a
+#: hand-authored structure map references before S5's re-bind exists. A *pin*, not a governed
+#: pipeline layer — it carries no stale class and no birth gate (S8.1 may formalize it into the
+#: governance family later); ``load_freeze_record`` still validates this version at the load
+#: boundary like every persisted engine artifact.
+STREAM_FREEZE_SCHEMA_VERSION = 1
+
 # --- fixed work-tree locations ---------------------------------------------------------- #
 
 #: Workspace area + subdirectory the L1 atom streams live under (``<work>/data/atoms/``).

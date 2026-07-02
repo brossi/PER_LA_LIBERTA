@@ -1,0 +1,114 @@
+{
+  "schema_version": 1,
+  "root_id": "d-root",
+  "map_revision": 1,
+  "block_vocabulary": [
+    {"name": "codex", "kind": "container", "status": "active"},
+    {"name": "aphorism", "kind": "leaf", "status": "active"},
+    {"name": "marginalia", "kind": "either", "status": "reserved"}
+  ],
+  "handle_policies": {
+    "codex": "designation-string",
+    "aphorism": "designation-string"
+  },
+  "furniture_atoms": [
+    {"atom_id": "wf_00000", "capture_role": "running-head"},
+    {"atom_id": "wf_00003", "capture_role": "catchword"}
+  ],
+  "aliases": [
+    {
+      "handle_type": "html_slug",
+      "value": "of-silence",
+      "scope": "global",
+      "locale_or_witness": "default",
+      "target_node_id": "aph-one",
+      "valid_from": 0,
+      "valid_to": null,
+      "status": "active"
+    },
+    {
+      "handle_type": "html_slug",
+      "value": "of-silence",
+      "scope": "d-root",
+      "locale_or_witness": "default",
+      "target_node_id": "aph-two",
+      "valid_from": 1,
+      "valid_to": null,
+      "status": "active"
+    },
+    {
+      "handle_type": "parse_md",
+      "value": "the_old_key",
+      "scope": "global",
+      "locale_or_witness": "default",
+      "target_node_id": "aph-three",
+      "valid_from": 0,
+      "valid_to": 1,
+      "status": "retired"
+    }
+  ],
+  "manifest": {
+    "source_artifacts": [{"witness": "wdiffer", "hash": "sha256:differ-fixture-witness"}],
+    "atom_streams": [
+      {"id": "canonical", "hash": "sha256:differ-fixture-canonical"},
+      {"id": "wdiffer", "hash": "sha256:differ-fixture-stream"}
+    ],
+    "canonical_stream_id": "canonical",
+    "canonical_content_hash": "sha256:differ-fixture-content",
+    "canonical_geometry_hash": "sha256:differ-fixture-geometry",
+    "layers": {
+      "atom_store": {"schema_version": 1, "stale_class": "atom-stream", "present": true},
+      "structure_map": {"schema_version": 1, "stale_class": "structure-map", "present": true},
+      "relation_store": {"schema_version": 1, "stale_class": "relation-store", "present": false}
+    },
+    "resource_lineage": {
+      "schema_version": 1,
+      "resource": {
+        "version": "sha256:differ-fixture-resource",
+        "stale_class": "resource-set",
+        "descriptor": {"oracle_min": 1, "frequency": "sha256:differ-frequency", "members": []}
+      },
+      "normalizer": {
+        "version": "sha256:differ-fixture-normalizer",
+        "stale_class": "normalization-policy",
+        "descriptor": {"accent_fold": {}, "case_fold": "none"}
+      }
+    },
+    "profile_version": "differ-profile-1",
+    "recognizer_version": "differ-recognizer-1",
+    "handle_renderer_version": 1
+  },
+  "nodes": [
+    {
+      "node_id": "d-root",
+      "node_class": "codex",
+      "minted_by": "human",
+      "children": ["aph-one", "aph-two", "aph-three"],
+      "designation": "The Differ Codex",
+      "title": "A Codex of Aphorisms"
+    },
+    {
+      "node_id": "aph-one",
+      "node_class": "aphorism",
+      "minted_by": "machine",
+      "body_atoms": ["dc_00000", "dc_00002"],
+      "designation": "Of Silence"
+    },
+    {
+      "node_id": "aph-two",
+      "node_class": "aphorism",
+      "minted_by": "machine",
+      "body_atoms": ["dc_00001", "dc_00003"],
+      "designation": "Of Masks",
+      "decision": "plugin-suggested"
+    },
+    {
+      "node_id": "aph-three",
+      "node_class": "aphorism",
+      "minted_by": "machine",
+      "body_atoms": ["dc_00004"],
+      "designation": "Of Endings",
+      "rebind_anchors": {"region": null}
+    }
+  ]
+}

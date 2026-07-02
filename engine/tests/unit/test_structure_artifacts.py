@@ -311,15 +311,15 @@ def test_public_export_surface_is_bounded():
 # --- S4.0 / B-1: structure-map schema birth-status map (§1.2.2) --------------------------------- #
 
 
-def test_schema_status_map_marks_current_structure_map_version_provisional():
-    # B-1 ships the schema_status map: a module-level {version: status} beside the version constant
-    # (§1.2.2). The structure-map schema is *born* only once S4.5's differ-fixture validates (inv 23,
-    # B-6); until then the current version is *provisional*. The born-gate assert_schema_born() (B-5)
-    # reads this map — here we pin its initial state, its export, and that the two states differ.
+def test_schema_status_map_marks_current_structure_map_version_born():
+    # B-1 shipped the schema_status map pinned *provisional*; S4.5/B-6 flipped version 1 to *born*
+    # after the D18 differ-fixture validated (inv 23 — the two unconditional asserts live in
+    # test_structure_born_gate.py). Here we pin the map's export, shape, and post-flip state; a
+    # version BUMP re-enters provisional (§1.2.2) and must update this pin alongside its own gate.
     assert "STRUCTURE_MAP_SCHEMA_STATUS" in structure.__all__
     status_map = structure.STRUCTURE_MAP_SCHEMA_STATUS
     assert isinstance(status_map, dict)
-    assert status_map[structure.STRUCTURE_MAP_SCHEMA_VERSION] == structure.SCHEMA_STATUS_PROVISIONAL
+    assert status_map[structure.STRUCTURE_MAP_SCHEMA_VERSION] == structure.SCHEMA_STATUS_BORN
     # provisional and born are distinct wire strings — an alias would make the born flip (inv 23) a
     # no-op that reads green.
     assert structure.SCHEMA_STATUS_PROVISIONAL != structure.SCHEMA_STATUS_BORN

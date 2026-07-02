@@ -74,7 +74,13 @@ SCHEMA_STATUS_BORN = "born"
 #: born-gate ``assert_schema_born()`` (S4.4) reads this map, and a *missing* key is fail-safe
 #: (treated as ``provisional`` → raise). Nothing here makes ``load_structure_map`` born-aware — that
 #: loader is deliberately born-agnostic (§1.2.3); the gate is a separate call.
-STRUCTURE_MAP_SCHEMA_STATUS: dict[int, str] = {STRUCTURE_MAP_SCHEMA_VERSION: SCHEMA_STATUS_PROVISIONAL}
+#:
+#: **Version 1 flipped ``born`` at S4.5/B-6 (2026-07-02):** the hand-authored D18 differ-fixture
+#: (``tests/fixtures/structure/differ_structure_map.json`` — depth-0 body, designation-string
+#: policy, non-ordinal headings, interleaved segmentation) shape- and semantically-validated
+#: through the born-agnostic ``load_structure_map`` (``test_structure_born_gate.py``, inv 23's two
+#: unconditional asserts). The schema is thereby proven to generalize beyond PLL (§1.2.1).
+STRUCTURE_MAP_SCHEMA_STATUS: dict[int, str] = {STRUCTURE_MAP_SCHEMA_VERSION: SCHEMA_STATUS_BORN}
 
 # --- resource + normalization-policy lineage (S3.0) ------------------------------------- #
 

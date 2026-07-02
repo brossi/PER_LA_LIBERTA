@@ -44,6 +44,33 @@ The suite is **unusually disciplined**. Exit codes, error types, and messages ar
 
 ---
 
+## 2b. Disposition — actions applied (2026-07-02)
+
+Acted on the two clear-win tracks; **deferred the strong-pair concision collapses** with rationale (below) so they stay triageable. All changes are granular commits on `spike/document-structure`; the suite stayed green throughout.
+
+**Applied:**
+- **§3 cannot-red tests** — cut `test_addressing_fields_round_trip_as_tuples`; folded `test_duplicate_atom_ids_empty_on_empty_stream` into `_empty_when_unique`; **strengthened** `test_align_streams_normalizes_case_and_whitespace_for_matching` with a two-block fixture, red-proven to fail against an identity `_alignment_key`. Commit `1434e68`.
+- **I6 scope correction** (forced by §3) — narrowed the governance doc-scan to the *decision record* per `docs/invariants.md` I6, excluding point-in-time `docs/probes/` reports (an audit that documents a removal must be free to name the removed test). Red-proven it still catches a dangling ref planted in a non-probe doc. Same commit.
+- **§4.1** — config_loader required-field family 5→1 parametrized (`test_profile_schema_rejects_a_missing_required_field`). Commit `924c8ad`.
+- **§4.8** — six per-module export-surface checks → one per-concern `test_public_names_per_concern_resolve` in `test_structure_artifacts`. Commit `4f3c8a5`.
+- **§4.3 (delegation subset)** — merged the two `production_roundtrip` gate-wrapper delegation duplicates into `test_production_roundtrip_delegates_to_the_gap_floor`; `mutate_gate.py` re-run confirms all 14 gate mutants still killed.
+
+**Deferred — strong pairs kept as separate tests (intentional; do not casually collapse):**
+
+| Family | Tests kept separate | Why (the non-obvious reason they exist as they do) |
+|---|---|---|
+| §4.2 roundtrip wholesale-exclusion | `..._raises_when_all_body_excluded`, `..._raises_when_below_fraction`, `..._floor_is_tunable`, `..._exempts_all_whitespace_source` | Each pins a **distinct branch** (all-excluded vs below-fraction vs tunable floor vs `total_nonws==0` exemption); all four are mutation-proven by `mutate_gate`. Parametrizable, but every case is a separately-killed mutant. |
+| §4.4 resource-lineage fold-mode / digest-component pairs | `test_chunk_key_casefold_mode_differs_from_lower` + `..._lower_mode_differs_from_casefold`; `..._tracks_the_chunk_routing_key` + `..._tracks_a_declared_filename_rename` | The fold-mode pair kills **M10/M11** (casefold≠lower and its symmetric); the digest pair pins different members of the `(key, file, content)` triple. Mutation-proven by `mutate.py`. |
+| §4.5 atoms geom / arity pairs | `test_present_geom_round_trips_exact` + `test_absent_geom_round_trips_as_absent`; `test_atom_raw_span_must_be_a_pair` + `test_atom_page_range_must_be_a_pair` | present-geom is a **non-default axis `capture` never emits**; raw_span vs page_range are distinct fields with distinct arity guards. |
+| §4.6 projection construction-shape | `test_container_and_leaf_distinct_variants`, `test_nodes_store_children_not_parent`, `test_nodes_and_map_frozen`, `test_sequence_fields_normalize_to_tuples`, `test_typed_records_are_frozen` | Immutability / list→tuple-normalization construction guards; each is the **sole guard** of its construction invariant on a distinct dataclass/field. |
+| §4.7 misc step pairs | `test_collect_step_opts_includes_only_set_options` + `..._empty_when_none_set`; `test_require_asset_missing_file_is_typed` + `..._missing_dir`; `test_plausibility_requires_both_strings` + `..._accepts_near_match_rejects_drift` | Each pair covers a **distinct axis** (set vs empty namespace; file vs dir kind; empty-guard vs ratio-boundary). |
+
+Why deferred, not done: these score **9–10** individually. Collapsing trades explicit, individually-named intent for marginal concision — and the proof for the non-`mutate_gate`/`mutate.py` families would be *structural* (no harness), so the added risk lands on the lowest-value collapses. **Revisit if** a family grows a 6th+ case, or a file becomes a maintenance burden. They are now flagged and understood; leaving them is a deliberate choice, not an oversight.
+
+**Still open (not this pass) — §5 infra findings:** the `mutate_b1` stale target, the `POLICY_TITLE` mutation gap, the `align_streams` direct `delete`-branch test, and the divergence-validator `RF` cases remain as documented in §5. These *add* coverage rather than compress; a natural follow-up when next touching test-infra.
+
+---
+
 ## 3. REVIEW-FOR-CUT and cannot-red tests (the actionable "ditch" core)
 
 These are the only tests that fail to bind on a real defect. Ranked by score.

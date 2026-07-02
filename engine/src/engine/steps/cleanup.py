@@ -352,7 +352,8 @@ def deduplicate_sentences(text: str, rules: CleanupRules, min_len: int = 40) -> 
         if len(sentences) < 2:
             result.append(para)
             continue
-        norm = lambda s: re.sub(r'\s+', ' ', s.lower().strip().translate(fold))
+        def norm(s: str) -> str:
+            return re.sub(r'\s+', ' ', s.lower().strip().translate(fold))
         seen = []
         kept = []
         for sent in sentences:

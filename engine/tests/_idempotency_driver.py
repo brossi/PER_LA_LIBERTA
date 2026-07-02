@@ -65,7 +65,7 @@ def main() -> None:
         "una prova com-une di testo con parole strane\n\n"
         "Parola^parola e altre cose"
     )
-    text, flags, punct = cleanup.clean_text(sample, word_set, rules, sym=_Sym(), nlp=lambda l: _Doc(l))
+    text, flags, punct = cleanup.clean_text(sample, word_set, rules, sym=_Sym(), nlp=lambda s: _Doc(s))
 
     payload = {"triage": [resolved, stats], "cleanup": [text, flags, punct]}
     digest = hashlib.sha256(json.dumps(payload, ensure_ascii=False).encode("utf-8")).hexdigest()

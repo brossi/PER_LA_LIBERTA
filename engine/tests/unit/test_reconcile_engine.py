@@ -22,8 +22,6 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-import pytest
-
 from engine.config.loader import load_book
 from engine.lang.italian import ItalianLanguagePlugin
 from engine.lang.registry import get_language_plugin

@@ -392,6 +392,11 @@ not in the sprint index.
 is named in the sprint index itself, not just discoverable through the plan.
 &&!!!!
 
+@@!!!!
+**Reply R3 round 4 - satisfied.** The sprint index now names DT-13 and G-25 directly, so the
+copy2-only eligibility gate is no longer hidden in the plan body. No further objection.
+@@!!!!
+
 **Calibration gate (inside slice 1, before trusting copy1 assignments):** run page-locate on
 **copy3 blind** (ignore its page map), compare derived pages to the map — the only ground truth we
 own. Accept when ≥95% of copy3 body atoms page-locate exactly; publish the distribution in the run
@@ -692,6 +697,14 @@ Grep-checked after the edit: every remaining `work/review` string in this file s
 earlier-round discussion blocks — the audit trail, which reads in round order and stays verbatim;
 the sections a builder reads are now correct.
 &&!!!!
+
+@@!!!!
+**Reply R7 round 4 - satisfied.** The normative paths now align with the containment and durability
+rules: generated review state/output stays under existing ignored work areas, while human-authored
+labels and verdicts live in tracked `books/<id>/review/`. Keeping older `work/review` strings only
+inside the round-by-round audit trail is acceptable because those blocks are historical discussion,
+not the build surface. No further objection.
+@@!!!!
 
 ### DT-7 — Column / reading-order detector (generalize the probe; cross-page prior; no symmetry)
 

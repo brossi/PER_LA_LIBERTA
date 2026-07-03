@@ -23373,6 +23373,36 @@
       "category": "modernization",
       "action": "restore",
       "reason": "PRINTED 'Nol' is a valid archaic/period Italian contraction of 'non lo'; PUBLISHED 'Non' modernises it by removing the enclitic. This is a legitimate period form that should be restored."
+    },
+    {
+      "id": 862,
+      "chapter": "p2_ch07",
+      "pages": "156-156",
+      "source": "",
+      "final": "Capitolo Ottavo",
+      "sentence": "passata la grande anima di un profeta! Capitolo Ottavo",
+      "page": 156,
+      "printed": "",
+      "published": "Capitolo Ottavo",
+      "category": "dittography",
+      "action": "review",
+      "origin": "manual-2026-07-03 session finding (engine seeder root-cause investigation), not from the blind read",
+      "reason": "Stranded OCR chapter heading: reconcile missed the ch07/ch08 boundary because copy1 read 'Capìtolo Ottavo', leaving the heading as ch07's final body paragraph; cleanup de-accented it but did not delete. It sits as a bare non-heading line immediately BEFORE the real '### Capitolo Ottavo' (italian_clean.md:2462 as of 2026-07-03). Print has the heading once, as the chapter head — page 156 shows it. Fix = delete the bare paragraph. EN ch07 never translated it (clean); no EN edit needed."
+    },
+    {
+      "id": 863,
+      "chapter": "p1_ch09",
+      "pages": "52-53",
+      "source": "migliaia di perso- | ci: Napoleone annunciò [...] Sedan! | s 45 -98- | Capìtolo Decimo | ne ! Ma Luigi Napoleone non osò",
+      "final": "migliaia di persone: Napoleone annunciò",
+      "sentence": "un olocausto di parecchie migliaia di persone: Napoleone annunciò all'Europa d'aver... salvato \"l'ordine sociale\".",
+      "page": 52,
+      "printed": "migliaia di persone! Ma Luigi Napoleone non osò",
+      "published": "migliaia di persone: Napoleone annunciò",
+      "category": "uncertain",
+      "action": "review",
+      "origin": "manual-2026-07-03 session finding (engine seeder root-cause investigation), not from the blind read",
+      "reason": "NOT scan-verified — the 'printed' field is the reconciled-witness HYPOTHESIS, recorded so the card renders as a substitution; adjudicate on the page. An OCR page-boundary interleave split the word 'perso-|ne' and spliced a page marker plus the ch10 heading between the halves. Cleanup rejoined it as 'persone: Napoleone annunciò...Sedan!' with 'Ma Luigi Napoleone non osò...' left as a separate paragraph (italian_clean.md:740/742 as of 2026-07-03). The fragments equally support 'persone! Ma Luigi Napoleone non osò...' as the true continuation, with 'Napoleone annunciò...Sedan!' belonging elsewhere (its own 'ci:' lead-in is unexplained). Question for the scan (p.52, spilling to 53): what actually follows 'migliaia di perso-'? One of the two attachments is wrong."
     }
   ]
 }

@@ -1,0 +1,402 @@
+# S2.1 — GeometrySource seam + backend (NORMAL path) + segmentation front-end (plan)
+
+**Status: DRAFT v1 — for audit before any code.** Parent issue #29 (children #35–#40, minted with
+this draft); tracker row `S2.1` in `ENGINE_STRUCTURE_TASKS.md` (~L423) is the authoritative spec — on
+any disagreement the tracker wins, then `ENGINE_STRUCTURE_PLAN.md` (§3.0, §11.1, D30), then this
+plan. Evidence anchor: `spike/document-structure` @ `08aea65`; every file:line cite below was
+verified on disk at that commit.
+
+Inputs this plan consolidates:
+
+- `docs/probes/s2_0_geometry_alignment.md` — the S2.0 probe result + §"S2.1 design inputs"
+  (revised post-audit) — and `docs/probes/s2_0_adversarial_audit.md` (Findings B/E/2/5 carried).
+- `books/per_la_liberta/probes/s2_0_geometry_probe.py` — the prototype the detector/matcher
+  generalize (its `tokens`/`bow_coverage`/`ordered_coverage`/`detect_columns`/`reading_order`).
+- The ingestion human-in-the-loop ruling (user, 2026-06-29): classifiers calibrate to **abstain**;
+  low-confidence pages route to a human worklist **before** the gate; `geom.present=false` only
+  after BOTH auto-detection and human review decline.
+
+## §0 Scope and provenance
+
+S2.0 (GATE, DONE, #18) chose the **NORMAL path**: both PLL PDFs are image scans (0 native boxes);
+the box layer is generated fresh by PyMuPDF+Tesseract (`ita`, 300 dpi). Evidence carried forward:
+token anchorability vs copy3/Gemini BoW median 0.939 / mean 0.925 (n=37); content-token median
+0.929; body two-column (probe detector 30/37); naive full-width order 0.49; column-order recovered
+mean 0.92 / 87% pass@0.85 on two-column pages (n=30) but mean 0.851 / 73% over all pages; copy1
+confirmed column-ordered 0.98. Verdict: S5 geometry = **conditional-primary, re-gated at S2.2
+(#30)** on the as-built detector, on mean + per-page pass-rate.
+
+S2.1 builds, in one wave (two slices, §5):
+
+1. **`GeometrySource` seam** — an injectable Protocol; backends yield per-page word boxes.
+2. **PyMuPDF+Tesseract backend** — the NORMAL path; OCR language/dpi come from book config.
+3. **Witness-text↔geometry matcher** — explicit, fail-loud, writes `{geometry_engine,
+   matched_witness_id, match_method, match_confidence}` into S1.1's frozen `Geom` slot; unmatched
+   boxes are unusable for primary re-bind; a canonical atom carries its **primary witness's** box
+   only where matched.
+4. **Segmentation front-end** — (0) two-branch reading-order sourcing, (1) density band pre-check,
+   (2) column/reading-order detection, (3) a **specified** human-review worklist.
+
+Consumers waiting on the as-built output (runway Lane 1): **BR-022** (region coordinate space —
+DT-4 pins it), **S3.1** (D30 word geometry — DT-12), **S5.1**'s mode re-gate (defined against this
+detector, ruled at **S2.2**).
+
+## §1 The geometry path (end-to-end)
+
+```
+scan PDF ──► GeometrySource backend ──► per-page WordBoxes
+                                            │
+                              (1) density band pre-check ── abstain ──► worklist
+                                            │ content
+                              (2) column / reading-order detect ── low conf ──► worklist
+                                            │
+              ┌── order-source branch (book config) ──┐
+   witness branch (PLL)                     no-witness branch (image-only)
+   witness text = order oracle              detector = primary order source
+   detector = cross-check / QA feed         human loop = essential backstop
+              │                                        │
+   (3) page-locate: monotone align          OCR tokens ARE the text; boxes
+       box stream ↔ witness stream          are theirs by construction
+              │
+   (4) per-atom match in the page window ── page below threshold ──► worklist
+              │ matched
+   Geom.matched(union bbox + provenance) ──► geometry sidecar (DT-9)
+              │ zero-match atom / declined page
+   Geom.absent  (only after auto + human both decline)
+```
+
+On the witness branch the matcher is the deliverable that fills `atom.geom`; the detector runs on
+every page anyway as the QA cross-check and the **S2.2 measurement feed** (per-page ordered
+coverage of detector-ordered boxes vs the witness window — the probe's metric, now emitted by the
+build). On the no-witness branch there is no witness to match: the front-end's segmentation
+(trusted boxes + reading order + worklist) IS the output, proven on a synthetic fixture (DT-11) —
+PLL never exercises this branch, and the engine must not presume it away.
+
+## §2 Surfaces it binds into (verified this session)
+
+- **`src/engine/structure/atoms.py:41`** — `Geom` frozen-slots dataclass: `present` +
+  six required-when-present fields (`page`, `bbox`, `geometry_engine`, `matched_witness_id`,
+  `match_method`, `match_confidence`); `absent()`/`matched()` factories; absence carries no
+  coordinates (invented geometry raises in `__post_init__`). NOTE: the tracker row quotes only
+  three provenance fields — the slot has **four** (`matched_witness_id` exists); the matcher
+  writes all four. `Atom.geom: Geom` at `:147`.
+- **Frozen streams** — `books/per_la_liberta/work/data/atoms/{copy1,copy2,copy3,canonical}.json`
+  (written by `freeze_streams.py`): copy1 3621 / copy2 3356 / copy3 799 / canonical 4786 atoms
+  (S1.3a oracle-backed pins). Canonical derives from copy1+copy2 only (copy3's word-level link is
+  S7.1b), so **"primary witness's box" ⇒ copy1 must be the matched witness** (DT-3). copy1/copy2
+  are `PAGE_UNMAPPED`; only copy3 has real page ranges (its `⟨PAGE:N⟩` map, 278 pages).
+- **Probe prototype** — `books/per_la_liberta/probes/s2_0_geometry_probe.py`: OCR invocation
+  `pg.get_textpage_ocr(flags=0, language=OCR_LANG, dpi=DPI, full=True)` (`:195`); the tokenizer
+  (`_EDGE`-strip + lower), BoW/ordered coverage, `detect_columns` (contiguous central valley +
+  populated-halves guard), `reading_order`.
+- **Neutrality guard** — `tests/unit/test_structure_neutrality.py`: substring, case-insensitive
+  scan of `FORBIDDEN` over `structure/` py+schema files, with planted-literal non-vacuity tests.
+  Gains the OCR-language literal **in quoted form** (`"ita"` / `'ita'`) — bare `ita` would
+  false-positive on English words (`italic`, `vital`) (DT-1).
+- **Toolchain** — `engine/pyproject.toml:20` `pymupdf>=1.27.2.2` (already a dep; no pytesseract
+  needed). Local tesseract at `/opt/homebrew/bin/tesseract` with `ita` + `ita_old`; tessdata must
+  be discoverable (probe docstring). **CI (`.github/workflows/engine.yml`, ubuntu-latest) has no
+  tesseract today** and the 82 MB PDF is gitignored — DT-11 owns the split. Tracked-in-CI real
+  assets: `data/copy{1,3}_raw.txt`, `data/copy3_page_map.json` (git ls-files verified).
+- **S3.1 stub plan** — `docs/s3_1_plan.md` carries Q-S3.1-1/-2; S3.1 consumes word geometry
+  through this seam (DT-12).
+
+## §3 Decisions to ratify (DT-1 … DT-12)
+
+### DT-1 — Module homes + neutrality budget
+
+New core modules, all under `src/engine/structure/` (neutral; S0.2 guard extended):
+
+- `geometry.py` — `WordBox` / `PageGeometry` records + the `GeometrySource` Protocol + a
+  `GeometryError` (errors-taxonomy citizen, next free exit code).
+- `geometry_pymupdf.py` — the PyMuPDF+Tesseract backend. `language` and `dpi` are **required
+  constructor parameters with no defaults** — a default language is a language opinion in core.
+  `"ita"` lives only in PLL book config under `books/per_la_liberta/`.
+- `segmentation.py` — density band classifier + column/reading-order detector + per-page
+  confidence records. Operates on boxes/pixmaps only; no witness, no language.
+- `geom_match.py` — normalizer + monotone page-locate + per-atom window matcher +
+  `attach_geometry(atoms, sidecar)` overlay loader.
+- `geom_sidecar.py` — sidecar schema/write/load (DT-9) + worklist records (DT-10). (If this file
+  wants to split during build, worklist records may move to their own module — name stability of
+  the four above is the commitment, not the count.)
+
+`FORBIDDEN` gains `'"ita"'` and `"'ita'"` (quoted forms; the existing planted-literal
+parametrization inherits them automatically). pymupdf imports in core are fine — it is already a
+required dependency; the neutrality rule governs language/book literals, not libraries.
+
+### DT-2 — `GeometrySource` contract
+
+A backend is a Protocol with one obligation: given a page index range, yield
+`PageGeometry{page: int, width: float, height: float, words: tuple[WordBox, ...]}` where
+`WordBox{text: str, bbox: (x0, y0, x1, y1)}`, plus an `engine_id: str` property — a
+reproducibility string built from live versions and params (shape:
+`pymupdf-{ver}+tesseract-{tessver}:dpi={dpi}:lang={lang}`). The matcher writes `engine_id`
+**verbatim** into `geometry_engine` — never a hardcoded string (red-first G-3). Fail-loud: missing
+tessdata / OCR failure / a box outside the page rect raise `GeometryError`; a backend never
+returns silently-empty pages for operational failures (empty ≠ failed: a genuinely blank page
+yields zero words *successfully*).
+
+### DT-3 — Anchor witness = copy1; page-locate by monotone alignment; copy3-blind calibration
+
+The done-when says a canonical atom carries its **primary witness's** box; canonical derivations
+are copy1+copy2 only, and copy1 is the primary structural witness — so **copy1 is the matched
+witness** (`matched_witness_id="copy1"`). Problem: copy1 is `PAGE_UNMAPPED` (no page map). Rather
+than a page prior, the build derives it: **monotone global alignment** of the (paginated, ordered)
+box token stream against copy1's (ordered) token stream — both are in reading order, so page
+assignment is a monotone segmentation of the witness stream; per-witness-atom page windows fall
+out. Byproduct: **real page ranges for copy1's atoms** — the open S1.3a page-attribution question
+gets its answer as derived sidecar data (never a mutation of the frozen stream, D25/DT-9).
+
+**Calibration gate (inside slice 1, before trusting copy1 assignments):** run page-locate on
+**copy3 blind** (ignore its page map), compare derived pages to the map — the only ground truth we
+own. Accept when ≥95% of copy3 body atoms page-locate exactly; publish the distribution in the run
+report. (Proposal; the number is Ben's to ratify. copy1's fresh-Tesseract-vs-IA-Tesseract
+agreement is expected ≥ copy3's Gemini-vs-Tesseract 0.939 — same engine family, same scan — but
+that expectation is *checked* by the run report, not assumed.)
+
+### DT-4 — Coordinate space + page numbering (BR-022 seed)
+
+`bbox` is in **PDF page-point space** (PyMuPDF `page.rect` units, origin top-left, y-down) — the
+one space that is dpi-independent and stable across re-renders. «to verify at build»: that
+`get_textpage_ocr` returns page-space (not pixmap-space) coords at dpi≠72 — bound by a test
+asserting every box ⊆ `page.rect` at two different dpi values on the synthetic fixture. `page` is
+the **1-based scan page number**, consistent with copy3's `⟨PAGE:N⟩` markers and
+`docs/assets/page_images/page_000N.png` (pymupdf index + 1); the copy3-blind calibration (DT-3)
+doubles as the numbering cross-check (278 markers == 278 pages, S1.3a). This DT is the BR-022
+answer-of-record: downstream regions inherit this space or declare a transform.
+
+### DT-5 — Two-branch reading-order sourcing (where the branch lives)
+
+Book config declares `order_source: witness | geometry`. PLL = `witness` (copy1 column-ordered
+0.98): the witness stream supplies order; page windows come from page-locate; the per-atom match
+is order-free within the window (BoW), so a column-detector miss cannot corrupt geometry — the
+detector still runs on every page as the QA cross-check, emitting per-page
+`ordered_coverage(witness_window, detector_ordered_boxes)` into the run report (**this is the
+S2.2 measurement feed**, DT-12). `geometry` branch: the detector's order is authoritative, the
+worklist is its essential backstop, and the OCR tokens are the text (boxes are theirs by
+construction — no matcher needed; the front-end's confidence/worklist output is the deliverable).
+Proven on the synthetic fixture; PLL never exercises this branch.
+
+### DT-6 — Density pre-check: band classifier, calibrated to abstain
+
+Audit Finding B stands: single fixed ink threshold is dead (non-monotone continuum; dark endpaper
+0.97 > densest prose; 22 real chapter-end pages < the old 0.038 "floor"). The classifier maps
+per-page features → `{content, near_blank, non_text_dark, abstain}`:
+
+- Features: ink fraction (binarized pixmap), box count, token yield (alpha-token count / box
+  count — p6's hallucination signature is 658 boxes / 7 tokens), mean token length.
+- **Two-sided**: `near_blank` (low ink, low token yield) and `non_text_dark` (high ink, low token
+  yield) are distinct classes; both mean "boxes untrusted".
+- **`abstain` is a first-class output** — the ambiguous middle routes to the worklist, never
+  forced into a class. Confidence = margin to the band edges, NOT raw ink fraction (Finding B's
+  trap: ink-confidence is maximal on the hallucination-prone dark pages).
+- Calibration set: the S2.0 stratified 37 + the audit's boundary pages (chapter ends, endpapers,
+  front/back matter), labeled once in the run report. Bands set generously toward abstain — a
+  human glance is cheap next to a trusted hallucination.
+
+### DT-7 — Column / reading-order detector (generalize the probe; cross-page prior; no symmetry)
+
+Promote `detect_columns`/`reading_order` into `segmentation.py` with the audit's rulings baked in:
+projection-profile contiguous central valley (≥3 bins) + populated-halves guard (the probe's
+sparse-page fix); **mirror-symmetry rule stays DROPPED** (redundant; wrong on asymmetric layouts);
+**cross-page prior retained** — layout is locally constant, so a page inherits its neighbor's
+class when its own valley evidence is inside a hysteresis margin, and overrides it only on strong
+disagreement (margin values proposed in-code, ratified by the run report distribution). Detector
+confidence = valley depth × column-balance; below threshold → worklist. Reading order (columns
+top-to-bottom, left column first, line-binned by median box height) comes free from the split.
+
+### DT-8 — Matcher: normalizer, window match, confidence formula, thresholds
+
+- **Normalizer** (promoted from the probe, one place, shared by page-locate + matcher): NFC →
+  whitespace split → strip edge punctuation → casefold. **No accent stripping, no stopword
+  removal** in core (language opinions; the probe's `content_tokens` stays probe-side as a
+  metric variant).
+- **Per-atom match** (`match_method="token-bow-v1"`): within the atom's page window, greedy
+  multiset token matching between atom tokens and box tokens;
+  `match_confidence = matched_tokens / atom_tokens` (pinned formula, value-pin tested);
+  `bbox` = union over **matched boxes only** (a distractor box never widens the union, G-6);
+  `page` = the window's page. Page-locate is recorded page-level in the sidecar as
+  `locate_method="monotone-align-v1"`.
+- **Thresholds (proposals; setting method = full-book distribution in the slice-1 run report,
+  ratified there, re-gated at S2.2):** page accepted when its atom-weighted match rate ≥ 0.80
+  (prior: S2.0 content-BoW median 0.929 / mean 0.925); accepted-page atoms write `Geom.matched`
+  when their own matched fraction ≥ 0.60, else `Geom.absent` + a report line; a page below 0.80
+  routes to the **worklist** (its atoms stay PENDING — no absent-write until a verdict, G-12).
+  Known robustness item, documented not solved here: line-break hyphen fragments (`perso-` / `ne`)
+  — both streams are Tesseract-family on the same scan, so fragments should agree; the run report
+  quantifies the residue.
+
+### DT-9 — Persistence: geometry sidecar, no stream supersession
+
+Geometry is L1 fact (PLAN §3.3 aside at L185), but the frozen streams are what Ben is actively
+authoring against — S2.1 does **not** re-emit them. It writes a versioned **sidecar**
+`books/<id>/work/data/geometry/{witness}_geom.json`:
+
+```json
+{
+  "schema_version": 1,
+  "witness_id": "copy1",
+  "stream_source_hash": "sha256:…",          // stale fail-loud on mismatch, D14/D21 pattern
+  "engine_id": "pymupdf-…+tesseract-…:dpi=300:lang=ita",
+  "locate_method": "monotone-align-v1",
+  "pages":  { "52": {"status": "matched", "match_rate": 0.94, "n_cols": 2, "order_qa": 0.91},
+              "6":  {"status": "routed",  "stage": "density", "signal": "band-margin", "value": 0.012} },
+  "atoms":  { "<atom_id>": {"page": 52, "bbox": [x0,y0,x1,y1],
+                            "match_method": "token-bow-v1", "match_confidence": 0.91} }
+}
+```
+
+Page `status ∈ {matched, routed, declined}`; a `routed` page's atoms are simply **absent from
+`atoms`** (pending ≠ `Geom.absent`). `attach_geometry(atoms, sidecar)` overlays `Geom.matched`
+onto matching atom ids at read time (new frozen instances; streams untouched); hash mismatch →
+fail-loud stale error. Folding geometry into a superseding stream emission is deferred to when S5
+needs it inline — a sidecar migrates trivially; churning Ben's authoring substrate now doesn't.
+
+### DT-10 — Human-review worklist: specified, not a slogan (audit Finding E)
+
+Home: `books/<id>/work/review/geometry_worklist.json` (+ on-demand overlay renders
+`work/review/overlays/page_NNNN.png`, gitignored — page image + tentative boxes/split drawn on).
+One record per routed page:
+
+```json
+{ "page": 6, "stage": "density | columns | match",
+  "signal": "band-margin | valley-confidence | match-rate", "value": 0.012, "threshold": 0.02,
+  "tentative": {"n_cols": 1, "split_x": null, "box_count": 658, "token_count": 7},
+  "verdict": null }
+```
+
+**Verdict schema** (human fills; a small CLI applies — reuse of the S4.6b gate-CLI pattern, not a
+new HTML sheet): `{"action": "confirm" | "redraw_split" | "reclassify" | "decline_geometry",
+"params": {…}, "by": "...", "at": "ISO"}`. `confirm`/`redraw_split`/`reclassify` → the page
+re-enters the pipeline with the human's parameters and its result is marked human-reviewed;
+`decline_geometry` → the page's atoms get `Geom.absent` — the ONLY route to absent besides a
+zero-match atom on an accepted page, satisfying "absent only after both auto and human decline".
+Unknown action → fail loud (G-14).
+
+**Volume bound:** `review_fraction_max` per stage, default **0.15**, book-config-tunable.
+Exceeding it **hard-fails the run** with the named principle: the automation premise failed —
+re-design the classifier, never lower the bar to drain the queue. (Prior: witness-branch PLL
+routes only density-abstain + low-match pages; S2.0's numbers predict well under 0.15. The
+no-witness branch bound applies to the synthetic fixture proof and future books.)
+
+### DT-11 — CI/test binding: synthetic image-only PDF + tesseract in CI; PLL real runs local
+
+The PDF is gitignored and CI has no tesseract — but skipping OCR tests would be skip-masking. The
+split:
+
+- **CI-provable (hard-asserted, runs everywhere):** a **generated synthetic image-only PDF**
+  fixture — pymupdf draws known text (plain ASCII, `lang="eng"`), renders each page to a pixmap,
+  and re-embeds the *images* in a fresh PDF (no text layer by construction; asserted:
+  `get_text() == ""`). Pages: two-column, single-column, near-blank, dark. The whole path —
+  backend OCR, density, columns, order, matcher on a fake witness assembled from the known text —
+  runs real. `engine.yml` gains `apt-get install -y tesseract-ocr tesseract-ocr-eng` (eng data
+  installed explicitly — whether the base package bundles it is not assumed).
+  English here is a **test fixture asset** (like D18's differ-fixture), not a core literal — the
+  fixture generator lives under `tests/fixtures/`, language passed as a parameter.
+- **Local-only (probe pattern, honest about absence):** the full-book PLL run —
+  `books/per_la_liberta/` runner producing `copy1_geom.json` + a written run report
+  (`docs/probes/s2_1_run_report.md`) with the calibration/threshold distributions (DT-3/6/8).
+  Real-input tests that need only tracked assets (copy3 raw + page map) still run in CI.
+- **Unit tier:** matcher/page-locate/segmentation tested against fake `GeometrySource`
+  implementations (deterministic boxes, no OCR at all).
+
+### DT-12 — S2.2 measurement hooks + S3.1 word-box seam
+
+- **S2.2 (#30)** re-gates S5's geometry mode on the **as-built** detector: mean ordered coverage
+  AND per-page pass-rate over n≥30. S2.1 therefore emits, in the run report and sidecar
+  (`order_qa` per page), exactly that per-page metric — S2.2 becomes a measurement + ruling, not
+  new machinery.
+- **S3.1 (D30 Zipf-DP)** needs **word-level** boxes; `atom.geom` stores only the union. No new
+  persistence: S3.1 re-invokes the `GeometrySource` seam (the sidecar's `engine_id` + params make
+  the re-run reproducible modulo tesseract version, which is recorded). If S3.1's cost profile
+  demands word-box persistence, that is its decision to bring — the seam is the contract.
+
+## §4 Invariants and red-first matrix
+
+Every row is seen RED against the named violation before the green lands (planted violation or
+mutation; `PYTHONDONTWRITEBYTECODE=1` + `__pycache__` purge during hunts). `Geom`'s own
+present/absent completeness invariants are S1.1's, already proven — new code constructs only via
+the factories and is not re-proven here.
+
+| # | Invariant | RED (named violation) | Home |
+|---|-----------|----------------------|------|
+| G-1 | backend requires `language`/`dpi` explicitly — no defaults | give either param a default → the no-arg `TypeError` test fails to raise | `test_geometry_backend.py` |
+| G-2 | no quoted OCR-language literal in structure core | plant `LANG = "ita"` in a throwaway core file → extended FORBIDDEN scan reds (planted-literal tests inherit the new terms) | `test_structure_neutrality.py` |
+| G-3 | `geometry_engine` = backend's `engine_id` verbatim | mutant hardcodes the string → fake-backend fixture with sentinel id reds | `test_geom_match.py` |
+| G-4 | zero-match atom → `Geom.absent`, never an invented box | mutant writes the page bbox for a 0-match atom → reds | `test_geom_match.py` |
+| G-5 | `match_confidence == matched/total` (pinned) | mutant returns constant 1.0 → value-pin fixture (known 3-of-5 match = 0.6) reds | `test_geom_match.py` |
+| G-6 | union bbox spans matched boxes only | mutant unions ALL page boxes → distractor-box fixture reds on bbox equality | `test_geom_match.py` |
+| G-7 | page-locate assignments monotone non-decreasing | shuffle mutant → monotonicity property reds (synthetic, CI); copy3-blind ≥95% exact = local run-report gate (PDF not in CI — honest split, DT-11) | `test_geom_match.py` + run report |
+| G-8 | every box ⊆ page rect; page-space coords dpi-invariant | OOB synthetic box → `GeometryError`; dpi 150 vs 300 boxes drift out of rect → containment test reds | `test_geometry_backend.py` |
+| G-9 | density `abstain` routes, never guesses | mutant maps abstain→content → planted mid-band fixture reds | `test_segmentation.py` |
+| G-10 | sparse single-column ≠ two-column (contiguous-gutter + populated-halves guards) | remove the ≥3-bin run guard → sparse-page fixture reds | `test_segmentation.py` |
+| G-11 | dark low-yield page classed `non_text_dark`, boxes untrusted | mutant trusts high-ink pages → endpaper-style fixture reds | `test_segmentation.py` |
+| G-12 | routed page's atoms stay PENDING — no absent-write before verdict | mutant writes `Geom.absent` on route → sidecar-state test reds | `test_geom_sidecar.py` |
+| G-13 | review fraction > `review_fraction_max` → hard fail | mutant drops the check → over-quota fixture passes silently, test reds | `test_geom_sidecar.py` |
+| G-14 | verdict application total: `decline_geometry`→absent, `confirm`/`redraw`/`reclassify`→re-enter; unknown action → fail loud | mutant treats unknown as confirm → reds | `test_geom_sidecar.py` |
+| G-15 | sidecar↔stream binding: `stream_source_hash` mismatch → stale fail-loud | flip one hash byte → `attach_geometry` reds | `test_geom_sidecar.py` |
+| G-16 | no-witness branch end-to-end: detector order recovers known text on the synthetic two-column page | break column split → ordered-coverage pin (== 1.0 on synthetic) reds | `test_geometry_e2e.py` |
+| G-17 | backend fail-loud: missing tessdata / OCR failure raises, never returns empty pages | mutant swallows the exception → reds (monkeypatched failing OCR) | `test_geometry_backend.py` |
+
+Post-build: a mutation hunt over the four new core modules (house discipline), survivors
+dispositioned in the audit note.
+
+## §5 Slices and build order (children of #29)
+
+**Slice 1 — seam, backend, matcher (the witness branch, PLL-productive):**
+
+1. **S2.1.1 (#35)** — `geometry.py`: records + Protocol + `GeometryError`; fake-backend test
+   double. (G-8 records-side, G-17 contract prose.)
+2. **S2.1.2 (#36)** — `geometry_pymupdf.py` backend + synthetic image-only PDF fixture generator
+   + CI tesseract install. (G-1, G-2, G-8, G-17; DT-11.)
+3. **S2.1.3 (#37)** — `geom_match.py`: normalizer, monotone page-locate (+ copy3-blind
+   calibration), per-atom window match, `attach_geometry`; `geom_sidecar.py` write/load; the PLL
+   slice-1 run → `copy1_geom.json` + run report with threshold distributions. (G-3…G-7, G-12,
+   G-15.)
+
+**Slice 2 — segmentation front-end (trust, order, human loop):**
+
+4. **S2.1.4 (#38)** — density band classifier. (G-9, G-11; DT-6.)
+5. **S2.1.5 (#39)** — column/reading-order detector + cross-page prior + two-branch wiring + the
+   synthetic no-witness end-to-end. (G-10, G-16; DT-5/7.)
+6. **S2.1.6 (#40)** — worklist + verdict CLI + volume bound + overlay renders; S2.2 measurement
+   feed (`order_qa` emitted book-wide). (G-13, G-14; DT-10/12.)
+
+Within each child: red tests first, then the module, then the mutation pass. Slice 1 makes PLL
+geometry real (S3.1/S5.1 unblock); slice 2 completes the tracker's front-end mandate and arms
+S2.2.
+
+## §6 Non-goals (defers to)
+
+- The **S2.2 re-gate ruling itself** (#30) — S2.1 emits the measurements; S2.2 rules the S5 mode.
+- **S3.1** Zipf-DP segmentation (own plan stub exists); **S5.1** rebind consumption.
+- **Stream supersession** with inline geom (DT-9 defers; sidecar first).
+- **HTML review sheet** tooling — the deviation-sheet pattern exists for later; slice 2 ships
+  JSON worklist + PNG overlays + CLI only.
+- **N-way witness geometry** (copy2/Harvard-scan boxes) — one witness (copy1) carries the
+  canonical box; revisit with the S7.1b word-level link.
+- **Word-box persistence** — S3.1's decision to bring (DT-12).
+
+## §7 Verification plan
+
+1. Full suite green (unit + real-input) locally and in CI (with the new tesseract step); ruff
+   clean on changed files; neutrality scan green **including the new quoted-language terms**.
+2. Red-first matrix: every G-row's red observed and recorded (planted violation or mutant) before
+   its green; post-build mutation hunt over the four new modules.
+3. Copy3-blind page-locate calibration ≥ the ratified floor, distribution published.
+4. The PLL slice-1 run report: page match-rate distribution, atoms matched/absent/pending counts,
+   threshold ratification, hyphen-fragment residue, `order_qa` distribution (the S2.2 feed).
+5. Adversarial delta re-audit before each child's commit (house cadence: wide + narrow apertures
+   on the delta).
+
+## §8 Definition of done
+
+- All six children (#35–#40) closed; tracker row S2.1 → `DONE` with the as-built note (path chosen,
+  evidence numbers, sidecar/worklist homes).
+- Tracker done-when satisfied and mapped: seam injectable (S2.1.1 fake backend) · backend yields
+  matched boxes + provenance for a PLL page fixture (S2.1.2/3) · unmatched → `geom.present=false`,
+  not invented (G-4, G-12/14 gate the absent-write) · low-confidence pages routed to human review
+  (S2.1.6).
+- `copy1_geom.json` exists for the real book with the run report; S2.2 (#30) is armed with its
+  measurement feed; BR-022 answered by DT-4.
+- User ratification of the DT set (this document, audited) precedes any code.

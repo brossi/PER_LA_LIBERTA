@@ -20,7 +20,11 @@ The invariants under test, each proven red by the mutation hunt (red-first, §9)
   ``StaleArtifactError`` — including unreadable files and parse-depth blowups), each load negative
   differing from the loadable document in exactly ONE axis (the S4.6-pre masking lesson);
 - the sidecar names its ``book`` and its ``stale_class``; the writer is deny-by-default (the
-  ``write_freeze_record`` posture) and the entry builder stamps BOTH digests via the producers.
+  ``write_freeze_record`` posture) and the entry builder stamps BOTH digests via the producers;
+- each entry persists its DT-4 **payload witnesses** (s4_6_tooling_plan, user-ratified
+  2026-07-02): the exact digest payloads, run-length-encoded on the wire and **self-verified** —
+  a witness that does not reproduce its digest cannot be constructed, so a forged or tampered
+  sidecar fails at the load boundary and the digest-diff explainer never needs a degraded mode.
 """
 
 from __future__ import annotations
@@ -47,9 +51,11 @@ from engine.structure import (
     authoring_evidence_path,
     build_evidence_entry,
     decision_digest,
+    decision_payload,
     evidence_findings,
     evidence_schema_version_const,
     extent_digest,
+    extent_payload,
     load_authoring_evidence,
     render_authoring_evidence,
     write_authoring_evidence,
@@ -101,14 +107,13 @@ def _projection(*nodes) -> ProjectionMap:
 
 
 def _fresh_evidence(projection: ProjectionMap) -> AuthoringEvidence:
-    """One entry per human-minted container, BOTH digests stamped from the live pair."""
+    """One entry per human-minted container, digests + DT-4 witnesses stamped via THE builder."""
     return AuthoringEvidence(
         book=BOOK,
         entries=tuple(
-            EvidenceEntry(
-                node_id=node.node_id,
-                decision_digest=decision_digest(node),
-                extent_digest=extent_digest(node, projection),
+            build_evidence_entry(
+                node,
+                projection,
                 evidence=f"scan-grounded rationale for {node.node_id}",
                 authored_at_revision=1,
             )
@@ -121,6 +126,24 @@ def _fresh_evidence(projection: ProjectionMap) -> AuthoringEvidence:
 def _replace_node(projection: ProjectionMap, node_id: str, **changes) -> ProjectionMap:
     return _projection(
         *(dataclasses.replace(n, **changes) if n.node_id == node_id else n for n in projection.nodes)
+    )
+
+
+def _entry(node_id: str, *, evidence: str = "why", revision: int = 0) -> EvidenceEntry:
+    """A coherent standalone entry (payload witnesses ↔ digests via THE producer) for gate/model
+    tests needing an entry unmoored from any live node — coherence-at-construction (DT-4) means a
+    fake-digest entry can no longer exist, so 'stale' test entries are stamped against a mutated
+    projection instead."""
+    d_payload = {"node_class": "section", "children": []}
+    e_payload = {"own": {"heading": [], "signature": []}, "beneath": []}
+    return EvidenceEntry(
+        node_id=node_id,
+        decision_digest=_hash_canonical(d_payload),
+        extent_digest=_hash_canonical(e_payload),
+        evidence=evidence,
+        authored_at_revision=revision,
+        decision_payload=d_payload,
+        extent_payload=e_payload,
     )
 
 
@@ -499,13 +522,7 @@ def test_gate_missing_evidence_for_a_human_container_reds_by_name():
 def test_gate_orphan_and_misbound_entries_red_by_name():
     projection = _projection(*_nodes())
     fresh = _fresh_evidence(projection).entries
-    orphan = EvidenceEntry(
-        node_id="n-ghost",
-        decision_digest="sha256:0",
-        extent_digest="sha256:0",
-        evidence="binds nothing",
-        authored_at_revision=1,
-    )
+    orphan = _entry("n-ghost", evidence="binds nothing", revision=1)
     _, _, leaf_a, _ = _nodes()
     misbound = EvidenceEntry(
         node_id="n-leaf-a",
@@ -513,6 +530,8 @@ def test_gate_orphan_and_misbound_entries_red_by_name():
         extent_digest=extent_digest(leaf_a, projection),
         evidence="on a machine leaf",
         authored_at_revision=1,
+        decision_payload=decision_payload(leaf_a),
+        extent_payload=extent_payload(leaf_a, projection),  # exercises the leaf-shaped {body} own
     )
     # Each finding must carry its OWN kind: an orphan misreported as "misbound" (or vice versa)
     # is a dropped check hiding behind its neighbour, so the match pins the kind token.
@@ -524,19 +543,21 @@ def test_gate_orphan_and_misbound_entries_red_by_name():
 
 def test_gate_collects_every_finding_in_one_raise():
     projection = _projection(*_nodes())
-    fresh = {e.node_id: e for e in _fresh_evidence(projection).entries}
+    # n-sec's entry is stamped against a mutated projection (class changed), so it is coherent
+    # in itself yet decision-stale against the LIVE map — the only way a stale entry can exist
+    # under DT-4 coherence-at-construction.
+    was_part = _replace_node(projection, "n-sec", node_class="part")
     evidence = AuthoringEvidence(
         book=BOOK,
         entries=(
             # n-root entry MISSING; n-sec entry decision-stale; plus an orphan.
-            dataclasses.replace(fresh["n-sec"], decision_digest="sha256:drifted"),
-            EvidenceEntry(
-                node_id="n-ghost",
-                decision_digest="sha256:0",
-                extent_digest="sha256:0",
-                evidence="orphan",
+            build_evidence_entry(
+                was_part.by_id["n-sec"],
+                was_part,
+                evidence="stamped before the class change",
                 authored_at_revision=1,
             ),
+            _entry("n-ghost", evidence="orphan", revision=1),
         ),
     )
     with pytest.raises(EvidenceGateError) as err:
@@ -585,23 +606,17 @@ def test_gate_message_names_the_title_and_reprs_the_digests():
     assert "'sha256:" in message  # digests are repr'd, not raw-interpolated
 
 
-def test_gate_message_cannot_be_forged_by_digest_content():
-    # The injection fix: a pinned digest containing a newline + fake finding line must appear
-    # escaped (repr), never verbatim — otherwise a crafted sidecar forges gate output.
-    projection = _projection(*_nodes())
-    fresh = {e.node_id: e for e in _fresh_evidence(projection).entries}
+def test_a_forged_digest_cannot_even_load_let_alone_forge_gate_output(tmp_path):
+    # The injection fix, STRENGTHENED by DT-4 coherence: the original test proved a crafted
+    # digest's fake finding line appears repr-escaped in gate messages; under
+    # coherence-at-construction such an entry cannot exist at all — the forged digest fails its
+    # witness self-verification at the LOAD boundary, so the forged text never reaches a gate.
+    # (Gate messages still repr every digest/title — test_gate_message_names_the_title...)
     forged = "sha256:x\n  [missing] human-minted container 'n-fake' has no evidence entry"
-    evidence = AuthoringEvidence(
-        book=BOOK,
-        entries=tuple(
-            dataclasses.replace(e, decision_digest=forged) if e.node_id == "n-sec" else e
-            for e in fresh.values()
-        ),
-    )
-    with pytest.raises(EvidenceGateError) as err:
-        assert_evidence_gate(evidence, projection)
-    assert forged not in str(err.value)  # raw newline payload never lands in the message
-    assert "\\n" in str(err.value)  # it shows up escaped instead
+    doc = _valid_doc()
+    doc["entries"][0]["decision_digest"] = forged
+    with pytest.raises(StaleArtifactError, match="untrustworthy"):
+        load_authoring_evidence(_write(tmp_path, doc))
 
 
 # --- EvidenceGateError: the typed carrier --------------------------------------------------------- #
@@ -643,14 +658,8 @@ def test_evidence_finding_kinds_is_the_closed_five_kind_set():
 
 def test_duplicate_entries_for_one_node_are_rejected_at_construction():
     # The gate's correspondence is ONE entry per container; a keyed table cannot hold two.
-    entry = EvidenceEntry(
-        node_id="n-root",
-        decision_digest="sha256:a",
-        extent_digest="sha256:b",
-        evidence="first",
-        authored_at_revision=0,
-    )
-    twin = dataclasses.replace(entry, evidence="second")
+    entry = _entry("n-root", evidence="first")
+    twin = dataclasses.replace(entry, evidence="second")  # prose is not hashed — still coherent
     with pytest.raises(ValueError, match="duplicate"):
         AuthoringEvidence(book=BOOK, entries=(entry, twin))
 
@@ -672,6 +681,18 @@ def test_duplicate_entries_for_one_node_are_rejected_at_construction():
         {"authored_at_revision": True},
         {"authored_at_revision": 2.0},
         {"authored_at_revision": -1},
+        # --- DT-4 payload witnesses: exact producer shapes, or nothing --------------------- #
+        {"decision_payload": "not an object"},
+        {"decision_payload": {"node_class": "x"}},  # children missing
+        {"decision_payload": {"node_class": "x", "children": [], "stray": 1}},
+        {"decision_payload": {"node_class": "  ", "children": []}},
+        {"decision_payload": {"node_class": "x", "children": [5]}},
+        {"extent_payload": {"own": {"heading": []}, "beneath": []}},  # neither producer shape
+        {"extent_payload": {"own": {"heading": [], "signature": []}, "beneath": ["b", "a"]}},
+        {"extent_payload": {"own": {"heading": [], "signature": []}, "beneath": ["a", "a"]}},
+        # coherence: a well-formed digest that the witness does not reproduce is untrustworthy
+        {"decision_digest": "sha256:" + "0" * 64},
+        {"extent_digest": "sha256:" + "0" * 64},
     ],
     ids=[
         "node_id-empty",
@@ -688,15 +709,29 @@ def test_duplicate_entries_for_one_node_are_rejected_at_construction():
         "revision-bool",
         "revision-float",
         "revision-negative",
+        "decision-payload-nonobject",
+        "decision-payload-missing-children",
+        "decision-payload-stray-key",
+        "decision-payload-blank-class",
+        "decision-payload-nonstr-child",
+        "extent-payload-bad-slot-shape",
+        "extent-payload-descending",
+        "extent-payload-duplicate",
+        "decision-witness-incoherent",
+        "extent-witness-incoherent",
     ],
 )
 def test_entry_model_rejects_degenerate_fields(changes):
+    d_payload = {"node_class": "section", "children": []}
+    e_payload = {"own": {"heading": [], "signature": []}, "beneath": []}
     valid = dict(
         node_id="n-1",
-        decision_digest="sha256:a",
-        extent_digest="sha256:b",
+        decision_digest=_hash_canonical(d_payload),
+        extent_digest=_hash_canonical(e_payload),
         evidence="why",
         authored_at_revision=0,
+        decision_payload=d_payload,
+        extent_payload=e_payload,
     )
     with pytest.raises((ValueError, TypeError)):
         EvidenceEntry(**{**valid, **changes})
@@ -712,12 +747,27 @@ def test_evidence_model_rejects_a_degenerate_book(book):
 
 # --- load boundary: total contract, one axis per negative --------------------------------------- #
 
+#: Decoded (in-memory) forms use the frozen tuple interiors the model stores; wire forms below
+#: use JSON lists. Canonical-JSON bytes are identical either way, so one digest serves both.
+_VALID_DECISION_PAYLOAD = {"node_class": "volume", "children": ()}
+#: The wire form carries one [first, last] run so the happy path exercises the DT-4 codec, not
+#: just plain ids.
+_VALID_EXTENT_PAYLOAD = {
+    "own": {"heading": (), "signature": ()},
+    "beneath": ("canonical_00002", "canonical_00003", "canonical_00004", "canonical_00005"),
+}
+_VALID_EXTENT_PAYLOAD_WIRE = {
+    "own": {"heading": [], "signature": []},
+    "beneath": ["canonical_00002", ["canonical_00003", "canonical_00005"]],
+}
 _VALID_ENTRY = {
     "node_id": "n-root",
-    "decision_digest": "sha256:abc",
-    "extent_digest": "sha256:def",
+    "decision_digest": _hash_canonical(_VALID_DECISION_PAYLOAD),
+    "extent_digest": _hash_canonical(_VALID_EXTENT_PAYLOAD),
     "evidence": "why this container exists",
     "authored_at_revision": 0,
+    "decision_payload": dict(_VALID_DECISION_PAYLOAD),
+    "extent_payload": _VALID_EXTENT_PAYLOAD_WIRE,
 }
 
 
@@ -744,10 +794,13 @@ def test_loadable_document_loads_typed(tmp_path):
     assert len(evidence.entries) == 1
     entry = evidence.entries[0]
     assert entry.node_id == "n-root"
-    assert entry.decision_digest == "sha256:abc"
-    assert entry.extent_digest == "sha256:def"
+    assert entry.decision_digest == _hash_canonical(_VALID_DECISION_PAYLOAD)
+    assert entry.extent_digest == _hash_canonical(_VALID_EXTENT_PAYLOAD)
     assert entry.authored_at_revision == 0
     assert evidence.by_node["n-root"] is entry
+    # the DT-4 witnesses arrive DECODED: the wire's [first, last] run expanded back to ids
+    assert entry.decision_payload == _VALID_DECISION_PAYLOAD
+    assert entry.extent_payload == _VALID_EXTENT_PAYLOAD
 
 
 def test_empty_entries_is_a_valid_starting_sidecar(tmp_path):
@@ -826,10 +879,51 @@ def _set_entry(doc: dict, key: str, value) -> dict:
         lambda d: _set_entry(d, "authored_at_revision", -1),
         lambda d: _set_entry(d, "stray", 1),  # additionalProperties: false, entry level
         lambda d: {**d, "entries": [dict(_VALID_ENTRY), dict(_VALID_ENTRY)]},  # duplicate node_id
-        lambda d: json.dumps(d).replace('"sha256:abc"', "NaN"),  # non-finite token
+        lambda d: json.dumps(d).replace('"n-root"', "NaN"),  # non-finite token
         # JSON-escaped lone surrogate: json.loads admits it, UTF-8 re-render never can — the
         # model rejects it and the loader wraps that (delta re-audit F3)
         lambda d: json.dumps(d).replace('"why this container exists"', '"x\\ud800y"'),
+        # --- DT-4 payload witnesses (one axis each) ------------------------------------------ #
+        lambda d: _drop_entry_key(d, "decision_payload"),
+        lambda d: _drop_entry_key(d, "extent_payload"),
+        lambda d: _set_entry(d, "decision_payload", "not an object"),  # Tier-1
+        lambda d: _set_entry(  # Tier-1: additionalProperties false inside the payload
+            d, "decision_payload", {"node_class": "volume", "children": [], "stray": 1}
+        ),
+        lambda d: _set_entry(  # Tier-1: children items must be strings
+            d, "decision_payload", {"node_class": "volume", "children": [5]}
+        ),
+        lambda d: _set_entry(  # typed build: own must be a producer shape (heading+signature|body)
+            d, "extent_payload", {"own": {"heading": []}, "beneath": []}
+        ),
+        lambda d: _set_entry(  # Tier-1: a run token is exactly [first, last]
+            d,
+            "extent_payload",
+            {"own": {"heading": [], "signature": []}, "beneath": [["a_1", "a_2", "a_3"]]},
+        ),
+        lambda d: _set_entry(  # decode: endpoints must share a prefix
+            d,
+            "extent_payload",
+            {"own": {"heading": [], "signature": []}, "beneath": [["a_1", "b_9"]]},
+        ),
+        lambda d: _set_entry(  # decode: descending range
+            d,
+            "extent_payload",
+            {"own": {"heading": [], "signature": []}, "beneath": [["a_9", "a_1"]]},
+        ),
+        lambda d: _set_entry(  # decode: the run-expansion ceiling — a bomb is an error, not an OOM
+            d,
+            "extent_payload",
+            {"own": {"heading": [], "signature": []}, "beneath": [["a_000000000", "a_999999999"]]},
+        ),
+        lambda d: _set_entry(  # self-verification: a valid-shape witness that lies about the digest
+            d,
+            "extent_payload",
+            {"own": {"heading": [], "signature": []}, "beneath": ["canonical_00002"]},
+        ),
+        lambda d: _set_entry(  # self-verification, decision half
+            d, "decision_payload", {"node_class": "part", "children": []}
+        ),
     ],
     ids=[
         "not-json",
@@ -860,6 +954,18 @@ def _set_entry(doc: dict, key: str, value) -> dict:
         "duplicate-node_id",
         "nan-token",
         "surrogate-evidence",
+        "entry-missing-decision-payload",
+        "entry-missing-extent-payload",
+        "decision-payload-nonobject",
+        "decision-payload-stray-key",
+        "decision-payload-nonstr-child",
+        "extent-own-bad-slot-shape",
+        "extent-run-three-element",
+        "extent-run-mismatched-prefixes",
+        "extent-run-descending",
+        "extent-run-expansion-bomb",
+        "extent-witness-lies-about-digest",
+        "decision-witness-lies-about-digest",
     ],
 )
 def test_load_contract_is_total(tmp_path, mangle):
@@ -950,6 +1056,10 @@ def test_build_evidence_entry_stamps_both_digests_via_the_producers():
     assert entry.decision_digest == decision_digest(sec)
     assert entry.extent_digest == extent_digest(sec, projection)
     assert entry.authored_at_revision == 3
+    # DT-4: the witnesses are THE producer payloads, verbatim — digest and witness can never
+    # come from two definitions
+    assert entry.decision_payload == decision_payload(sec)
+    assert entry.extent_payload == extent_payload(sec, projection)
 
 
 def test_build_evidence_entry_refuses_a_node_the_gate_would_flag():
@@ -972,3 +1082,183 @@ def test_authoring_evidence_path_is_the_work_root_companion(tmp_path):
     path = authoring_evidence_path(workspace)
     assert path.name == AUTHORING_EVIDENCE_FILENAME
     assert path.parent == workspace.root
+
+
+# --- the DT-4 payload-witness codec (s4_6_tooling_plan §4 rows 10/22/23) ------------------------- #
+
+
+def test_atom_run_codec_is_lossless_and_canonical():
+    from engine.structure.evidence import _decode_atom_runs, _encode_atom_runs
+
+    # canonical maximal-run form: one deterministic encoding per input (byte-stable re-stamps)
+    assert _encode_atom_runs(["a_1", "a_2", "a_3"]) == [["a_1", "a_3"]]
+    assert _encode_atom_runs(["canonical_00089"]) == ["canonical_00089"]
+    # width boundary: zero-padded equal widths run; a width change breaks the run (a_9 → a_10)
+    assert _encode_atom_runs(["a_09", "a_10"]) == [["a_09", "a_10"]]
+    assert _encode_atom_runs(["a_9", "a_10"]) == ["a_9", "a_10"]
+    # adversarial shapes stay lossless — decode(encode(x)) == x on every one
+    for ids in (
+        [],
+        ["alpha", "beta"],  # no decimal tails: never compress
+        ["a_1", "b_2"],  # prefix change breaks a run
+        ["x", "x1", "x2"],  # bare prefix beside its numbered kin
+        ["a_1", "a_1"],  # duplicate (model rejects it later; the codec must not lie about it)
+        ["a_1", "a_3"],  # gap: no run
+        ["a_10", "a_9"],  # unsorted: no run, still lossless
+    ):
+        assert _decode_atom_runs(_encode_atom_runs(ids)) == ids
+
+
+@pytest.mark.parametrize(
+    "token",
+    [
+        [["a_1", "b_2"]],  # mismatched prefixes
+        [["alpha", "beta"]],  # no decimal tails at all
+        [["a_9", "a_1"]],  # descending
+        [["a_1", "a_02"]],  # width mismatch
+        [["a_1", "a_2", "a_3"]],  # not a pair
+        [5],  # not a string or pair
+        [["a_000000000", "a_999999999"]],  # expansion bomb: an error, never an allocation
+    ],
+    ids=[
+        "mismatched-prefixes",
+        "no-decimal-tails",
+        "descending",
+        "width-mismatch",
+        "three-element",
+        "non-string-token",
+        "expansion-bomb",
+    ],
+)
+def test_atom_run_decode_rejects_malformed_tokens(token):
+    from engine.structure.evidence import _decode_atom_runs
+
+    with pytest.raises(ValueError):
+        _decode_atom_runs(token)
+
+
+def test_rendered_entry_carries_run_encoded_witnesses():
+    # The wire form is the run-encoded witness (DT-4): n-sec's beneath (leaf_a's two consecutive
+    # body atoms) collapses to one [first, last] pair, and the decision witness rides verbatim.
+    projection = _projection(*_nodes())
+    rendered = render_authoring_evidence(_fresh_evidence(projection))
+    doc = json.loads(rendered)
+    sec_entry = next(e for e in doc["entries"] if e["node_id"] == "n-sec")
+    assert sec_entry["decision_payload"] == {"node_class": "section", "children": ["n-leaf-a"]}
+    assert sec_entry["extent_payload"]["beneath"] == [["canonical_00002", "canonical_00003"]]
+    assert sec_entry["extent_payload"]["own"] == {
+        "heading": ["canonical_00001"],
+        "signature": ["canonical_00005"],
+    }
+
+
+def test_witness_shape_floor_fires_even_under_a_coherent_digest():
+    # The mutation hunt's E12/E13 lesson: a degenerate payload paired with a STALE digest lets
+    # the coherence check mask the shape checks — these pair each bad shape with its own
+    # coherent digest, so ONLY the shape floor can reject, and dropping it goes red here.
+    d_payload = {"node_class": "section", "children": []}
+    duplicated = {"own": {"heading": [], "signature": []}, "beneath": ["a_1", "a_1"]}
+    with pytest.raises(ValueError, match="ascending"):
+        EvidenceEntry(
+            node_id="n-1",
+            decision_digest=_hash_canonical(d_payload),
+            extent_digest=_hash_canonical(duplicated),
+            evidence="x",
+            authored_at_revision=0,
+            decision_payload=d_payload,
+            extent_payload=duplicated,
+        )
+    half_shaped = {"own": {"heading": []}, "beneath": []}
+    with pytest.raises(ValueError, match="heading\\+signature"):
+        EvidenceEntry(
+            node_id="n-1",
+            decision_digest=_hash_canonical(d_payload),
+            extent_digest=_hash_canonical(half_shaped),
+            evidence="x",
+            authored_at_revision=0,
+            decision_payload=d_payload,
+            extent_payload=half_shaped,
+        )
+
+
+def test_decode_budget_is_cumulative_within_one_witness(tmp_path):
+    # The delta re-audit's allocation-bomb finding: N sub-ceiling runs sum without bound if the
+    # ceiling is per-run. Two 600,001-id runs in ONE beneath list must exhaust the shared budget
+    # on the second run's PRE-allocation check (peak allocation stays bounded by the budget).
+    doc = _valid_doc()
+    doc["entries"][0]["extent_payload"] = {
+        "own": {"heading": [], "signature": []},
+        "beneath": [["y_0000000", "y_0600000"], ["y_0700000", "y_1300000"]],
+    }
+    # match on the raise's own wording, NOT "budget": pytest's match= is re.search over the
+    # full message, which embeds tmp_path — and tmp_path contains this TEST'S NAME, so
+    # match="budget" passed on ANY StaleArtifactError (the mutation hunt's E20 false-pass).
+    with pytest.raises(StaleArtifactError, match="refusing the allocation"):
+        load_authoring_evidence(_write(tmp_path, doc))
+
+
+def test_decode_budget_is_shared_across_entries(tmp_path):
+    # Same bomb, spread across entries: entry one is fully coherent (real digests over its
+    # 600,001-id witness) and loads; entry two's decode must then hit the DOCUMENT-wide budget —
+    # a per-call or per-entry budget would let a sub-KB sidecar force an unbounded allocation.
+    big = {
+        "own": {"heading": (), "signature": ()},
+        "beneath": tuple(f"z_{i:07d}" for i in range(600_001)),
+    }
+    d_payload = {"node_class": "volume", "children": ()}
+    doc = _valid_doc()
+    doc["entries"] = [
+        {
+            "node_id": "n-big-1",
+            "decision_digest": _hash_canonical(d_payload),
+            "extent_digest": _hash_canonical(big),
+            "evidence": "first bomb half",
+            "authored_at_revision": 0,
+            "decision_payload": {"node_class": "volume", "children": []},
+            "extent_payload": {
+                "own": {"heading": [], "signature": []},
+                "beneath": [["z_0000000", "z_0600000"]],
+            },
+        },
+        {
+            "node_id": "n-big-2",
+            "decision_digest": _hash_canonical(d_payload),
+            "extent_digest": "sha256:never-reached",
+            "evidence": "second bomb half",
+            "authored_at_revision": 0,
+            "decision_payload": {"node_class": "volume", "children": []},
+            "extent_payload": {
+                "own": {"heading": [], "signature": []},
+                "beneath": [["z_0700000", "z_1300000"]],
+            },
+        },
+    ]
+    with pytest.raises(StaleArtifactError, match="refusing the allocation"):
+        load_authoring_evidence(_write(tmp_path, doc))
+
+
+def test_witnesses_are_deep_frozen():
+    # The delta re-audit's aliasing finding: mutable payload interiors let a consumer decouple a
+    # witness from its digest in place. Frozen means frozen — proxies and tuples all the way down.
+    projection = _projection(*_nodes())
+    entry = build_evidence_entry(
+        projection.by_id["n-sec"], projection, evidence="frozen", authored_at_revision=0
+    )
+    with pytest.raises(TypeError):
+        entry.decision_payload["evil"] = 1
+    with pytest.raises(AttributeError):
+        entry.decision_payload["children"].append("n-injected")
+    with pytest.raises(TypeError):
+        entry.extent_payload["own"]["heading"] = ()
+    assert isinstance(entry.extent_payload["beneath"], tuple)
+    # ...and equality with the live producers still holds (the tuple-ized producer form)
+    assert entry.decision_payload == decision_payload(projection.by_id["n-sec"])
+
+
+def test_restamp_of_an_unchanged_node_rerenders_byte_identically(tmp_path):
+    # s4_6_tooling_plan §4 row 23: canonical codec + renderer ⇒ an unchanged re-stamp is an empty
+    # diff, the same byte-idempotence posture the freeze pin holds.
+    projection = _projection(*_nodes())
+    first = _fresh_evidence(projection)
+    again = _fresh_evidence(projection)
+    assert render_authoring_evidence(first) == render_authoring_evidence(again)

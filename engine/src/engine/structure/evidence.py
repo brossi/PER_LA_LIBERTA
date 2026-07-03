@@ -34,6 +34,17 @@ neither digest: re-titling a container does not invalidate the rationale for its
 identity is its own ``AUTHORING_EVIDENCE_SCHEMA_VERSION`` + ``AUTHORING_EVIDENCE_STALE_CLASS``
 (both persisted in the document, like every governed layer).
 
+Beside each digest the entry persists its **payload witness** (DT-4 of the S4.6b tooling plan,
+user-ratified 2026-07-02): the exact payload the digest was computed over — the decision payload
+verbatim, the extent payload with each sorted atom-id list run-length encoded on the wire
+(:func:`_encode_atom_runs`). The witness is *explanation data, never attestation*: the digests
+remain the only staleness authority, the gate never reads a witness, and the loader
+**self-verifies** every witness by recomputing its digest — a payload that does not reproduce its
+digest is an internally incoherent sidecar and fails the load contract
+(:class:`~engine.errors.StaleArtifactError` naming the node), never a quiet degraded mode. This is
+what lets the S4.6b digest-diff explainer name WHICH children/atoms moved without any baseline
+document, snapshot, or git archaeology.
+
 The sidecar is **optional at generic load** (``load_structure_map`` never reads it) and **required
 at the S4.6 authored-map gate** (§1.4.1a): :func:`assert_evidence_gate` holds the one-to-one
 correspondence — every human-minted container has exactly one entry fresh on *both* digests, every
@@ -126,6 +137,195 @@ def _require_text(value: object, where: str) -> str:
     return value
 
 
+# --- the payload-witness wire codec (DT-4, s4_6_tooling_plan) ----------------------------------- #
+
+#: Decode budget for expanded atom ids — **cumulative**, and shared across an entire document at
+#: the load boundary. Without it a crafted pair (``["a_0", "a_999999999999"]``) would make the
+#: loader materialize the whole range; without the *cumulative* accounting, N sub-ceiling runs
+#: across slots and entries would sum without bound (the delta re-audit's demolisher forced a
+#: multi-million-id, 697 MB allocation from a 578-byte sidecar that way — the digest coherence
+#: check runs only *after* decode materializes the ids, so the budget must run first). The
+#: ceiling sits far above the 10^5 addressability tier (D35) while keeping the failure a clean
+#: load error instead of an OOM.
+_MAX_RUN_EXPANSION = 1_000_000
+
+
+def _split_decimal_tail(atom_id: str) -> tuple[str, str]:
+    """``(prefix, digits)`` where ``digits`` is the maximal ASCII-decimal tail (possibly empty).
+
+    ASCII-only deliberately: ``str.isdigit`` admits Unicode digits whose ``int()`` round-trip
+    changes the character, which would break ``decode(encode(x)) == x``.
+    """
+    i = len(atom_id)
+    while i > 0 and "0" <= atom_id[i - 1] <= "9":
+        i -= 1
+    return atom_id[:i], atom_id[i:]
+
+
+def _decode_atom_runs(tokens: object, *, budget: list[int] | None = None) -> list[str]:
+    """Inverse of :func:`_encode_atom_runs`: expand each ``[first, last]`` pair back to its ids.
+
+    A malformed token (wrong shape, mismatched prefixes/widths, descending range) is ``ValueError``
+    — the loader wraps it into the total contract. ``budget`` is a single-element mutable counter
+    of ids this decode may still emit, **debited before any expansion**, so a crafted range is a
+    clean failure, never an allocation. The loader shares ONE budget across the whole document
+    (per-run or per-call ceilings alone sum without bound across slots/entries — the delta
+    re-audit's allocation-bomb finding); a bare call gets a fresh per-call budget.
+    """
+    if not isinstance(tokens, (list, tuple)):
+        raise TypeError(f"atom-run tokens must be a list, got {type(tokens).__name__}")
+    if budget is None:
+        budget = [_MAX_RUN_EXPANSION]
+    out: list[str] = []
+    for token in tokens:
+        if isinstance(token, str):
+            budget[0] -= 1
+            if budget[0] < 0:
+                raise ValueError(
+                    f"atom-run decode exceeds the {_MAX_RUN_EXPANSION}-id budget — refusing the "
+                    f"allocation (crafted or degenerate witness)"
+                )
+            out.append(token)
+            continue
+        if not (
+            isinstance(token, (list, tuple))
+            and len(token) == 2
+            and all(isinstance(t, str) for t in token)
+        ):
+            raise ValueError(
+                f"malformed atom-run token {token!r}: expected a plain id or a [first, last] pair"
+            )
+        first, last = token
+        first_prefix, first_digits = _split_decimal_tail(first)
+        last_prefix, last_digits = _split_decimal_tail(last)
+        if not first_digits or first_prefix != last_prefix or len(first_digits) != len(last_digits):
+            raise ValueError(
+                f"malformed atom run {token!r}: endpoints must share a prefix and equal-width "
+                f"decimal tails"
+            )
+        start, end = int(first_digits), int(last_digits)
+        if end < start:
+            raise ValueError(f"malformed atom run {token!r}: descending range")
+        budget[0] -= end - start + 1
+        if budget[0] < 0:
+            raise ValueError(
+                f"atom run {token!r} expands to {end - start + 1} ids — beyond the remaining "
+                f"{_MAX_RUN_EXPANSION}-id budget; refusing the allocation"
+            )
+        width = len(first_digits)
+        out.extend(f"{first_prefix}{value:0{width}d}" for value in range(start, end + 1))
+    return out
+
+
+def _encode_atom_runs(ids: list[str] | tuple[str, ...]) -> list:
+    """The witness wire form of a sorted atom-id list: maximal consecutive runs (shared prefix,
+    equal-width ASCII-decimal tails, values ascending by one) collapse to a two-element
+    ``[first, last]`` array; everything else stays a plain string. Ids that don't fit the pattern
+    simply never compress — no id-scheme literal anywhere (inv 15).
+
+    Deterministic (one canonical encoding per input, so an unchanged re-stamp re-renders
+    byte-identically) and self-checked on every call: ``decode(encode(x)) == x``, so a codec fault
+    can never persist a lying witness.
+    """
+    tokens: list = []
+    i, n = 0, len(ids)
+    while i < n:
+        prefix, digits = _split_decimal_tail(ids[i])
+        j = i
+        if digits:
+            width, start = len(digits), int(digits)
+            while j + 1 < n:
+                nxt_prefix, nxt_digits = _split_decimal_tail(ids[j + 1])
+                if (
+                    nxt_prefix == prefix
+                    and len(nxt_digits) == width
+                    and int(nxt_digits) == start + (j + 1 - i)
+                ):
+                    j += 1
+                else:
+                    break
+        tokens.append([ids[i], ids[j]] if j > i else ids[i])
+        i = j + 1
+    # budget = exactly the input length: a correct encoding decodes to precisely len(ids), so any
+    # over-expansion bug is refused here too, and a legitimately huge in-memory encode never
+    # trips the document-load ceiling
+    if _decode_atom_runs(tokens, budget=[len(ids)]) != list(ids):
+        raise ValueError(
+            "atom-run encoding failed its decode(encode(x)) == x self-check — refusing to emit a "
+            "witness that does not reproduce its input"
+        )
+    return tokens
+
+
+# --- payload-witness shape validation (DT-4) ----------------------------------------------------- #
+
+#: The two ``own`` shapes the extent producer emits: a container binds ``heading``+``signature``,
+#: a leaf binds ``body``. A witness carrying any other slot combination is not a producer payload.
+_OWN_SLOT_SHAPES = ({"heading", "signature"}, {"body"})
+
+
+def _require_ascending_ids(values: object, where: str) -> tuple[str, ...]:
+    """A strictly ascending, duplicate-free sequence of atom-id strings — the canonical
+    sorted-set form the extent producer emits. Anything else cannot be a producer payload.
+    Returned as a tuple (the witnesses are stored deep-frozen)."""
+    if not isinstance(values, (list, tuple)):
+        raise TypeError(f"{where} must be a list of atom ids, got {type(values).__name__}")
+    ids = tuple(_require_text(value, f"{where}[{i}]") for i, value in enumerate(values))
+    if any(b <= a for a, b in zip(ids, ids[1:])):
+        raise ValueError(
+            f"{where} must be strictly ascending with no duplicates — the canonical sorted-set "
+            f"form the digest producers emit"
+        )
+    return ids
+
+
+def _normalized_decision_payload(payload: object, where: str) -> dict:
+    """Validate + normalize a decision-payload witness to the exact producer shape
+    (``{"node_class": str, "children": [ordered node ids]}`` — children order is meaningful,
+    never sorted here)."""
+    if not isinstance(payload, Mapping):
+        raise TypeError(f"{where} must be an object, got {type(payload).__name__}")
+    if set(payload.keys()) != {"node_class", "children"}:
+        raise ValueError(
+            f"{where} must carry exactly node_class + children, got {sorted(map(str, payload.keys()))}"
+        )
+    node_class = _require_text(payload["node_class"], f"{where}.node_class")
+    children = payload["children"]
+    if not isinstance(children, (list, tuple)):
+        raise TypeError(f"{where}.children must be a list, got {type(children).__name__}")
+    return {
+        "node_class": node_class,
+        "children": tuple(
+            _require_text(child, f"{where}.children[{i}]") for i, child in enumerate(children)
+        ),
+    }
+
+
+def _normalized_extent_payload(payload: object, where: str) -> dict:
+    """Validate + normalize an extent-payload witness to the exact producer shape
+    (``{"own": <per-slot sorted sets>, "beneath": <sorted union>}``)."""
+    if not isinstance(payload, Mapping):
+        raise TypeError(f"{where} must be an object, got {type(payload).__name__}")
+    if set(payload.keys()) != {"own", "beneath"}:
+        raise ValueError(
+            f"{where} must carry exactly own + beneath, got {sorted(map(str, payload.keys()))}"
+        )
+    own = payload["own"]
+    if not isinstance(own, Mapping):
+        raise TypeError(f"{where}.own must be an object, got {type(own).__name__}")
+    if set(own.keys()) not in _OWN_SLOT_SHAPES:
+        raise ValueError(
+            f"{where}.own must carry exactly heading+signature (container) or body (leaf), got "
+            f"{sorted(map(str, own.keys()))}"
+        )
+    return {
+        "own": {
+            slot: _require_ascending_ids(own[slot], f"{where}.own.{slot}") for slot in sorted(own)
+        },
+        "beneath": _require_ascending_ids(payload["beneath"], f"{where}.beneath"),
+    }
+
+
 @dataclass(frozen=True, slots=True)
 class EvidenceEntry:
     """One authored-evidence record: the prose rationale for one hand-authored container, pinned
@@ -136,6 +336,14 @@ class EvidenceEntry:
     ``Atom``/``Alias`` idiom): every string field must be a genuine, visibly non-blank ``str``
     (zero-width-only prose is no evidence), and the revision must be a genuine non-negative int
     (Tier-1 ``"integer"`` admits ``2.0``; ``bool`` subclasses int).
+
+    ``decision_payload``/``extent_payload`` are the DT-4 payload witnesses, held **decoded and
+    deep-frozen** (``MappingProxyType`` + tuples, the ``by_node`` posture — the wire run-encoding
+    is the renderer/loader's concern) and normalized to the exact producer shapes. Coherence is a
+    *model* invariant, not a load nicety: a witness that does not reproduce its digest through
+    THE producer cannot be constructed at all — nor mutated out from under it afterwards (the
+    delta re-audit's aliasing finding) — so a loaded entry's witness is always trustworthy and
+    the explainer never needs a degraded mode for it.
     """
 
     node_id: str
@@ -143,6 +351,8 @@ class EvidenceEntry:
     extent_digest: str
     evidence: str
     authored_at_revision: int
+    decision_payload: Mapping
+    extent_payload: Mapping
 
     def __post_init__(self) -> None:
         _require_text(self.node_id, "EvidenceEntry.node_id")
@@ -155,6 +365,27 @@ class EvidenceEntry:
                 f"EvidenceEntry.authored_at_revision must be >= 0 (a map_revision), got "
                 f"{self.authored_at_revision}"
             )
+        decision = _normalized_decision_payload(
+            self.decision_payload, "EvidenceEntry.decision_payload"
+        )
+        extent = _normalized_extent_payload(self.extent_payload, "EvidenceEntry.extent_payload")
+        # hash the plain normalized forms (json cannot serialize a MappingProxyType), THEN freeze
+        if _hash_canonical(decision) != self.decision_digest:
+            raise ValueError(
+                f"EvidenceEntry {self.node_id!r}: decision_payload does not reproduce "
+                f"decision_digest — the stored witness is untrustworthy; re-stamp the node"
+            )
+        if _hash_canonical(extent) != self.extent_digest:
+            raise ValueError(
+                f"EvidenceEntry {self.node_id!r}: extent_payload does not reproduce "
+                f"extent_digest — the stored witness is untrustworthy; re-stamp the node"
+            )
+        object.__setattr__(self, "decision_payload", MappingProxyType(decision))
+        object.__setattr__(
+            self,
+            "extent_payload",
+            MappingProxyType({"own": MappingProxyType(extent["own"]), "beneath": extent["beneath"]}),
+        )
 
 
 @dataclass(frozen=True, slots=True)
@@ -194,22 +425,30 @@ class AuthoringEvidence:
 # --- the split staleness digests (§1.4.1b) ------------------------------------------------------ #
 
 
+def decision_payload(node: Node) -> dict:
+    """THE decision payload — what :func:`decision_digest` hashes, and (verbatim) the DT-4 witness
+    an entry stores beside that digest: ``{"node_class": ..., "children": [ordered child node
+    ids]}`` (a leaf contributes the empty sequence; tuples — the stored-witness interior form,
+    identical canonical-JSON bytes). One producer for digest and witness, so the two can never be
+    computed from different definitions."""
+    return {
+        "node_class": node.node_class,
+        "children": tuple(node.children) if isinstance(node, ContainerNode) else (),
+    }
+
+
 def decision_digest(node: Node) -> str:
     """THE decision digest — the human-topology half of the split staleness key (§1.4.1b).
 
-    Payload: ``{"node_class": ..., "children": [ordered child node ids]}`` (a leaf contributes the
-    empty list), hashed through the single S4 producer (D-S4-I). The field list is CLOSED to atom
-    ids — that is the R1 split: an S5 re-bind that renames every atom leaves every decision digest
-    byte-identical, so this digest is **never machine-refreshed**; when it stales, a human changed
-    the map's shape and must re-verify the rationale. Reading order is structure (§3.B.6), so a
-    child reorder changes it. Display/handle/minting metadata never enters. Authoring tooling
-    stamps entries via :func:`build_evidence_entry` — never a hand-computed hash.
+    Payload: :func:`decision_payload`, hashed through the single S4 producer (D-S4-I). The field
+    list is CLOSED to atom ids — that is the R1 split: an S5 re-bind that renames every atom
+    leaves every decision digest byte-identical, so this digest is **never machine-refreshed**;
+    when it stales, a human changed the map's shape and must re-verify the rationale. Reading
+    order is structure (§3.B.6), so a child reorder changes it. Display/handle/minting metadata
+    never enters. Authoring tooling stamps entries via :func:`build_evidence_entry` — never a
+    hand-computed hash.
     """
-    payload = {
-        "node_class": node.node_class,
-        "children": list(node.children) if isinstance(node, ContainerNode) else [],
-    }
-    return _hash_canonical(payload)
+    return _hash_canonical(decision_payload(node))
 
 
 def extent_digest(node: Node, projection: ProjectionMap) -> str:
@@ -229,12 +468,23 @@ def extent_digest(node: Node, projection: ProjectionMap) -> str:
     against). Assumes a validated map; fails loud (``ValueError``) on a dangling child reference
     or any node revisit (cycle / multi-parent / duplicate edge) rather than crashing or hanging.
     """
+    return _hash_canonical(extent_payload(node, projection))
+
+
+def extent_payload(node: Node, projection: ProjectionMap) -> dict:
+    """THE extent payload — what :func:`extent_digest` hashes, and (run-encoded on the wire) the
+    DT-4 witness an entry stores beside that digest: the node's ``own`` per-slot binding plus the
+    flat sorted ``beneath`` union (tuples — the stored-witness interior form, identical
+    canonical-JSON bytes). One producer for digest and witness. Same validated-map precondition
+    as the digest (fails loud on dangling/revisited nodes)."""
     if isinstance(node, ContainerNode):
-        own = {"heading": sorted(node.heading_atoms), "signature": sorted(node.signature_atoms)}
+        own = {
+            "heading": tuple(sorted(node.heading_atoms)),
+            "signature": tuple(sorted(node.signature_atoms)),
+        }
     else:
-        own = {"body": sorted(node.body_atoms)}
-    payload = {"own": own, "beneath": sorted(_beneath_atom_ids(node, projection))}
-    return _hash_canonical(payload)
+        own = {"body": tuple(sorted(node.body_atoms))}
+    return {"own": own, "beneath": tuple(sorted(_beneath_atom_ids(node, projection)))}
 
 
 def _require_child(child_id: str, parent_id: str, projection: ProjectionMap) -> Node:
@@ -341,6 +591,10 @@ def load_authoring_evidence(path: Path, *, expected_book: str | None = None) -> 
         ) from exc
     try:
         _strict_int(doc["schema_version"], "schema_version")
+        # ONE decode budget across the whole document — per-run ceilings alone sum without bound
+        # over slots and entries (a sub-KB sidecar forced a multi-million-id allocation in the
+        # delta re-audit), and the digest coherence check only runs AFTER decode materializes ids.
+        document_budget = [_MAX_RUN_EXPANSION]
         evidence = AuthoringEvidence(
             book=doc["book"],
             entries=tuple(
@@ -350,6 +604,19 @@ def load_authoring_evidence(path: Path, *, expected_book: str | None = None) -> 
                     extent_digest=e["extent_digest"],
                     evidence=e["evidence"],
                     authored_at_revision=e["authored_at_revision"],
+                    decision_payload=e["decision_payload"],
+                    extent_payload={
+                        # Wire → decoded witness; the entry model then self-verifies each payload
+                        # against its digest, so an expanded run that lies about the substrate
+                        # cannot survive the load (DT-4).
+                        "own": {
+                            slot: _decode_atom_runs(tokens, budget=document_budget)
+                            for slot, tokens in e["extent_payload"]["own"].items()
+                        },
+                        "beneath": _decode_atom_runs(
+                            e["extent_payload"]["beneath"], budget=document_budget
+                        ),
+                    },
                 )
                 for e in doc["entries"]
             ),
@@ -422,6 +689,74 @@ def _describe(node: Node) -> str:
     return f"{node.node_id!r} ({title!r})" if title else f"{node.node_id!r}"
 
 
+def _attributed_findings(
+    evidence: AuthoringEvidence, projection: ProjectionMap
+) -> tuple[tuple[str, str, str], ...]:
+    """The single findings core, each finding attributed to its subject ``node_id`` —
+    ``(node_id, kind, message)``. :func:`evidence_findings` is the (kind, message) projection of
+    exactly this sequence; the S4.6b worklist view consumes the attribution directly, so per-node
+    status is never re-derived by parsing messages or by a second staleness computation."""
+    findings: list[tuple[str, str, str]] = []
+    human_containers = {
+        node.node_id
+        for node in projection.nodes
+        if isinstance(node, ContainerNode) and node.minted_by == MINTED_BY_HUMAN
+    }
+    for node in projection.nodes:  # map reading order, not lexicographic id order
+        if node.node_id in human_containers and node.node_id not in evidence.by_node:
+            findings.append(
+                (
+                    node.node_id,
+                    "missing",
+                    f"human-minted container {_describe(node)} has no evidence entry",
+                )
+            )
+    for entry in evidence.entries:
+        node = projection.by_id.get(entry.node_id)
+        if node is None:
+            findings.append(
+                (
+                    entry.node_id,
+                    "orphaned",
+                    f"evidence entry {entry.node_id!r} binds no node in the map",
+                )
+            )
+            continue
+        if entry.node_id not in human_containers:
+            findings.append(
+                (
+                    entry.node_id,
+                    "misbound",
+                    f"evidence entry {entry.node_id!r} binds a node that is not a human-minted "
+                    f"container — evidence documents hand-authored containers only",
+                )
+            )
+            continue
+        live_decision = decision_digest(node)
+        if entry.decision_digest != live_decision:
+            findings.append(
+                (
+                    entry.node_id,
+                    "stale-decision",
+                    f"evidence for {_describe(node)} is STALE on its decision digest: pinned "
+                    f"{entry.decision_digest!r} != live {live_decision!r} — the container's class "
+                    f"or child topology changed; re-verify the authoring decision and re-stamp",
+                )
+            )
+        live_extent = extent_digest(node, projection)
+        if entry.extent_digest != live_extent:
+            findings.append(
+                (
+                    entry.node_id,
+                    "stale-extent",
+                    f"evidence for {_describe(node)} is STALE on its extent digest: pinned "
+                    f"{entry.extent_digest!r} != live {live_extent!r} — the subtree's atom "
+                    f"coverage changed; re-verify the boundary extent and re-stamp",
+                )
+            )
+    return tuple(findings)
+
+
 def evidence_findings(
     evidence: AuthoringEvidence, projection: ProjectionMap
 ) -> tuple[tuple[str, str], ...]:
@@ -438,54 +773,7 @@ def evidence_findings(
     lines). ``authored_at_revision`` is never consulted (§1.4.1b). Assumes a validated projection
     (see the module docstring). Returns ``()`` when the pair holds.
     """
-    findings: list[tuple[str, str]] = []
-    human_containers = {
-        node.node_id
-        for node in projection.nodes
-        if isinstance(node, ContainerNode) and node.minted_by == MINTED_BY_HUMAN
-    }
-    for node in projection.nodes:  # map reading order, not lexicographic id order
-        if node.node_id in human_containers and node.node_id not in evidence.by_node:
-            findings.append(
-                ("missing", f"human-minted container {_describe(node)} has no evidence entry")
-            )
-    for entry in evidence.entries:
-        node = projection.by_id.get(entry.node_id)
-        if node is None:
-            findings.append(
-                ("orphaned", f"evidence entry {entry.node_id!r} binds no node in the map")
-            )
-            continue
-        if entry.node_id not in human_containers:
-            findings.append(
-                (
-                    "misbound",
-                    f"evidence entry {entry.node_id!r} binds a node that is not a human-minted "
-                    f"container — evidence documents hand-authored containers only",
-                )
-            )
-            continue
-        live_decision = decision_digest(node)
-        if entry.decision_digest != live_decision:
-            findings.append(
-                (
-                    "stale-decision",
-                    f"evidence for {_describe(node)} is STALE on its decision digest: pinned "
-                    f"{entry.decision_digest!r} != live {live_decision!r} — the container's class "
-                    f"or child topology changed; re-verify the authoring decision and re-stamp",
-                )
-            )
-        live_extent = extent_digest(node, projection)
-        if entry.extent_digest != live_extent:
-            findings.append(
-                (
-                    "stale-extent",
-                    f"evidence for {_describe(node)} is STALE on its extent digest: pinned "
-                    f"{entry.extent_digest!r} != live {live_extent!r} — the subtree's atom "
-                    f"coverage changed; re-verify the boundary extent and re-stamp",
-                )
-            )
-    return tuple(findings)
+    return tuple((kind, message) for _, kind, message in _attributed_findings(evidence, projection))
 
 
 def assert_evidence_gate(evidence: AuthoringEvidence, projection: ProjectionMap) -> None:
@@ -518,12 +806,16 @@ def build_evidence_entry(
             f"build_evidence_entry: {node.node_id!r} is not a human-minted container — evidence "
             f"documents hand-authored containers only"
         )
+    d_payload = decision_payload(node)
+    e_payload = extent_payload(node, projection)
     return EvidenceEntry(
         node_id=node.node_id,
-        decision_digest=decision_digest(node),
-        extent_digest=extent_digest(node, projection),
+        decision_digest=_hash_canonical(d_payload),
+        extent_digest=_hash_canonical(e_payload),
         evidence=evidence,
         authored_at_revision=authored_at_revision,
+        decision_payload=d_payload,
+        extent_payload=e_payload,
     )
 
 
@@ -542,6 +834,19 @@ def render_authoring_evidence(evidence: AuthoringEvidence) -> str:
                 "extent_digest": entry.extent_digest,
                 "evidence": entry.evidence,
                 "authored_at_revision": entry.authored_at_revision,
+                "decision_payload": {
+                    "node_class": entry.decision_payload["node_class"],
+                    "children": list(entry.decision_payload["children"]),
+                },
+                "extent_payload": {
+                    # Decoded → wire runs; the codec's per-call decode(encode(x)) == x self-check
+                    # plus the deterministic maximal-run rule keep re-stamps byte-idempotent.
+                    "own": {
+                        slot: _encode_atom_runs(ids)
+                        for slot, ids in sorted(entry.extent_payload["own"].items())
+                    },
+                    "beneath": _encode_atom_runs(entry.extent_payload["beneath"]),
+                },
             }
             for entry in evidence.entries
         ],

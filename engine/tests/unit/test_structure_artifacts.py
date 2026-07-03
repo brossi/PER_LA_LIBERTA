@@ -110,6 +110,7 @@ PUBLIC_SURFACE_BY_CONCERN = {
     "freeze": ("build_freeze_record", "render_freeze_record", "load_freeze_record",
                "write_freeze_record", "assert_freeze_matches"),
     "evidence": ("EvidenceEntry", "AuthoringEvidence", "decision_digest", "extent_digest",
+                 "decision_payload", "extent_payload",
                  "load_authoring_evidence", "assert_evidence_gate", "evidence_schema_version_const",
                  "authoring_evidence_path", "EvidenceGateError", "EVIDENCE_FINDING_KINDS",
                  "evidence_findings", "build_evidence_entry", "render_authoring_evidence",
@@ -126,6 +127,8 @@ PUBLIC_SURFACE_BY_CONCERN = {
                       "load_structure_map", "write_structure_map", "render_structure_map",
                       "build_manifest", "schema_version_const", "assert_schema_born"),
     "reader_glue": ("load_workspace_streams", "workspace_reader"),
+    "authoring": ("assert_authoring_integrity", "authoring_status", "explain_evidence_drift",
+                  "stamp_evidence", "validate_authoring"),
 }
 
 
@@ -328,6 +331,15 @@ EXPECTED_PUBLIC_SURFACE = frozenset(
         "build_evidence_entry",
         "render_authoring_evidence",
         "write_authoring_evidence",
+        # S4.6b DT-4 — the digest payload producers (witnesses + explainer)
+        "decision_payload",
+        "extent_payload",
+        # S4.6b — the authoring-loop toolkit (plan §7's ratified five, issue #34)
+        "assert_authoring_integrity",
+        "authoring_status",
+        "explain_evidence_drift",
+        "stamp_evidence",
+        "validate_authoring",
     }
 )
 

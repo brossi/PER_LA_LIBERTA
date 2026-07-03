@@ -102,17 +102,14 @@ Italian — it binds this tracker back to the live-edition program (the deploy-h
    (#32, `ebd7f11`): `load_workspace_streams` / `workspace_reader` in
    `structure/atom_store.py`/`structure_map.py`, with `assert_reference_integrity` composed on
    load.
-3. **S4.6 authoring-loop tooling (under-specified on the row).** The row pins the workflow
-   (skeleton seeds candidates, evidence recorded) but no one owns the mechanics: a candidate-map
-   seeder from the known PLL skeleton, and a validate-on-save runner (the loader over the frozen
-   streams) so authoring errors surface per-edit, not at the end. `CLASS_NOT_IN_VOCAB` et al. only
-   protect an authoring loop that actually runs the validator. Named deliverables (post-audit,
-   2026-07-02): a **freeze×evidence composite gate** (one command = `assert_freeze_matches` over
-   the workspace streams + `load_structure_map` + `assert_evidence_gate` — the full "is this
-   authored map trustworthy" check); a **digest-diff explainer** (given a `stale-decision` /
-   `stale-extent` finding, show WHICH children/atoms moved, not just the hashes); and a
-   **non-raising status listing** consuming `evidence_findings()` (the worklist view, kinds as
-   columns).
+3. ~~**S4.6 authoring-loop tooling (under-specified on the row).**~~ **DONE 2026-07-03** as
+   S4.6b (#34; plan `s4_6_tooling_plan.md`, RATIFIED): `structure/authoring/` ships the composite
+   gate, validate-on-save (`--watch`), the worklist status listing, the single-node stamp
+   (DT-6), and the digest-diff explainer — exact diffs always, via DT-4 payload witnesses
+   persisted in the sidecar (schema amended inside the free-edit window). Book side:
+   `books/per_la_liberta/seed_structure_map.py` seeded the draft (120 nodes / 61 containers /
+   56 chapters, full 4,786-atom coverage, 22 review flags); the gate reds all-`missing` — the
+   S4.6 worklist is live.
 4. **Branch/program reconciliation (outside this tracker, gating "ready").** The spike carries
    `engine-framework`'s history, and that branch's remaining port work (M4b cleanup step —
    mid-port, not written; M4c translate/typeset) lives in `ENGINE_M4b_PLAN.md`, not here. "Engine

@@ -73,12 +73,21 @@ from engine.structure.evidence import (
     assert_evidence_gate,
     build_evidence_entry,
     decision_digest,
+    decision_payload,
     evidence_findings,
     evidence_schema_version_const,
     extent_digest,
+    extent_payload,
     load_authoring_evidence,
     render_authoring_evidence,
     write_authoring_evidence,
+)
+from engine.structure.authoring import (
+    assert_authoring_integrity,
+    authoring_status,
+    explain_evidence_drift,
+    stamp_evidence,
+    validate_authoring,
 )
 from engine.structure.atom_store import (
     CANONICAL,
@@ -275,4 +284,15 @@ __all__ = [
     "build_evidence_entry",
     "render_authoring_evidence",
     "write_authoring_evidence",
+    # S4.6b DT-4 (user-ratified 2026-07-02): the digest payload producers — one producer for
+    # digest and witness, consumed by the sidecar's payload witnesses and the digest-diff explainer
+    "decision_payload",
+    "extent_payload",
+    # S4.6b — the authoring-loop toolkit (composite gate, editor-loop validation, worklist
+    # status, single-node stamp, digest-diff explainer); plan §7's ratified five (issue #34)
+    "assert_authoring_integrity",
+    "authoring_status",
+    "explain_evidence_drift",
+    "stamp_evidence",
+    "validate_authoring",
 ]

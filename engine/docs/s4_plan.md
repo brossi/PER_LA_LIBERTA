@@ -255,6 +255,18 @@ per inv 11, M9) belongs to the **negative-fixture set** (§1.2.0/§3.B.5), **not
     reversed: a within-node heading↔signature re-slot now stales that node's extent (locally — the
     parent's `beneath` union is unchanged), since the role assignment is part of what the human
     verified.
+
+    **Payload witnesses (2026-07-03, S4.6b DT-4 — user-ratified; s4_6_tooling_plan):** each
+    sidecar entry additionally persists the exact payload behind each digest — the decision
+    payload verbatim, the extent payload with its sorted atom-id lists run-length encoded on the
+    wire — as **explanation data, never attestation**: the digests remain the only staleness
+    authority, the gate never reads a witness, and `load_authoring_evidence` **self-verifies**
+    every witness by recomputing its digest through THE producer (an incoherent pair is a
+    `StaleArtifactError` naming the node, never a quiet degraded mode; under
+    coherence-at-construction a forged digest cannot even load). This is what lets the S4.6b
+    digest-diff explainer name WHICH children/atoms moved with no baseline snapshot or git
+    archaeology. Amended inside the still-open schema-v1 free-edit window (no sidecar existed
+    yet); the digest producers and payload shapes above are untouched.
   - **§1.4.1c — sidecar engine half (forward engine row, named — M9/X20).** The sidecar **schema + the digest-
     staleness validator** are *engine code* (not prose Ben authors), so they get an explicit forward tracker
     row with an **engine owner**, scheduled **immediately before S4.6 (predecessor: S4.4 schema; successor:

@@ -14,7 +14,8 @@ through `ccf9c05`); stream measurements taken 2026-07-03 on the live frozen stre
 Inputs this plan consolidates:
 
 - `docs/probes/s2_0_geometry_alignment.md` — the S2.0 probe result + §"S2.1 design inputs"
-  (revised post-audit) — and `docs/probes/s2_0_adversarial_audit.md` (Findings B/E/2/5 carried).
+  (revised post-audit) — and `docs/probes/s2_0_adversarial_audit.md` (Findings B/E carried;
+  the numbered findings 2/5 are the alignment doc's §Findings).
 - `books/per_la_liberta/probes/s2_0_geometry_probe.py` — the prototype the detector/matcher
   generalize (its `tokens`/`bow_coverage`/`ordered_coverage`/`detect_columns`/`reading_order`).
 - The ingestion human-in-the-loop ruling (user, 2026-06-29): classifiers calibrate to **abstain**;
@@ -120,7 +121,8 @@ PLL never exercises this branch, and the engine must not presume it away.
   needed). Local tesseract at `/opt/homebrew/bin/tesseract` with `ita` + `ita_old`; tessdata must
   be discoverable (probe docstring). **CI (`.github/workflows/engine.yml`, ubuntu-latest) has no
   tesseract today** and the 82 MB PDF is gitignored — DT-11 owns the split. Tracked-in-CI real
-  assets: `data/copy{1,3}_raw.txt`, `data/copy3_page_map.json` (git ls-files verified).
+  assets: `books/per_la_liberta/inputs/copy{1,2,3}_raw.txt` + `copy3_pro_page_map.json`
+  (git ls-files verified; these are the files the engine's real-input tests read).
 - **Workspace containment** — `paths.py`: `BookWorkspace.resolve` guards **writes** into `work/`
   (`:97–113`); tracked read-only siblings are the established pattern (`inputs/`, `:83–86`);
   `engine/.gitignore:15–20` ignores `books/*/work/{data,output,state}/*` ("regenerable, so never
@@ -210,7 +212,9 @@ The done-when says a canonical atom carries its **primary witness's** box; canon
 are copy1+copy2 only, and copy1 is the primary structural witness — so **copy1 is the matched
 witness** (`matched_witness_id="copy1"`). Problem: copy1 is `PAGE_UNMAPPED` (no page map). Rather
 than a page prior, the build derives it by monotone global alignment of the (paginated) box token
-stream against copy1's (ordered) token stream. Byproduct: **real page ranges for copy1's atoms**
+stream against copy1's (ordered) token stream — both are in reading order, so page assignment is
+a monotone segmentation of the witness stream, and per-witness-atom page windows fall out (the
+windows DT-8's matcher works inside). Byproduct: **real page ranges for copy1's atoms**
 — the open S1.3a page-attribution question gets its answer as derived sidecar data (never a
 mutation of the frozen stream, D25/DT-9).
 
@@ -236,7 +240,7 @@ mutation of the frozen stream, D25/DT-9).
   so two boundary positions tie on score — asserts the exact (earliest) boundary indices; a
   mutant flipping the tie-break to latest reds.
 - **Furniture:** the witness stream *contains* furniture atoms (`processing_scope="excluded"`,
-  `atoms.py:30–35`), so page-locate runs over the full stream — printed folios are page-anchoring
+  `atoms.py:30–37`), so page-locate runs over the full stream — printed folios are page-anchoring
   signal, and a furniture atom that matches its printed box gets real geometry, which is fine.
 
 **No copy2 fallback (ruling, R3):** the tracker requires the canonical atom to carry its *primary
@@ -445,7 +449,7 @@ tracked verdict file):
   "pages":  { "52": {"status": "matched", "match_rate": 0.94, "n_cols": 2,
                      "n_cols_source": "evidence", "order_qa": 0.91, "dropped_boxes": 0},
               "6":  {"status": "routed",  "stage": "density", "signal": "band-margin", "value": 0.012},
-              "301": {"status": "declined", "verdict": {"action": "decline_geometry", "by": "…", "at": "…"}} },
+              "230": {"status": "declined", "verdict": {"action": "decline_geometry", "by": "…", "at": "…"}} },
   "atoms":  { "<copy1_atom_id>":  {"status": "matched", "page": 52, "bbox": [1,2,3,4],
                                    "match_method": "token-bow-v1", "match_confidence": 0.91},
               "<copy1_atom_id2>": {"status": "unmatched", "reason": "below_atom_floor",
@@ -490,11 +494,13 @@ produces new frozen instances at read time; streams untouched. Edges:
   attach from `derived_from` (not persisted per-atom — the copy1-keyed `atoms` map cannot name
   it) + the `coverage.canonical_no_primary_derivation` counter; **never a match-failure reason**
   (DT-13, G-25);
-- canonical atom back-linking to **multiple** copy1 atoms →
-  `unmatched(reason="multi_primary_derivation")` + counted in
-  `coverage.canonical_multi_primary_derivation` in v1; measured zero on the live stream (§2), so
-  the fixture is synthetic-only today and exists to guard future re-freezes — a mutant that
-  unions the two or silently picks the first reds (G-20);
+- canonical atom back-linking to **multiple** copy1 atoms → reported
+  `unmatched(reason="multi_primary_derivation")` **at attach, canonical mode** — like
+  `ineligible`, an attach-time outcome, not a persisted per-atom record (the copy1-keyed `atoms`
+  map cannot name a canonical atom, and the persisted per-atom reason enum stays the three
+  values above); the durable trace is `coverage.canonical_multi_primary_derivation`. Measured
+  zero on the live stream (§2), so the fixture is synthetic-only today and exists to guard
+  future re-freezes — a mutant that unions the two or silently picks the first reds (G-20);
 - dangling back-links are already `CaptureError`'s jurisdiction at the store tier, not re-checked
   here.
 
@@ -583,8 +589,8 @@ split is a **claim ladder**: each tier claims only what it runs (R20).
    claims about real-book matching** — distributions, threshold ratification, residues. The
    full-book run: `books/per_la_liberta/` runner producing `copy1_geom.json` + a written run
    report (`docs/probes/s2_1_run_report.md`) with the calibration/threshold distributions
-   (DT-3/6/8). Real-input tests that need only tracked assets (copy3 raw + page map) still run
-   in CI.
+   (DT-3/6/8). Real-input tests that need only tracked assets (`inputs/copy3_raw.txt` +
+   `copy3_pro_page_map.json`) still run in CI.
 
 Enforcement of tier drift (§7): no G-row may cite the synthetic PDF as evidence for a
 matcher-semantics invariant — a semantics row that only reds via the synthetic PDF is mis-homed
@@ -675,8 +681,9 @@ constructor cannot catch: wrong *values*, wrong *routing*, wrong *state*.
 Not in the table (module-external ripple, DT-1): the exit-code uniqueness sweep extension gets its
 own red during #35 — `GeometryError.exit_code` temporarily set to 11 must red the extended sweep.
 
-Post-build: a mutation hunt over the four new core modules (house discipline), survivors
-dispositioned in the audit note.
+Post-build: a mutation hunt over the five new core modules — `geom_sidecar.py` explicitly
+included; it owns the most load-boundary rows (house discipline) — survivors dispositioned in
+the audit note.
 
 ## §5 Slices and build order (children of #29)
 
@@ -724,7 +731,7 @@ S2.2.
 1. Full suite green (unit + real-input) locally and in CI (with the new tesseract step); ruff
    clean on changed files; neutrality scan green **including the new quoted-language terms**.
 2. Red-first matrix: every G-row's red observed and recorded (planted violation or mutant) before
-   its green; post-build mutation hunt over the four new modules.
+   its green; post-build mutation hunt over the five new modules (incl. `geom_sidecar.py`).
 3. **Claim-ladder rule (DT-11):** no G-row may cite the synthetic PDF as evidence for a
    matcher-semantics invariant — a semantics row that only reds via the synthetic PDF is
    mis-homed and gets moved to a fake-backend fixture.

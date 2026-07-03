@@ -228,26 +228,33 @@ per inv 11, M9) belongs to the **negative-fixture set** (§1.2.0/§3.B.5), **not
       leaf contributes `[]`). Witnesses the human's **topology decision**; re-bind-stable by D33
       store-and-rebind (a re-bind renames atoms, never node ids) and therefore **never machine-refreshed** —
       a drift always means a human changed the map's shape.
-    - **extent digest** — exact payload `{"extent": [<sorted set of the node's transitive subtree atom
-      coverage>]}` (own `heading_atoms` + `signature_atoms` + every descendant leaf's `body_atoms`,
-      slot-flattened, set-canonicalized). Witnesses the **substrate binding**; semantics that fall out: a
-      boundary move stales exactly the subtrees whose union changed (an unchanged-union ancestor stays
-      fresh), content addition cascades to every ancestor (honest), re-slotting within one node stales
-      nothing. Mechanically re-stampable at S5 where a re-bind is unique + above threshold (protocol owned
-      by S5.1).
+    - **extent digest** — exact payload `{"own": <the node's per-slot binding — {"heading": […],
+      "signature": […]} for a container, {"body": […]} for a leaf, each slot a sorted set>, "beneath":
+      [<flat sorted union of every descendant's coverage>]}` *(slot-aware form, F5/Option B closure —
+      user-ratified 2026-07-02; supersedes the initial slot-flattened single-set payload, changed inside
+      the schema-v1 free-edit window)*. Witnesses the **substrate binding**; semantics that fall out: any
+      re-slot touching the node's own binding (heading→signature within the node, or a heading atom moved
+      into its own child leaf — the F5 case the flat payload missed) stales exactly that node; a boundary
+      move stales exactly the subtrees whose union changed (an unchanged-union ancestor stays fresh);
+      internal re-segmentation under an unchanged boundary stales nothing above it; content addition
+      cascades to every ancestor (honest). Mechanically re-stampable at S5 where a re-bind is unique +
+      above threshold (protocol owned by S5.1).
 
     Evidence is stale **iff either digest changes**, each half its own finding kind (`stale-decision` /
     `stale-extent`). `map_revision` is **informational bookkeeping, NOT** a staleness trigger (Audit 15).
     The sidecar hash does **not** enter structure-map lineage; the document persists its own
     `schema_version` + `stale_class` + `book` (loader `expected_book` binding).
 
-    **Known consequence (delta re-audit 2026-07-02, RAN-verified):** a re-slot ACROSS nodes inside one
-    subtree — e.g. a container's `heading_atoms` atom moved into its own child leaf's `body_atoms` —
-    changes **neither** digest: the subtree union is unchanged (extent) and so is the topology
-    (decision), yet the container's heading boundary was redrawn. The retired single digest (per-slot
-    owned atoms) would have staled it. If that case must stale evidence, it is an S5+ spec extension
-    (a third, per-node-slot witness), not an implementation fix — the code implements this payload
-    exactly.
+    **F5 closure (2026-07-02, Option B, user-ratified):** the delta re-audit found that under the
+    original flat-set extent payload, a re-slot ACROSS nodes inside one subtree (a container's heading
+    atom moved into its own child leaf's body) changed **neither** digest despite redrawing the heading
+    boundary. Closed by making the extent payload slot-aware (the `own`/`beneath` form above) rather
+    than adding a third digest: the two-domain taxonomy stands (decision = id-free human topology;
+    extent = id-bearing binding, now complete over the node's binding surface), no new schema field or
+    finding kind, and the S5 re-stamp protocol is untouched. One earlier acceptance deliberately
+    reversed: a within-node heading↔signature re-slot now stales that node's extent (locally — the
+    parent's `beneath` union is unchanged), since the role assignment is part of what the human
+    verified.
   - **§1.4.1c — sidecar engine half (forward engine row, named — M9/X20).** The sidecar **schema + the digest-
     staleness validator** are *engine code* (not prose Ben authors), so they get an explicit forward tracker
     row with an **engine owner**, scheduled **immediately before S4.6 (predecessor: S4.4 schema; successor:

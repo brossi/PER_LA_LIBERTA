@@ -17,12 +17,15 @@ two change domains, so each entry pins **two digests**, each through THE produce
   node ids, *nothing else*. Re-bind-stable by D33 store-and-rebind (an S5 re-bind renames atoms,
   never node ids), and therefore **never machine-refreshed**: a stale decision digest always means
   a human changed the map's shape and must re-verify the rationale.
-- :func:`extent_digest` — the **substrate binding**: the node's transitive subtree atom coverage
-  (own ``heading_atoms``/``signature_atoms`` + every descendant leaf's ``body_atoms``),
-  slot-flattened and canonicalized as a **sorted set**. A boundary move stales exactly the affected
-  subtrees (an ancestor whose union is unchanged stays fresh); content addition cascades
-  extent-staleness to every ancestor (accepted as honest). At S5, extents are mechanically
-  re-stampable where a re-bind is unique and above threshold — the re-stamp protocol is S5.1's.
+- :func:`extent_digest` — the **substrate binding**, slot-aware since the F5/Option B closure
+  (user-ratified 2026-07-02): the node's **own** per-slot binding (``heading``/``signature`` for a
+  container, ``body`` for a leaf — each a sorted set) plus the flat sorted union of everything
+  **beneath** it. Any re-slot touching the node's own binding (heading→signature, or a heading
+  atom moved into its own child leaf — the F5 case the earlier flat-set payload missed) stales
+  exactly that node; a boundary move stales exactly the affected subtrees (an ancestor whose
+  union is unchanged stays fresh); content addition cascades extent-staleness to every ancestor
+  (accepted as honest). At S5, extents are mechanically re-stampable where a re-bind is unique
+  and above threshold — the re-stamp protocol is S5.1's.
 
 Display and handle metadata (``title``/``designation``/``handle_policy``/``minted_by``) enter
 neither digest: re-titling a container does not invalidate the rationale for its *boundaries*.
@@ -210,28 +213,50 @@ def decision_digest(node: Node) -> str:
 
 
 def extent_digest(node: Node, projection: ProjectionMap) -> str:
-    """THE extent digest — the substrate-binding half of the split staleness key (§1.4.1b).
+    """THE extent digest — the substrate-binding half of the split staleness key (§1.4.1b,
+    slot-aware since the F5/Option B closure, user-ratified 2026-07-02).
 
-    Payload: ``{"extent": sorted set of the node's transitive subtree atom coverage}`` — its own
-    ``heading_atoms``/``signature_atoms`` plus every descendant leaf's ``body_atoms``, slot-
-    flattened (re-slotting an atom between heading and signature moves no coverage, so it stales
-    nothing) and set-canonicalized (a child reorder with the same coverage is a decision change,
-    not an extent change) — hashed through the single S4 producer (D-S4-I). Semantics that fall
-    out: a boundary move stales exactly the subtrees whose union changed; content addition
+    Payload: ``{"own": <the node's per-slot binding, each slot a sorted set>, "beneath": <the
+    flat sorted union of every descendant's coverage>}`` — a container's ``own`` carries
+    ``heading``/``signature``, a leaf's carries ``body``; ``beneath`` unions descendants' own
+    slots and bodies without distinguishing them — hashed through the single S4 producer
+    (D-S4-I). Semantics that fall out: a re-slot (heading→signature within the node, or a heading
+    atom moved into the node's own child leaf — the F5 case the earlier flat-set payload missed)
+    changes the node's OWN binding and stales exactly that node, while unchanged-union ancestors
+    stay fresh; a boundary move stales exactly the subtrees whose union changed; internal
+    re-segmentation under an unchanged boundary stales nothing above it; content addition
     cascades to every ancestor (honest — they genuinely span more than they were authored
     against). Assumes a validated map; fails loud (``ValueError``) on a dangling child reference
     or any node revisit (cycle / multi-parent / duplicate edge) rather than crashing or hanging.
     """
-    payload = {"extent": sorted(_subtree_atom_ids(node, projection))}
+    if isinstance(node, ContainerNode):
+        own = {"heading": sorted(node.heading_atoms), "signature": sorted(node.signature_atoms)}
+    else:
+        own = {"body": sorted(node.body_atoms)}
+    payload = {"own": own, "beneath": sorted(_beneath_atom_ids(node, projection))}
     return _hash_canonical(payload)
 
 
-def _subtree_atom_ids(node: Node, projection: ProjectionMap) -> set[str]:
-    """The transitive atom coverage of ``node``'s subtree, resolved through ``projection.by_id``
-    (an iterative walk — no recursion-depth ceiling on deep maps)."""
+def _require_child(child_id: str, parent_id: str, projection: ProjectionMap) -> Node:
+    child = projection.by_id.get(child_id)
+    if child is None:
+        raise ValueError(
+            f"extent_digest: child {child_id!r} of {parent_id!r} resolves to no "
+            f"node — dangling reference; validate the map before digesting"
+        )
+    return child
+
+
+def _beneath_atom_ids(node: Node, projection: ProjectionMap) -> set[str]:
+    """The transitive atom coverage strictly BENEATH ``node`` (descendants only — the node's own
+    slots are the payload's ``own`` half), resolved through ``projection.by_id`` (an iterative
+    walk — no recursion-depth ceiling on deep maps)."""
     coverage: set[str] = set()
-    seen: set[str] = set()
-    stack: list[Node] = [node]
+    seen: set[str] = {node.node_id}
+    stack: list[Node] = [
+        _require_child(child_id, node.node_id, projection)
+        for child_id in (node.children if isinstance(node, ContainerNode) else ())
+    ]
     while stack:
         current = stack.pop()
         if current.node_id in seen:
@@ -244,14 +269,10 @@ def _subtree_atom_ids(node: Node, projection: ProjectionMap) -> set[str]:
         if isinstance(current, ContainerNode):
             coverage.update(current.heading_atoms)
             coverage.update(current.signature_atoms)
-            for child_id in current.children:
-                child = projection.by_id.get(child_id)
-                if child is None:
-                    raise ValueError(
-                        f"extent_digest: child {child_id!r} of {current.node_id!r} resolves to no "
-                        f"node — dangling reference; validate the map before digesting"
-                    )
-                stack.append(child)
+            stack.extend(
+                _require_child(child_id, current.node_id, projection)
+                for child_id in current.children
+            )
         else:
             coverage.update(current.body_atoms)
     return coverage

@@ -6,11 +6,13 @@ The invariants under test, each proven red by the mutation hunt (red-first, §9)
 
 - the staleness key is SPLIT (§1.4.1b): ``decision_digest`` witnesses the human's topology decision
   (``node_class`` + ordered ``children`` node ids — nothing else), ``extent_digest`` witnesses the
-  substrate binding (the transitive subtree atom coverage as a sorted set) — each through THE
+  substrate binding — slot-aware since the F5/Option B closure (user-ratified 2026-07-02): the
+  node's OWN per-slot binding (sorted sets) + the flat sorted union BENEATH it — each through THE
   producer (``_hash_canonical``), each with its own change/ignore matrix and its own finding kind;
 - the split's headline semantics hold: a boundary move stales exactly the affected subtrees (the
   parent whose union is unchanged stays fresh); content addition cascades extent-staleness to every
-  ancestor; a decision digest never moves on a substrate-only change and vice versa;
+  ancestor; a re-slot (within a node or into its own subtree) stales that node's extent and stays
+  local; a decision digest never moves on a substrate-only change and vice versa;
 - the gate raises :class:`EvidenceGateError` (exit 12) whose typed ``findings`` come from the ONE
   non-raising producer (``evidence_findings``), kinds drawn from the closed
   ``EVIDENCE_FINDING_KINDS`` set, reported in map reading order with titles and repr'd digests;
@@ -185,19 +187,26 @@ def test_decision_digest_ignores_leaf_body_atoms():
 # --- the extent digest: transitive subtree atom coverage as a sorted set ------------------------ #
 
 
-def test_extent_digest_is_hash_canonical_over_the_sorted_transitive_coverage():
-    # sec's extent = own heading + signature + descendant leaf_a's body, slot-flattened, sorted;
-    # root's extent = the whole tree's coverage; a leaf's = its own body. Byte-for-byte pin.
+def test_extent_digest_is_hash_canonical_over_own_slots_and_beneath_union():
+    # Option B payload (the F5 closure, user-ratified 2026-07-02): the node's OWN slot binding
+    # (per-slot sorted sets — which atoms play which role for THIS node) + the flat sorted union
+    # of everything BENEATH it. Byte-for-byte pin through THE producer.
     root, sec, leaf_a, leaf_b = _nodes()
     projection = _projection(root, sec, leaf_a, leaf_b)
     assert extent_digest(sec, projection) == _hash_canonical(
-        {"extent": ["canonical_00001", "canonical_00002", "canonical_00003", "canonical_00005"]}
+        {
+            "own": {"heading": ["canonical_00001"], "signature": ["canonical_00005"]},
+            "beneath": ["canonical_00002", "canonical_00003"],
+        }
     )
     assert extent_digest(root, projection) == _hash_canonical(
-        {"extent": [f"canonical_0000{i}" for i in range(6)]}
+        {
+            "own": {"heading": ["canonical_00000"], "signature": []},
+            "beneath": [f"canonical_0000{i}" for i in range(1, 6)],
+        }
     )
     assert extent_digest(leaf_a, projection) == _hash_canonical(
-        {"extent": ["canonical_00002", "canonical_00003"]}
+        {"own": {"body": ["canonical_00002", "canonical_00003"]}, "beneath": []}
     )
 
 
@@ -242,16 +251,64 @@ def test_extent_digest_ignores_children_reorder_with_the_same_coverage():
     assert decision_digest(mutated.by_id["n-root"]) != decision_digest(root)
 
 
-def test_extent_is_a_set_not_a_slot_map():
-    # Conscious R1 property: re-slotting an atom (heading → signature) moves no coverage, so
-    # NEITHER digest stales — the boundary rationale and the spanned content are both unchanged.
+def test_within_node_reslot_stales_extent_but_not_the_ancestors():
+    # Option B reverses the flat-set consequence: heading → signature changes the node's OWN
+    # binding, so ITS extent stales (the human re-glances at the role assignment) — while the
+    # parent's beneath-union is unchanged, so staleness stays local. Decision never moves on a
+    # substrate edit.
     projection = _projection(*_nodes())
     sec = projection.by_id["n-sec"]
+    root = projection.by_id["n-root"]
     reslotted = _replace_node(
-        projection, "n-sec", heading_atoms=(), signature_atoms=("canonical_00005", "canonical_00001")
+        projection, "n-sec", heading_atoms=(), signature_atoms=("canonical_00001", "canonical_00005")
     )
-    assert extent_digest(reslotted.by_id["n-sec"], reslotted) == extent_digest(sec, projection)
+    assert extent_digest(reslotted.by_id["n-sec"], reslotted) != extent_digest(sec, projection)
+    assert extent_digest(reslotted.by_id["n-root"], reslotted) == extent_digest(root, projection)
     assert decision_digest(reslotted.by_id["n-sec"]) == decision_digest(sec)
+
+
+def test_cross_node_reslot_inside_one_subtree_stales_the_container_not_the_ancestor():
+    # THE F5 closure: a container's heading atom moved into its own child leaf's body redraws
+    # that container's boundary — its extent stales — while the subtree union above is untouched
+    # (ancestor fresh) and no topology changed (decisions byte-identical). Under the flat-set
+    # payload this edit was invisible everywhere; under the retired single digest it staled the
+    # container but coupled every other change domain with it.
+    projection = _projection(*_nodes())
+    sec, root = projection.by_id["n-sec"], projection.by_id["n-root"]
+    moved = _projection(
+        *(
+            dataclasses.replace(n, heading_atoms=())
+            if n.node_id == "n-sec"
+            else dataclasses.replace(
+                n, body_atoms=("canonical_00001", "canonical_00002", "canonical_00003")
+            )
+            if n.node_id == "n-leaf-a"
+            else n
+            for n in projection.nodes
+        )
+    )
+    assert extent_digest(moved.by_id["n-sec"], moved) != extent_digest(sec, projection)
+    assert extent_digest(moved.by_id["n-root"], moved) == extent_digest(root, projection)
+    for node_id in ("n-root", "n-sec"):
+        assert decision_digest(moved.by_id[node_id]) == decision_digest(projection.by_id[node_id])
+
+
+def test_extent_digest_is_order_blind_within_a_slot():
+    # Per-slot SORTED sets: a pure reorder of a slot's stored atom list is not a binding change.
+    two = ContainerNode(
+        node_id="n-2h",
+        node_class="section",
+        minted_by=MINTED_BY_HUMAN,
+        heading_atoms=("canonical_00007", "canonical_00006"),
+    )
+    flipped = dataclasses.replace(two, heading_atoms=("canonical_00006", "canonical_00007"))
+    assert extent_digest(
+        flipped, ProjectionMap(root_id="n-2h", nodes=(flipped,))
+    ) == extent_digest(two, ProjectionMap(root_id="n-2h", nodes=(two,)))
+    # and the canonical form is ASCENDING (pins the sort direction a reversed sort would fake)
+    assert extent_digest(two, ProjectionMap(root_id="n-2h", nodes=(two,))) == _hash_canonical(
+        {"own": {"heading": ["canonical_00006", "canonical_00007"], "signature": []}, "beneath": []}
+    )
 
 
 def test_boundary_move_stales_exactly_the_affected_subtrees():
@@ -347,8 +404,10 @@ def test_digest_golden_pins():
     assert decision_digest(sec) == (
         "sha256:06a1af21c5da4e6d143e64527fa69e38e5e9d6a45deffbc94498380f99f2609b"
     ), consequence
+    # extent pin re-computed 2026-07-02 for the F5/Option B slot-aware payload (a conscious,
+    # user-ratified payload change made inside the schema-v1 free-edit window — no sidecar existed)
     assert extent_digest(sec, projection) == (
-        "sha256:2fe8d4674633a9a74425cd71d5d0606ab332157dbd4005200ce5aebd4414d4c8"
+        "sha256:d73254e296bf30135024873cff0292b90d2365343015440f2fe1634e5a277719"
     ), consequence
 
 

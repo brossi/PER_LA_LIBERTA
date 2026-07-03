@@ -1,7 +1,10 @@
 # S2.1 — GeometrySource seam + backend (NORMAL path) + segmentation front-end (plan)
 
-**Status: DRAFT v1 — audit round 1 answered in-place (&&&&&& blocks, 2026-07-03); awaiting
-ratification before any code. Accepted amendments fold into the DT/G bodies on ratification.** Parent issue #29 (children #35–#40, minted with
+**Status: DRAFT v1 — audit round 1 answered (&&&&&& blocks); round-2 replies (@@@@@! blocks)
+answered with &&&&&! follow-ups on the 10 threads carrying conditions or open items (2026-07-03).
+Two decisions escalated to Ben: the per-atom primary-witness question (R3 follow-up — 1165/4786
+canonical atoms are copy2-only) and the tracker's own both-decline wording (R10 follow-up).
+Awaiting ratification before any code; accepted amendments fold into the DT/G bodies then.** Parent issue #29 (children #35–#40, minted with
 this draft); tracker row `S2.1` in `ENGINE_STRUCTURE_TASKS.md` (~L423) is the authoritative spec — on
 any disagreement the tracker wins, then `ENGINE_STRUCTURE_PLAN.md` (§3.0, §11.1, D30), then this
 plan. Evidence anchor: `spike/document-structure` @ `08aea65`; every file:line cite below was
@@ -101,6 +104,21 @@ cannot catch: the matcher writing a *wrong value*. (2) Tracker wording: fixed th
 The §2 NOTE above is amended to record the fix rather than keep asserting a stale mismatch.
 &&&&&&
 
+@@@@@!
+**Reply R17 - satisfied, with one implementation guard.** The split between S1.1 constructor
+completeness and S2.1 matcher-value correctness is sound. Keep the widened G-3 test explicitly
+sentinel-driven for both `geometry_engine` and `matched_witness_id`; otherwise a test that only
+asserts construction succeeds will not catch a hardcoded witness.
+@@@@@!
+
+&&&&&!
+**R17 follow-up — assertion shape pinned.** The G-3 test constructs the fake backend with
+`engine_id="engine-sentinel-77"` and configures the anchor witness as `"witness-sentinel-3"`, then
+asserts **equality** on both `geom.geometry_engine` and `geom.matched_witness_id` against those
+exact strings — never merely that construction succeeded. The two mutants (hardcode either field)
+must red independently.
+&&&&&!
+
 @@@@@@
 **Audit 21 — tracker minimalism should not preserve a wrong provenance contract.** Leaving the
 S2.1 row's three-field `{geometry_engine, match_method, match_confidence}` prose untouched is not
@@ -119,6 +137,11 @@ so code written to the tracker's three-field prose would not even construct — 
 contract always was the four-field one, and the tracker prose was the drifted copy. The
 matched-geom test is R17's widened G-3.
 &&&&&&
+
+@@@@@!
+**Reply R21 - satisfied.** Tracker drift is closed now that the S2.1 row names all four frozen
+provenance fields and G-3 owns the executable binding. No further objection.
+@@@@@!
 
 - **Frozen streams** — `books/per_la_liberta/work/data/atoms/{copy1,copy2,copy3,canonical}.json`
   (written by `freeze_streams.py`): copy1 3621 / copy2 3356 / copy3 799 / canonical 4786 atoms
@@ -187,6 +210,20 @@ is G-18 (R16). Owned ripples: extend the exit-code uniqueness sweep
 `errors.py`'s "two structure-owned subclasses" docstring to three.
 &&&&&&
 
+@@@@@!
+**Reply R1 - satisfied, pending the uniqueness sweep extension.** Exit 13 is the right shape and
+the `BackendError` split is correct. The only thing to keep load-bearing is the test update: the
+global exit-code uniqueness sweep must include `geometry.py`, or this can regress silently when
+another carrier is added beside its raiser.
+@@@@@!
+
+&&&&&!
+**R1 follow-up — the sweep extension gets its own red so it cannot regress silently.** During #35's
+red phase: with `GeometryError.exit_code` temporarily set to 11 (colliding with
+`StructureValidationError`), the extended sweep must red — proving it actually sees the fourth
+file, not just that 13 happens to be unique today. Then green at 13.
+&&&&&!
+
 `FORBIDDEN` gains `'"ita"'` and `"'ita'"` (quoted forms; the existing planted-literal
 parametrization inherits them automatically). pymupdf imports in core are fine — it is already a
 required dependency; the neutrality rule governs language/book literals, not libraries.
@@ -228,6 +265,12 @@ must go through `segmentation.reading_order` — treating backend order as readi
 to do it accidentally.
 &&&&&&
 
+@@@@@!
+**Reply R2 - satisfied.** The record/backend split is clean: invalid constructed records fail loud,
+backend artifacts are dropped only with counts, and reading order is explicitly not a seam
+guarantee. No further objection.
+@@@@@!
+
 ### DT-3 — Anchor witness = copy1; page-locate by monotone alignment; copy3-blind calibration
 
 The done-when says a canonical atom carries its **primary witness's** box; canonical derivations
@@ -262,6 +305,35 @@ ruling rather than silent coverage loss. The `{witness}_geom.json` namespace alr
 future `copy2_geom.json` without redesign; attach-precedence would be the new decision that ruling
 brings with it.
 &&&&&&
+
+@@@@@!
+**Reply R3 - satisfied, but make the coverage categories part of the run-report schema.** The
+no-fallback ruling is coherent. The important enforcement detail is that `copy1 page-locate failed`,
+`copy1 atom unmatched`, `copy2-only canonical`, and `secondary-not-attempted` are named fields or
+counters in the report, not prose labels that can disappear from the implementation.
+@@@@@!
+
+&&&&&!
+**R3 follow-up — counters become sidecar schema fields, and a new measured fact raises an open
+question for your ratification.** (1) Schema: the counters live in the **sidecar** (the loaded,
+schema'd artifact), under a top-level `coverage` object — `pages_locate_failed`,
+`atoms_unmatched_on_accepted_pages`, `canonical_no_primary_derivation`,
+`canonical_multi_primary_derivation` (R12) — the run report cites them; prose labels cannot drift
+out of the implementation because G-18's loader test reads them. (2) The fact, measured this
+session on the live canonical stream: **1165 of 4786 canonical atoms (24.3%) have no copy1
+derivation at all** (copy2-only; multi-copy1 count is 0). Under the no-fallback ruling those are
+born-unmatchable — a quarter of the canonical stream carries guaranteed-absent geometry before any
+OCR runs, which is materially more than the "counted edge" flavor of R3 suggested. **Open
+question:** does the done-when's "primary witness's box" admit the per-atom reading — a copy2-only
+atom's primary (indeed only) witness *is* copy2 — recovering those 1165 via a second
+`copy2_geom.json` with honest `matched_witness_id="copy2"` (no per-atom mixing inside one
+sidecar)? Honest cost note: copy2's boxes come from the **Harvard scan** — a different physical
+copy — so that path needs the second PDF, its own page-locate, and its own calibration argument
+(copy2 has no ground-truth page map either). Recommendation: ship slice 1 copy1-only as planned
+(the machinery is witness-generic regardless), and rule on the per-atom-primary reading as a
+fast-follow once the run report shows real copy1 coverage. The ruling is yours — it reinterprets
+the done-when, so I will not take it silently.
+&&&&&!
 
 **Calibration gate (inside slice 1, before trusting copy1 assignments):** run page-locate on
 **copy3 blind** (ignore its page map), compare derived pages to the map — the only ground truth we
@@ -298,6 +370,31 @@ floor re-derived, (ii) route the failing page-regions to the DT-10 worklist, (ii
 (the tracker retains it as the specified conditional). Never a silently lowered bar.
 &&&&&&
 
+@@@@@!
+**Reply R4 - mostly satisfied; pin the DP complexity and tie-break tests.** The objective is now
+buildable. Add an explicit complexity expectation for the banded DP and a deterministic tie-break
+fixture with repeated tokens/furniture. Without those, a correct-looking implementation can become
+quadratic on the full witness or choose unstable page boundaries across Python/library changes.
+@@@@@!
+
+&&&&&!
+**R4 follow-up — complexity and determinism pinned, with measured inputs.** Scale, measured this
+session: copy1 = **129,767** whitespace tokens across 3,621 atoms, K = 278 pages (~467
+tokens/page). **Complexity contract:** the banded DP is `O(N + K·B)` — boundary candidates per
+page limited to a band `B` positioned by cumulative-token ratio (proposal: B = 3× the max page bag
+size, ≈1.4K tokens), with *incremental* integer multiset scoring (moving a boundary by one token
+updates the intersection count in O(1)). That is ~4×10⁵ boundary evaluations for the full book vs
+N² ≈ 1.7×10¹⁰ for the quadratic shape — the run report records page-locate wall time so a
+complexity regression is visible, and the mutation pass reviews the incremental-update invariant
+(no perf assert in CI; timing tests flake). **Determinism:** scores are integers (multiset
+intersection counts) — no floats anywhere in the DP — and argmax uses the earliest-boundary
+tie-break, so boundaries are a pure function of the two token streams, stable across
+Python/platform/library versions. **Committed fixture** (joins G-7's home): a synthetic stream
+with a repeated-token run plus a furniture token straddling a boundary, built so two boundary
+positions tie on score — asserts the exact (earliest) boundary indices; a mutant flipping the
+tie-break to latest reds.
+&&&&&!
+
 @@@@@@
 **Audit 18 — derived copy1 page attribution needs an ownership boundary.** DT-3 says page-locate
 answers the open S1.3a copy1 page-attribution question as sidecar data, but the plan should say
@@ -321,6 +418,12 @@ onto a `PAGE_UNMAPPED` atom is the intended state, not a contradiction. Ratifyin
 note gains one pointer line: sidecar-derived copy1 pages exist at calibration floor X, adoption
 decision unchanged at S7.1b.
 &&&&&&
+
+@@@@@!
+**Reply R18 - satisfied.** The field split between `Geom.page` and `Atom.page_range` resolves the
+ownership boundary. The S1.3a deferral note should point to the sidecar as evidence only, not as an
+adopted page-range source. No further objection.
+@@@@@!
 
 ### DT-4 — Coordinate space + page numbering (BR-022 seed)
 
@@ -356,6 +459,19 @@ loud, never emit wrong coordinates silently). CropBox≠MediaBox: coords are rel
 containment test on a cropped synthetic page».
 &&&&&&
 
+@@@@@!
+**Reply R5 - satisfied, with crop/rotation covered.** The strengthened same-word numeric
+comparison is the right proof, and rejecting rotation in S2.1 is acceptable as long as it is a
+tested fail-loud condition. No further objection.
+@@@@@!
+
+&&&&&!
+**R5 follow-up — rotation rejection becomes a named red, not prose.** The synthetic fixture gains a
+rotated-page variant (rotation set on one page of the generated PDF); the backend must raise
+`GeometryError` on it — a mutant that proceeds and emits boxes reds. Joins G-17's home
+(`test_geometry_backend.py`), listed in the folded matrix rather than left as a DT-4 sentence.
+&&&&&!
+
 ### DT-5 — Two-branch reading-order sourcing (where the branch lives)
 
 Book config declares `order_source: witness | geometry`. PLL = `witness` (copy1 column-ordered
@@ -387,6 +503,11 @@ the branch. That becomes a named §6 non-goal ("image-only-book ingestion: atom 
 text is a future lane through S1.3a, not an S2.1 deliverable"), so the omission is a recorded
 decision, not a gap someone later mistakes for support.
 &&&&&&
+
+@@@@@!
+**Reply R6 - satisfied.** Declaring the no-witness branch as a segmentation-front-end proof, not an
+atom-stream emitter, removes the hidden S1.x contract. No further objection.
+@@@@@!
 
 ### DT-6 — Density pre-check: band classifier, calibrated to abstain
 
@@ -427,6 +548,38 @@ mechanically, and a verdict given under old bands goes stale rather than silentl
 (G-22).
 &&&&&&
 
+@@@@@!
+**Reply R7 - mostly satisfied; do not put generated calibration under `work/` if it must be
+tracked.** The governed-artifact approach is right, but `books/per_la_liberta/work/...` is usually
+runtime/generated territory and may be gitignored. If `density_calibration.json` is a ratified
+input, place it under a tracked config/probes path or explicitly document that this `work/review`
+file is committed and governed.
+@@@@@!
+
+&&&&&!
+**R7 follow-up — verified, you are right, and the objection generalizes further than DT-6.**
+Checked this session: `engine/.gitignore:15–20` ignores `books/*/work/{data,output,state}/*` with
+the comment "work/ is the isolated, disposable output tree… Regenerable, so never committed", and
+`git ls-files` confirms only `.gitkeep`s are tracked under `work/`. `work/review/` happens to be
+un-ignored today, but committing governed human labels there would violate the documented
+convention — and the same violation was latent in **DT-10**: worklist *verdicts* are human labor,
+and homing them in a disposable tree is the corrections.json-tombstone failure class from the live
+pipeline. Revised ruling to ratify: **generated-in-work/, human-durable-tracked-in-review/**. A
+new tracked `books/<id>/review/` (sibling of `work/`, like `inputs/`) homes the human-authored
+artifacts — `density_calibration.json` (labels) and `geometry_verdicts.json` (verdicts +
+fingerprints + history) — which pipeline steps *read only*, matching `paths.py`'s contract:
+`BookWorkspace.resolve` guards **writes** into `work/` (`paths.py:97–113`) and read-only tracked
+siblings are the established pattern (`inputs/`, `paths.py:83–86`). Engine-*generated* review
+artifacts stay disposable in `work/review/`: the worklist candidate records and the overlay PNGs.
+Band *values* land in `manifest.json` (the tracked book config that already exists). The geometry
+sidecar deliberately **stays** in gitignored `work/data/geometry/` — once R13's idempotent replay
+lands it is a deterministic function of (PDF × streams × params × tracked verdicts), so the durable
+record is the tracked verdict file and the disposable-tree convention holds. The verdict CLI writes
+the tracked file on the human's behalf — the authoring-tool family (`seed_structure_map.py`,
+S4.6b gate CLI), outside the step write-containment contract; its exact plumbing is a #40 build
+detail, the principle above is what needs your ratification. DT-10's paths update at fold.
+&&&&&!
+
 ### DT-7 — Column / reading-order detector (generalize the probe; cross-page prior; no symmetry)
 
 Promote `detect_columns`/`reading_order` into `segmentation.py` with the audit's rulings baked in:
@@ -459,6 +612,11 @@ where `order_qa` fails. (5) The named red fixture lands as G-23: a strong-eviden
 page between two two-column pages — a mutant that lets the prior override strong own-page evidence
 reds.
 &&&&&&
+
+@@@@@!
+**Reply R8 - satisfied.** The prior now has the needed reset, override, abstain, and provenance
+rules. No further objection.
+@@@@@!
 
 ### DT-8 — Matcher: normalizer, window match, confidence formula, thresholds
 
@@ -498,6 +656,25 @@ specify: repeated common tokens that would clear 0.60 — under consumption + fl
 bind.
 &&&&&&
 
+@@@@@!
+**Reply R9 - mostly satisfied; define the consumption order.** Box-token consumption is the right
+defense, but it needs a deterministic order over atoms and boxes inside a page. Tie that to witness
+atom order plus stable box ordering from the page-locate/detector input, or repeated-token fixtures
+can still produce nondeterministic bboxes.
+@@@@@!
+
+&&&&&!
+**R9 follow-up — deterministic order pinned by canonicalization, not by trusting emission.** At
+matcher entry the page's boxes are sorted by the stable geometric key `(y0, x0, x1, y1, text)` — a
+total order independent of backend emission (which R2 left contractually unspecified, so the
+matcher must not lean on it); atoms iterate in witness-stream order; token→box assignment is
+first-available in canonical box order, consumed by scanning the sorted list (no dict/Counter
+iteration order anywhere in the path). Result: the bbox is a pure function of (witness stream,
+page box *set*). New determinism red joining G-24's home: run the matcher twice on the same fake
+page with emission order shuffled between runs → byte-identical output required; a mutant that
+skips the canonical sort reds.
+&&&&&!
+
 - **Thresholds (proposals; setting method = full-book distribution in the slice-1 run report,
   ratified there, re-gated at S2.2):** page accepted when its atom-weighted match rate ≥ 0.80
   (prior: S2.0 content-BoW median 0.929 / mean 0.925); accepted-page atoms write `Geom.matched`
@@ -535,6 +712,27 @@ tripwire — auto-absent fraction on accepted pages > 5% of book atoms (proposal
 to the page-scoped form.
 &&&&&&
 
+@@@@@!
+**Reply R10 - satisfied, subject to wording cleanup.** The page-level versus atom-level split is
+coherent and the 5% auto-absent tripwire is the right safety valve. Make sure §0/§1 and DT-8 use
+that exact scope split, because leaving the older absolute "both auto and human decline" sentence
+beside the exception will recreate this ambiguity.
+@@@@@!
+
+&&&&&!
+**R10 follow-up — the surviving absolute sentences are enumerated, and one open item is the
+tracker's own copy.** Grep-verified: the absolute form survives at three places in this document —
+the header inputs (L18), the §1 diagram's absent-leg (L66), and DT-10's "satisfying …" clause — all
+three get the page-scoped form at fold: *"a page's geometry is declined only after both
+auto-detection and a human verdict; within an accepted page, unmatched atoms auto-absent with
+recorded reason (DT-8 exception, R19 record)."* **Open item for you:** the tracker row itself still
+ends with the absolute sentence, and the row is the authoritative spec. Proposed amendment (yours
+to apply or defer to the S2.1-close as-built note): "page-level `geom.present=false` only after
+BOTH auto-detection and human review decline; atom-level absence on an accepted page is
+automatic-with-recorded-reason (s2_1_plan R10/R19)." I have not touched the row — unlike R21's
+factual under-quote, this one changes normative spec wording, which is yours.
+&&&&&!
+
 @@@@@@
 **Audit 19 — if zero-match auto-absent remains, preserve its reason.** The coworker summary treats
 "zero-match atom on an accepted page" as a legitimate second route to `Geom.absent`; that can work
@@ -555,6 +753,12 @@ page record. So the four states S5 must distinguish are all mechanically queryab
 **human-declined** (page `declined`). DT-9's schema sketch gains the unmatched-record shape on
 fold.
 &&&&&&
+
+@@@@@!
+**Reply R19 - satisfied.** Keeping absence reasons in the sidecar rather than `Geom` respects the
+frozen S1.1 model and gives S5 enough state to distinguish matched, auto-unmatched, pending, and
+human-declined. No further objection.
+@@@@@!
 
 ### DT-9 — Persistence: geometry sidecar, no stream supersession
 
@@ -603,6 +807,20 @@ binds stream↔sidecar (its job); PDF identity is generation/replay-side, record
 *can* check. All of these fields join the R13 input fingerprint. New red: G-19.
 &&&&&&
 
+@@@@@!
+**Reply R11 - satisfied, with one naming precision.** The structured replay contract closes the
+under-binding. Use `source_pdf` only if S2.1 is truly PDF-only; otherwise name it `source_scan` or
+`geometry_source_artifact` so the seam can later support image bundles without a schema rename.
+@@@@@!
+
+&&&&&!
+**R11 follow-up — ruling: `source_scan` with a `kind` discriminator.**
+`source_scan: {kind: "pdf", sha256, n_pages, bytes}` — your generic-name point taken; a future
+image-bundle backend adds `kind: "image-dir"` (with `n_pages` as image count and `sha256` over a
+canonical manifest of the bundle) without a rename or schema-version bump. The `engine_id` display
+string is unchanged.
+&&&&&!
+
 @@@@@@
 **Audit 12 — atom-id namespace is ambiguous.** The path is `{witness}_geom.json`, but
 `attach_geometry(atoms, sidecar)` sounds generic and the done-when talks about canonical atoms
@@ -629,6 +847,26 @@ union-merge machinery is built; dangling back-links are already `CaptureError`'s
 the store tier and are not re-checked here. New red: G-20 (mutant doing direct canonical-id lookup
 → disjoint-namespace fixture reds).
 &&&&&&
+
+@@@@@!
+**Reply R12 - mostly satisfied; multi-copy1 derivations need an explicit red or report field.**
+Witness-keyed storage plus canonical `derived_from` attachment is the right model. For canonical
+atoms with multiple copy1 derivations, either add a fixture proving v1 marks them unmatched or add
+a report counter; otherwise the "absent + counted" edge may be skipped because it is thought not to
+exist.
+@@@@@!
+
+&&&&&!
+**R12 follow-up — both, not either; and "thought not to exist" is now a measured fact instead of a
+guess.** (a) The fixture: a synthetic canonical atom with two copy1 derivations → v1 marks it
+`unmatched(reason="multi_primary_derivation")`; a mutant that unions the two or silently picks the
+first reds (joins G-20's home). (b) The counter: `coverage.canonical_multi_primary_derivation` in
+the sidecar (R3's schema), so the count is proven on every run. Measured this session on the live
+canonical stream: **zero** multi-copy1 atoms across all 4,786 — so the fixture is synthetic-only
+today and exists to guard future re-freezes, and the counter turns the zero into an assertion
+rather than an assumption. (Same scan produced the 1165 no-copy1 count now sitting in the R3
+follow-up as the open per-atom-primary question.)
+&&&&&!
 
 ### DT-10 — Human-review worklist: specified, not a slogan (audit Finding E)
 
@@ -672,6 +910,11 @@ refused and the page re-routed as a fresh record, the old verdict retained in `h
 never silently re-applied to different inputs. This is the D14/D21 stale posture applied at the
 human boundary.
 &&&&&&
+
+@@@@@!
+**Reply R13 - satisfied.** Stable ids, input fingerprints, history, idempotent replay, and stale
+verdict refusal cover the worklist lifecycle. No further objection.
+@@@@@!
 
 **Volume bound:** `review_fraction_max` per stage, default **0.15**, book-config-tunable.
 Exceeding it **hard-fails the run** with the named principle: the automation premise failed —
@@ -721,6 +964,12 @@ deterministically with zero OCR. The synthetic PDF keeps only what genuinely nee
 pass: the G-1/G-8/G-17 backend contracts and the G-16 order path.
 &&&&&&
 
+@@@@@!
+**Reply R14 - satisfied.** The split between backend smoke and deterministic matcher semantics is
+clean, and the fake-backend fixture inventory covers the missing Unicode/hyphen/repetition cases.
+No further objection.
+@@@@@!
+
 @@@@@@
 **Audit 20 — keep the CI OCR smoke from becoming the matcher-quality proof.** The synthetic
 image-only PDF is the right anti-skip fixture for the backend, but its generated text can make OCR
@@ -740,6 +989,11 @@ drift you name, added to §7: no G-row may cite the synthetic PDF as evidence fo
 matcher-semantics invariant — a semantics row that only reds via the synthetic PDF is
 mis-homed and gets moved to a fake-backend fixture.
 &&&&&&
+
+@@@@@!
+**Reply R20 - satisfied.** The three-tier claim ladder prevents the synthetic PDF from being
+over-read as quality evidence. No further objection.
+@@@@@!
 
 ### DT-12 — S2.2 measurement hooks + S3.1 word-box seam
 
@@ -774,6 +1028,11 @@ regenerate-under-its-own-engine-id (its geometry, its evidence, recorded as such
 word-box persistence — which remains its decision to make, now with the honest price tag stated
 instead of an implied free replay.
 &&&&&&
+
+@@@@@!
+**Reply R15 - satisfied.** The replay contract plus union-bbox consistency gate is honest about
+what S3.1 can reproduce and where a rerun becomes new evidence. No further objection.
+@@@@@!
 
 ## §4 Invariants and red-first matrix
 
@@ -833,6 +1092,22 @@ as G-18…G-24, plus one strengthening:
   plausible-wrong bbox (R9's fixture). Home: `test_geom_match.py`.
 - **G-8 strengthened** per R5: numeric dpi-invariance within tolerance, not containment alone.
 &&&&&&
+
+@@@@@!
+**Reply R16 - satisfied, assuming the new G rows are folded into §4 rather than left as response
+prose.** The added rows cover the missing persisted/load-boundary contracts. During ratification,
+move G-18 through G-24 into the table itself so the red-first matrix remains the single executable
+checklist.
+@@@@@!
+
+&&&&&!
+**R16 follow-up — confirmed, with the round-2 additions included in the same fold.** At
+ratification G-18…G-24 enter the §4 table itself, alongside the rows this round added: the
+rotation-rejection red (R5, into G-17), the tie-break fixture (R4, into G-7), the
+emission-shuffle determinism red (R9, into G-24), and the multi-primary-derivation fixture (R12,
+into G-20). The response prose then documents provenance only; the table remains the single
+executable checklist the mutation pass runs against.
+&&&&&!
 
 Post-build: a mutation hunt over the four new core modules (house discipline), survivors
 dispositioned in the audit note.

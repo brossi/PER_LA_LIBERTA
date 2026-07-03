@@ -45,7 +45,8 @@ and a live map; a sidecar that cannot be loaded at all stays
 Both gate functions assume an already-**validated** projection (one loaded through
 ``load_structure_map`` or passed through ``validate_projection``): they resolve ``children`` edges
 and do not re-run Tier-2. On an unvalidated map, :func:`extent_digest` fails loud on a dangling
-child reference or a cycle rather than crashing or hanging.
+child reference and on any node revisit (a cycle, a multi-parent diamond, or a duplicate child
+edge) rather than crashing, double-counting, or hanging.
 
 Neutral core (inv 15): no language/book/typeface literal — the S0.2 scan globs this module and
 the schema JSON beside it.
@@ -115,6 +116,10 @@ def _require_text(value: object, where: str) -> str:
         raise TypeError(f"{where} must be a str, got {type(value).__name__}")
     if not value.translate(_INVISIBLES).strip():
         raise ValueError(f"{where} must be visibly non-blank (whitespace/zero-width-only is empty)")
+    if any("\ud800" <= ch <= "\udfff" for ch in value):
+        # A JSON-escaped lone surrogate ("\ud800") survives json.loads but cannot encode back to
+        # UTF-8 — it would load cleanly and then crash the writer, breaking byte-idempotence.
+        raise ValueError(f"{where} must be valid Unicode text (lone surrogate cannot round-trip)")
     return value
 
 
@@ -215,7 +220,7 @@ def extent_digest(node: Node, projection: ProjectionMap) -> str:
     out: a boundary move stales exactly the subtrees whose union changed; content addition
     cascades to every ancestor (honest — they genuinely span more than they were authored
     against). Assumes a validated map; fails loud (``ValueError``) on a dangling child reference
-    or a cycle rather than crashing or hanging.
+    or any node revisit (cycle / multi-parent / duplicate edge) rather than crashing or hanging.
     """
     payload = {"extent": sorted(_subtree_atom_ids(node, projection))}
     return _hash_canonical(payload)
@@ -232,7 +237,8 @@ def _subtree_atom_ids(node: Node, projection: ProjectionMap) -> set[str]:
         if current.node_id in seen:
             raise ValueError(
                 f"extent_digest: node {current.node_id!r} revisited under {node.node_id!r} — the "
-                f"projection contains a cycle; validate the map before digesting"
+                f"projection has a cycle or a multi-parent/duplicate child edge (Tier-2's CYCLE / "
+                f"MULTI_PARENT / DUPLICATE_CHILD_REF territory); validate the map before digesting"
             )
         seen.add(current.node_id)
         if isinstance(current, ContainerNode):

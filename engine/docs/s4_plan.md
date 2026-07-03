@@ -240,6 +240,14 @@ per inv 11, M9) belongs to the **negative-fixture set** (§1.2.0/§3.B.5), **not
     `stale-extent`). `map_revision` is **informational bookkeeping, NOT** a staleness trigger (Audit 15).
     The sidecar hash does **not** enter structure-map lineage; the document persists its own
     `schema_version` + `stale_class` + `book` (loader `expected_book` binding).
+
+    **Known consequence (delta re-audit 2026-07-02, RAN-verified):** a re-slot ACROSS nodes inside one
+    subtree — e.g. a container's `heading_atoms` atom moved into its own child leaf's `body_atoms` —
+    changes **neither** digest: the subtree union is unchanged (extent) and so is the topology
+    (decision), yet the container's heading boundary was redrawn. The retired single digest (per-slot
+    owned atoms) would have staled it. If that case must stale evidence, it is an S5+ spec extension
+    (a third, per-node-slot witness), not an implementation fix — the code implements this payload
+    exactly.
   - **§1.4.1c — sidecar engine half (forward engine row, named — M9/X20).** The sidecar **schema + the digest-
     staleness validator** are *engine code* (not prose Ben authors), so they get an explicit forward tracker
     row with an **engine owner**, scheduled **immediately before S4.6 (predecessor: S4.4 schema; successor:
@@ -377,7 +385,8 @@ A node is **container** (owns ordered `children` + optional `heading_atoms`/`sig
   - **Container with zero `children` and no `heading_atoms`/`signature_atoms`** → `EC.EMPTY_CONTAINER` (inv 26).
   - **`root_id` naming no node** → `EC.ROOT_ID_DANGLING` (inv 14, Tier-2a precondition, short-circuit).
 - **§3.B.6 — Ordering & contiguity (M8, X16).** `children` is ordered = **reading order** (feeds `position-path`
-  handles + the §1.4.1b digest). `body_atoms` is ordered by **strictly ascending canonical-stream index** and
+  handles + the §1.4.1b *decision* digest; the extent digest is set-canonicalized and order-blind). `body_atoms`
+  is ordered by **strictly ascending canonical-stream index** and
   **need not be contiguous** (it may interleave around excluded furniture). Out-of-order or intra-list-duplicate
   `body_atoms` → `EC.BODY_ATOMS_UNORDERED` (inv 27) — note inv 20 cannot catch this because §3.E.1 re-sorts
   atoms before hashing, so a descending list round-trips byte-identically.

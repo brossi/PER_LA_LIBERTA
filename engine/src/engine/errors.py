@@ -12,11 +12,16 @@ Two structure-owned :class:`EngineError` subclasses live beside their raisers ra
 the closed ``EC`` payload) and ``EvidenceGateError`` (``12``, ``structure/evidence.py`` — the
 authoring-evidence gate's typed ``(kind, message)`` findings). The CLI maps every
 :class:`EngineError` generically via ``exc.exit_code``, so subclassing elsewhere costs nothing
-here; a new code must stay unique across BOTH files.
+here; a new code must stay unique across all three files (pinned by
+``test_authoring_evidence.py``'s uniqueness sweep).
 
-The shared load-boundary taxonomy every persisted engine artifact obeys: an **absent** artifact is
-:class:`MissingInputError`; a **present-but-unloadable** one (malformed, unreadable, stale-version,
-wrong stale class) is :class:`StaleArtifactError`; nothing else escapes a loader.
+The shared load-boundary taxonomy of the persisted structure-*document* loaders (structure maps,
+stream-freeze records, authoring-evidence sidecars): an **absent** artifact is
+:class:`MissingInputError`; a **present-but-unloadable** one (malformed, unreadable, non-UTF-8,
+parse-depth blowup, stale-version, wrong stale class) is :class:`StaleArtifactError`; nothing else
+escapes those loaders. Known gap (delta re-audit 2026-07-02): ``structure.atom_store.load_stream``
+predates the unreadable/non-UTF-8/parse-depth hardening and still leaks those raw — an S1.5
+follow-up, not a claim.
 """
 
 from __future__ import annotations
@@ -130,7 +135,9 @@ class StaleArtifactError(EngineError):
     document carries a ``schema_version`` that is not the current registered one (genuinely
     **stale** — refresh or migrate, the M3/S8.1 stale-class hook), declares the wrong
     ``stale_class``, is missing a required key, is unreadable or unparseable (``OSError``/
-    ``RecursionError``/non-UTF-8/non-JSON wrapped at the boundary), or is otherwise structurally
+    ``RecursionError``/non-UTF-8/non-JSON wrapped at the boundary — the three document loaders
+    hold this in full; ``atom_store.load_stream`` wraps only the JSON tier so far, the known S1.5
+    gap noted in the module docstring), or is otherwise structurally
     malformed (a model-invariant violation a ``ValueError`` would raise in memory is wrapped here,
     so every loader has a total contract: a valid object or this error). ``assert_freeze_matches``
     also raises it: a drifted freeze pin *is* a stale artifact. One human action — do not trust

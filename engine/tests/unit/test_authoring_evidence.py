@@ -306,6 +306,22 @@ def test_extent_digest_fails_loud_on_a_dangling_child_ref():
         extent_digest(sec, projection)
 
 
+def test_extent_digest_fails_loud_on_a_multi_parent_diamond_not_just_true_cycles():
+    # Delta re-audit F4: a DAG revisit (MULTI_PARENT territory) is not a cycle, but it is still an
+    # unvalidated map — the walk refuses it with an honest diagnosis instead of double-counting.
+    a = ContainerNode(node_id="n-a", node_class="section", minted_by=MINTED_BY_HUMAN, children=("n-s",))
+    b = ContainerNode(node_id="n-b", node_class="section", minted_by=MINTED_BY_HUMAN, children=("n-s",))
+    root = ContainerNode(
+        node_id="n-r", node_class="volume", minted_by=MINTED_BY_HUMAN, children=("n-a", "n-b")
+    )
+    shared = LeafNode(
+        node_id="n-s", node_class="block", minted_by=MINTED_BY_MACHINE, body_atoms=("canonical_00000",)
+    )
+    projection = ProjectionMap(root_id="n-r", nodes=(root, a, b, shared))
+    with pytest.raises(ValueError, match="revisited.*multi-parent|multi-parent.*revisited"):
+        extent_digest(root, projection)
+
+
 def test_extent_digest_fails_loud_on_a_cycle_instead_of_hanging():
     # ProjectionMap construction admits a cycle (cycles are Tier-2's CYCLE code); the walk must
     # terminate with a diagnosis, not recurse forever.
@@ -592,6 +608,7 @@ def test_duplicate_entries_for_one_node_are_rejected_at_construction():
         {"extent_digest": ["sha256:a"]},
         {"evidence": "   "},  # whitespace-only prose is no evidence
         {"evidence": "\u200b\u2060\ufeff"},  # zero-width-only prose is no evidence either
+        {"evidence": "x\ud800y"},  # lone surrogate: loads from JSON escapes, can never re-render
         {"evidence": 5},
         {"authored_at_revision": True},
         {"authored_at_revision": 2.0},
@@ -607,6 +624,7 @@ def test_duplicate_entries_for_one_node_are_rejected_at_construction():
         "extent-nonstr",
         "evidence-blank",
         "evidence-zero-width",
+        "evidence-lone-surrogate",
         "evidence-nonstr",
         "revision-bool",
         "revision-float",
@@ -750,6 +768,9 @@ def _set_entry(doc: dict, key: str, value) -> dict:
         lambda d: _set_entry(d, "stray", 1),  # additionalProperties: false, entry level
         lambda d: {**d, "entries": [dict(_VALID_ENTRY), dict(_VALID_ENTRY)]},  # duplicate node_id
         lambda d: json.dumps(d).replace('"sha256:abc"', "NaN"),  # non-finite token
+        # JSON-escaped lone surrogate: json.loads admits it, UTF-8 re-render never can — the
+        # model rejects it and the loader wraps that (delta re-audit F3)
+        lambda d: json.dumps(d).replace('"why this container exists"', '"x\\ud800y"'),
     ],
     ids=[
         "not-json",
@@ -779,6 +800,7 @@ def _set_entry(doc: dict, key: str, value) -> dict:
         "entry-stray-key",
         "duplicate-node_id",
         "nan-token",
+        "surrogate-evidence",
     ],
 )
 def test_load_contract_is_total(tmp_path, mangle):

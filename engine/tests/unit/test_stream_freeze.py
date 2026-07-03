@@ -206,6 +206,20 @@ def test_load_freeze_record_unreadable_file_is_stale(tmp_path):
         path.chmod(0o644)
 
 
+def test_load_freeze_record_non_utf8_and_depth_blowup_are_stale(tmp_path):
+    # Delta re-audit F1: these two escaped raw (UnicodeDecodeError / RecursionError) while the
+    # docstring claimed the total contract — the loader now matches its evidence/structure-map
+    # siblings.
+    bad = tmp_path / "freeze.json"
+    bad.write_bytes(b"\xff\xfe{")
+    with pytest.raises(StaleArtifactError, match="not valid UTF-8"):
+        load_freeze_record(bad)
+    deep = tmp_path / "deep.json"
+    deep.write_text("[" * 100_000, encoding="utf-8")
+    with pytest.raises(StaleArtifactError, match="not valid JSON"):
+        load_freeze_record(deep)
+
+
 # --- assert_freeze_matches: every drift axis fails loud, naming the stream ---------------- #
 
 

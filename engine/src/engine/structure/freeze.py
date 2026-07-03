@@ -91,8 +91,12 @@ def load_freeze_record(path: Path) -> dict:
         text = path.read_text(encoding="utf-8")
     except OSError as exc:
         raise _malformed(path, f"unreadable ({exc})") from exc
+    except UnicodeDecodeError as exc:
+        raise _malformed(path, f"not valid UTF-8 ({exc})") from exc
     try:
         doc = json.loads(text)
+    except RecursionError as exc:
+        raise _malformed(path, "not valid JSON (nested beyond parseable depth)") from exc
     except ValueError as exc:
         raise _malformed(path, f"not valid JSON ({exc})") from exc
     if not isinstance(doc, dict):

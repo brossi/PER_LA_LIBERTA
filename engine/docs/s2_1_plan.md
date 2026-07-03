@@ -1,6 +1,7 @@
 # S2.1 — GeometrySource seam + backend (NORMAL path) + segmentation front-end (plan)
 
-**Status: DRAFT v1 — for audit before any code.** Parent issue #29 (children #35–#40, minted with
+**Status: DRAFT v1 — audit round 1 answered in-place (&&&&&& blocks, 2026-07-03); awaiting
+ratification before any code. Accepted amendments fold into the DT/G bodies on ratification.** Parent issue #29 (children #35–#40, minted with
 this draft); tracker row `S2.1` in `ENGINE_STRUCTURE_TASKS.md` (~L423) is the authoritative spec — on
 any disagreement the tracker wins, then `ENGINE_STRUCTURE_PLAN.md` (§3.0, §11.1, D30), then this
 plan. Evidence anchor: `spike/document-structure` @ `08aea65`; every file:line cite below was
@@ -77,9 +78,48 @@ PLL never exercises this branch, and the engine must not presume it away.
 - **`src/engine/structure/atoms.py:41`** — `Geom` frozen-slots dataclass: `present` +
   six required-when-present fields (`page`, `bbox`, `geometry_engine`, `matched_witness_id`,
   `match_method`, `match_confidence`); `absent()`/`matched()` factories; absence carries no
-  coordinates (invented geometry raises in `__post_init__`). NOTE: the tracker row quotes only
+  coordinates (invented geometry raises in `__post_init__`). NOTE: the tracker row quoted only
   three provenance fields — the slot has **four** (`matched_witness_id` exists); the matcher
-  writes all four. `Atom.geom: Geom` at `:147`.
+  writes all four (tracker row corrected 2026-07-03 per audit R21). `Atom.geom: Geom` at `:147`.
+
+@@@@@@
+**Audit 17 — the four-field provenance correction needs a binding test or tracker edit.** The plan
+correctly notices the tracker row under-quotes the frozen `Geom` provenance fields, but it should
+not stay only as a note. Add a G-row or acceptance item that a matched geom carries all four
+provenance fields, including `matched_witness_id`, and log the tracker wording correction so the
+done-when does not keep reintroducing the three-field contract.
+@@@@@@
+
+&&&&&&
+**R17 — accepted, both halves.** (1) Binding test: folded into **G-3, widened** — the
+matcher-written geom must carry all four provenance fields, with `matched_witness_id` equal to the
+*configured* anchor witness, sentinel-tested (fake backend + sentinel witness id; a mutant that
+hardcodes `"copy1"` or writes the wrong field reds). Note the split of labor: a *missing* field is
+already unconstructible — `Geom.__post_init__` raises on any `None` in a present geom
+(`atoms.py:69–74`, S1.1's proof, not re-proven) — so the new red targets the failure construction
+cannot catch: the matcher writing a *wrong value*. (2) Tracker wording: fixed this turn, see R21.
+The §2 NOTE above is amended to record the fix rather than keep asserting a stale mismatch.
+&&&&&&
+
+@@@@@@
+**Audit 21 — tracker minimalism should not preserve a wrong provenance contract.** Leaving the
+S2.1 row's three-field `{geometry_engine, match_method, match_confidence}` prose untouched is not
+just a harmless minimal edit: it conflicts with the frozen S1.1 `Geom.matched()` contract, which
+requires `matched_witness_id`. This sprint should include the tiny tracker wording fix to list all
+four fields, plus the matched-geom test, because implementation will otherwise be judged against
+two different specs.
+@@@@@@
+
+&&&&&&
+**R21 — accepted; the tracker edit is applied this turn, not deferred.** The S2.1 row now reads
+`{geometry_engine, matched_witness_id, match_method, match_confidence}`
+(`ENGINE_STRUCTURE_TASKS.md`, S2.1 spec cell). The two-specs risk was concrete, not stylistic:
+`Geom.__post_init__` hard-rejects a present geom missing `matched_witness_id` (`atoms.py:69–74`),
+so code written to the tracker's three-field prose would not even construct — the frozen S1.1
+contract always was the four-field one, and the tracker prose was the drifted copy. The
+matched-geom test is R17's widened G-3.
+&&&&&&
+
 - **Frozen streams** — `books/per_la_liberta/work/data/atoms/{copy1,copy2,copy3,canonical}.json`
   (written by `freeze_streams.py`): copy1 3621 / copy2 3356 / copy3 799 / canonical 4786 atoms
   (S1.3a oracle-backed pins). Canonical derives from copy1+copy2 only (copy3's word-level link is
@@ -120,6 +160,33 @@ New core modules, all under `src/engine/structure/` (neutral; S0.2 guard extende
   wants to split during build, worklist records may move to their own module — name stability of
   the four above is the commitment, not the count.)
 
+@@@@@@
+**Audit 1 — `GeometryError` needs a concrete taxonomy slot before code starts.** "Next free exit
+code" is too loose now that structure-owned errors already occupy 11/12 beside the global
+`EngineError` taxonomy. Decide whether OCR/backend operational failures reuse `BackendError`
+(exit 5) or whether `GeometryError` is a new `EngineError` subclass with a pinned unique exit code
+and a uniqueness test. Otherwise different S2.1 modules can surface the same failure as either a
+clean typed geometry failure or a generic traceback/backend failure.
+@@@@@@
+
+&&&&&&
+**R1 — accepted; pinned now, verified against the live taxonomy.** Ruling: `GeometryError(EngineError)`
+with **`exit_code = 13`** — the next free code (grep-verified this session: `errors.py` owns 3–10,
+`StructureValidationError` 11 at `structure/errors.py:170`, `EvidenceGateError` 12 at
+`structure/evidence.py:656`) — living beside its raiser in `geometry.py`, the carrier-beside-vocabulary
+posture `errors.py`'s docstring names for 11/12. **Not** a `BackendError` reuse: that class is
+ocr-step-owned and its documented contract is the *opposite* posture — per-page failures degrade to
+an `[OCR_ERROR]` sentinel (`errors.py:56–61`) — while `GeometryError` is fail-loud with no per-page
+degrade (DT-2). Reusing exit 5 would put two contradictory failure contracts under one code.
+Boundary inside S2.1: `GeometryError` covers backend/OCR operational failure and geometry integrity
+(box outside rect, calibration-gate block, volume-bound breach); the sidecar/worklist **load**
+boundaries do NOT use it — they join the existing shared loader taxonomy (absent →
+`MissingInputError`, present-but-unloadable/stale → `StaleArtifactError`; `errors.py:18–24`), which
+is G-18 (R16). Owned ripples: extend the exit-code uniqueness sweep
+(`test_authoring_evidence.py:625`, currently spanning three files) to the fourth file, and update
+`errors.py`'s "two structure-owned subclasses" docstring to three.
+&&&&&&
+
 `FORBIDDEN` gains `'"ita"'` and `"'ita'"` (quoted forms; the existing planted-literal
 parametrization inherits them automatically). pymupdf imports in core are fine — it is already a
 required dependency; the neutrality rule governs language/book literals, not libraries.
@@ -136,6 +203,31 @@ tessdata / OCR failure / a box outside the page rect raise `GeometryError`; a ba
 returns silently-empty pages for operational failures (empty ≠ failed: a genuinely blank page
 yields zero words *successfully*).
 
+@@@@@@
+**Audit 2 — `WordBox` validity is under-specified.** The contract should reject or normalize
+`NaN`/`inf`, non-positive boxes (`x1 <= x0` or `y1 <= y0`), empty OCR text, and ambiguous page-index
+semantics at the seam, not later in the matcher. It should also state whether backend output order
+is raw OCR order or explicitly unspecified, because downstream code must not accidentally treat a
+backend's native order as the canonical reading order outside the detector branch.
+@@@@@@
+
+&&&&&&
+**R2 — accepted; pinned at the seam, two layers, no silent loss.** (1) Record contract:
+`WordBox`/`PageGeometry` `__post_init__` rejects non-finite coords, degenerate boxes (`x1 <= x0` or
+`y1 <= y0`), empty/whitespace `text`, and non-positive page/width/height — invalid records are
+unconstructible (G-21, R16). (2) Backend normalization: Tesseract can emit empty-text/degenerate
+artifacts; the backend drops them *before* record construction and counts them in a per-page
+`dropped_boxes` stat surfaced in the sidecar page record + run report — dropped-and-counted, never
+silently absent. (3) Page semantics pinned at the seam: `PageGeometry.page` is DT-4's 1-based scan
+number; the Protocol's range parameters are 1-based inclusive, matching `⟨PAGE:N⟩` /
+`page_000N.png`. (4) Order: **contractually unspecified** at the seam — and that is load-bearing by
+design, not an omission: page-locate consumes per-page token *bags* (order-free) and the per-atom
+match is BoW-within-window, so slice 1 never depends on backend emission order; the only ordered-box
+producer is the slice-2 detector, and `order_qa` measures exactly that. A consumer wanting order
+must go through `segmentation.reading_order` — treating backend order as reading order has no API
+to do it accidentally.
+&&&&&&
+
 ### DT-3 — Anchor witness = copy1; page-locate by monotone alignment; copy3-blind calibration
 
 The done-when says a canonical atom carries its **primary witness's** box; canonical derivations
@@ -147,12 +239,88 @@ assignment is a monotone segmentation of the witness stream; per-witness-atom pa
 out. Byproduct: **real page ranges for copy1's atoms** — the open S1.3a page-attribution question
 gets its answer as derived sidecar data (never a mutation of the frozen stream, D25/DT-9).
 
+@@@@@@
+**Audit 3 — copy1-only matching needs an explicit no-fallback rule.** Choosing copy1 as the primary
+witness is defensible, but the plan should state what happens when copy1 page-locates or matches
+poorly while copy2 would match. If copy2 is deliberately not a fallback, the run report must count
+"copy1 failed / secondary not attempted" separately so geometry coverage loss is visible. If copy2
+is allowed as fallback, the sidecar and `matched_witness_id` rules need to support per-atom witness
+selection rather than a single `{witness}_geom.json` namespace.
+@@@@@@
+
+&&&&&&
+**R3 — ruling: no copy2 fallback in S2.1; the visibility requirement accepted in full.** The
+no-fallback rule is the done-when's own semantics, not just parsimony: the tracker requires the
+canonical atom to carry its *primary witness's* box, and a copy2 box on a canonical atom — however
+honestly labeled `matched_witness_id="copy2"` — is a different contract that would need a D-level
+redefinition first. What lands instead: the run report + sidecar count the loss **separately and by
+cause** — pages where copy1 page-locate failed, accepted pages' copy1-unmatched atoms, and canonical
+atoms with **no copy1 derivation at all** (copy2-only atoms, structurally unmatchable under this
+ruling; the report quantifies how many of the 4786 that is) — each line tagged
+`secondary-not-attempted`, so the untried copy2 option stays visible as evidence for a future
+ruling rather than silent coverage loss. The `{witness}_geom.json` namespace already admits a
+future `copy2_geom.json` without redesign; attach-precedence would be the new decision that ruling
+brings with it.
+&&&&&&
+
 **Calibration gate (inside slice 1, before trusting copy1 assignments):** run page-locate on
 **copy3 blind** (ignore its page map), compare derived pages to the map — the only ground truth we
 own. Accept when ≥95% of copy3 body atoms page-locate exactly; publish the distribution in the run
 report. (Proposal; the number is Ben's to ratify. copy1's fresh-Tesseract-vs-IA-Tesseract
 agreement is expected ≥ copy3's Gemini-vs-Tesseract 0.939 — same engine family, same scan — but
 that expectation is *checked* by the run report, not assumed.)
+
+@@@@@@
+**Audit 4 — monotone alignment is named but not specified enough to build or falsify.** "Monotone
+global alignment" needs a concrete objective: token normalization input, gap/mismatch scoring,
+page-break penalty, treatment of repeated headers/furniture, and how ties choose page windows.
+The copy3-blind 95% gate also needs a failure route: does S2.1.3 block, fall back to S2.1-alt,
+demote geometry for S5, or route pages to review? A monotonicity-only invariant can pass with a
+bad but ordered segmentation.
+@@@@@@
+
+&&&&&&
+**R4 — accepted; the algorithm is now pinned.** **Objective:** given the DT-8-normalized witness
+token stream `w[0..N)` and per-page box token bags `B_1..B_K` (pages in scan order), choose
+monotone boundaries `0 = c_0 ≤ c_1 ≤ … ≤ c_K = N` maximizing
+`Σ_p |multiset_intersect(w[c_{p-1}:c_p), B_p)|` — a banded DP (band from the cumulative-length
+ratio), deterministic tie-break to the earliest boundary achieving the max. No separate
+gap/mismatch scoring: unmatched tokens (garble, hallucinated boxes) simply score zero.
+**Furniture:** the witness stream *contains* furniture atoms (`processing_scope="excluded"`,
+`atoms.py:30–35`), so page-locate runs over the full stream — printed folios are page-anchoring
+signal, and a furniture atom that matches its printed box gets real geometry, which is fine.
+**Monotonicity-only passing a bad segmentation:** agreed — which is why G-7 was written as a pair:
+the monotone property (CI, shape) AND the copy3-blind exactness gate (ground truth, quality). Shape
+alone was never the acceptance. **Failure route, pinned:** calibration < floor → S2.1.3
+**hard-blocks** — no `copy1_geom.json` is published; the run report ships the failure distribution
+and the ruling comes to you with the named options: (i) ratify a page±1 tolerance tier with the
+floor re-derived, (ii) route the failing page-regions to the DT-10 worklist, (iii) reopen S2.1-alt
+(the tracker retains it as the specified conditional). Never a silently lowered bar.
+&&&&&&
+
+@@@@@@
+**Audit 18 — derived copy1 page attribution needs an ownership boundary.** DT-3 says page-locate
+answers the open S1.3a copy1 page-attribution question as sidecar data, but the plan should say
+who treats that answer as authoritative and how it is ratified. If it is merely S2.1 geometry
+evidence, keep it out of frozen streams and downstream page-range semantics; if it closes an S1.3a
+follow-up, add a tracker/doc update pointing to the sidecar-derived pages and their calibration
+floor.
+@@@@@@
+
+&&&&&&
+**R18 — accepted; the ownership boundary already exists in code as a tripwire, and the plan now
+cites it instead of drifting past it.** S1.3a.4's
+`test_real_canonical_is_uniformly_page_unmapped_until_s7_1b` pins every canonical atom
+`PAGE_UNMAPPED (-1,-1)` until **S7.1b**, whose tracker row names canonical page-attribution as its
+deliverable (via the copy3↔canonical word-level link). The pin: S2.1's derived pages are **geometry
+evidence only** — they live in `Geom.page` (a fact about where the matched *box* sits) and in the
+sidecar; `Atom.page_range` (the capture address) stays `PAGE_UNMAPPED`, and the tripwire keeps
+enforcing that. Different fields, different meanings — so `attach_geometry` writing `Geom.page=52`
+onto a `PAGE_UNMAPPED` atom is the intended state, not a contradiction. Ratifying *adoption*
+(page_range semantics) remains S7.1b's; on S2.1 close, the tracker's S1.3a `PAGE_PENDING` deferral
+note gains one pointer line: sidecar-derived copy1 pages exist at calibration floor X, adoption
+decision unchanged at S7.1b.
+&&&&&&
 
 ### DT-4 — Coordinate space + page numbering (BR-022 seed)
 
@@ -165,6 +333,29 @@ the **1-based scan page number**, consistent with copy3's `⟨PAGE:N⟩` markers
 doubles as the numbering cross-check (278 markers == 278 pages, S1.3a). This DT is the BR-022
 answer-of-record: downstream regions inherit this space or declare a transform.
 
+@@@@@@
+**Audit 5 — the proposed coordinate proof is too weak.** "Every box is inside `page.rect` at two
+dpi values" does not prove the coordinates are dpi-independent page points; pixmap-space boxes can
+still be scaled into the rect and pass containment. Add a test that OCRs the same synthetic page at
+two dpi values and compares the same word's bbox numerically in page space within tolerance. Also
+pin behavior for rotated/cropped pages or explicitly declare them out of scope for S2.1.
+@@@@@@
+
+&&&&&&
+**R5 — accepted, with one correction to the threat model.** Raw pixmap-space coords at dpi=300 are
+~4.17× page points — containment against a 612×792 rect *would* red on them, so the two-dpi
+containment test was not toothless. What it genuinely cannot catch is a library that scales into
+page units with dpi-dependent quantization drift (rounded on the pixel grid, then divided). The
+numeric test closes that and is strictly stronger, so it replaces the containment-only wording:
+OCR the same synthetic page at dpi 150 and 300 and assert the same word's bbox equal in page space
+within tolerance (proposal: ≤0.5 pt per coordinate), plus containment. Folded into G-8.
+**Rotation/crop: explicitly unsupported in S2.1 — enforced, not assumed.** The backend raises
+`GeometryError` on `page.rotation != 0` (both PLL scans are unrotated; a rotated page must fail
+loud, never emit wrong coordinates silently). CropBox≠MediaBox: coords are relative to `page.rect`
+«unverified that `page.rect` is the cropbox-derived visible rect — bound at build by the same
+containment test on a cropped synthetic page».
+&&&&&&
+
 ### DT-5 — Two-branch reading-order sourcing (where the branch lives)
 
 Book config declares `order_source: witness | geometry`. PLL = `witness` (copy1 column-ordered
@@ -176,6 +367,26 @@ S2.2 measurement feed**, DT-12). `geometry` branch: the detector's order is auth
 worklist is its essential backstop, and the OCR tokens are the text (boxes are theirs by
 construction — no matcher needed; the front-end's confidence/worklist output is the deliverable).
 Proven on the synthetic fixture; PLL never exercises this branch.
+
+@@@@@@
+**Audit 6 — the no-witness branch lacks an L1 integration contract.** Saying "OCR tokens ARE the
+text" skips the step that turns detector-ordered boxes into atoms with `raw_span`, `raw_source_hash`,
+`page_range`, and `Geom` provenance. If the no-witness branch is only a front-end proof, say it
+does not emit atom streams in S2.1. If it does emit atoms, it needs a capture/round-trip contract
+compatible with S1.x, not just ordered coverage on a synthetic page.
+@@@@@@
+
+&&&&&&
+**R6 — accepted; the plan now says it outright: in S2.1 the no-witness branch emits NO atom
+streams.** It is a segmentation-front-end proof — trusted boxes + reading order + worklist routing
+on the synthetic fixture, measured by G-16's ordered-coverage pin — nothing more. Turning
+detector-ordered boxes into L1 atoms (raw_span/raw_source_hash against *what* raw source — the OCR
+text itself would be the witness — plus capture tiling and round-trip) is a real capture-contract
+design that must go through S1.3a's machinery, and it has no consumer today: PLL never exercises
+the branch. That becomes a named §6 non-goal ("image-only-book ingestion: atom capture from OCR
+text is a future lane through S1.3a, not an S2.1 deliverable"), so the omission is a recorded
+decision, not a gap someone later mistakes for support.
+&&&&&&
 
 ### DT-6 — Density pre-check: band classifier, calibrated to abstain
 
@@ -194,6 +405,28 @@ per-page features → `{content, near_blank, non_text_dark, abstain}`:
   front/back matter), labeled once in the run report. Bands set generously toward abstain — a
   human glance is cheap next to a trusted hallucination.
 
+@@@@@@
+**Audit 7 — calibration cannot live only in a run report.** The classifier thresholds and labeled
+calibration pages are part of the executable artifact: future reruns need to know whether the
+classifier changed or merely the input changed. Persist the feature thresholds, calibration-page
+ids, and classifier version either in book config or a governed calibration artifact, and make the
+sidecar/run report record the exact version used.
+@@@@@@
+
+&&&&&&
+**R7 — accepted; calibration becomes a governed artifact and the core stays numberless.** Pin:
+`segmentation.py` takes band thresholds as **required constructor parameters with no defaults**
+(the G-1 posture again — a baked default band is a scan-profile opinion in core) and exports a
+classifier version string (`SEGMENTATION_VERSION = "density-bands-v1"`). PLL's calibrated values
+live in book config under `books/per_la_liberta/`; the labeled calibration set (page ids + assigned
+bands — the S2.0 stratified 37 + the audit's boundary pages) is a **tracked** input artifact,
+`books/per_la_liberta/work/review/density_calibration.json`, which the run report cites rather than
+contains. The sidecar records `classifier_version` + the exact band values used, and both join the
+R13 input fingerprint — so a rerun distinguishes "classifier changed" from "input changed"
+mechanically, and a verdict given under old bands goes stale rather than silently re-applying
+(G-22).
+&&&&&&
+
 ### DT-7 — Column / reading-order detector (generalize the probe; cross-page prior; no symmetry)
 
 Promote `detect_columns`/`reading_order` into `segmentation.py` with the audit's rulings baked in:
@@ -204,6 +437,28 @@ class when its own valley evidence is inside a hysteresis margin, and overrides 
 disagreement (margin values proposed in-code, ratified by the run report distribution). Detector
 confidence = valley depth × column-balance; below threshold → worklist. Reading order (columns
 top-to-bottom, left column first, line-binned by median box height) comes free from the split.
+
+@@@@@@
+**Audit 8 — cross-page prior needs reset and abstain rules.** A retained prior can hide exactly the
+transition pages S2.0 called out: front/back matter, chapter openings, dark/near-blank pages, and
+sparse chapter ends. Define where the prior is allowed to apply, when density/worklist status
+resets it, and add a red fixture for a single-column page between two two-column pages. Without
+that, "locally constant" becomes a way to propagate a confident wrong layout.
+@@@@@@
+
+&&&&&&
+**R8 — accepted; the prior gets a scope contract.** (1) It applies only between consecutive
+`content`-band pages — the density gate runs first, and any non-content or worklist-routed page
+**resets** the chain (a prior must never tunnel through an endpaper or a routed page). (2)
+Own-page evidence outside the hysteresis margin always wins — the prior breaks ties *inside* the
+margin only, never overrides a confident valley. (3) In-margin with *disagreeing* neighbors (the
+transition pages you name: chapter opens, sparse ends) → **abstain to the worklist**, inherit
+nothing. (4) Every page records `n_cols_source: "evidence" | "prior"` in its sidecar page record,
+so the S2.2 re-gate can measure how often the prior decided and whether prior-decided pages are
+where `order_qa` fails. (5) The named red fixture lands as G-23: a strong-evidence single-column
+page between two two-column pages — a mutant that lets the prior override strong own-page evidence
+reds.
+&&&&&&
 
 ### DT-8 — Matcher: normalizer, window match, confidence formula, thresholds
 
@@ -217,6 +472,32 @@ top-to-bottom, left column first, line-binned by median box height) comes free f
   `bbox` = union over **matched boxes only** (a distractor box never widens the union, G-6);
   `page` = the window's page. Page-locate is recorded page-level in the sidecar as
   `locate_method="monotone-align-v1"`.
+
+@@@@@@
+**Audit 9 — BoW atom matching is vulnerable on short/common-token atoms.** A greedy multiset match
+inside a page window can confidently bind a short atom to the wrong repeated phrase, especially
+when function words are retained and order is ignored. Add a minimum distinctive-token floor,
+tie/ambiguity handling, or a monotone/locality constraint, plus a red fixture with repeated common
+tokens where the wrong boxes would otherwise meet the 0.60 threshold and produce a plausible but
+false bbox.
+@@@@@@
+
+&&&&&&
+**R9 — accepted as a real failure mode; mitigation pinned, with the never-invent posture doing the
+heavy lifting.** V1 mechanism: (1) **multiset box-token consumption** — atoms match in witness
+order within the page and a box token consumed by one atom is unavailable to the next, so a
+repeated phrase cannot double-bind (G-24's mutant: remove consumption → duplicate-bind fixture
+reds); (2) **distinctive-token floor** — an atom binds only if it matched ≥ `min_tokens` tokens
+(proposal: 3) OR ≥1 token unique within the page bag; an atom failing the floor is written
+`unmatched(reason="ambiguous")` — **absent, not a plausible wrong bbox**. The cost asymmetry
+justifies the bias: a missing box degrades coverage visibly; a wrong box corrupts S5 re-bind
+silently. (3) The run report quantifies the ambiguous-atom residue; if material, the named
+escalation is order-aware locality (neighbor-bounded windows using detector order) — an
+S2.2-evidence decision, not built speculatively now. The G-24 red fixture is exactly the one you
+specify: repeated common tokens that would clear 0.60 — under consumption + floor they must not
+bind.
+&&&&&&
+
 - **Thresholds (proposals; setting method = full-book distribution in the slice-1 run report,
   ratified there, re-gated at S2.2):** page accepted when its atom-weighted match rate ≥ 0.80
   (prior: S2.0 content-BoW median 0.929 / mean 0.925); accepted-page atoms write `Geom.matched`
@@ -225,6 +506,55 @@ top-to-bottom, left column first, line-binned by median box height) comes free f
   Known robustness item, documented not solved here: line-break hyphen fragments (`perso-` / `ne`)
   — both streams are Tesseract-family on the same scan, so fragments should agree; the run report
   quantifies the residue.
+
+@@@@@@
+**Audit 10 — atom-level absent writes contradict the human-decline rule.** The header and tracker
+say `geom.present=false` only after both automation and human review decline, but DT-8 lets an
+accepted page write `Geom.absent` for any atom below 0.60 with no human verdict. If that exception
+is intentional, name it as an explicit exception and justify why atom-level auto-decline is safe.
+Otherwise low-confidence atoms on an accepted page need their own pending/review state, not an
+immediate absent write.
+@@@@@@
+
+&&&&&&
+**R10 — partial pushback on the premise; the fix accepted.** The tension is not between this plan
+and the tracker — it sits *inside the tracker row itself*, verbatim: the done-when mandates
+"unmatched → `geom.present=false`, not invented" (atom-level, no human in the sentence), while the
+row prose says "`geom.present=false` only after BOTH auto-detection and human review decline" —
+and that sentence lives in the front-end/worklist paragraph, i.e. page context. The coherent
+reading is scope-split, and the plan now states it as the explicit exception you ask for: the
+both-decline rule governs **page-level** geometry (a page's geometry is never written off without
+a human verdict — routed pages stay pending, G-12); on an **accepted** page, a sub-floor or
+zero-match atom writes absent **automatically**. Justification: (a) the done-when mandates exactly
+that; (b) per-atom human review breaks the DT-10 volume bound by orders of magnitude; (c) the
+blast radius is page-bounded — a page with many unmatched atoms fails the 0.80 page gate and
+routes to the human anyway, so a systematic matcher failure cannot hide behind atom-level
+auto-absents. Guard on the residue: auto-absent atoms get R19's reason records plus a proposed
+tripwire — auto-absent fraction on accepted pages > 5% of book atoms (proposal, yours to ratify)
+→ hard-fail, same principle as the review volume bound. §0/§1's "both decline" wording is amended
+to the page-scoped form.
+&&&&&&
+
+@@@@@@
+**Audit 19 — if zero-match auto-absent remains, preserve its reason.** The coworker summary treats
+"zero-match atom on an accepted page" as a legitimate second route to `Geom.absent`; that can work
+only if the sidecar records it distinctly from `decline_geometry`. Otherwise S5 cannot tell
+"human reviewed and declined page geometry" from "automatic atom-level miss inside an accepted
+page." Add an explicit per-atom absence reason/status or route zero-match atoms to review.
+@@@@@@
+
+&&&&&&
+**R19 — accepted; and the frozen model forces where the reason lives.** `Geom` has no reason field
+and `absent()` is nullary (`atoms.py:84–87`) — the S1.1 slot is frozen, so the reason **cannot**
+ride on the atom; it lives in the sidecar, which is what S5 loads anyway. Pin: sidecar per-atom
+records carry `status ∈ {matched, unmatched}`, with `reason ∈ {zero_match, below_atom_floor,
+ambiguous}` and the measured `match_confidence` on unmatched records (no bbox); a routed page's
+atoms stay absent from the map entirely (pending); a declined page carries the human verdict on its
+page record. So the four states S5 must distinguish are all mechanically queryable: **matched**
+(bbox), **auto-unmatched** (reason), **pending** (absent-from-map + page `routed`),
+**human-declined** (page `declined`). DT-9's schema sketch gains the unmatched-record shape on
+fold.
+&&&&&&
 
 ### DT-9 — Persistence: geometry sidecar, no stream supersession
 
@@ -252,6 +582,54 @@ onto matching atom ids at read time (new frozen instances; streams untouched); h
 fail-loud stale error. Folding geometry into a superseding stream emission is deferred to when S5
 needs it inline — a sidecar migrates trivially; churning Ben's authoring substrate now doesn't.
 
+@@@@@@
+**Audit 11 — sidecar binding is missing the source image/PDF identity.** `stream_source_hash`
+guards the witness text, but the boxes are generated from a scan PDF plus OCR parameters. A stale
+or swapped PDF can still match the same witness hash and produce different coordinates. Persist the
+source PDF/artifact hash, page count, OCR dpi/language, and ideally a structured backend-param
+object in addition to the human-readable `engine_id`; fail loud when any of those do not match.
+@@@@@@
+
+&&&&&&
+**R11 — accepted in full; the witness hash alone under-binds.** The boxes are a function of
+(PDF, engine, params), so the sidecar gains: `source_pdf: {sha256, n_pages, bytes}` and a
+structured `backend_params: {dpi, language, pymupdf, tesseract}` beside the human-readable
+`engine_id` (which stays, for grep/report use — it is now derived display, the structured object
+is the contract). Enforcement points: **generation** fails loud if the live PDF's hash or page
+count disagrees with an existing sidecar being regenerated (regen-guard posture); any **seam
+re-invocation** (S3.1, R15) must compare the recorded `source_pdf.sha256` against the live PDF and
+fail loud on mismatch — a one-shot hash of the local file, not a burden. `attach_geometry` itself
+binds stream↔sidecar (its job); PDF identity is generation/replay-side, recorded so every consumer
+*can* check. All of these fields join the R13 input fingerprint. New red: G-19.
+&&&&&&
+
+@@@@@@
+**Audit 12 — atom-id namespace is ambiguous.** The path is `{witness}_geom.json`, but
+`attach_geometry(atoms, sidecar)` sounds generic and the done-when talks about canonical atoms
+carrying the primary witness's box. State whether `atoms` keys are copy1 witness atom ids or
+canonical atom ids. If witness-keyed, attaching to canonical atoms must walk `derived_from` and
+handle multi-source canonical atoms explicitly; if canonical-keyed, `witness_id` is provenance
+only and the sidecar is not really per-witness.
+@@@@@@
+
+&&&&&&
+**R12 — accepted; pinned, and the model already carries the needed link (verified this session).**
+`Atom.derived_from: tuple[AtomDerivation, ...]` with `AtomDerivation{witness, atom_id}`
+(`atoms.py:116–122, :150`). Ruling: sidecar `atoms` keys are **copy1 per-witness atom ids** — the
+matcher works witness-side, which keeps the sidecar honest to its `{witness}_geom.json` name.
+`attach_geometry` gets a two-mode contract, both tested: (a) per-witness copy1 stream — direct id
+lookup; (b) canonical stream — resolve each atom's `derived_from` entries filtered to
+`witness == "copy1"` and attach that witness atom's geom. Mode (b) *is* the implementation of
+"canonical atom carries its primary witness's box", and S2.2's property test ("primary-witness box
+on canonical atoms where matched") consumes it — canonical attachment is a required deliverable,
+not speculation. Edges: a canonical atom with no copy1 derivation → geom stays absent, counted
+under R3's `secondary-not-attempted` line; a canonical atom back-linking to *multiple* copy1 atoms
+→ absent + counted in v1, with the run report establishing whether the case even exists before any
+union-merge machinery is built; dangling back-links are already `CaptureError`'s jurisdiction at
+the store tier and are not re-checked here. New red: G-20 (mutant doing direct canonical-id lookup
+→ disjoint-namespace fixture reds).
+&&&&&&
+
 ### DT-10 — Human-review worklist: specified, not a slogan (audit Finding E)
 
 Home: `books/<id>/work/review/geometry_worklist.json` (+ on-demand overlay renders
@@ -272,6 +650,28 @@ re-enters the pipeline with the human's parameters and its result is marked huma
 `decline_geometry` → the page's atoms get `Geom.absent` — the ONLY route to absent besides a
 zero-match atom on an accepted page, satisfying "absent only after both auto and human decline".
 Unknown action → fail loud (G-14).
+
+@@@@@@
+**Audit 13 — worklist verdicts need replay and staleness semantics.** The record lacks a stable
+record id, input sidecar/run id, source PDF hash, classifier version, and status transition history.
+Without those, a verdict can be applied to a different OCR run or applied twice with different
+effects. The CLI should be idempotent: same worklist + same verdicts + same inputs yields the same
+sidecar, while any input/calibration drift marks old verdicts stale and routes them back through
+review.
+@@@@@@
+
+&&&&&&
+**R13 — accepted in full; the record and CLI get replay semantics.** Each worklist record gains:
+`id` (stable: `"{witness}:p{page:04d}:{stage}"`), `input_fingerprint` = sha256 over
+(`stream_source_hash`, `source_pdf.sha256`, `engine_id`, `classifier_version`, band/threshold
+values — the same fields R7/R11 persist), and a `history` list of applied verdicts (`by`/`at`
+already in the verdict schema). CLI contract, red-tested as G-22: **idempotent** — same worklist +
+same verdicts + same inputs → byte-identical sidecar, and re-applying an already-applied verdict is
+a no-op; **stale-guarded** — a verdict whose record fingerprint ≠ the current input fingerprint is
+refused and the page re-routed as a fresh record, the old verdict retained in `history` as evidence,
+never silently re-applied to different inputs. This is the D14/D21 stale posture applied at the
+human boundary.
+&&&&&&
 
 **Volume bound:** `review_fraction_max` per stage, default **0.15**, book-config-tunable.
 Exceeding it **hard-fails the run** with the named principle: the automation premise failed —
@@ -300,6 +700,47 @@ split:
 - **Unit tier:** matcher/page-locate/segmentation tested against fake `GeometrySource`
   implementations (deterministic boxes, no OCR at all).
 
+@@@@@@
+**Audit 14 — the CI fixture risks proving only the easy OCR path.** An English ASCII synthetic PDF
+is useful for the backend smoke, but it will not exercise the Italian/accent/NFC normalization path,
+hyphen fragments, or repeated-token ambiguity that drive the real matcher risk. Add OCR-free fake
+backend unit fixtures for accented tokens, edge punctuation, line-break hyphens, and duplicate
+phrases so those semantics are CI-bound even though the PLL PDF remains local-only.
+@@@@@@
+
+&&&&&&
+**R14 — accepted; the hard-semantics cases move to OCR-free fake-backend fixtures, CI-bound.**
+The fixture inventory (lands in DT-11 on fold): NFC composed vs decomposed accents through the
+DT-8 normalizer (`è` as one codepoint vs `e` + U+0300 must match); edge punctuation (guillemets,
+commas — fixture *data*, not core literals; the neutrality guard scans `src/engine/structure/`,
+not tests); casefold; line-break hyphen fragments (`perso-`/`ne` as adjacent boxes vs the
+witness's joined `persone` — pinning the honest v1 behavior: fragments do NOT match the joined
+form, they count as unmatched residue and degrade `match_confidence` truthfully, and must never
+*wrongly* bind); and the repeated-common-token page (G-24). All exercise `geom_match` semantics
+deterministically with zero OCR. The synthetic PDF keeps only what genuinely needs a real OCR
+pass: the G-1/G-8/G-17 backend contracts and the G-16 order path.
+&&&&&&
+
+@@@@@@
+**Audit 20 — keep the CI OCR smoke from becoming the matcher-quality proof.** The synthetic
+image-only PDF is the right anti-skip fixture for the backend, but its generated text can make OCR
+too clean and layout too controlled. The plan should separate "real OCR path executes in CI" from
+"matcher semantics are covered" and require the fake-backend fixtures to own the hard cases. The
+run report then remains the only claim about PLL-quality matcher performance.
+@@@@@@
+
+&&&&&&
+**R20 — accepted; stated as a three-tier claim ladder, each tier claiming only what it runs.**
+(1) Synthetic-PDF tier: "the real OCR path executes and honors backend contracts" —
+existence/fail-loud/coordinate-space, nothing about match quality. (2) Fake-backend tier:
+"matcher/segmentation semantics hold on the adversarial cases" (R14's inventory) — CI-bound,
+deterministic. (3) The PLL run report: the **only** artifact permitted to make quality claims
+about real-book matching (distributions, threshold ratification, residues). Enforcement of the
+drift you name, added to §7: no G-row may cite the synthetic PDF as evidence for a
+matcher-semantics invariant — a semantics row that only reds via the synthetic PDF is
+mis-homed and gets moved to a fake-backend fixture.
+&&&&&&
+
 ### DT-12 — S2.2 measurement hooks + S3.1 word-box seam
 
 - **S2.2 (#30)** re-gates S5's geometry mode on the **as-built** detector: mean ordered coverage
@@ -310,6 +751,29 @@ split:
   persistence: S3.1 re-invokes the `GeometrySource` seam (the sidecar's `engine_id` + params make
   the re-run reproducible modulo tesseract version, which is recorded). If S3.1's cost profile
   demands word-box persistence, that is its decision to bring — the seam is the contract.
+
+@@@@@@
+**Audit 15 — S3.1 reproducibility is weaker than stated if word boxes are not persisted.** An
+`engine_id` string plus params is not enough to re-run the same word-box layer after a Tesseract,
+tessdata, PyMuPDF, source-PDF, or calibration change. If S3.1 is expected to re-invoke the seam,
+the sidecar/run report must expose a structured replay contract and source artifact hash; otherwise
+S3.1 should either consume persisted word boxes or explicitly accept that its geometry input may
+differ from the S2.1 union boxes.
+@@@@@@
+
+&&&&&&
+**R15 — accepted; DT-12's claim was over-strong as written and is now honest.** An `engine_id`
+string alone cannot re-produce boxes across a tesseract/tessdata/PyMuPDF/PDF change. What S3.1
+actually gets: (1) the **structured replay contract** from R11 (`source_pdf.sha256` +
+`backend_params` with live versions) — re-invocation *verifies* fingerprint match and fails loud
+on drift, so S3.1 either reproduces on provably-identical inputs or knows it did not; (2) a
+**drift check even on apparent match**: each persisted atom union bbox must ≈ the union of the
+fresh matched word boxes within tolerance — a consistency gate before S3.1 trusts word-level
+geometry against S2.1-era unions; (3) on any mismatch, S3.1's documented options are
+regenerate-under-its-own-engine-id (its geometry, its evidence, recorded as such) or bring
+word-box persistence — which remains its decision to make, now with the honest price tag stated
+instead of an implied free replay.
+&&&&&&
 
 ## §4 Invariants and red-first matrix
 
@@ -337,6 +801,38 @@ the factories and is not re-proven here.
 | G-15 | sidecar↔stream binding: `stream_source_hash` mismatch → stale fail-loud | flip one hash byte → `attach_geometry` reds | `test_geom_sidecar.py` |
 | G-16 | no-witness branch end-to-end: detector order recovers known text on the synthetic two-column page | break column split → ordered-coverage pin (== 1.0 on synthetic) reds | `test_geometry_e2e.py` |
 | G-17 | backend fail-loud: missing tessdata / OCR failure raises, never returns empty pages | mutant swallows the exception → reds (monkeypatched failing OCR) | `test_geometry_backend.py` |
+
+@@@@@@
+**Audit 16 — the red matrix does not cover several new persisted contracts.** Add G-rows for
+sidecar schema/version rejection, source-PDF hash mismatch, atom-id namespace attachment
+(witness-to-canonical or canonical direct), calibration-version staleness, and worklist replay
+idempotency. Those are load-boundary contracts, not just implementation details, and today they
+would rely on prose in DT-9/DT-10 rather than red-first tests.
+@@@@@@
+
+&&&&&&
+**R16 — accepted; the load-boundary contracts get their own rows.** Folded into §4 on ratification
+as G-18…G-24, plus one strengthening:
+
+- **G-18** — sidecar/worklist loader totality: unknown `schema_version` / missing required key /
+  malformed → the shared loader taxonomy (`StaleArtifactError`; absent file → `MissingInputError`,
+  per `errors.py:18–24`); mutant loader accepting any version → reds. Home: `test_geom_sidecar.py`.
+- **G-19** — source-PDF fingerprint mismatch at generation/replay → fail-loud (flip a hash byte /
+  wrong page count). Home: `test_geom_sidecar.py`.
+- **G-20** — canonical attachment resolves `derived_from(witness=="copy1")`; mutant doing direct
+  canonical-id lookup → disjoint-namespace fixture reds. Home: `test_geom_match.py`.
+- **G-21** — `WordBox`/`PageGeometry` validity: NaN/inf/degenerate/empty-text unconstructible;
+  mutant drops the `__post_init__` check → reds. Home: `test_geometry_backend.py`.
+- **G-22** — worklist replay: idempotent re-apply (byte-identical sidecar) + stale-fingerprint
+  verdict refused, including classifier-version drift (R7); mutant applying a stale verdict →
+  reds. Home: `test_geom_sidecar.py`.
+- **G-23** — cross-page prior reset/override rules (R8's fixture: strong-evidence single-column
+  between two-column neighbors; prior never crosses a non-content/routed page). Home:
+  `test_segmentation.py`.
+- **G-24** — repeated-token ambiguity: consumption + distinctive-token floor prevent a
+  plausible-wrong bbox (R9's fixture). Home: `test_geom_match.py`.
+- **G-8 strengthened** per R5: numeric dpi-invariance within tolerance, not containment alone.
+&&&&&&
 
 Post-build: a mutation hunt over the four new core modules (house discipline), survivors
 dispositioned in the audit note.

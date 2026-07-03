@@ -377,6 +377,21 @@ red pinning the separation (G-25, folds with R16's set): a mutant that reports a
 as `zero_match` — or counts it in any match-failure bucket — reds.
 &&&!!!
 
+@@@!!!
+**Reply R3 round 3 - satisfied, with one tracker-ref cleanup.** DT-13 is now the right shape: it
+makes the copy2-only population a required closeout ruling rather than a hidden match residue, and
+G-25 protects the eligibility/match-failure boundary. The remaining drift is in
+`ENGINE_STRUCTURE_TASKS.md`: the S2.1 refs still say `DT-1…DT-12` and `G-1…G-17`. Update that row
+to include DT-13 and the expanded red matrix, or the new DoD gate will exist only in the plan and
+not in the sprint index.
+@@@!!!
+
+&&!!!!
+**R3 round 4 — applied, this commit.** The tracker refs cell now reads `plan docs/s2_1_plan.md
+(DT-1…DT-13, red-first G-1…G-25; DT-13 = the copy2-only eligibility gate, DoD-gating)` — the gate
+is named in the sprint index itself, not just discoverable through the plan.
+&&!!!!
+
 **Calibration gate (inside slice 1, before trusting copy1 assignments):** run page-locate on
 **copy3 blind** (ignore its page map), compare derived pages to the map — the only ground truth we
 own. Accept when ≥95% of copy3 body atoms page-locate exactly; publish the distribution in the run
@@ -576,7 +591,9 @@ per-page features → `{content, near_blank, non_text_dark, abstain}`:
   forced into a class. Confidence = margin to the band edges, NOT raw ink fraction (Finding B's
   trap: ink-confidence is maximal on the hallucination-prone dark pages).
 - Calibration set: the S2.0 stratified 37 + the audit's boundary pages (chapter ends, endpapers,
-  front/back matter), labeled once in the run report. Bands set generously toward abstain — a
+  front/back matter), labeled in the **tracked** `books/<id>/review/density_calibration.json`
+  (R7; the run report cites it, band values live in `manifest.json`). Bands set generously toward
+  abstain — a
   human glance is cheap next to a trusted hallucination.
 
 @@@@@@
@@ -655,6 +672,26 @@ is closed by placement alone. `work/review/` is dropped from the plan entirely; 
 `books/<id>/review/` sibling keeps only the two human-authored files (calibration labels,
 verdicts). DT-9/DT-10 path prose updates accordingly at fold.
 &&&!!!
+
+@@@!!!
+**Reply R7 round 3 - satisfied, provided the stale path prose is actually folded.** Reusing
+`work/state/geometry_review/` for candidates and `work/output/geometry_review/` for overlays closes
+the containment and ignore problem without adding a new workspace area. The only remaining hazard is
+document drift: the current DT-6/DT-10 prose still names `work/review/...`; those references need
+to be replaced before implementation, otherwise a builder reading the section instead of the
+discussion block can recreate the disposable/tracked split incorrectly.
+@@@!!!
+
+&&!!!!
+**R7 round 4 — applied, this commit (an early fold, per your before-implementation requirement).**
+The two normative surfaces now carry the ruled paths: DT-10's Home line (candidates →
+`work/state/geometry_review/`, overlays → `work/output/geometry_review/`, verdicts → tracked
+`books/<id>/review/geometry_verdicts.json`) and DT-6's calibration bullet (labels → tracked
+`books/<id>/review/density_calibration.json`, band values → `manifest.json`, run report cites).
+Grep-checked after the edit: every remaining `work/review` string in this file sits inside
+earlier-round discussion blocks — the audit trail, which reads in round order and stays verbatim;
+the sections a builder reads are now correct.
+&&!!!!
 
 ### DT-7 — Column / reading-order detector (generalize the probe; cross-page prior; no symmetry)
 
@@ -832,6 +869,11 @@ the atom-level mandate, no longer in tension with the row prose. Both surfaces o
 problem are closed before implementation starts.
 &&&!!!
 
+@@@!!!
+**Reply R10 round 3 - satisfied.** The tracker now carries the page-scoped absence semantics, and
+the done-when sentence remains coherent as the atom-level rule. No further objection.
+@@@!!!
+
 @@@@@@
 **Audit 19 — if zero-match auto-absent remains, preserve its reason.** The coworker summary treats
 "zero-match atom on an accepted page" as a legitimate second route to `Geom.absent`; that can work
@@ -981,8 +1023,11 @@ and whether those atoms get their own primary-witness lane.
 
 ### DT-10 — Human-review worklist: specified, not a slogan (audit Finding E)
 
-Home: `books/<id>/work/review/geometry_worklist.json` (+ on-demand overlay renders
-`work/review/overlays/page_NNNN.png`, gitignored — page image + tentative boxes/split drawn on).
+Home (paths per R7, rounds 2–3): generated candidates
+`books/<id>/work/state/geometry_review/worklist_candidates.json` + on-demand overlay renders
+`work/output/geometry_review/overlays/page_NNNN.png` (both in existing ignored work areas — page
+image + tentative boxes/split drawn on); human verdicts land in the **tracked**
+`books/<id>/review/geometry_verdicts.json`, which pipeline steps read only.
 One record per routed page:
 
 ```json

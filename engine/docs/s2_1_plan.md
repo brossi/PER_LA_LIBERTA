@@ -759,11 +759,21 @@ S2.2.
   either given their per-atom primary-witness lane or their exclusion is explicitly ratified —
   never silently absorbed as match residue (round 3, R3).
 
-**Numeric proposals bundled in this ratification** (each is marked "proposal" at its DT; the
-ratification act covers them unless singled out): copy3-blind calibration floor ≥95% exact (DT-3);
-DP band B = 3× max page bag (DT-3); dpi-invariance tolerance ≤0.5 pt/coordinate (DT-4);
-distinctive-token floor `min_tokens=3` OR ≥1 page-unique (DT-8); auto-absent tripwire 5% of book
-atoms on accepted pages (DT-8); `review_fraction_max` 0.15 (DT-10). Separately, the **match
-thresholds 0.80/0.60** (DT-8) and the **hysteresis margins** (DT-7) are ratified *at the slice-1
-run report* against the full-book distributions — proposing them final now would be
-measurement-blind.
+**Numeric proposals — ruled independently** (Ben, 2026-07-03: no bundled signature; each number
+carries its own ruling). Ledger below; the DT prose stays the definition of record, this table
+records the verdicts. A number stays a proposal until ruled, and the child that consumes it
+cannot land with an unruled value — the constants are required parameters/test values, so there
+is no default to fall back to.
+
+| # | Proposal | DT | Consumed by | Ruling |
+|---|----------|----|-------------|--------|
+| P-1 | copy3-blind page-locate calibration floor: ≥95% exact | DT-3 | #37 (calibration gate) | pending |
+| P-2 | DP band B = 3× max page bag (≈1.4K tokens) | DT-3 | #37 (page-locate) | pending |
+| P-3 | dpi-invariance tolerance ≤0.5 pt/coordinate | DT-4 | #36 (G-8 test) | pending |
+| P-4 | distinctive-token floor: `min_tokens=3` OR ≥1 page-unique token | DT-8 | #37 (matcher) | pending |
+| P-5 | auto-absent tripwire: >5% of book atoms on accepted pages → hard-fail | DT-8 | #37 (slice-1 run gate) | pending |
+| P-6 | `review_fraction_max` = 0.15 per stage | DT-10 | #40 (volume bound) | pending |
+
+Separately (unchanged): the **match thresholds 0.80/0.60** (DT-8) and the **hysteresis margins**
+(DT-7) are ratified *at the slice-1 run report* against the full-book distributions — proposing
+them final now would be measurement-blind.

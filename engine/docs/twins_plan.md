@@ -99,10 +99,25 @@ in practice:
   ambiguous signature emits `unclassified`, never a guessed class. Verdicts are
   human-only — the flagger/decider boundary is the charter, not an implementation
   detail.
-- **DT-4 Merge path.** An `accidental` cross-witness twin is reconciliation input:
-  word-level 2-way reconciliation of the pair yields one authoritative span whose
-  provenance records both twins. Merge is a human-triggered action with a recorded
-  verdict; never automatic.
+- **DT-4 Merge path** *(RATIFIED 2026-07-04, with two clauses)*. An `accidental`
+  cross-witness twin is reconciliation input: word-level 2-way reconciliation of
+  the pair yields one authoritative span whose provenance records both twins.
+  Merge is a human-triggered action with a recorded verdict; never automatic.
+  - **Materialization defers to S8.1 — the verdict record IS the merge.** An
+    `accidental_merged` verdict carries the approved merged text plus per-word
+    provenance (which twin supplied each reading) in the tracked verdict artifact.
+    The twins stay physically in the frozen stream until an S8.1 supersession pass
+    consumes ruled verdicts and mints the superseding stream revision. L1
+    immutability holds; no shadow-stream (authoritative text never lives outside
+    the stream store); S8.1 gains a concrete named input. (The S1.3a posture:
+    derived data waits in a sidecar; the frozen artifact is never mutated.)
+  - **The machine proposes, the human disposes.** At verdict time the CLI computes
+    and presents the word-level reconciliation *proposal* (diff + merged
+    candidate — mechanical, deterministic); the editor approves or hand-edits, and
+    only approved text enters the verdict record. The flagger principle one level
+    deeper: merge content is an intentioned editorial decision — `A DURANCE`/
+    `Canarie` vs `La Durr`/`Carmarie` is a word-level judgment no similarity score
+    may make.
 - **DT-5 Seeder consumption.** The seeder reads the twin report: duplicate-heading
   flags cite twin ids instead of guessing ("duplicate copy segment, running head,
   or index entry?" becomes "twin t-3, verdict pending"); a verdict-carrying twin

@@ -1,11 +1,14 @@
-# Twins — duplicated-section flagging as stream QA (plan stub)
+# Twins — duplicated-section flagging as stream QA
 
-**Status: STUB for discussion — not ratified.** No tracker row, milestone number, or
-issue is minted; those follow ratification (§7). The governing principle IS settled
-(Ben, 2026-07-04, in discussion): **this is a flagger, never a deduplicator** — every
-flag feeds an *intentioned decision by the human editor*; the pipeline never silently
-merges, deletes, or picks a side. The machine's job is detection, classification
-evidence, and a worklist; the verdict is human.
+**Status: RATIFIED 2026-07-04 (Ben) — point-by-point, nine rulings** (DT-1…DT-6,
+verdict-CLI home, tracker home S1.6, sequencing), one commit per ruling. The one
+deliberately open item: the **P-1…P-4 numeric ledger**, measured on the PLL streams
+and ruled at slice A — it gates slice-A-DONE, never the build (DT-6). Governing
+principle: **this is a flagger, never a deduplicator** — every flag feeds an
+*intentioned decision by the human editor*; the pipeline never silently merges,
+deletes, or picks a side. The machine's job is detection, classification evidence,
+and a worklist; the verdict is human. Tracker row: `ENGINE_STRUCTURE_TASKS.md`
+S1.6; GitHub issues minted at build-start.
 
 ## §1 Charter and origin evidence
 
@@ -170,6 +173,15 @@ in practice:
 
 ## §5 Slices
 
+**Sequencing (RULED 2026-07-04): S2.1 slice 1 first — #36 → #37 (+ run-report
+rulings) → twins slice A (+ P-ledger ruling) → slice B; slice C free to interleave
+after A.** Basis: S2.1 has four named dependents (S3.1, S5.1, BR-022, twins-B);
+slice A's output has no waiting consumer until B/C; A-before-B contiguity keeps the
+twins build and its ledger ruling in one context. Ben's S4.6 authoring pass
+deliberately waits for these upstream improvements ("plenty of time to hold off if
+it means the improvements help the manual work") — the recorded contingency stands:
+if that pass ever starts before #37 lands, slice A pulls forward to serve it.
+
 1. **Slice A — detector + report + worklist** (S-1 + S-2). No dependencies;
    buildable now. PLL acceptance: finds the P1-ch22 canonical twin; does not flag
    the running heads, folios, or the end-matter index.
@@ -194,8 +206,16 @@ in practice:
 - **v2-extraction gating** — S11 consumes twin verdicts later; nothing here gates
   extraction yet.
 
-## §7 Open for ratification
+## §7 Ruling ledger (all ruled 2026-07-04 except the slice-A numerics)
 
-DT-1…DT-6 as written; the §3/DT-6 numeric values (measure first); verdict-CLI home;
-whether twin relations live in `relations.json` or an own sidecar; tracker
-row/milestone number + issue minting; slice-A-now vs after-S2.1-slice-1 sequencing.
+| Point | Ruling |
+|-------|--------|
+| DT-1 homes | three-artifact split: regenerable report / tracked verdicts / relations = ratified-truth only |
+| DT-2 position | post-freeze pre-seeder; stale fails loud, absent degrades; `capture → freeze → twins → seed` normative |
+| DT-3 abstention | tightened: no band ever verdicts; floor = scope not judgment; long intentional repeats flag by design |
+| DT-4 merge | verdict record IS the merge; materialization defers to S8.1; machine proposes, human disposes |
+| DT-5 seeder | pending annotates / ruled binds; strict twins→seed direction |
+| DT-6 numerics | process ratified; P-1 floor `L`, P-2 band, P-3 shingle `k`, P-4 position boundary — **measured and ruled at slice A** (gates DONE, not build) — the sole open item |
+| CLI home | own entry `python -m engine.structure.twins`; shared review front-door deferred to #40's close (named trigger) |
+| Tracker | row S1.6 (one-row + own-plan pattern); issues at build-start |
+| Sequencing | #36 → #37 → twins A → B; pull-forward contingency if the S4.6 authoring pass starts first |

@@ -118,10 +118,23 @@ in practice:
     deeper: merge content is an intentioned editorial decision — `A DURANCE`/
     `Canarie` vs `La Durr`/`Carmarie` is a word-level judgment no similarity score
     may make.
-- **DT-5 Seeder consumption.** The seeder reads the twin report: duplicate-heading
-  flags cite twin ids instead of guessing ("duplicate copy segment, running head,
-  or index entry?" becomes "twin t-3, verdict pending"); a verdict-carrying twin
-  region cannot double-seed.
+- **DT-5 Seeder consumption** *(RATIFIED 2026-07-04, with the pending/ruled split)*.
+  The seeder reads the twin report; the DT-3 no-auto-verdict rule draws the
+  boundary of what it may do with it:
+  - **Pending twins annotate, never suppress.** A heading inside a `pending` twin
+    region participates in boundary matching exactly as without the report; the
+    *flag* improves — "heading at `canonical_01978` sits inside twin t-3
+    (`pending`, cross-witness signature) — likely the duplicate copy's heading;
+    REVIEW" replaces the three-way guess ("duplicate copy segment, running head,
+    or index entry?").
+  - **Ruled verdicts bind.** Under an `accidental_*` verdict, the non-authoritative
+    side's headings are excluded as boundary candidates outright; the flag states
+    the exclusion and cites the verdict. Human decision in, machine consequence
+    out.
+  - **Inheritance and direction:** absent/stale report semantics per ratified DT-2
+    (absent = noted and proceed; stale = fail loud). Flow is strictly
+    one-directional, twins → seed — the detector never consumes seeder output; a
+    seeding guess must not become twin evidence.
 - **DT-6 Numbers ride a ruling ledger.** `L` (length floor), the similarity band,
   and shingle size are *measured on the PLL streams first* (the s2_1 §8 pattern:
   proposals with measured bases, ruled per-item, never bundled).

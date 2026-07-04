@@ -69,8 +69,21 @@ in practice:
   Verdict enum `{intentional, accidental_merged, accidental_authoritative}` plus
   `pending`; `pending` lives in artifacts 1–2 only, never in 3. Applying a verdict
   is an explicit, idempotent, stale-guarded act (the DT-10 replay discipline).
-- **DT-2 Position.** Detector runs post-freeze, pre-seeder; read-only over the
-  frozen streams; deterministic (double-run byte-identical).
+- **DT-2 Position** *(RATIFIED 2026-07-04, with two clauses)*. Detector runs
+  post-freeze, pre-seeder; read-only over the frozen streams (its only write is its
+  own report under `work/` — inside the I7 containment boundary); deterministic
+  (double-run byte-identical).
+  - **Staleness semantics for consumers:** the report carries the stream
+    fingerprint it was computed against. A consumer finding a
+    fingerprint-mismatched report fails loud (`StaleArtifactError`, shared loader
+    taxonomy) — evidence about streams that no longer exist is worse than none. An
+    *absent* report degrades gracefully: the seeder runs and its flag report notes
+    "no twin report present." Absent = a visible sequencing fact; stale = a
+    correctness hazard.
+  - **Step position is normative for future books:** `capture → freeze → twins →
+    seed` is the named ingestion order. For PLL (already seeded, first-write
+    guarded) the detector back-fills the report; the existing seeder flags gain
+    twin citations only if a human ever chooses a re-seed.
 - **DT-3 Abstention.** Mid-band candidates route to the worklist; the tool never
   auto-verdicts. Verdicts are human-only — the flagger/decider boundary is the
   charter, not an implementation detail.

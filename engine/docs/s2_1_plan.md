@@ -445,7 +445,7 @@ tracked verdict file):
   "engine_id": "pymupdf-…+tesseract-…:dpi=300:lang=ita",
   "locate_method": "monotone-align-v1",
   "classifier_version": "density-bands-v1",
-  "band_params": {"…": "the exact band values used (DT-6)"},
+  "classifier_params": {"…": "the exact band values used (DT-6)"},
   "pages":  { "52": {"status": "matched", "match_rate": 0.94, "n_cols": 2,
                      "n_cols_source": "evidence", "order_qa": 0.91, "dropped_boxes": 0},
               "6":  {"status": "routed",  "stage": "density", "signal": "band-margin", "value": 0.012},
@@ -768,11 +768,11 @@ is no default to fall back to.
 | # | Proposal | DT | Consumed by | Ruling |
 |---|----------|----|-------------|--------|
 | P-1 | copy3-blind page-locate calibration floor: ≥95% exact | DT-3 | #37 (calibration gate) | pending |
-| P-2 | DP band B = 3× max page bag (≈1.4K tokens) | DT-3 | #37 (page-locate) | pending |
-| P-3 | dpi-invariance tolerance ≤0.5 pt/coordinate | DT-4 | #36 (G-8 test) | pending |
-| P-4 | distinctive-token floor: `min_tokens=3` OR ≥1 page-unique token | DT-8 | #37 (matcher) | pending |
-| P-5 | auto-absent tripwire: >5% of book atoms on accepted pages → hard-fail | DT-8 | #37 (slice-1 run gate) | pending |
-| P-6 | `review_fraction_max` = 0.15 per stage | DT-10 | #40 (volume bound) | pending |
+| P-2 | DP band B = 3× max page bag (≈1.4K tokens) | DT-3 | #37 (page-locate) | **RULED 2026-07-03: accepted** |
+| P-3 | dpi-invariance tolerance ≤0.5 pt/coordinate | DT-4 | #36 (G-8 test) | **RULED 2026-07-03: accepted** |
+| P-4 | distinctive-token floor: `min_tokens=3` OR ≥1 page-unique token | DT-8 | #37 (matcher) | pending (balance under review) |
+| P-5 | auto-absent tripwire: >5% of book atoms on accepted pages → hard-fail | DT-8 | #37 (slice-1 run gate) | pending (sizing second-opinion) |
+| P-6 | `review_fraction_max` = 0.15 per stage | DT-10 | #40 (volume bound) | **RULED 2026-07-03: accepted** |
 
 Separately (unchanged): the **match thresholds 0.80/0.60** (DT-8) and the **hysteresis margins**
 (DT-7) are ratified *at the slice-1 run report* against the full-book distributions — proposing

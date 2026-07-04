@@ -175,9 +175,15 @@ in practice:
    the running heads, folios, or the end-matter index.
 2. **Slice B — geometry adjudicator** (S-3). Gated on S2.1 slice 1 (#37's sidecar).
    Another named consumer of the slice-1 run artifacts.
-3. **Slice C — verdicts + merge + seeder consumption.** Verdict CLI (home to be
-   ruled: extend the authoring CLI vs own entry point), DT-4 merge path, DT-5
-   seeder integration.
+3. **Slice C — verdicts + merge + seeder consumption.** Verdict CLI home *(RULED
+   2026-07-04)*: **own entry point, `python -m engine.structure.twins`** (the
+   module owns its CLI; `__main__.py` carries the import-inert guard from day
+   one). Not bolted onto the authoring CLI — different artifact family, different
+   lifecycle. A shared `review` front-door for all human worklists is **deferred
+   to a named trigger**: when #40 lands the geometry verdict CLI, both consumers
+   exist and the shared surface gets designed against real shapes
+   (deferral-for-information — revisit at #40's close, owner: the #40 DoD).
+   Plus DT-4 merge path, DT-5 seeder integration.
 
 ## §6 Non-goals
 

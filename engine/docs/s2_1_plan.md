@@ -1,11 +1,14 @@
 # S2.1 — GeometrySource seam + backend (NORMAL path) + segmentation front-end (plan)
 
-**Status: DRAFT v2 (redraft) — synthesized 2026-07-03 from the four-round adversarial audit; the
-full discussion (21 → 10 → 3 → 2 threads, all closed "no further objection") is preserved verbatim
-in `s2_1_plan-discussion.md`. Every accepted amendment is folded into the DT/G bodies below —
-this document is the build surface; the discussion file is the audit trail. Awaiting ratification
-before any code; DT-13's (a)/(b) ruling additionally gates the S2.1 DoD (it may land any time
-before close — slice 1 is outcome-neutral).** Parent issue #29 (children #35–#40); tracker row
+**Status: RATIFIED 2026-07-03 (Ben) — DT-1…DT-13 ratified as written**, after: the four-round
+adversarial audit (21 → 10 → 3 → 2 threads, all closed "no further objection"; verbatim trail in
+`s2_1_plan-discussion.md`), a two-lens post-redraft fold audit (121/121 discussion commitments
+verified present + faithful; drift findings fixed), and per-item rulings on every escalated
+number and name (§8 ledger: B1, B2, P-1…P-6). This document is the build surface; the discussion
+file is the audit trail. **Build is unblocked — slice 1, #35 first.** One decision deliberately
+remains open: **DT-13's (a)/(b) ruling** — it gates the tracker row's `DONE`, not the build;
+slice 1 is outcome-neutral and the designed decision point is the slice-1 run report's measured
+copy1 coverage. Parent issue #29 (children #35–#40); tracker row
 `S2.1` in `ENGINE_STRUCTURE_TASKS.md` (~L423) is the authoritative spec — on any disagreement the
 tracker wins, then `ENGINE_STRUCTURE_PLAN.md` (§3.0, §11.1, D30), then this plan. Evidence anchor:
 `spike/document-structure` — file:line cites verified on disk during the audit (commits `08aea65`
@@ -801,7 +804,8 @@ S2.2.
   low-confidence pages routed to human review (S2.1.6).
 - `copy1_geom.json` exists for the real book with the run report; S2.2 (#30) is armed with its
   measurement feed; BR-022 answered by DT-4.
-- User ratification of the DT set (this document, audited) precedes any code.
+- User ratification of the DT set (this document, audited) precedes any code — **satisfied
+  2026-07-03** (post-audit, post-P-rulings; status header).
 - **DT-13 ruled (a) or (b)** before the tracker row goes `DONE`: copy2-only canonical atoms are
   either given their per-atom primary-witness lane or their exclusion is explicitly ratified —
   never silently absorbed as match residue (round 3, R3).

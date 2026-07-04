@@ -94,8 +94,10 @@ PLL never exercises this branch, and the engine must not presume it away.
   R21) — the frozen contract always was four-field. `Atom.geom: Geom` at `:147`.
 - **`Atom.derived_from: tuple[AtomDerivation, ...]`** with `AtomDerivation{witness, atom_id}`
   (`atoms.py:116–122, :150`) — the link canonical attachment walks (DT-9). `processing_scope`
-  `included`/`excluded` (`:30–37`) — furniture atoms exist in the witness streams (DT-3 uses
-  them as page-anchoring signal).
+  `included`/`excluded` (`:30–37`); measured (2026-07-03): copy1 carries **zero** `excluded`
+  atoms — its page furniture (folio/decoration OCR garble, chapter heads) is `included`-scope
+  text — while copy3's 278 `excluded` atoms are its synthetic `⟨PAGE:N⟩` markers. DT-3's
+  page-locate runs over the full stream either way.
 - **Frozen streams** — `books/per_la_liberta/work/data/atoms/{copy1,copy2,copy3,canonical}.json`
   (written by `freeze_streams.py`): copy1 3621 / copy2 3356 / copy3 799 / canonical 4786 atoms
   (S1.3a oracle-backed pins). Canonical derives from copy1+copy2 only (copy3's word-level link is
@@ -104,6 +106,14 @@ PLL never exercises this branch, and the engine must not presume it away.
   pages). Measured 2026-07-03 on the live streams: **1165/4786 canonical atoms (24.3%) have no
   copy1 derivation** (copy2-only — DT-13's population); **multi-copy1 count = 0** (DT-9's
   synthetic-only edge); copy1 = **129,767** whitespace tokens (~467/page — DT-3's scale input).
+  Atom-size profile (sizes the P-1/P-4/P-5 rulings): copy1 tokens/atom mean 35.8 / median 25 /
+  max 283, with a large short tail — ≤3 tokens = 1,170 atoms (32.3% by count, **1.3% by token
+  mass**), spread uniformly across the book, mostly folio/decoration OCR garble (`'35 32 5E:'`,
+  `'3E'`) plus chapter heads (82 of the 1,170 are `«`/`—` dialogue openers). copy3 body = 521
+  atoms and bimodal: ~63% page-sized prose chunks (mean 241 tokens, ~2/page) + 193 atoms ≤5
+  tokens (stamps, chapter heads, bare folio numbers, decoration garble); **no copy3 body atom
+  spans a page boundary** (atoms were cut at the markers), so DT-3's calibration "exact" is
+  unambiguous for every atom.
 - **Probe prototype** — `books/per_la_liberta/probes/s2_0_geometry_probe.py`: OCR invocation
   `pg.get_textpage_ocr(flags=0, language=OCR_LANG, dpi=DPI, full=True)` (`:195`); the tokenizer
   (`_EDGE`-strip + lower), BoW/ordered coverage, `detect_columns` (contiguous central valley +
@@ -239,9 +249,12 @@ mutation of the frozen stream, D25/DT-9).
   synthetic stream with a repeated-token run plus a furniture token straddling a boundary, built
   so two boundary positions tie on score — asserts the exact (earliest) boundary indices; a
   mutant flipping the tie-break to latest reds.
-- **Furniture:** the witness stream *contains* furniture atoms (`processing_scope="excluded"`,
-  `atoms.py:30–37`), so page-locate runs over the full stream — printed folios are page-anchoring
-  signal, and a furniture atom that matches its printed box gets real geometry, which is fine.
+- **Furniture:** page-locate runs over the **full** stream, never filtered by `processing_scope`
+  (`atoms.py:30–37`). Measured (2026-07-03): copy1 carries its page furniture as
+  `included`-scope text (folio/decoration garble — ~1/3 of its atoms by count, 1.3% by token
+  mass) and copy3's `excluded` atoms are the synthetic `⟨PAGE:N⟩` markers, which match no box
+  and score zero — harmless. Printed folios/decoration are page-anchoring signal, and a
+  furniture-text atom that matches its printed box gets real geometry, which is fine.
 
 **No copy2 fallback (ruling, R3):** the tracker requires the canonical atom to carry its *primary
 witness's* box; a copy2 box on a canonical atom is a different contract needing a D-level

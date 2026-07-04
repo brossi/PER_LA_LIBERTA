@@ -84,9 +84,21 @@ in practice:
     seed` is the named ingestion order. For PLL (already seeded, first-write
     guarded) the detector back-fills the report; the existing seeder flags gain
     twin citations only if a human ever chooses a re-seed.
-- **DT-3 Abstention.** Mid-band candidates route to the worklist; the tool never
-  auto-verdicts. Verdicts are human-only — the flagger/decider boundary is the
-  charter, not an implementation detail.
+- **DT-3 Abstention** *(RATIFIED 2026-07-04, tightened)*. **No confidence band ever
+  verdicts.** Bands affect worklist *ordering and annotation only* — a 0.99
+  cross-witness long twin arrives at the top of the worklist with its evidence
+  attached, but it arrives `pending` like everything else. The only automatic
+  outcome in the tool is *non-detection* below the length floor, and that is scope,
+  not judgment (a line-length repeat is not a candidate, the same way a non-heading
+  line is not a seeder candidate). Corollary, deliberately: a **long intentional
+  repetition should flag** and receive a human `intentional` verdict — that is the
+  system working, not noise; there is no "obviously intentional, suppress it"
+  heuristic above the floor, because that heuristic would be the deduplicator
+  returning through the side door. The must-NOT-flag red fixtures are strictly
+  below-floor classes. The S-2 signature classifier abstains the same way: an
+  ambiguous signature emits `unclassified`, never a guessed class. Verdicts are
+  human-only — the flagger/decider boundary is the charter, not an implementation
+  detail.
 - **DT-4 Merge path.** An `accidental` cross-witness twin is reconciliation input:
   word-level 2-way reconciliation of the pair yields one authoritative span whose
   provenance records both twins. Merge is a human-triggered action with a recorded
@@ -108,7 +120,7 @@ in practice:
 | index-entry cluster must NOT flag | end-matter title cluster fixture stays silent |
 | same-witness dittography classifies differently from cross-witness twin | signature mutant conflating the two → red |
 | S-3 adjudicator: one box never binds twice | double-bind mutant → red (extends G-24's consumption discipline) |
-| mid-band routes, never verdicts | mutant auto-verdicting the mid-band → red |
+| no band ever verdicts — every above-floor candidate lands `pending` | mutant auto-verdicting any band (incl. a "suppress obviously-intentional" heuristic) → red; long-intentional-repeat fixture must FLAG (and stay `pending`) |
 | report loader joins the shared loader taxonomy | absent → `MissingInputError`; malformed/stale → `StaleArtifactError` |
 | determinism | double-run byte-identical; emission-order shuffle invariant |
 

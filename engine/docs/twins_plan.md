@@ -135,9 +135,25 @@ in practice:
     (absent = noted and proceed; stale = fail loud). Flow is strictly
     one-directional, twins → seed — the detector never consumes seeder output; a
     seeding guess must not become twin evidence.
-- **DT-6 Numbers ride a ruling ledger.** `L` (length floor), the similarity band,
-  and shingle size are *measured on the PLL streams first* (the s2_1 §8 pattern:
-  proposals with measured bases, ruled per-item, never bundled).
+- **DT-6 Numbers ride a ruling ledger** *(RATIFIED 2026-07-04 as process, with
+  three clauses; the numbers themselves stay open)*. Measured on the PLL streams,
+  proposed with bases, ruled per-item, never bundled (the s2_1 §8 pattern).
+  - **Decision point = slice A; the ledger gates slice-A-DONE, not build-start.**
+    The detector is built with the numbers as parameters; its first PLL run
+    produces the proposal sheet; the ledger is ruled; slice A's acceptance run
+    executes with ruled values. No throwaway measurement script duplicating the
+    detector. (The DT-13 shape: an open ruling gates the row's DONE, never the
+    build.)
+  - **The ledger, named in full:** P-1 length floor `L`; P-2 similarity band
+    `[hi_lo, 1.0)`; P-3 shingle size `k`; P-4 position-class distance boundary
+    (adjacent-displaced vs far, S-2). Implicit numbers are how thresholds escape
+    their ledger — nothing ships unnamed.
+  - **The measured basis places both poles:** the known twins (the P1-ch22
+    canonical pair; the #655-scale event) AND the known intentional/short classes
+    (running heads, folios, the end-matter index cluster) located in the
+    length × similarity plane, with chosen values separating them by a stated
+    margin. What the plane cannot separate belongs to the mid-band worklist *by
+    design* (DT-3 working, not a calibration failure).
 
 ## §4 Red-first matrix (sketch — rows firm up at ratification)
 

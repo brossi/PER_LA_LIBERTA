@@ -635,6 +635,34 @@ def test_evidence_gate_error_is_an_engine_error_at_the_next_free_exit_code():
     assert StructureValidationError.exit_code != EvidenceGateError.exit_code
 
 
+def test_engine_error_exit_codes_are_globally_unique_across_the_four_owner_modules():
+    # DT-1 owned ripple: the exit-code sweep now spans FOUR files — engine.errors (3–10),
+    # structure.errors (11, StructureValidationError), structure.evidence (12, EvidenceGateError),
+    # and structure.geometry (13, GeometryError). Collect every EngineError subclass across all
+    # four (a set, deduped by class identity since each module imports the base) and assert exit
+    # codes are globally unique. Proven to actually SEE the 4th file during #35's red phase: with
+    # GeometryError.exit_code temporarily set to 11 it collides with StructureValidationError and
+    # this assertion reds — so a green here is "13 is unique because the sweep checked it", not
+    # "13 happens to be unclaimed today".
+    import engine.structure.errors as structure_errors
+    import engine.structure.evidence as evidence_mod
+    import engine.structure.geometry as geometry_mod
+
+    modules = [engine_errors, structure_errors, evidence_mod, geometry_mod]
+    classes = {
+        obj
+        for module in modules
+        for name in dir(module)
+        if isinstance(obj := getattr(module, name), type) and issubclass(obj, EngineError)
+    }
+    by_code: dict[int, list[str]] = {}
+    for cls in classes:
+        by_code.setdefault(cls.exit_code, []).append(cls.__name__)
+    collisions = {code: names for code, names in by_code.items() if len(names) > 1}
+    assert not collisions, f"EngineError exit codes collide across owner modules: {collisions}"
+    assert geometry_mod.GeometryError.exit_code == 13
+
+
 def test_evidence_gate_error_rejects_an_empty_payload():
     with pytest.raises(ValueError, match="at least one"):
         EvidenceGateError(())

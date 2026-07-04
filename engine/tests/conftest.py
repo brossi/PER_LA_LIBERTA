@@ -101,3 +101,41 @@ def acq():
         split=_split_pages_by_marker,
         inputs=SYNTHETIC_INPUTS,
     )
+
+
+# --- S2.1 geometry seam double ---------------------------------------------------------- #
+#
+# The injectable ``GeometrySource`` double the seam tests (#35) and the matcher/segmentation
+# tiers (#37+) bind to — canned pages, no OCR, no PDF (the same BR-009/D6 injected-backend
+# posture as the acquisition doubles above). ``engine_id`` is a free string here; the real
+# backend derives it from live library versions + params (#36, DT-2).
+
+
+class _FakeGeometrySource:
+    """Canned ``GeometrySource``: yields the pre-built page for every number in range.
+
+    Strict like ``_FakeFetcher``: an unseeded in-range page raises ``KeyError`` (a real backend
+    yields *every* page in range — a blank page is zero words, never a silent skip, DT-2), and a
+    duplicate seeded page number is a seeding-time ``ValueError`` (never a quiet last-wins).
+    """
+
+    def __init__(self, pages, *, engine_id: str = "fake-geometry-v0") -> None:
+        pages = list(pages)
+        self._pages = {p.page: p for p in pages}
+        if len(self._pages) != len(pages):
+            raise ValueError("duplicate page numbers seeded in _FakeGeometrySource")
+        self._engine_id = engine_id
+
+    @property
+    def engine_id(self) -> str:
+        return self._engine_id
+
+    def read_pages(self, first_page: int, last_page: int):
+        for n in range(first_page, last_page + 1):
+            yield self._pages[n]
+
+
+@pytest.fixture
+def geom():
+    """Geometry seam test doubles, as one namespace (the ``acq`` exposure pattern)."""
+    return SimpleNamespace(Source=_FakeGeometrySource)

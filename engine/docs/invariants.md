@@ -82,7 +82,7 @@ The decision record (divergence ledger, branch register, this file, `port_discip
 committed code: no stale counts, scrubbed terms, or dangling test references.
 - **Conclusion underwritten:** the governance docs are trustworthy enough to reason from without re-reading all the code.
 - **Positive / Negative:** partly mechanized — I3 keeps the ledger coherent; I4 keeps scrubbed terms out of core; referenced test names can be checked to resolve.
-- **Positive (mechanized sliver, M4b):** `test_invariants_controls::test_governance_docs_cite_only_resolvable_test_names` — every `test_*` name cited in `docs/` + `docs/decisions/` resolves to a real test module/function (exact or family prefix), so a rename/removal can no longer leave a dangling doc reference.
+- **Positive (mechanized sliver, M4b):** `test_invariants_controls::test_governance_docs_cite_only_resolvable_test_names` — every `test_*` name cited in `docs/` + `docs/decisions/` resolves to a real test module/function (exact or family prefix), so a rename/removal can no longer leave a dangling doc reference. Scoped (S2.1/#35): frozen point-in-time snapshots are outside the scan (`docs/probes/`, `*discussion*` plan-dialogue archives — both may legitimately name removed tests), and a ratified plan's not-yet-built test homes ride the self-cleaning `PENDING_TEST_HOMES` allowlist (an entry that starts to resolve fails the test until deleted, so it cannot outlive its child).
 - **Residual risk (documented probe):** the rest of I6 — "every doc *claim* (count, behaviour) still matches code" — stays a human cross-check at each milestone close (the post-M4a audit was one); only the doc-cited-test-name sliver is mechanized.
 
 ### I7 — Workspace write-containment (the safety property)

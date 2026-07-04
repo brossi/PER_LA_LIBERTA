@@ -104,6 +104,7 @@ def test_all_public_exports_resolve_on_the_package():
 # test_handle_surface_is_exported / test_structure_validation_error_is_exported copies (audit 4.8).
 PUBLIC_SURFACE_BY_CONCERN = {
     "atoms": ("Atom", "Geom", "AtomDerivation", "duplicate_atom_ids"),
+    "geometry": ("WordBox", "PageGeometry", "GeometrySource", "GeometryError"),
     "capture": ("capture_witness", "build_canonical", "align_streams", "assert_capture_tiles",
                 "PAGE_UNMAPPED", "PROCESSING_SCOPE_INCLUDED", "PROCESSING_SCOPE_EXCLUDED",
                 "marker_page_binding"),
@@ -259,6 +260,11 @@ EXPECTED_PUBLIC_SURFACE = frozenset(
         "duplicate_atom_ids",
         "PROCESSING_SCOPE_INCLUDED",
         "PROCESSING_SCOPE_EXCLUDED",
+        # S2.1 — geometry seam (concern A word-box layer)
+        "WordBox",
+        "PageGeometry",
+        "GeometrySource",
+        "GeometryError",
         # S0.4 — block-classifier seam
         "BlockClassifier",
         "BlockClassification",

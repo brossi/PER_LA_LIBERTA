@@ -157,7 +157,7 @@ New core modules, all under `src/engine/structure/` (neutral; S0.2 guard extende
   The class lives beside its raiser — the carrier-beside-vocabulary posture `errors.py`'s
   docstring names for 11/12. **Not** a `BackendError` reuse: that class is ocr-step-owned and its
   documented contract is the *opposite* posture — per-page failures degrade to an `[OCR_ERROR]`
-  sentinel (`errors.py:56–61`) — while `GeometryError` is fail-loud with no per-page degrade
+  sentinel (`errors.py:58–63`) — while `GeometryError` is fail-loud with no per-page degrade
   (DT-2). Reusing exit 5 would put two contradictory failure contracts under one code.
 - `geometry_pymupdf.py` — the PyMuPDF+Tesseract backend. `language` and `dpi` are **required
   constructor parameters with no defaults** — a default language is a language opinion in core.
@@ -173,7 +173,7 @@ New core modules, all under `src/engine/structure/` (neutral; S0.2 guard extende
 **`GeometryError` boundary inside S2.1:** it covers backend/OCR operational failure and geometry
 integrity (box outside rect, calibration-gate block, volume-bound breach). The sidecar/worklist
 **load** boundaries do NOT use it — they join the existing shared loader taxonomy (absent →
-`MissingInputError`, present-but-unloadable/stale → `StaleArtifactError`, `errors.py:18–24`),
+`MissingInputError`, present-but-unloadable/stale → `StaleArtifactError`, `errors.py:20–26`),
 red-tested as G-18.
 
 **Owned ripples:** extend the exit-code uniqueness sweep (`test_authoring_evidence.py:625`,
@@ -716,7 +716,7 @@ constructor cannot catch: wrong *values*, wrong *routing*, wrong *state*.
 | G-15 | sidecar↔stream binding: `stream_source_hash` mismatch → stale fail-loud | flip one hash byte → `attach_geometry` reds | `test_geom_sidecar.py` |
 | G-16 | no-witness branch end-to-end: detector order recovers known text on the synthetic two-column page | break column split → ordered-coverage pin (== 1.0 on synthetic) reds | `test_geometry_e2e.py` |
 | G-17 | backend fail-loud: missing tessdata / OCR failure raises; rotated page (`page.rotation != 0`) raises `GeometryError`, never emits coordinates | mutant swallows the exception → reds (monkeypatched failing OCR); mutant proceeds on the rotated-page fixture variant and emits boxes → reds | `test_geometry_backend.py` |
-| G-18 | sidecar/worklist loader totality: unknown `schema_version` / missing required key / malformed → `StaleArtifactError`; absent file → `MissingInputError` (shared taxonomy, `errors.py:18–24`) | mutant loader accepting any version → reds | `test_geom_sidecar.py` |
+| G-18 | sidecar/worklist loader totality: unknown `schema_version` / missing required key / malformed → `StaleArtifactError`; absent file → `MissingInputError` (shared taxonomy, `errors.py:20–26`) | mutant loader accepting any version → reds | `test_geom_sidecar.py` |
 | G-19 | `source_scan` fingerprint mismatch at generation/replay → fail-loud | flip a hash byte / wrong page count → reds | `test_geom_sidecar.py` |
 | G-20 | canonical attachment resolves `derived_from(witness=="copy1")`; multi-primary derivation → `unmatched(multi_primary_derivation)`, never a silent union/pick | mutant doing direct canonical-id lookup → disjoint-namespace fixture reds; mutant unioning or picking-first on the two-derivation synthetic fixture → reds | `test_geom_match.py` |
 | G-21 | `WordBox`/`PageGeometry` validity: non-finite / degenerate / empty-text / non-positive page unconstructible | mutant drops the `__post_init__` check → reds | `test_geometry_backend.py` |

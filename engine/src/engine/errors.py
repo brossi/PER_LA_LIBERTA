@@ -6,14 +6,16 @@ Deliberately minimal (F7): a category is added only when a real raiser exists �
 "for completeness" (YAGNI). Exit codes ``1`` (config) and ``2`` (unported stub) are owned by the
 CLI; the step failures below start at ``3``.
 
-Two structure-owned :class:`EngineError` subclasses live beside their raisers rather than here
+Three structure-owned :class:`EngineError` subclasses live beside their raisers rather than here
 (the carrier-beside-the-vocabulary posture), continuing the exit-code sequence:
 ``StructureValidationError`` (``11``, ``structure/errors.py`` — Tier-2 semantic findings carrying
-the closed ``EC`` payload) and ``EvidenceGateError`` (``12``, ``structure/evidence.py`` — the
-authoring-evidence gate's typed ``(kind, message)`` findings). The CLI maps every
-:class:`EngineError` generically via ``exc.exit_code``, so subclassing elsewhere costs nothing
-here; a new code must stay unique across all three files (pinned by
-``test_authoring_evidence.py``'s uniqueness sweep).
+the closed ``EC`` payload), ``EvidenceGateError`` (``12``, ``structure/evidence.py`` — the
+authoring-evidence gate's typed ``(kind, message)`` findings), and ``GeometryError`` (``13``,
+``structure/geometry.py`` — the fail-loud geometry/OCR-backend + geometry-integrity carrier,
+deliberately not reusing :class:`BackendError` 5, whose degrade-to-sentinel posture is the
+opposite). The CLI maps every :class:`EngineError` generically via ``exc.exit_code``, so
+subclassing elsewhere costs nothing here; a new code must stay unique across all four files (pinned
+by ``test_authoring_evidence.py``'s uniqueness sweep).
 
 The shared load-boundary taxonomy of the persisted structure-*document* loaders (structure maps,
 stream-freeze records, authoring-evidence sidecars): an **absent** artifact is

@@ -110,6 +110,12 @@ from engine.structure.atoms import (
     Geom,
     duplicate_atom_ids,
 )
+from engine.structure.geometry import (
+    GeometryError,
+    GeometrySource,
+    PageGeometry,
+    WordBox,
+)
 from engine.structure.capture import (
     PAGE_UNMAPPED,
     align_streams,
@@ -211,6 +217,11 @@ __all__ = [
     "duplicate_atom_ids",
     "PROCESSING_SCOPE_INCLUDED",
     "PROCESSING_SCOPE_EXCLUDED",
+    # S2.1 — geometry seam (concern A word-box layer)
+    "WordBox",
+    "PageGeometry",
+    "GeometrySource",
+    "GeometryError",
     # S0.4 — block-classifier seam (concern A typing)
     "BlockClassifier",
     "BlockClassification",

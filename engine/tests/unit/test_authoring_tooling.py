@@ -518,3 +518,17 @@ def test_cli_exit_codes_ride_the_engine_error_taxonomy(tmp_path, capsys):
         main(["--book", BOOK, "--books-dir", books, "explain", "--node", "n-none"]) == 2
     )  # caller error
     capsys.readouterr()  # drain
+
+
+def test_cli_entry_module_is_import_inert():
+    # `python -m engine.structure.authoring` must run the CLI, but a plain import of the
+    # __main__ submodule (package import-walks: pkgutil discovery, doc generators, coverage
+    # import modes) must NOT execute argparse — an unguarded module-level main() call turns
+    # every walk into SystemExit(2) plus usage noise on stderr. Pop the module first so the
+    # import genuinely re-executes (a cached entry would pass this test vacuously).
+    import importlib
+    import sys
+
+    sys.modules.pop("engine.structure.authoring.__main__", None)
+    mod = importlib.import_module("engine.structure.authoring.__main__")
+    assert callable(mod.main)  # the entry point is exposed, just not executed

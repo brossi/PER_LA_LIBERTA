@@ -53,12 +53,22 @@ in practice:
 
 ## §3 Decisions to ratify (sketch)
 
-- **DT-1 Homes.** Detector in `structure/twins.py` (core, book-agnostic); persisted
-  report `work/data/stream_qa/twin_report.json`; human worklist mirroring the
-  geometry-review pattern (`s2_1_plan.md` DT-10: candidates under `work/state/`,
-  verdicts tracked under `books/<id>/review/`); twin relations recorded with the L3
-  relation machinery, verdict enum `{intentional, accidental_merged,
-  accidental_authoritative}` plus `pending`.
+- **DT-1 Homes** *(RATIFIED 2026-07-04)*. Detector in `structure/twins.py` (core,
+  book-agnostic). Three-artifact split, mirroring the geometry-review design
+  (`s2_1_plan.md` DT-10):
+  1. `work/data/stream_qa/twin_report.json` — the detector's output (candidate
+     pairs, scores, signature class); regenerable QA output in the ignored `work/`
+     area, carrying the stream fingerprint it was computed against;
+  2. `books/<id>/review/twin_verdicts.json` — **tracked** human verdicts with
+     provenance (who/when/evidence cited), the sibling-of-`work/` posture of
+     `geometry_verdicts.json`; the editor's intentioned decisions accumulate here,
+     survive re-runs, and are replayable;
+  3. the L3 relation store — only *applied* verdicts materialize as `twin-of`
+     relations (durable, schema-versioned, loader-hardened); `relations.json` is
+     ratified-truth only.
+  Verdict enum `{intentional, accidental_merged, accidental_authoritative}` plus
+  `pending`; `pending` lives in artifacts 1–2 only, never in 3. Applying a verdict
+  is an explicit, idempotent, stale-guarded act (the DT-10 replay discipline).
 - **DT-2 Position.** Detector runs post-freeze, pre-seeder; read-only over the
   frozen streams; deterministic (double-run byte-identical).
 - **DT-3 Abstention.** Mid-band candidates route to the worklist; the tool never

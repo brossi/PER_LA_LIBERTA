@@ -121,6 +121,14 @@ def test_pagegeometry_allows_zero_words_a_blank_page_is_successfully_empty():
     assert pg.words == ()
 
 
+def test_pagegeometry_rejects_non_wordbox_words_elements():
+    # DT-2 pins the record shape as `words: tuple[WordBox, ...]` — a row that is not a WordBox
+    # never went through WordBox's own G-21 gates, so admitting it would smuggle unvalidated
+    # geometry past the whole construction-time contract.
+    with pytest.raises(ValueError, match="WordBox"):
+        PageGeometry(page=1, width=612.0, height=792.0, words=("not a box",))
+
+
 @pytest.mark.parametrize("page", [0, -1, math.nan, math.inf, -math.inf, 1.5, True])
 def test_pagegeometry_rejects_non_positive_or_non_integer_page(page):
     # `page` is the 1-based scan number — an exact int. `page <= 0` alone would admit nan (compares

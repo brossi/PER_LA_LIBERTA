@@ -60,7 +60,6 @@ from engine.structure import (
     render_authoring_evidence,
     write_authoring_evidence,
 )
-from engine.structure.errors import StructureValidationError
 from engine.structure.projection import MINTED_BY_HUMAN, MINTED_BY_MACHINE
 from engine.structure.structure_map import _hash_canonical
 
@@ -622,17 +621,13 @@ def test_a_forged_digest_cannot_even_load_let_alone_forge_gate_output(tmp_path):
 # --- EvidenceGateError: the typed carrier --------------------------------------------------------- #
 
 
-def test_evidence_gate_error_is_an_engine_error_at_the_next_free_exit_code():
+def test_evidence_gate_error_is_an_engine_error_at_exit_code_12():
+    # Value pin only. This test originally also scanned engine.errors for a 12-collision and
+    # checked 11 != 12; #35's four-module global sweep (below) subsumed both, completing DT-1's
+    # "extend the sweep" ripple — duplicating them here would be the add-beside residue the
+    # extension was supposed to replace.
     assert issubclass(EvidenceGateError, EngineError)
     assert EvidenceGateError.exit_code == 12
-    taken = {
-        getattr(engine_errors, name).exit_code
-        for name in dir(engine_errors)
-        if isinstance(getattr(engine_errors, name), type)
-        and issubclass(getattr(engine_errors, name), EngineError)
-    }
-    assert 12 not in taken  # engine.errors taxonomy does not collide
-    assert StructureValidationError.exit_code != EvidenceGateError.exit_code
 
 
 def test_engine_error_exit_codes_are_globally_unique_across_the_four_owner_modules():

@@ -6,9 +6,10 @@ cross-language alignment (ENGINE_STRUCTURE_PLAN §2–§3). The core here carrie
 ordinal, or book-structure literal — heading grammar, matter labels, and numbering are data in
 the structure profile + the per-book structure map, never code (invariant I4; the S0.2 neutrality
 guard makes that a standing assertion). The atom/projection models, the recognizer, the persisted
-stores, and governance land milestone by milestone (ENGINE_STRUCTURE_TASKS S1–S11); this package
-is the S0.1 skeleton — the schema-version constants and the fixed artifact locations everything
-else pins to.
+stores, and governance land milestone by milestone (ENGINE_STRUCTURE_TASKS S1–S11), and each
+concern's exports join the surface below as its milestone arrives — the re-export list is the
+authoritative public surface (pinned by ``test_structure_artifacts``' export registries), grown
+from the original S0.1 skeleton of schema-version constants and fixed artifact locations.
 """
 
 from __future__ import annotations

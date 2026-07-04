@@ -104,9 +104,11 @@ class PageGeometry:
     ``page`` is the 1-based scan number (DT-4; consistent with copy3's ``⟨PAGE:N⟩`` markers and
     ``page_000N.png``); ``width``/``height`` are the page-point dimensions; ``words`` is this page's
     boxes. Validity is enforced at construction (G-21): ``page`` positive, ``width``/``height``
-    positive and finite. ``words`` may be **empty** — a genuinely blank page yields zero words
-    *successfully* (DT-2: empty ≠ failed; rejecting it would force the backend to invent a failure on
-    a real blank page). ``words`` is normalized to a tuple so the frozen guarantee holds.
+    positive and finite; every ``words`` element must be a :class:`WordBox` (DT-2's record shape —
+    anything else skipped ``WordBox``'s own gates). ``words`` may be **empty** — a genuinely blank
+    page yields zero words *successfully* (DT-2: empty ≠ failed; rejecting it would force the
+    backend to invent a failure on a real blank page). ``words`` is normalized to a tuple so the
+    frozen guarantee holds.
     """
 
     page: int
@@ -116,6 +118,10 @@ class PageGeometry:
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "words", tuple(self.words))
+        # DT-2 pins the shape as tuple[WordBox, ...]: a non-WordBox row never passed WordBox's own
+        # gates, so admitting one would smuggle unvalidated geometry past the construction contract.
+        if not all(isinstance(w, WordBox) for w in self.words):
+            raise ValueError("PageGeometry.words elements must all be WordBox records")
         # ``page`` is an int count (the 1-based scan number), so the gate is exact-type, not
         # numeric: a bare ``page <= 0`` would admit ``nan`` (compares False — the trap ``WordBox``'s
         # bbox ordering avoids), ``inf`` (genuinely > 0), and a fractional page; ``isinstance``

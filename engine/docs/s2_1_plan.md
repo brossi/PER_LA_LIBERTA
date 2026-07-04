@@ -237,7 +237,8 @@ mutation of the frozen stream, D25/DT-9).
   **earliest** boundary achieving the max. No separate gap/mismatch scoring: unmatched tokens
   (garble, hallucinated boxes) simply score zero.
 - **Complexity contract:** `O(N + K·B)` — boundary candidates per page limited to a band `B`
-  (proposal: 3× the max page bag size, ≈1.4K tokens), with *incremental* integer multiset scoring
+  (ruled 2026-07-03, P-2: 3× the max page bag size, ≈1.4K tokens), with *incremental* integer
+  multiset scoring
   (moving a boundary by one token updates the intersection count in O(1)). Scale, measured: copy1
   N = 129,767 tokens, K = 278 pages — ~4×10⁵ boundary evaluations vs N² ≈ 1.7×10¹⁰ for the
   quadratic shape. The run report records page-locate wall time so a complexity regression is
@@ -269,9 +270,12 @@ future `copy2_geom.json` without redesign.
 **Calibration gate (inside slice 1, before trusting copy1 assignments):** run page-locate on
 **copy3 blind** (ignore its page map), compare derived pages to the map — the only ground truth we
 own. Accept when ≥95% of copy3 body atoms page-locate exactly; publish the distribution in the run
-report. (Proposal; the number is Ben's to ratify. copy1's fresh-Tesseract-vs-IA-Tesseract
-agreement is expected ≥ copy3's Gemini-vs-Tesseract 0.939 — same engine family, same scan — but
-that expectation is *checked* by the run report, not assumed.) Shape alone is never the
+report. (**Ruled 2026-07-03, P-1: 95% stands for the slice-1 gate, re-evaluated at the run
+report** — tighten to 97% if the ≤5-token calibration-atom exactness distribution supports it;
+the copy3 body population is bimodal (§2) and the tiny-atom mislocation rate is the one unknown
+the run resolves. copy1's fresh-Tesseract-vs-IA-Tesseract agreement is expected ≥ copy3's
+Gemini-vs-Tesseract 0.939 — same engine family, same scan — but that expectation is *checked* by
+the run report, not assumed.) Shape alone is never the
 acceptance: G-7 pairs the monotone property (CI) with this exactness gate (ground truth).
 
 **Failure route (pinned):** calibration < floor → S2.1.3 **hard-blocks** — no `copy1_geom.json`
@@ -293,7 +297,8 @@ copy1 pages exist at calibration floor X, adoption decision unchanged at S7.1b.
 `bbox` is in **PDF page-point space** (PyMuPDF `page.rect` units, origin top-left, y-down) — the
 one space that is dpi-independent and stable across re-renders. Proof is numeric, not
 containment-only (R5): OCR the same synthetic page at dpi 150 and 300 and assert the same word's
-bbox equal in page space within tolerance (proposal: ≤0.5 pt per coordinate), plus containment
+bbox equal in page space within tolerance (ruled 2026-07-03, P-3: ≤0.5 pt per coordinate), plus
+containment
 (every box ⊆ `page.rect`) — containment alone would already red on raw pixmap coords (~4.17× at
 300 dpi) but cannot catch dpi-dependent quantization drift; the numeric test closes that (G-8).
 
@@ -402,7 +407,8 @@ first, line-binned by median box height) comes free from the split.
    token consumed by one atom is unavailable to the next, so a repeated phrase cannot double-bind
    (G-24's mutant: remove consumption → duplicate-bind fixture reds).
 2. **Distinctive-token floor** — an atom binds only if it matched ≥ `min_tokens` tokens
-   (proposal: 3) OR ≥1 token unique within the page bag; an atom failing the floor is written
+   (ruled 2026-07-03, P-4: 3) OR ≥1 token unique within the page bag; an atom failing the floor
+   is written
    `unmatched(reason="ambiguous")` — **absent, not a plausible wrong bbox**. The cost asymmetry
    justifies the bias: a missing box degrades coverage visibly; a wrong box corrupts S5 re-bind
    silently.
@@ -436,9 +442,33 @@ or zero-match atom writes absent **automatically**, with the reason recorded in 
 `geom.present=false`, not invented" — the atom-level rule); (b) per-atom human review breaks the
 DT-10 volume bound by orders of magnitude; (c) the blast radius is page-bounded — a page with
 many unmatched atoms fails the 0.80 page gate and routes to the human anyway, so a systematic
-matcher failure cannot hide behind atom-level auto-absents. Guard on the residue: a proposed
-tripwire — auto-absent fraction on accepted pages > 5% of book atoms (proposal, Ben's to ratify)
-→ hard-fail, same principle as the review volume bound.
+matcher failure cannot hide behind atom-level auto-absents.
+
+**Auto-absent tripwire (ruled 2026-07-03, P-5 — a second-opinion-sized two-leg form replaces the
+earlier flat "5% of book atoms" proposal, which the measured short-atom tail (§2) could trip on
+honest residue):** both legs computed over **accepted pages only** from the sidecar's per-atom
+records + witness token counts (DT-8-normalizer counts), hard-fail on either:
+
+- **Leg A — token mass:** auto-absent token mass / accepted-page token mass > **0.02**. Sized
+  against the measured honest ceiling: the entire ≤3-token furniture tail is 1.3% of token mass,
+  so leg A cannot fire on it even at total wipeout — any firing implies real prose mass absent.
+- **Leg B — scoped count:** among atoms with ≥4 witness tokens on accepted pages, auto-absent
+  rate > **0.05** (≈123 of the 2,451 such atoms ≈ one prose absence every ~2.3 pages —
+  systematic, never honest residue). Leg B catches the wide-but-thin failure leg A underweights;
+  leg A catches the mass-concentrated one leg B underweights.
+- **Warn tier (run report, non-blocking, never thresholded away):** the auto-absent table by
+  reason × token band (≤3 / 4–10 / >10) + the accepted-page `match_confidence` histogram;
+  informational flag on any band > 1%.
+
+Both constants are value-pin-tested with named-principle failure messages (the G-13 posture);
+red row G-26. Retune protocol, pre-committed: tighten at S2.2 if honest residue lands under the
+priors; **raise only with a newly named, quantified honest-absence class ratified in the run
+report — never to un-fire a trip.** Named blind spots, recorded honestly: (a) a failure confined
+to short atoms (headings, dialogue openers) moves leg A ≤1.3 points and is invisible to leg B —
+only the warn-tier band table surfaces it; (b) a joint mode threading P-6 (~10% routed) and leg A
+(~1.5% mass) evades both guards individually — mitigation is the run report publishing routing
+rate beside absent mass; (c) the tripwire sees only *absence* — a confidently-wrong bbox is
+G-6/G-24's territory, not a tripwire's.
 
 ### DT-9 — Persistence: geometry sidecar, no stream supersession
 
@@ -567,7 +597,8 @@ never silently re-applied to different inputs. This is the D14/D21 stale posture
 human boundary. It is also what keeps the sidecar disposable: the tracked verdicts + inputs
 deterministically regenerate it.
 
-**Volume bound:** `review_fraction_max` per stage, default **0.15**, book-config-tunable.
+**Volume bound:** `review_fraction_max` per stage, default **0.15** (ruled 2026-07-03, P-6),
+book-config-tunable.
 Exceeding it **hard-fails the run** with the named principle: the automation premise failed —
 re-design the classifier, never lower the bar to drain the queue (G-13). (Prior: witness-branch
 PLL routes only density-abstain + low-match pages; S2.0's numbers predict well under 0.15. The
@@ -690,6 +721,7 @@ constructor cannot catch: wrong *values*, wrong *routing*, wrong *state*.
 | G-23 | cross-page prior scope: own-evidence-outside-margin wins; prior never crosses a non-content/routed page; in-margin disagreeing neighbors → abstain | mutant lets the prior override strong own-page evidence → strong-evidence single-column-between-two-column fixture reds | `test_segmentation.py` |
 | G-24 | repeated-token ambiguity + determinism: consumption + distinctive-token floor prevent a plausible-wrong bbox; output invariant to backend emission order | remove consumption → duplicate-bind fixture reds; skip the canonical box sort → emission-shuffled double-run not byte-identical, reds | `test_geom_match.py` |
 | G-25 | eligibility ≠ match failure: copy2-only canonical atom surfaces as `ineligible(no_primary_derivation)`, never `zero_match` or any match-failure bucket | mutant reporting an ineligible atom as `zero_match` / counting it in a failure bucket → copy2-only fixture reds | `test_geom_match.py` |
+| G-26 | auto-absent tripwire (DT-8, P-5): leg A (>2% token mass) and leg B (>5% of ≥4-token atoms) each hard-fail; the ≤3-token honest class alone can never fire either | mutant drops either leg, mis-scopes the ≥4-token population, or counts routed-page atoms → sized fixtures red; control fixture: total short-tail wipeout must NOT trip (guards the never-fire-on-honest charter) | `test_geom_sidecar.py` |
 
 Not in the table (module-external ripple, DT-1): the exit-code uniqueness sweep extension gets its
 own red during #35 — `GeometryError.exit_code` temporarily set to 11 must red the extended sweep.
@@ -710,7 +742,7 @@ the audit note.
 3. **S2.1.3 (#37)** — `geom_match.py`: normalizer, monotone page-locate (+ copy3-blind
    calibration), per-atom window match, `attach_geometry` (both modes); `geom_sidecar.py`
    write/load; the PLL slice-1 run → `copy1_geom.json` + run report with threshold
-   distributions. (G-3…G-7, G-12, G-15, G-18, G-19, G-20, G-24, G-25.)
+   distributions. (G-3…G-7, G-12, G-15, G-18, G-19, G-20, G-24, G-25, G-26.)
 
 **Slice 2 — segmentation front-end (trust, order, human loop):**
 
@@ -753,7 +785,9 @@ S2.2.
 5. The PLL slice-1 run report: page match-rate distribution, atoms
    matched/absent/pending/ineligible counts, `coverage` counters, threshold ratification,
    hyphen-fragment residue, ambiguous-atom residue, page-locate wall time, `order_qa`
-   distribution (the S2.2 feed).
+   distribution (the S2.2 feed); the P-5 warn-tier table (reason × token band + confidence
+   histogram) with routing rate published beside absent token mass (the joint-threading watch);
+   the ≤5-token calibration-atom exactness distribution (P-1's tighten-to-97% input).
 6. Adversarial delta re-audit before each child's commit (house cadence: wide + narrow apertures
    on the delta).
 
@@ -780,11 +814,11 @@ is no default to fall back to.
 
 | # | Proposal | DT | Consumed by | Ruling |
 |---|----------|----|-------------|--------|
-| P-1 | copy3-blind page-locate calibration floor: ≥95% exact | DT-3 | #37 (calibration gate) | pending |
+| P-1 | copy3-blind page-locate calibration floor: ≥95% exact | DT-3 | #37 (calibration gate) | **RULED 2026-07-03: 95% for slice 1; re-evaluate at the run report (tighten to 97% if the ≤5-token exactness distribution supports it)** |
 | P-2 | DP band B = 3× max page bag (≈1.4K tokens) | DT-3 | #37 (page-locate) | **RULED 2026-07-03: accepted** |
 | P-3 | dpi-invariance tolerance ≤0.5 pt/coordinate | DT-4 | #36 (G-8 test) | **RULED 2026-07-03: accepted** |
-| P-4 | distinctive-token floor: `min_tokens=3` OR ≥1 page-unique token | DT-8 | #37 (matcher) | pending (balance under review) |
-| P-5 | auto-absent tripwire: >5% of book atoms on accepted pages → hard-fail | DT-8 | #37 (slice-1 run gate) | pending (sizing second-opinion) |
+| P-4 | distinctive-token floor: `min_tokens=3` OR ≥1 page-unique token | DT-8 | #37 (matcher) | **RULED 2026-07-03: accepted as proposed** |
+| P-5 | auto-absent tripwire: >5% of book atoms on accepted pages → hard-fail | DT-8 | #37 (slice-1 run gate) | **RULED 2026-07-03: replaced by the two-leg form — leg A >2% token mass + leg B >5% of ≥4-token atoms, accepted pages only, + warn tier (DT-8; red row G-26)** |
 | P-6 | `review_fraction_max` = 0.15 per stage | DT-10 | #40 (volume bound) | **RULED 2026-07-03: accepted** |
 
 Separately (unchanged): the **match thresholds 0.80/0.60** (DT-8) and the **hysteresis margins**

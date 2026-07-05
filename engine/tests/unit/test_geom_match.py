@@ -159,13 +159,31 @@ def test_locate_tie_break_takes_the_earliest_boundary_exactly():
 
 
 def test_locate_default_band_is_the_ruled_width_of_the_largest_bag():
-    # The P-2 width in *use* (no band_tokens override): 3x the largest bag (20 tokens -> width 60,
-    # half 30) around the ratio center (20) reaches the optimum at exactly the band's upper edge
-    # (50). A narrower rule (1x, or 3x the smallest bag) or a shaved edge (center+half-1) cannot
-    # reach it and reds on the boundary value.
-    tokens = ["f"] * 40 + ["aa"] * 10 + ["bb"] * 10
-    bags = [{"aa": 10}, {"bb": 10, "cc": 10}]
-    assert locate_pages(tokens, bags) == (0, 50, 60)
+    # The P-2 width in *use* (no band_tokens override; SUPERSEDED 2026-07-05: 16x, was 3x): the
+    # largest bag is 10 tokens -> width 160, half 80. Bags {aa:4} and {bb:10} over 112 fillers +
+    # 4 aa + 10 bb: the unique optimum c1 = 116 (all aa's to page 1, all bb's to page 2) sits at
+    # EXACTLY center + half (center = round(126 * 4/14) = 36; 36 + 80 = 116) — so a narrower rule
+    # (any multiplier < 16, or 16x the SMALLEST bag: half 32) or a shaved edge (center+half-1)
+    # cannot reach it and reds on the boundary value.
+    tokens = ["f"] * 112 + ["aa"] * 4 + ["bb"] * 10
+    bags = [{"aa": 4}, {"bb": 10}]
+    assert locate_pages(tokens, bags) == (0, 116, 126)
+
+
+def test_locate_default_band_survives_end_matter_token_deserts():
+    # RED (the #37 slice-1 calibration block, 2026-07-05 — the P-2 supersession's reason): pages
+    # that carry bag mass but no stream tokens (covers, scan targets, back-matter noise) stretch
+    # the cumulative-bag-mass band centers away from the true boundaries. Unit-scale replica of
+    # the PLL failure: 16 desert pages ({noise:5} each, 80 of 100 total bag mass) push the last
+    # desert boundary's center to round(20*80/100) = 16 while its true position is 0. Under the
+    # superseded 3x band (max bag 10 -> half 15) the center error 16 > 15 CLIPS the optimum —
+    # boundaries are forced >= 1 and an aa token is stranded on a desert page (the exact
+    # mechanism that sent the real run's tail to 0% exact, drift +10 pages). The ruled 16x band
+    # (half 80) reaches it; earliest tie-break parks every desert boundary at 0.
+    # See engine/docs/probes/s2_1_band_drift.md for the full-book evidence.
+    tokens = ["aa"] * 10 + ["bb"] * 10
+    bags = [{"noise": 5}] * 16 + [{"aa": 10}, {"bb": 10}]
+    assert locate_pages(tokens, bags) == (0,) * 17 + (10, 20)
 
 
 def test_locate_all_empty_bags_fall_back_deterministically():
@@ -183,9 +201,11 @@ def test_locate_band_positions_by_cumulative_token_ratio():
 
 
 def test_locate_band_multiplier_is_the_ruled_p2_value():
-    assert BAND_BAG_MULTIPLIER == 3, (
-        "P-2 (RULED 2026-07-03) fixes the DP band at 3x the max page bag — a different multiplier "
-        "is an unruled re-tune, not a tweak"
+    assert BAND_BAG_MULTIPLIER == 16, (
+        "P-2 (RULED 2026-07-03: 3x; SUPERSEDED by Ben 2026-07-05: 16x — the 3x band clipped the "
+        "DP against PLL's end-matter center drift, collapsing the calibration tail to 0% exact; "
+        "see engine/docs/probes/s2_1_band_drift.md) fixes the DP band at 16x the max page bag — "
+        "a different multiplier is an unruled re-tune, not a tweak"
     )
 
 

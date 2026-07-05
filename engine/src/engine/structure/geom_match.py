@@ -77,9 +77,16 @@ LOCATE_METHOD = "monotone-align-v1"
 #: one matched token is unique within its page bag. A partial match below the floor writes
 #: ``ambiguous``; a zero-match atom writes ``zero_match`` (it never reaches the floor question).
 MIN_DISTINCTIVE_TOKENS = 3
-#: P-2 (RULED 2026-07-03): the DP band width is this multiple of the largest page bag's token
-#: count — boundary candidates per page stay O(band), not O(stream).
-BAND_BAG_MULTIPLIER = 3
+#: P-2 (RULED 2026-07-03: 3; SUPERSEDED by Ben 2026-07-05: 16): the DP band width is this
+#: multiple of the largest page bag's token count — boundary candidates per page stay O(band),
+#: not O(stream). The 3x width proved narrower than the band-center prior's real error: centers
+#: are cumulative-bag-mass positions, and pages holding bag mass but no stream tokens (covers,
+#: scan noise, back matter) stretch that estimate by more pages than 3 bags cover — on the PLL
+#: slice-1 run the drift reached +10 pages and collapsed the calibration tail to 0% exact while
+#: the true pages held ~95% of the atoms' tokens. 16x covers the worst observed drift with ~60%
+#: margin at ~10x locate cost (a once-per-book step); evidence + remedy family in
+#: engine/docs/probes/s2_1_band_drift.md.
+BAND_BAG_MULTIPLIER = 16
 
 # Attach-time outcome vocabulary (never persisted in the sidecar — its per-atom reason enum is
 # closed at the three match reasons, R19; these are derived at attach from the sidecar's page

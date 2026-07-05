@@ -48,6 +48,17 @@ FORBIDDEN = [
     # as "«"/"»" (validate.py:108-109), which a char-only scan would miss: the exact
     # reintroduction path the pipeline actually uses.
     "«", "»", "\\u00ab", "\\u00bb", "\\xab", "\\xbb",
+    # OCR-language literal (S2.1.2 #36, DT-1/G-2): the Tesseract language code the PyMuPDF+Tesseract
+    # backend OCRs with is a per-book scan opinion — it lives in book config, passed to the backend
+    # as a required parameter, never baked in core. Scanned in QUOTED form only ("ita"/'ita'): a bare
+    # `ita` would false-positive on ordinary English words (italic, vital, capital), whereas the
+    # quoted forms only match a string literal — the exact reintroduction path (a hardcoded
+    # `language="ita"` default). The engine_id string builds `lang={language}` from the parameter, so
+    # no literal appears; the profile/manifest is where "ita" lives. The `+`-anchored forms catch
+    # Tesseract's combined-code syntax (`language="ita+eng"` / `"eng+ita"` / mid-position
+    # `"deu+ita+eng"`), which the bare quoted pair would miss while staying anchored (quote or `+`
+    # adjacent to `ita` on both sides) against English-word false positives.
+    '"ita"', "'ita'", '"ita+', "'ita+", '+ita"', "+ita'", "+ita+",
     # PLL's baked structure shape (F2): the live validator's `check_chapter_count` hard-codes the
     # part/chapter count (its `h3_count` result key; the 24+33=57 literals). The general tree model
     # replaces that — either token reappearing in structure/ core is book opinion leaking back in.

@@ -28,6 +28,18 @@ jobs:
         with:
           enable-cache: true
 
+      - name: Install Tesseract OCR (real OCR path — S2.1 geometry backend, DT-11 tier 1)
+        # The PyMuPDF+Tesseract backend's OCR tests run hard-asserted here (no skipif, no
+        # skip-masking): missing tesseract must FAIL the suite, not silently skip. eng data is
+        # installed explicitly (the base package bundling it is not assumed). TESSDATA_PREFIX
+        # discovery is best-effort (an empty find leaves it unset); fitz.get_tessdata() is the
+        # fallback, and its failure surfaces fail-loud in the tests (GeometryError), never a skip.
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y tesseract-ocr tesseract-ocr-eng
+          td="$(find /usr/share -name eng.traineddata 2>/dev/null | head -1)"
+          if [ -n "$td" ]; then echo "TESSDATA_PREFIX=$(dirname "$td")" >> "$GITHUB_ENV"; fi
+
       - name: Sync (with the `it` extra — the suite's binding + integration tests load the real model)
         run: uv sync --extra it
 

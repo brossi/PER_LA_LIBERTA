@@ -18,6 +18,39 @@ sys.dont_write_bytecode = True
 ENGINE_ROOT = Path(__file__).resolve().parents[1]
 SYNTHETIC_INPUTS = ENGINE_ROOT / "books" / "synthetic" / "inputs"
 
+# The synthetic image-only PDF generator (S2.1.2 #36, DT-11) lives under tests/fixtures/. Load it
+# by explicit file path rather than putting its dir on sys.path — the dir also holds a `structure/`
+# subtree and `_generate_*` scripts, so a bare `sys.path` insert would make `import structure`
+# resolvable to the fixtures namespace (a latent shadow of `engine.structure`). Path-loading confines
+# the import to this one module and never touches sys.modules under a shadowing name.
+_GEOMETRY_PDF_PATH = ENGINE_ROOT / "tests" / "fixtures" / "geometry_pdf.py"
+_geometry_pdf_mod = None
+
+
+def _load_geometry_pdf():
+    global _geometry_pdf_mod
+    if _geometry_pdf_mod is None:
+        import importlib.util
+
+        name = "tests_fixtures_geometry_pdf"  # distinctive: registers safely, shadows nothing
+        spec = importlib.util.spec_from_file_location(name, _GEOMETRY_PDF_PATH)
+        if spec is None or spec.loader is None:
+            raise ImportError(f"cannot load the geometry_pdf fixture module from {_GEOMETRY_PDF_PATH}")
+        mod = importlib.util.module_from_spec(spec)
+        # Register before exec: @dataclass resolves its module via sys.modules[__module__], which is
+        # None until the module is registered (fails with AttributeError on a frozen dataclass).
+        sys.modules[name] = mod
+        try:
+            spec.loader.exec_module(mod)
+        except BaseException:
+            # A failed exec must not be cached as success: the first test would error truthfully,
+            # then every later `synth` use would get a half-executed module — an AttributeError far
+            # from the real cause. Unregister and leave the cache empty so every call re-raises.
+            sys.modules.pop(name, None)
+            raise
+        _geometry_pdf_mod = mod
+    return _geometry_pdf_mod
+
 
 @pytest.fixture
 def engine_root() -> Path:
@@ -139,3 +172,38 @@ class _FakeGeometrySource:
 def geom():
     """Geometry seam test doubles, as one namespace (the ``acq`` exposure pattern)."""
     return SimpleNamespace(Source=_FakeGeometrySource)
+
+
+# --- S2.1.2 synthetic image-only PDF fixtures (#36, DT-11 tier 1) ----------------------- #
+#
+# The real-OCR-path test tier: image-only PDFs (no native text layer) drawn by the generator
+# under tests/fixtures/, so the PyMuPDF+Tesseract backend's OCR / coordinate-space / fail-loud
+# contracts run against a real Tesseract pass in CI (hard-asserted, no skip-masking — DT-11).
+# English drawn text is a fixture asset (the D18 differ-fixture posture), not a core literal:
+# the backend OCRs with a language *parameter*.
+
+
+@pytest.fixture
+def synth(tmp_path):
+    """Synthetic image-only PDF builders + a tmp-path writer, as one namespace (the ``geom``/``acq``
+    exposure pattern). ``synth.pdf(specs, ...)`` writes an image-only PDF into the test's tmp_path
+    and returns the ``Path`` the backend opens; the DT-11 page variants
+    (``single_column``/``two_column``/``near_blank``/``dark``) and the ``rotated``/``cropped``
+    decorators are re-exposed so a test names only the pages it needs."""
+    g = _load_geometry_pdf()
+
+    def pdf(specs, *, render_dpi: int = 200, name: str = "synth.pdf") -> Path:
+        return g.write_image_only_pdf(tmp_path / name, list(specs), render_dpi=render_dpi)
+
+    return SimpleNamespace(
+        pdf=pdf,
+        render_bytes=g.render_image_only_pdf,
+        single_column=g.single_column_page,
+        two_column=g.two_column_page,
+        near_blank=g.near_blank_page,
+        dark=g.dark_page,
+        rotated=g.rotated,
+        cropped=g.cropped,
+        PageSpec=g.PageSpec,
+        Line=g.Line,
+    )

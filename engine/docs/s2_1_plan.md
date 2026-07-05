@@ -299,18 +299,31 @@ copy1 pages exist at calibration floor X, adoption decision unchanged at S7.1b.
 
 `bbox` is in **PDF page-point space** (PyMuPDF `page.rect` units, origin top-left, y-down) — the
 one space that is dpi-independent and stable across re-renders. Proof is numeric, not
-containment-only (R5): OCR the same synthetic page at dpi 150 and 300 and assert the same word's
-bbox equal in page space within tolerance (ruled 2026-07-03, P-3: ≤0.5 pt per coordinate), plus
-containment
-(every box ⊆ `page.rect`) — containment alone would already red on raw pixmap coords (~4.17× at
-300 dpi) but cannot catch dpi-dependent quantization drift; the numeric test closes that (G-8).
+containment-only (R5): the coordinate space is bound **directly against ground truth** — draw each
+known word at a known page-point origin and assert its OCR box lands there (within a font-metric
+tolerance), NOT at the pixmap-space position `origin×dpi/72`; run independently at dpi 150 and 300,
+so each resolution landing on the same page-point truth *is* dpi-independence — plus containment
+(every box ⊆ `page.rect`). **(Ruled by Ben 2026-07-04 — the build session's "lock in E" direction —
+superseding the original cross-dpi ≤0.5 pt *difference* form: real Tesseract box edges quantize
+0.5–0.65 pt between 150 and 300 — bounded by the 0.48 pt/px pixel at 150 dpi — exceeding that bound
+(session-measured 2026-07-04, corroborated by the old form's flaky red on identical bytes; no
+durable drift artifact yet — the G-8 test itself now reds if the assumption breaks), while the
+ground-truth form has ~30:1 signal-to-noise at dpi 150 and ~100:1 at 300, is build-robust, and
+additionally catches the consistent-wrong-space bug the difference form missed; no consumer needs
+sub-pixel cross-dpi stability, since S3.1 replays at the pinned dpi. See P-3.)** Containment alone
+would already red on raw pixmap coords (~4.17× at 300 dpi);
+the ground-truth test closes the page-space-vs-pixmap-space question (G-8).
 
 **Rotation/crop: explicitly unsupported in S2.1 — enforced, not assumed.** The backend raises
 `GeometryError` on `page.rotation != 0` (both PLL scans are unrotated; a rotated page must fail
 loud, never emit wrong coordinates silently) — the synthetic fixture gains a rotated-page variant
-and the rejection is a named red (G-17). CropBox≠MediaBox: coords are relative to `page.rect`
-«unverified that `page.rect` is the cropbox-derived visible rect — bound at build by the same
-containment test on a cropped synthetic page» (G-8's home).
+and the rejection is a named red (G-17). CropBox≠MediaBox: coords are relative to `page.rect` —
+**bound at build (2026-07-04, completed in the same-day audit remediation): the cropped-page tests
+assert BOTH that the emitted dimensions ARE the cropbox's (500×360, not the mediabox's 612×792 —
+a mediabox-derived-rect mutant reds) AND that box positions land at crop-relative ground truth
+(a crop-origin-offset mutant reds — the dimension check alone could not see an offset); the
+«unverified» is resolved — `page.rect` is the origin-normalized cropbox rect, probed
+(0,0,500,360)** (G-8's home).
 
 `page` is the **1-based scan page number**, consistent with copy3's `⟨PAGE:N⟩` markers and
 `docs/assets/page_images/page_000N.png` (pymupdf index + 1); the copy3-blind calibration (DT-3)
@@ -706,7 +719,7 @@ constructor cannot catch: wrong *values*, wrong *routing*, wrong *state*.
 | G-5 | `match_confidence == matched/total` (pinned) | mutant returns constant 1.0 → value-pin fixture (known 3-of-5 match = 0.6) reds | `test_geom_match.py` |
 | G-6 | union bbox spans matched boxes only | mutant unions ALL page boxes → distractor-box fixture reds on bbox equality | `test_geom_match.py` |
 | G-7 | page-locate monotone non-decreasing + deterministic earliest-boundary tie-break | shuffle mutant → monotonicity property reds (synthetic, CI); tie-break fixture (repeated-token run + boundary-straddling furniture, two boundaries tied on score) asserts exact earliest indices — latest-flip mutant reds; copy3-blind ≥95% exact = local run-report gate (PDF not in CI — honest split, DT-11) | `test_geom_match.py` + run report |
-| G-8 | every box ⊆ page rect; page-point coords numerically dpi-invariant | OOB synthetic box → `GeometryError`; same word at dpi 150 vs 300 must be equal in page space within ≤0.5 pt/coordinate → quantization-drift mutant reds; cropped-page containment binds the `page.rect` «unverified» (DT-4) | `test_geometry_backend.py` |
+| G-8 | every box ⊆ page rect; page-point coords proven against ground truth at each dpi | OOB synthetic box (all four edges) → `GeometryError`; a word drawn at a known page-point origin must OCR to that origin (±15 pt), NOT the pixmap position `origin×dpi/72`, at dpi 150 AND 300 → pixmap-coord mutant reds ~dpi/72× off (P-3 2026-07-04, superseding the ≤0.5 pt cross-dpi form); cropped-page tests assert cropbox dims (500×360 ≠ mediabox) → mediabox mutant reds, AND crop-relative ground-truth positions → crop-origin-offset mutant reds, binding the `page.rect` «unverified»; non-finite coord → `GeometryError` | `test_geometry_backend.py` |
 | G-9 | density `abstain` routes, never guesses | mutant maps abstain→content → planted mid-band fixture reds | `test_segmentation.py` |
 | G-10 | sparse single-column ≠ two-column (contiguous-gutter + populated-halves guards) | remove the ≥3-bin run guard → sparse-page fixture reds | `test_segmentation.py` |
 | G-11 | dark low-yield page classed `non_text_dark`, boxes untrusted | mutant trusts high-ink pages → endpaper-style fixture reds | `test_segmentation.py` |
@@ -820,7 +833,7 @@ is no default to fall back to.
 |---|----------|----|-------------|--------|
 | P-1 | copy3-blind page-locate calibration floor: ≥95% exact | DT-3 | #37 (calibration gate) | **RULED 2026-07-03: 95% for slice 1; re-evaluate at the run report (tighten to 97% if the ≤5-token exactness distribution supports it)** |
 | P-2 | DP band B = 3× max page bag (≈1.4K tokens) | DT-3 | #37 (page-locate) | **RULED 2026-07-03: accepted** |
-| P-3 | dpi-invariance tolerance ≤0.5 pt/coordinate | DT-4 | #36 (G-8 test) | **RULED 2026-07-03: accepted** |
+| P-3 | dpi-invariance tolerance ≤0.5 pt/coordinate | DT-4 | #36 (G-8 test) | **RULED 2026-07-03: accepted; SUPERSEDED 2026-07-04 (Ben — the build session's "lock in E" ruling; record corrected 2026-07-05: the stamp as first written carried a fabricated future date and cited a non-existent run report — see the #36 audit)** — the ≤0.5 pt cross-dpi *difference* form is empirically unachievable (real Tesseract box edges drift 0.5–0.65 pt between 150 and 300, bounded by the 0.48 pt/px pixel at 150 dpi; session-measured 2026-07-04, corroborated by the old form's flaky red on identical bytes — no durable drift artifact yet). Replaced by a **ground-truth construction**: a word drawn at a known page-point origin must OCR to that origin (±15 pt), not the pixmap position, run independently at 150 and 300 — proves page-space directly (BR-022), catches the consistent-wrong-space bug the difference form missed, ~30:1 SNR at dpi 150 / ~100:1 at 300 (build-robust); no consumer needs sub-pixel cross-dpi stability (S3.1 replays at the pinned dpi). See DT-4. |
 | P-4 | distinctive-token floor: `min_tokens=3` OR ≥1 page-unique token | DT-8 | #37 (matcher) | **RULED 2026-07-03: accepted as proposed** |
 | P-5 | auto-absent tripwire: >5% of book atoms on accepted pages → hard-fail | DT-8 | #37 (slice-1 run gate) | **RULED 2026-07-03: replaced by the two-leg form — leg A >2% token mass + leg B >5% of ≥4-token atoms, accepted pages only, + warn tier (DT-8; red row G-26)** |
 | P-6 | `review_fraction_max` = 0.15 per stage | DT-10 | #40 (volume bound) | **RULED 2026-07-03: accepted** |

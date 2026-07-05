@@ -78,7 +78,6 @@ def _resolves(cited: str, actual: set[str]) -> bool:
 # leaving the plan citation dangling behind it — pruning that case belongs to the child-close
 # review (the issue tags below exist for that review, not for this test).
 PENDING_TEST_HOMES = {
-    "test_segmentation": "#38",
     "test_geometry_e2e": "#39",
 }
 

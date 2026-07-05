@@ -139,6 +139,17 @@ from engine.structure.geom_sidecar import (
     load_geom_sidecar,
     save_geom_sidecar,
 )
+from engine.structure.segmentation import (
+    SEGMENTATION_VERSION,
+    DensityBand,
+    DensityClassifier,
+    DensityVerdict,
+    PageDensityFeatures,
+    edge_strip,
+    ink_fraction_from_pixmap,
+    is_alpha_token,
+    page_density_features,
+)
 from engine.structure.capture import (
     PAGE_UNMAPPED,
     align_streams,
@@ -265,6 +276,16 @@ __all__ = [
     "load_geom_sidecar",
     "assert_source_scan_matches",
     "assert_auto_absent_tripwire",
+    # S2.1.4 — density band pre-check classifier (segmentation)
+    "SEGMENTATION_VERSION",
+    "DensityBand",
+    "DensityClassifier",
+    "DensityVerdict",
+    "PageDensityFeatures",
+    "edge_strip",
+    "ink_fraction_from_pixmap",
+    "is_alpha_token",
+    "page_density_features",
     # S0.4 — block-classifier seam (concern A typing)
     "BlockClassifier",
     "BlockClassification",

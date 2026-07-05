@@ -174,6 +174,100 @@ def geom():
     return SimpleNamespace(Source=_FakeGeometrySource)
 
 
+# --- S2.1.3 matcher/sidecar stream + page builders (#37, DT-11 tier 2) ------------------ #
+#
+# The fake-backend tier's raw material: witness/canonical atom streams built from plain text
+# lists (spans + hashes derived, so the streams are store-valid), and PageGeometry pages laid out
+# deterministically (or with explicit bboxes for distractor/union fixtures). No OCR, no PDF —
+# matcher semantics bind to the seam, never the synthetic-PDF tier (DT-11's claim ladder).
+
+
+def _mk_witness_stream(texts, *, witness="w-sentinel-3", ids=None):
+    from engine.structure.atom_store import AtomStream
+    from engine.structure.atoms import Atom, Geom
+    from engine.structure.capture import PAGE_UNMAPPED
+    from engine.structure.roundtrip import hash_raw
+    from engine.structure.roundtrip_gate import gap_records
+
+    ids = ids or [f"{witness}-a{i}" for i in range(len(texts))]
+    source = "\n".join(texts)
+    atoms = []
+    offset = 0
+    for aid, text in zip(ids, texts):
+        start = source.index(text, offset)
+        end = start + len(text)
+        atoms.append(
+            Atom(
+                atom_id=aid,
+                text=text,
+                raw_span=(start, end),
+                raw_source_hash=hash_raw(text),
+                page_range=PAGE_UNMAPPED,
+                norm_layer="raw",
+                geom=Geom.absent(),
+                capture_provenance_class="ocr_text",
+                witness=witness,
+            )
+        )
+        offset = end
+    return AtomStream.witness(witness, atoms, gap_records(atoms, source), source)
+
+
+def _mk_canonical_stream(entries, *, stream_id="canonical"):
+    """``entries`` = (atom_id, text, [(witness, witness_atom_id), ...]) triples."""
+    from engine.structure.atom_store import AtomStream
+    from engine.structure.atoms import Atom, AtomDerivation, Geom
+    from engine.structure.capture import PAGE_UNMAPPED
+    from engine.structure.roundtrip import hash_raw
+
+    atoms = []
+    offset = 0
+    for aid, text, derivs in entries:
+        atoms.append(
+            Atom(
+                atom_id=aid,
+                text=text,
+                raw_span=(offset, offset + len(text)),
+                raw_source_hash=hash_raw(text),
+                page_range=PAGE_UNMAPPED,
+                norm_layer="raw",
+                geom=Geom.absent(),
+                capture_provenance_class="reconciled",
+                derived_from=tuple(AtomDerivation(witness=w, atom_id=a) for w, a in derivs),
+            )
+        )
+        offset += len(text)
+    return AtomStream.canonical(atoms, stream_id=stream_id)
+
+
+def _mk_page(number, words, *, width=500.0, height=700.0):
+    """One ``PageGeometry``: ``words`` entries are plain strings (auto-laid on one row, left to
+    right) or ``(text, (x0, y0, x1, y1))`` pairs for explicit placement."""
+    from engine.structure.geometry import PageGeometry, WordBox
+
+    boxes = []
+    x = 10.0
+    for entry in words:
+        if isinstance(entry, str):
+            box = WordBox(text=entry, bbox=(x, 10.0, x + 8.0 * max(1, len(entry)), 22.0))
+            x = box.bbox[2] + 6.0
+        else:
+            text, bbox = entry
+            box = WordBox(text=text, bbox=tuple(bbox))
+        boxes.append(box)
+    return PageGeometry(page=number, width=width, height=height, words=tuple(boxes))
+
+
+@pytest.fixture
+def matchkit():
+    """S2.1.3 builders, as one namespace (the ``acq``/``geom`` exposure pattern)."""
+    return SimpleNamespace(
+        witness_stream=_mk_witness_stream,
+        canonical_stream=_mk_canonical_stream,
+        page=_mk_page,
+    )
+
+
 # --- S2.1.2 synthetic image-only PDF fixtures (#36, DT-11 tier 1) ----------------------- #
 #
 # The real-OCR-path test tier: image-only PDFs (no native text layer) drawn by the generator

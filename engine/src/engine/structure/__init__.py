@@ -117,6 +117,28 @@ from engine.structure.geometry import (
     PageGeometry,
     WordBox,
 )
+from engine.structure.geom_match import (
+    AttachOutcome,
+    AttachResult,
+    MatchOutcome,
+    attach_geometry,
+    build_geom_sidecar,
+    locate_pages,
+    match_stream,
+    normalize_tokens,
+)
+from engine.structure.geom_sidecar import (
+    AtomPages,
+    AtomRecord,
+    GeomSidecar,
+    PageRecord,
+    SourceScan,
+    assert_auto_absent_tripwire,
+    assert_source_scan_matches,
+    geom_sidecar_path,
+    load_geom_sidecar,
+    save_geom_sidecar,
+)
 from engine.structure.capture import (
     PAGE_UNMAPPED,
     align_streams,
@@ -223,6 +245,26 @@ __all__ = [
     "PageGeometry",
     "GeometrySource",
     "GeometryError",
+    # S2.1.3 — matcher + monotone page-locate + attach overlay (geom_match)
+    "normalize_tokens",
+    "locate_pages",
+    "match_stream",
+    "MatchOutcome",
+    "build_geom_sidecar",
+    "attach_geometry",
+    "AttachResult",
+    "AttachOutcome",
+    # S2.1.3 — geometry sidecar (geom_sidecar)
+    "GeomSidecar",
+    "SourceScan",
+    "PageRecord",
+    "AtomRecord",
+    "AtomPages",
+    "geom_sidecar_path",
+    "save_geom_sidecar",
+    "load_geom_sidecar",
+    "assert_source_scan_matches",
+    "assert_auto_absent_tripwire",
     # S0.4 — block-classifier seam (concern A typing)
     "BlockClassifier",
     "BlockClassification",

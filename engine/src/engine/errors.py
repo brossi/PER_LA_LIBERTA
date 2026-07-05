@@ -18,7 +18,7 @@ subclassing elsewhere costs nothing here; a new code must stay unique across all
 by ``test_authoring_evidence.py``'s uniqueness sweep).
 
 The shared load-boundary taxonomy of the persisted structure-*document* loaders (structure maps,
-stream-freeze records, authoring-evidence sidecars): an **absent** artifact is
+stream-freeze records, authoring-evidence sidecars, geometry sidecars): an **absent** artifact is
 :class:`MissingInputError`; a **present-but-unloadable** one (malformed, unreadable, non-UTF-8,
 parse-depth blowup, stale-version, wrong stale class) is :class:`StaleArtifactError`; nothing else
 escapes those loaders. Known gap (delta re-audit 2026-07-02): ``structure.atom_store.load_stream``

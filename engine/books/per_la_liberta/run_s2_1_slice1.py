@@ -24,9 +24,15 @@ The LOCAL-ONLY real run (the scan PDF is gitignored and CI has no copy — DT-11
 4. Run-report evidence -> ``docs/probes/s2_1_run_stats.json`` (the numbers behind
    ``docs/probes/s2_1_run_report.md``), ``status: "ok"`` only on a fully green run.
 
-The 0.80/0.60 thresholds passed below are DT-8 **proposals** — this runner is their book-side
-consumer; they are ratified (or retuned) at the run report, which is why the engine core refuses
-to default them.
+DT-8 thresholds (RATIFIED by Ben 2026-07-05, at the slice-1 run report): ``atom_match_floor``
+0.60 is a ratified **constant** (it guards individual atoms, not review budgets).
+``page_accept_rate`` is ratified as a **standing procedure**, not a constant: the cut is a
+per-run review-budget decision, named by a human from the deterministic ``threshold_sweep``
+this runner emits (ladder + advisory gap candidates + decision zone, persisted in the stats
+file and printed at run end); the applied cut lands in ``run_params``, its rationale in the run
+report. Run 1's cut: 0.80 (the pre-registered proposal, left standing after review of the
+12-page worklist). The engine core still refuses to default either value — both arrive as
+parameters.
 
 Usage (from ``engine/``):  uv run python books/per_la_liberta/run_s2_1_slice1.py
   --accept-rate / --atom-floor    override the proposal thresholds for sensitivity probes
@@ -43,6 +49,7 @@ import argparse
 import hashlib
 import json
 import time
+from bisect import bisect_left
 from collections import Counter
 from pathlib import Path
 
@@ -310,6 +317,58 @@ def _decade_bin(rate: float) -> str:
     return "0.9"
 
 
+# DT-8 standing mechanism (RATIFIED by Ben 2026-07-05): the page-accept threshold is not a
+# constant — it is a per-run REVIEW-BUDGET decision, named by a human from this deterministic
+# sweep of the run's own persisted rate distribution (never an ad-hoc probe loop, never an
+# auto-decided cut). The gap candidates are ADVISORY: they surface where the distribution has
+# natural cuts; the human names the value; the applied cut lands in run_params and its rationale
+# in the run report. Re-cutting = re-running with --accept-rate X (~3 min from the box cache).
+SWEEP_LADDER = (0.70, 0.75, 0.78, 0.79, 0.80, 0.81, 0.85, 0.90)
+SWEEP_GAP_RANGE = (0.50, 0.95)  # cuts outside this range are not review-budget territory
+SWEEP_ZONE_HALF_WIDTH = 0.05  # pages within +/- this of the applied cut = the decision zone
+
+
+def _threshold_sweep(sidecar, applied_cut):
+    """The threshold-decision evidence: ladder counts, advisory gap candidates, decision zone.
+
+    Pages routed at locate (``empty-window``) carry no rate and route under any cut; only
+    match-stage rates participate. Pure and deterministic over the sidecar's persisted rates."""
+    rated = sorted(
+        (rec.match_rate if rec.status == "matched" else rec.value, n)
+        for n, rec in sidecar.pages.items()
+        if rec.status == "matched" or rec.stage == "match"
+    )
+    values = [v for v, _ in rated]
+    rateless = len(sidecar.pages) - len(rated)
+
+    def counts(cut):
+        accepted = len(values) - bisect_left(values, cut)
+        return {"accepted": accepted, "routed": len(values) - accepted + rateless}
+
+    ladder = {f"{t:.2f}": counts(t) for t in sorted({*SWEEP_LADDER, round(applied_cut, 4)})}
+    lo, hi = SWEEP_GAP_RANGE
+    in_range = sorted({v for v in values if lo <= v <= hi})
+    gaps = sorted(
+        (
+            {"below": a, "above": b, "width": b - a, "candidate_cut": (a + b) / 2,
+             **counts((a + b) / 2)}
+            for a, b in zip(in_range, in_range[1:])
+        ),
+        key=lambda g: -g["width"],
+    )[:3]
+    zone = {
+        str(n): v for v, n in rated if abs(v - applied_cut) <= SWEEP_ZONE_HALF_WIDTH
+    }
+    return {
+        "procedure": "DT-8 ratified 2026-07-05: human-named cut from this sweep; gaps advisory",
+        "applied_cut": applied_cut,
+        "pages_without_rate": rateless,
+        "ladder": ladder,
+        "gap_candidates": gaps,
+        "decision_zone": dict(sorted(zone.items(), key=lambda kv: kv[1])),
+    }
+
+
 def _write_stats(status: str, **sections) -> None:
     STATS_PATH.parent.mkdir(parents=True, exist_ok=True)
     atomic_write_json(STATS_PATH, {"status": status, **sections})
@@ -449,6 +508,7 @@ def main() -> None:
             "total": sum(oob.values()),
             "pages_with_drops": {str(k): v for k, v in sorted(oob.items()) if v},
         },
+        "threshold_sweep": _threshold_sweep(sidecar, args.accept_rate),
     }
 
     try:
@@ -467,6 +527,19 @@ def main() -> None:
     print(f"coverage: {dict(sidecar.coverage)}")
     print(f"tripwire: massA={tripwire['absent_token_mass_rate']:.4f} "
           f"proseB={tripwire['prose_absent_rate']:.4f} flags={len(tripwire['flags'])}")
+    sweep = sections["threshold_sweep"]
+    print(f"\nthreshold sweep (DT-8 procedure — applied cut {sweep['applied_cut']}):")
+    for t, c in sweep["ladder"].items():
+        mark = " <- applied" if float(t) == round(sweep["applied_cut"], 4) else ""
+        print(f"  >= {t}: {c['accepted']} accepted / {c['routed']} routed{mark}")
+    for g in sweep["gap_candidates"]:
+        print(
+            f"  gap candidate: cut {g['candidate_cut']:.4f} (width {g['width']:.4f}, "
+            f"{g['below']:.4f}..{g['above']:.4f}) -> {g['accepted']} accepted / {g['routed']} routed"
+        )
+    zone = ", ".join(f"p{n}={v:.4f}" for n, v in sweep["decision_zone"].items())
+    print(f"  decision zone (±{SWEEP_ZONE_HALF_WIDTH}): {zone or 'empty'}")
+    print("  to re-cut: re-run with --accept-rate X (~3 min from the box cache)")
 
 
 if __name__ == "__main__":

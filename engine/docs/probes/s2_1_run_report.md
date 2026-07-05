@@ -11,8 +11,8 @@ split).
 - Engine: `pymupdf-1.27.2.3+tesseract-5.5.2:dpi=300:lang=ita`; scan = the 278-page LOC PDF.
 - Wall: OCR 13.5 min cold (checkpointed cache; later phases re-run from it in ~3 min),
   calibration 89 s, copy1 match 88.6 s.
-- Thresholds as proposed at DT-8: `page_accept_rate=0.80`, `atom_match_floor=0.60`
-  (ratification: §Ratification below).
+- Thresholds: `page_accept_rate=0.80`, `atom_match_floor=0.60` — both since ratified (the floor
+  as a constant, the cut as a standing per-run procedure; see §Ratifications).
 
 ## Calibration (P-1, two-clause — SUPERSEDED form ruled 2026-07-05)
 
@@ -79,25 +79,38 @@ exactly DT-13's 2026-07-03 measurement, 24.3% of the canonical stream; ruling be
 - P-7 bounded drop-and-count: exactly the probe-predicted 20 off-page boxes dropped and counted
   (pages 4:4, 5:2, 273:1, 274:10, 276:3); no page approached the 20% systemic bound.
 
-## Ratification items (DoD-gating for #37 close)
+## Ratifications (all ruled by Ben 2026-07-05, at this run report — #37's DoD gate)
 
-1. **DT-8 thresholds 0.80/0.60** — proposal → ratify. Evidence: the page histogram is cleanly
-   bimodal (253 pages ≥ 0.80, stragglers are noise pages plus an 11-page review worklist);
-   loosening to 0.75 would absorb ~8 worklist pages into "matched" — the wrong direction given
-   the route-to-human posture. Atom floor 0.60: only 50 atoms land in `below_atom_floor`.
-   **Recommend ratify as proposed.**
-2. **Wire extension `stage="locate"/signal="empty-window"`** — observed on exactly the 7
-   physically text-empty pages. **Recommend ratify** (extends DT-10's enum, honest distinct
-   cause vs a match-rate failure).
-3. **DT-13 (a) vs (b)** — 1,165 copy2-only canonical atoms carry no geometry from this sidecar.
-   **Recommend (b)**: ratify the exclusion as a named coverage floor (24.3% of canonical atoms)
-   and keep the copy2 lane as a later deliverable — lane (a) requires a Harvard-scan OCR pass,
-   its own calibration argument (copy2 has no ground-truth page map), and its own leaf-offset
-   handling: a full deliverable, not a close-out item. Revisit condition: the first consumer
-   that needs geometry on a copy2-only atom (e.g. S3.1 word geometry or a citation surface).
-4. **P-1 "tighten to 97%?" note** — clause A measures 99.70%, so 97% would pass today;
-   recommend **keeping 95%** until a second book gives cross-book variance (floor-setting on
-   N=1 is anchoring, not calibration).
+1. **DT-8 thresholds.** `atom_match_floor = 0.60` ratified as a **constant** (only 50 atoms
+   below it; it guards individual atoms, not budgets). `page_accept_rate` ratified as a
+   **standing procedure**: the cut is a per-run review-budget decision, named by a human from
+   the run's own deterministic `threshold_sweep` (fixed ladder + advisory gap candidates +
+   decision-zone page list — persisted in `s2_1_run_stats.json`, printed at run end). Gap
+   detection is advisory only; the applied cut lands in `run_params`, its rationale here.
+   **Run 1's cut: 0.80** — the pre-registered proposal, left standing after review of the
+   12-page worklist (scans + per-page diagnostics). The decision that mattered at this cut:
+   the three near-bar pages (p192/p253/p265, 0.7975–0.7988) stay in review rather than being
+   accepted on closeness; their verdicts become retuning evidence at the next book.
+2. **Wire extension `stage="locate"/signal="empty-window"` — RATIFIED.** Observed on exactly
+   the 7 physically text-empty pages; recorded at DT-10's enum in the plan.
+3. **DT-13 — outcome (b) RATIFIED.** The 24.3% copy2-only absent-geometry floor (1,165 atoms,
+   reproduced exactly by this run) is a named, accepted loss; the copy2 lane stays a later
+   deliverable. Revisit trigger: the first consumer needing geometry on a copy2-only atom.
+4. **P-1 "tighten to 97%?" note — RESOLVED: keep 95%.** Clause A measures 99.70%, so 97% would
+   pass today, but floor-setting on one book is anchoring, not calibration; revisit at N=2.
+
+### The worklist as reviewed
+
+The threshold decision was made against the actual pages (worklist artifact, 2026-07-05): of
+the 12 interior routed pages, two are structurally empty leaves mis-dressed as text (p6 = the
+title page's verso, whose 658 boxes are Tesseract reading *bleed-through* and library pencil
+marks — its 0.75 "rate" spans a 4-token window; p125 = the «PARTE SECONDA» divider, 2 boxes),
+two are genuine prose below 0.75 (p117 at 0.733, p139 at 0.683 — the blotchiest impression in
+the book; deficits spread across short function words), and eight form the 0.755–0.799 shelf
+(distributed short-word disagreement plus identifiable causes: a proper name rendered two ways,
+hyphen fragments, apostrophe-word divergence). p6 is also the cautionary case for low cuts: at
+0.75 its meaningless 4-token rate would have been *accepted* and the ghost-text leaf stamped a
+matched page.
 
 ## Reproduction
 

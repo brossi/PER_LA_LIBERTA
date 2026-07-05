@@ -298,6 +298,10 @@ the run resolves. copy1's fresh-Tesseract-vs-IA-Tesseract agreement is expected 
 Gemini-vs-Tesseract 0.939 — same engine family, same scan — but that expectation is *checked* by
 the run report, not assumed.) Shape alone is never the
 acceptance: G-7 pairs the monotone property (CI) with this exactness gate (ground truth).
+**(Superseded 2026-07-05: the gate is now the two-clause form — see the P-1 row. The run
+resolved the tiny-atom unknown: ≤5-token atoms page-locate exactly at only 48.7% but always
+within ±1; the tighten-to-97% note is RESOLVED by Ben 2026-07-05 — keep 95% for clause A until a
+second book gives cross-book variance; N=1 floor-tightening is anchoring, not calibration.)**
 
 **Failure route (pinned):** calibration < floor → S2.1.3 **hard-blocks** — no `copy1_geom.json`
 is published; the run report ships the failure distribution and the ruling comes to Ben with the
@@ -614,6 +618,10 @@ One record per routed page (replay semantics per R13):
 - `input_fingerprint` = sha256 over (`stream_source_hash`, `source_scan.sha256`, `engine_id`,
   `classifier_version`, band/threshold values) — the same fields DT-6/DT-9 persist.
 - `history` accumulates applied verdicts (`by`/`at` from the verdict schema).
+- **Enum extension (RATIFIED by Ben 2026-07-05, at the slice-1 run report):** pages routed
+  because their locate window is text-empty persist `stage: "locate"`, `signal: "empty-window"`,
+  `value: 0.0` — a distinct honest cause, not a match-rate failure. Observed on exactly the 7
+  physically text-empty PLL pages (covers, scan target, back matter).
 
 **Verdict schema** (human fills; a small CLI applies — reuse of the S4.6b gate-CLI pattern, not a
 new HTML sheet): `{"action": "confirm" | "redraw_split" | "reclassify" | "decline_geometry",
@@ -698,6 +706,12 @@ Measured on the live streams (2026-07-03): **1165/4786 canonical atoms (24.3%) h
 derivation** (copy2-only; multi-copy1 = 0). Under DT-3's copy1-only ruling these atoms are not
 match *failures* — they are **ineligible**: no copy1 witness atom exists for the sidecar to key.
 Two admissible outcomes; **one must be ratified before S2.1 closes** (DoD-gating):
+
+> **RULED by Ben 2026-07-05, at the slice-1 run report: outcome (b).** The 24.3% absent-geometry
+> floor on the canonical stream is a named, accepted loss (the run reproduced the measurement
+> exactly: `coverage.canonical_no_primary_derivation = 1165`, multi-primary = 0). The copy2 lane
+> stays a later deliverable; revisit trigger = the first consumer that needs geometry on a
+> copy2-only atom (e.g. S3.1 word geometry or a citation surface).
 
 - **(a) Per-atom primary witness.** "Primary witness's box" reads per canonical atom: copy1 where
   a copy1 derivation exists, else copy2. Adds a `copy2_geom.json` lane — Harvard-scan
@@ -857,6 +871,22 @@ is no default to fall back to.
 | P-6 | `review_fraction_max` = 0.15 per stage | DT-10 | #40 (volume bound) | **RULED 2026-07-03: accepted** |
 | P-7 | off-page OCR boxes: bounded drop-and-count — isolated boxes dropped + counted per page (`oob_boxes`), a page's off-page fraction > 20% of candidates still fails loud | DT-4 / G-8 | #36 backend (blocking the #37 slice-1 run) | **RULED by Ben 2026-07-05: accepted (option (a) of three presented), superseding the unconditional fail-loud ratified at DT-4** — evidence: the first slice-1 run tripped G-8 on scan page 4; whole-book probe same day: 20/136,385 boxes (0.015%) off-page, confined to 5 noise pages {4, 5, 273, 274, 276}, worst page 4.5%, all garbage text — an isolated-hallucination class, while the pixmap-space-leak class the tripwire exists for displaces ~100% of a page's boxes, so the 20% bound sits in the wide gap and preserves it. Bound-check reds: boundary (`>` not `>=`), denominator (candidates, not raw), banked-counter, all-off-page — hunt 48/48 KILLED. |
 
-Separately (unchanged): the **match thresholds 0.80/0.60** (DT-8) and the **hysteresis margins**
-(DT-7) are ratified *at the slice-1 run report* against the full-book distributions — proposing
-them final now would be measurement-blind.
+Separately: the **hysteresis margins** (DT-7) are ratified at their consumer's run report —
+the #38 segmentation run, which is what produces the valley/column distributions; the #37
+slice-1 run had no such evidence (proposing them final before it would be measurement-blind).
+
+**DT-8 thresholds — RATIFIED by Ben 2026-07-05, at the slice-1 run report:**
+`atom_match_floor = 0.60` is ratified as a **constant** (it guards individual atoms, not review
+budgets; the run put only 50 atoms below it). `page_accept_rate` is ratified as a **standing
+procedure**, not a constant: the cut is a per-run **review-budget decision** — the run computes
+every page's rate regardless of the cut, emits a deterministic `threshold_sweep`
+(fixed ladder + advisory gap candidates + decision-zone page list, persisted in
+`s2_1_run_stats.json` and printed at run end), and a human names the cut from that evidence;
+the applied value lands in `run_params`, its rationale in the run report. Gap detection is
+**advisory only** — an auto-decided cut would move the review-budget decision back to an
+algorithm and re-open the tune-to-the-data failure mode. Re-cutting = re-run with
+`--accept-rate X` (~3 min from the box cache; per-atom records for newly accepted pages need the
+re-match — routed pages carry only pending atoms, G-12). Run 1's cut: **0.80** — the
+pre-registered proposal, left standing after Ben reviewed the 12-page worklist with scans +
+per-page diagnostics; the three near-bar pages (0.7975–0.7988) stay in review, and their
+verdicts become retuning evidence at the next book (N=2).

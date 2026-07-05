@@ -317,6 +317,12 @@ Immutable, addressed capture units — the floor everything pins to.
 > establishes is the prerequisite for attributing pages to canonical text; *there* "pending vs
 > intrinsically-unmapped" finally gains a consumer and may earn the split. The S1.3a.4 tripwire
 > pins the exact atom set that change will touch.
+> **Pointer (R18, added at #37 close 2026-07-05):** sidecar-derived copy1 page attributions now
+> exist (`copy1_geom.json`, regenerable; evidence `docs/probes/s2_1_run_report.md`) at the
+> two-clause calibration gate: exact 99.70% on >5-token single-page atoms, 100% within ±1 over
+> all 521 (P-1 as superseded 2026-07-05). These are **geometry evidence** (`Geom.page` + the
+> sidecar's `atom_pages`), NOT `Atom.page_range` — the adoption decision is unchanged and stays
+> S7.1b's; canonical coverage floor 24.3% absent (copy2-only atoms, DT-13 outcome (b)).
 
 > **Carried review concerns (issue #16 audit) — revisit later, opened-not-closed by the burnish.**
 > Three threads S1.3a.1–.3 *surface* but do not *settle*:

@@ -195,9 +195,25 @@ A backend is a Protocol with one obligation: given a page index range, yield
 reproducibility string built from live versions and params (shape:
 `pymupdf-{ver}+tesseract-{tessver}:dpi={dpi}:lang={lang}`). The matcher writes `engine_id`
 **verbatim** into `geometry_engine` — never a hardcoded string (G-3). Fail-loud: missing
-tessdata / OCR failure / a box outside the page rect raise `GeometryError`; a backend never
+tessdata / OCR failure / a systemic off-page-box fraction raise `GeometryError`; a backend never
 returns silently-empty pages for operational failures (empty ≠ failed: a genuinely blank page
 yields zero words *successfully*).
+
+**Off-page boxes — bounded drop-and-count (RULED by Ben 2026-07-05, superseding the
+unconditional fail-loud first ratified here and at DT-4/G-8):** an *isolated* off-page box is a
+Tesseract hallucination — dropped and counted in a per-page `oob_boxes` stat (kept separate from
+`dropped_boxes`: DT-2 debris vs a coordinate-integrity event; surfaced in the box cache and the
+run report — sidecar persistence deferred to a future schema bump). A page whose off-page
+fraction exceeds **20% of its candidate boxes** (candidates = boxes that reached the off-page
+check, post DT-2 drop) still raises `GeometryError`, with the counter banked before the raise for
+post-mortem: the pixmap-space-leak class G-8 exists for, which displaces ~100% of a page's boxes
+(~dpi/72×), is what the bound keeps loud. The bound is fraction-only (no minimum-candidate
+floor): on a near-blank page a single off-page box among ≤4 candidates still raises — deliberate,
+an evidence-starved page cannot discriminate isolated from systemic. Evidence for the ruling: the first
+#37 slice-1 run tripped G-8 on scan page 4; the 2026-07-05 whole-book probe
+(`books/per_la_liberta/probes/s2_1_oob_probe.py`) found 20 of 136,385 boxes (0.015%) off-page,
+confined to 5 noise pages (4, 5, 273, 274, 276 — scan-target/back-matter), worst page 4.5%, all
+garbage text. See P-7.
 
 **Record validity (two layers, no silent loss — R2):**
 
@@ -719,7 +735,7 @@ constructor cannot catch: wrong *values*, wrong *routing*, wrong *state*.
 | G-5 | `match_confidence == matched/total` (pinned) | mutant returns constant 1.0 → value-pin fixture (known 3-of-5 match = 0.6) reds | `test_geom_match.py` |
 | G-6 | union bbox spans matched boxes only | mutant unions ALL page boxes → distractor-box fixture reds on bbox equality | `test_geom_match.py` |
 | G-7 | page-locate monotone non-decreasing + deterministic earliest-boundary tie-break | shuffle mutant → monotonicity property reds (synthetic, CI); tie-break fixture (repeated-token run + boundary-straddling furniture, two boundaries tied on score) asserts exact earliest indices — latest-flip mutant reds; copy3-blind ≥95% exact = local run-report gate (PDF not in CI — honest split, DT-11) | `test_geom_match.py` + run report |
-| G-8 | every box ⊆ page rect; page-point coords proven against ground truth at each dpi | OOB synthetic box (all four edges) → `GeometryError`; a word drawn at a known page-point origin must OCR to that origin (±15 pt), NOT the pixmap position `origin×dpi/72`, at dpi 150 AND 300 → pixmap-coord mutant reds ~dpi/72× off (P-3 2026-07-04, superseding the ≤0.5 pt cross-dpi form); cropped-page tests assert cropbox dims (500×360 ≠ mediabox) → mediabox mutant reds, AND crop-relative ground-truth positions → crop-origin-offset mutant reds, binding the `page.rect` «unverified»; non-finite coord → `GeometryError` | `test_geometry_backend.py` |
+| G-8 | every *emitted* box ⊆ page rect — isolated off-page boxes dropped + counted (`oob_boxes`), a page's off-page fraction > 20% of candidates fails loud (P-7 2026-07-05, superseding unconditional fail-loud); page-point coords proven against ground truth at each dpi | OOB synthetic box (all four edges, among in-page filler) → dropped, counted, never emitted, `dropped_boxes` untouched; fraction over the bound (incl. an all-off-page pixmap-leak fixture) → `GeometryError` naming "off-page fraction", counter banked pre-raise; fraction exactly at the bound tolerated (`>` not `>=`); denominator = candidates post-DT-2-drop, not raw boxes; a word drawn at a known page-point origin must OCR to that origin (±15 pt), NOT the pixmap position `origin×dpi/72`, at dpi 150 AND 300 → pixmap-coord mutant reds ~dpi/72× off (P-3 2026-07-04, superseding the ≤0.5 pt cross-dpi form); cropped-page tests assert cropbox dims (500×360 ≠ mediabox) → mediabox mutant reds, AND crop-relative ground-truth positions → crop-origin-offset mutant reds, binding the `page.rect` «unverified»; non-finite coord → `GeometryError` (unconditionally — no observed NaN class to size a bound against) | `test_geometry_backend.py` |
 | G-9 | density `abstain` routes, never guesses | mutant maps abstain→content → planted mid-band fixture reds | `test_segmentation.py` |
 | G-10 | sparse single-column ≠ two-column (contiguous-gutter + populated-halves guards) | remove the ≥3-bin run guard → sparse-page fixture reds | `test_segmentation.py` |
 | G-11 | dark low-yield page classed `non_text_dark`, boxes untrusted | mutant trusts high-ink pages → endpaper-style fixture reds | `test_segmentation.py` |
@@ -837,6 +853,7 @@ is no default to fall back to.
 | P-4 | distinctive-token floor: `min_tokens=3` OR ≥1 page-unique token | DT-8 | #37 (matcher) | **RULED 2026-07-03: accepted as proposed** |
 | P-5 | auto-absent tripwire: >5% of book atoms on accepted pages → hard-fail | DT-8 | #37 (slice-1 run gate) | **RULED 2026-07-03: replaced by the two-leg form — leg A >2% token mass + leg B >5% of ≥4-token atoms, accepted pages only, + warn tier (DT-8; red row G-26)** |
 | P-6 | `review_fraction_max` = 0.15 per stage | DT-10 | #40 (volume bound) | **RULED 2026-07-03: accepted** |
+| P-7 | off-page OCR boxes: bounded drop-and-count — isolated boxes dropped + counted per page (`oob_boxes`), a page's off-page fraction > 20% of candidates still fails loud | DT-4 / G-8 | #36 backend (blocking the #37 slice-1 run) | **RULED by Ben 2026-07-05: accepted (option (a) of three presented), superseding the unconditional fail-loud ratified at DT-4** — evidence: the first slice-1 run tripped G-8 on scan page 4; whole-book probe same day: 20/136,385 boxes (0.015%) off-page, confined to 5 noise pages {4, 5, 273, 274, 276}, worst page 4.5%, all garbage text — an isolated-hallucination class, while the pixmap-space-leak class the tripwire exists for displaces ~100% of a page's boxes, so the 20% bound sits in the wide gap and preserves it. Bound-check reds: boundary (`>` not `>=`), denominator (candidates, not raw), banked-counter, all-off-page — hunt 48/48 KILLED. |
 
 Separately (unchanged): the **match thresholds 0.80/0.60** (DT-8) and the **hysteresis margins**
 (DT-7) are ratified *at the slice-1 run report* against the full-book distributions — proposing

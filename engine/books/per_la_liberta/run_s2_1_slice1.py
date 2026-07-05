@@ -103,15 +103,18 @@ def _pages_to_cache(pages) -> list[dict]:
 
 
 def _load_or_ocr_pages(workspace, pdf_path, scan_sha, first, last, refresh):
-    """The cached OCR pass: PageGeometry list + dropped_boxes + provenance strings.
+    """The cached OCR pass: PageGeometry list + dropped_boxes + oob_boxes + provenance strings.
 
     The cache is written incrementally (every CHECKPOINT_EVERY pages, and on a mid-pass
     fail-loud) with ``complete: false`` until the whole range is in, so an interrupted or
-    backend-blocked pass resumes instead of repeating finished pages."""
+    backend-blocked pass resumes instead of repeating finished pages. A cache from before the
+    2026-07-05 bounded drop-and-count amendment lacks ``oob_boxes`` and is treated as unusable
+    (regenerated) rather than guessed at."""
     cache_path = workspace.resolve("data", "geometry", f"_boxes_dpi{DPI}.json")
     backend = PyMuPDFTesseractBackend(pdf_path, language=LANGUAGE, dpi=DPI)
     pages: list[PageGeometry] = []
     dropped: dict[int, int] = {}
+    oob: dict[int, int] = {}
     if cache_path.is_file() and not refresh:
         try:
             cached = json.loads(cache_path.read_text(encoding="utf-8"))
@@ -120,17 +123,20 @@ def _load_or_ocr_pages(workspace, pdf_path, scan_sha, first, last, refresh):
                 and cached["engine_id"] == backend.engine_id
                 and cached["first"] == first
                 and cached["last"] == last
+                and isinstance(cached["oob_boxes"], dict)
+                and isinstance(cached["dropped_boxes"], dict)
                 and len(cached["pages"]) == len({e["page"] for e in cached["pages"]})
             )
         except (json.JSONDecodeError, KeyError, TypeError, UnicodeDecodeError) as exc:
-            print(f"box cache unreadable ({exc}) — regenerating (or pass --refresh-boxes)")
+            print(f"box cache unusable ({exc!r}: corrupt or pre-P-7 schema) — regenerating")
             usable = False
         if usable:
             pages = _pages_from_cache(cached["pages"])
             dropped = {int(k): v for k, v in cached["dropped_boxes"].items()}
+            oob = {int(k): v for k, v in cached["oob_boxes"].items()}
             if cached.get("complete") and len(pages) == last - first + 1:
                 print(f"box cache hit: {len(pages)} pages from {cache_path.name}")
-                return pages, dropped, cached["engine_id"], cached["backend_params"]
+                return pages, dropped, oob, cached["engine_id"], cached["backend_params"]
             print(f"box cache partial: {len(pages)} pages banked; resuming OCR")
 
     def checkpoint(complete: bool) -> None:
@@ -145,6 +151,7 @@ def _load_or_ocr_pages(workspace, pdf_path, scan_sha, first, last, refresh):
                 "last": last,
                 "complete": complete,
                 "dropped_boxes": {str(k): v for k, v in dropped.items()},
+                "oob_boxes": {str(k): v for k, v in oob.items()},
                 "pages": _pages_to_cache(pages),
             },
         )
@@ -160,16 +167,27 @@ def _load_or_ocr_pages(workspace, pdf_path, scan_sha, first, last, refresh):
             for geometry in backend.read_pages(resume_from, last):
                 pages.append(geometry)
                 dropped[geometry.page] = backend.dropped_boxes[geometry.page]
+                oob[geometry.page] = backend.oob_boxes[geometry.page]
+                if oob[geometry.page]:
+                    print(
+                        f"  page {geometry.page}: {oob[geometry.page]} isolated off-page "
+                        f"box(es) dropped and counted (2026-07-05 ruling)"
+                    )
                 if geometry.page % CHECKPOINT_EVERY == 0 or geometry.page == last:
                     checkpoint(complete=(geometry.page == last))
                     elapsed = time.monotonic() - started
                     print(f"  page {geometry.page}/{last}  ({elapsed:.0f}s elapsed)")
         except GeometryError:
-            checkpoint(complete=False)  # bank the finished pages before failing loud
+            # Bank the finished pages AND the failing page's backend counters (banked there
+            # before its raise) so the systemic-failure evidence lands in the persisted cache;
+            # a resume re-OCRs the failing page and overwrites these entries.
+            dropped.update({p: c for p, c in backend.dropped_boxes.items() if p not in dropped})
+            oob.update({p: c for p, c in backend.oob_boxes.items() if p not in oob})
+            checkpoint(complete=False)
             raise
     else:
         checkpoint(complete=True)
-    return pages, dropped, backend.engine_id, backend.backend_params
+    return pages, dropped, oob, backend.engine_id, backend.backend_params
 
 
 def _calibrate_copy3_blind(copy3, pages, floor):
@@ -272,7 +290,7 @@ def main() -> None:
         "atom_match_floor": args.atom_floor,
     }
     try:
-        pages, dropped, engine_id, backend_params = _load_or_ocr_pages(
+        pages, dropped, oob, engine_id, backend_params = _load_or_ocr_pages(
             workspace, pdf_path, scan_sha, first, last, args.refresh_boxes
         )
     except GeometryError as exc:
@@ -347,6 +365,13 @@ def main() -> None:
         },
         "coverage": dict(sidecar.coverage),
         "hyphen_fragment_boxes": sum(1 for pg in pages for w in pg.words if w.text.endswith("-")),
+        # Bounded drop-and-count evidence (P-7, ruled 2026-07-05): which pages shed isolated
+        # off-page hallucinations, and how many — the run report's check that the drops stayed
+        # confined to the probe's noise-page profile.
+        "oob_boxes": {
+            "total": sum(oob.values()),
+            "pages_with_drops": {str(k): v for k, v in sorted(oob.items()) if v},
+        },
     }
 
     try:

@@ -42,8 +42,9 @@ class GeometryError(EngineError):
 
     Covers the backend's operational faults (missing tessdata, an OCR failure, and *any* rotated
     page — ``page.rotation != 0`` raises rather than emitting coordinates in a silently-transformed
-    space, G-17) and geometry-integrity violations (a box outside the page rect, a
-    calibration-gate block, a volume-bound breach). One human action — the geometry is
+    space, G-17) and geometry-integrity violations (a systemic off-page-box fraction — isolated
+    off-page boxes are dropped and counted, ruled 2026-07-05 — a calibration-gate block, a
+    volume-bound breach). One human action — the geometry is
     untrustworthy, stop — so one exit code.
 
     Distinct from :class:`~engine.errors.BackendError` (exit 5) by design: ``ocr``'s backend
@@ -148,11 +149,12 @@ class GeometrySource(Protocol):
 
     Fail-loud (backend obligation, enforced by the #36 backend, not this Protocol): missing tessdata,
     an OCR failure, a rotated page (``page.rotation != 0`` — refused outright, never silently
-    de-rotated into a coordinate space the matcher does not expect; G-17), or a box outside the page
-    rect raise :class:`GeometryError`; a backend never returns silently-empty pages for operational
-    failures — an empty page is a *successful* zero-word read, an operational failure is an
-    exception. Emission order is **unspecified** (DT-2): no consumer may treat backend order as
-    reading order.
+    de-rotated into a coordinate space the matcher does not expect; G-17), or a systemic
+    off-page-box fraction (isolated off-page boxes are dropped and counted — bounded
+    drop-and-count, ruled 2026-07-05) raise :class:`GeometryError`; a backend never returns
+    silently-empty pages for operational failures — an empty page is a *successful* zero-word read,
+    an operational failure is an exception. Emission order is **unspecified** (DT-2): no consumer
+    may treat backend order as reading order.
     """
 
     @property

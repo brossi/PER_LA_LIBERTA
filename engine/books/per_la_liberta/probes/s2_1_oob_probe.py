@@ -1,11 +1,14 @@
 """S2.1.3 probe — how widespread are Tesseract's off-page (out-of-rect) boxes on the PLL scan?
 
-Evidence for the #37 off-page ruling: the #36 backend fails loud on any box outside the page rect
-(G-8, ratified), and the real slice-1 run tripped it on page 4 — a scan-target/library noise page
-where Tesseract emitted 4 hallucinated wide boxes (garbage text, x1 ~1.7x the page width). This
-probe OCRs every page OUTSIDE the backend (raw pymupdf) and records, per page: box count,
-off-page box count, and each off-page box's text + bbox — so the ruling (drop-and-count isolated
-artifacts vs keep hard fail-loud) can be sized against the whole book instead of one page.
+Evidence artifact for the off-page ruling (RULED by Ben 2026-07-05 → P-7 bounded drop-and-count;
+kept as the sizing behind that ruling): the #36 backend AS FIRST RATIFIED failed loud on any box
+outside the page rect (G-8), and the first slice-1 run tripped it on page 4 — a
+scan-target/library noise page where Tesseract emitted 4 hallucinated wide boxes (garbage text,
+x1 ~1.7x the page width). This probe OCRs every page OUTSIDE the backend (raw pymupdf) and
+records, per page: box count, off-page box count, and each off-page box's text + bbox — so the
+ruling (drop-and-count isolated artifacts vs keep hard fail-loud) could be sized against the
+whole book instead of one page. Result (2026-07-05 whole-book run): 20/136,385 boxes off-page,
+confined to 5 noise pages {4, 5, 273, 274, 276}, worst page 4.5% — the basis of P-7's 20% bound.
 
 Checkpointing: appends one JSON line per page to ``work/data/geometry/_oob_probe.jsonl`` and skips
 already-probed pages on restart, so the ~40-minute pass survives interruption. Read-only against

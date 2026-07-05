@@ -454,35 +454,147 @@ def test_cropped_page_boxes_land_at_crop_relative_ground_truth(synth):
         )
 
 
-@pytest.mark.parametrize("edge", ["left", "top", "right", "bottom"])
-def test_box_outside_the_page_rect_raises_geometry_error(synth, monkeypatch, edge):
-    # RED (G-8 containment): a mutant that drops the ⊆-rect check emits an off-page box instead of
-    # raising. An out-of-page box is corruption, not a droppable artifact — fail loud. All FOUR edges
-    # are exercised so each clause of the four-way bound is independently killed by a mutant (an
-    # x-only fixture would leave the y-clauses untested — mutation-hunt discipline). Monkeypatched OCR
-    # so the guard is tested without a real pass; every box is non-degenerate so it reaches the OOB
-    # check rather than the earlier degenerate-drop.
-    pdf = synth.pdf([synth.single_column()])
-    be = PyMuPDFTesseractBackend(pdf, language="eng", dpi=300)
-    rect = fitz.open(pdf)[0].rect
+# Five in-page filler boxes for the bounded-OOB fixtures: enough candidates that ONE off-page box
+# sits at/below the 20% fraction bound (1/6 ≈ 0.167, 1/5 = 0.2) while TWO exceed it (2/7 ≈ 0.286).
+_FILLER = [_word(f"fill{i}", (10.0 + 50.0 * i, 100.0, 50.0 + 50.0 * i, 130.0)) for i in range(5)]
+
+
+def _oob_boxes_by_edge(rect):
     w, h = rect.width, rect.height
-    boxes = {
+    return {
         "left": (-60.0, 10.0, -5.0, 40.0),
         "top": (10.0, -60.0, 60.0, -5.0),
         "right": (w + 5.0, 10.0, w + 60.0, 40.0),
         "bottom": (10.0, h + 5.0, 60.0, h + 60.0),
     }
-    _stub_ocr(monkeypatch, [_word("runaway", boxes[edge])])
-    with pytest.raises(GeometryError, match="outside|rect|page"):
+
+
+@pytest.mark.parametrize("edge", ["left", "top", "right", "bottom"])
+def test_isolated_off_page_box_is_dropped_and_counted_not_raised(synth, monkeypatch, edge):
+    # RED (G-8 amended — ruled by Ben 2026-07-05, bounded drop-and-count): before the amendment this
+    # page RAISED on its single off-page box; now an ISOLATED off-page box (1 of 6 candidates,
+    # fraction ≤ the 20% bound) is a Tesseract hallucination — dropped, counted in `oob_boxes`,
+    # never emitted, never conflated with the DT-2 `dropped_boxes` artifact counter. All FOUR edges
+    # are exercised so each clause of the four-way detection bound is independently killed by a
+    # mutant (an x-only fixture would leave the y-clauses untested); a dropped clause here shows as
+    # oob_boxes == 0 AND the runaway word emitted.
+    pdf = synth.pdf([synth.single_column()])
+    be = PyMuPDFTesseractBackend(pdf, language="eng", dpi=300)
+    rect = fitz.open(pdf)[0].rect
+    _stub_ocr(monkeypatch, [*_FILLER, _word("runaway", _oob_boxes_by_edge(rect)[edge])])
+    (pg,) = list(be.read_pages(1, 1))
+    assert [w.text for w in pg.words] == [f"fill{i}" for i in range(5)], (
+        "the off-page box must be dropped, the in-page boxes kept"
+    )
+    assert be.oob_boxes[1] == 1, "the dropped off-page box must be counted in oob_boxes"
+    assert be.dropped_boxes[1] == 0, "an off-page box is not a DT-2 artifact — counters stay separate"
+
+
+def test_off_page_fraction_above_bound_raises_and_banks_the_counter(synth, monkeypatch):
+    # RED (G-8 amended): 2 off-page of 7 candidates (≈28.6%) exceeds the 20% bound — that is no
+    # longer an isolated-hallucination profile (PLL whole-book probe worst page: 4.5%) but the
+    # systemic class the bound exists to keep loud (a pixmap-space leak displaces ~every box). The
+    # raise must carry the fraction diagnosis, and `oob_boxes` must be banked BEFORE the raise so
+    # the failure is inspectable post-mortem (the slice-1 runner banks backend counters into its
+    # box cache when GeometryError fires mid-book).
+    pdf = synth.pdf([synth.single_column()])
+    be = PyMuPDFTesseractBackend(pdf, language="eng", dpi=300)
+    rect = fitz.open(pdf)[0].rect
+    w = rect.width
+    _stub_ocr(monkeypatch, [
+        *_FILLER,
+        _word("runaway1", (w + 5.0, 10.0, w + 60.0, 40.0)),
+        _word("runaway2", (w + 5.0, 50.0, w + 60.0, 80.0)),
+    ])
+    with pytest.raises(GeometryError, match="off-page fraction"):
         list(be.read_pages(1, 1))
+    assert be.oob_boxes[1] == 2, "the counter must be banked before the systemic raise"
+
+
+def test_off_page_fraction_exactly_at_bound_is_tolerated(synth, monkeypatch):
+    # RED (G-8 amended, boundary): 1 off-page of exactly 5 candidates = 20% — AT the bound, not
+    # over it — must be tolerated (the bound is `>`, not `>=`; a `>=` mutant reds here). Exact in
+    # floats because the comparison is `oob > _OOB_PAGE_FRACTION_MAX * candidates` and 0.2 * 5
+    # rounds to exactly 1.0 (the code never computes 1/5).
+    pdf = synth.pdf([synth.single_column()])
+    be = PyMuPDFTesseractBackend(pdf, language="eng", dpi=300)
+    rect = fitz.open(pdf)[0].rect
+    w = rect.width
+    _stub_ocr(monkeypatch, [*_FILLER[:4], _word("runaway", (w + 5.0, 10.0, w + 60.0, 40.0))])
+    (pg,) = list(be.read_pages(1, 1))
+    assert [w.text for w in pg.words] == [f"fill{i}" for i in range(4)]
+    assert be.oob_boxes[1] == 1
+
+
+def test_page_of_entirely_off_page_boxes_raises(synth, monkeypatch):
+    # G-8's original tripwire survives the amendment: the pixmap-space-leak class (coords ~dpi/72×
+    # too large) displaces ~100% of a page's boxes, and 3/3 off-page is far over any sane bound —
+    # fail loud, never emit. Green before the amendment too (any oob raised); its independent teeth
+    # come from the hunt (bound-check-removed and bound-enlarged mutants red only here).
+    pdf = synth.pdf([synth.single_column()])
+    be = PyMuPDFTesseractBackend(pdf, language="eng", dpi=300)
+    rect = fitz.open(pdf)[0].rect
+    w = rect.width
+    _stub_ocr(monkeypatch, [
+        _word(f"pix{i}", (w + 5.0, 10.0 + 40.0 * i, w + 60.0, 40.0 + 40.0 * i)) for i in range(3)
+    ])
+    with pytest.raises(GeometryError, match="off-page fraction"):
+        list(be.read_pages(1, 1))
+    assert be.oob_boxes[1] == 3
+
+
+def test_oob_fraction_denominator_is_candidates_not_raw_boxes(synth, monkeypatch):
+    # RED (G-8 amended, denominator): the fraction is over boxes that REACHED the off-page check
+    # (post DT-2 empty/degenerate drop), not raw OCR output. 1 off-page of 4 candidates = 25% →
+    # raises; a raw-count mutant sees 1 of 7 (the three DT-2 artifacts inflate the denominator)
+    # ≈ 14% → tolerates → this test reds. Noise pages are exactly where empty-text artifacts and
+    # hallucinated boxes co-occur, so the wrong denominator would systematically under-diagnose.
+    # The empty-text OFF-PAGE box binds the precedence (delta audit 2026-07-05): a finite box that
+    # is both debris and off-page counts as debris — dropped_boxes 3, not oob_boxes 2 — so a
+    # mutant hoisting the OOB clauses above the DT-2 drop reds on the counter split.
+    pdf = synth.pdf([synth.single_column()])
+    be = PyMuPDFTesseractBackend(pdf, language="eng", dpi=300)
+    rect = fitz.open(pdf)[0].rect
+    w = rect.width
+    _stub_ocr(monkeypatch, [
+        *_FILLER[:3],
+        _word("", (10.0, 200.0, 60.0, 230.0)),      # empty-text artifact (DT-2 drop)
+        _word("  ", (10.0, 240.0, 60.0, 270.0)),    # whitespace-text artifact (DT-2 drop)
+        _word("", (w + 5.0, 200.0, w + 60.0, 230.0)),  # empty-text AND off-page → debris wins
+        _word("runaway", (w + 5.0, 10.0, w + 60.0, 40.0)),
+    ])
+    with pytest.raises(GeometryError, match="off-page fraction"):
+        list(be.read_pages(1, 1))
+    assert be.oob_boxes[1] == 1 and be.dropped_boxes[1] == 3
+
+
+def test_off_page_fraction_just_above_bound_raises(synth, monkeypatch):
+    # RED (delta audit 2026-07-05): the at-bound (20%) and above-bound fixtures alone pin the
+    # constant only to [0.20, 0.286) — a drift mutant to 0.24 survived them. 2 off-page of 9
+    # candidates ≈ 22.2% narrows the pin to [0.20, 0.222): over the real bound (2 > 0.2·9 = 1.8 →
+    # raise) but under the drifted one (2 > 0.24·9 = 2.16 → tolerate → this test reds).
+    pdf = synth.pdf([synth.single_column()])
+    be = PyMuPDFTesseractBackend(pdf, language="eng", dpi=300)
+    rect = fitz.open(pdf)[0].rect
+    w = rect.width
+    filler7 = [_word(f"f{i}", (10.0 + 40.0 * i, 300.0, 40.0 + 40.0 * i, 330.0)) for i in range(7)]
+    _stub_ocr(monkeypatch, [
+        *filler7,
+        _word("runaway1", (w + 5.0, 10.0, w + 60.0, 40.0)),
+        _word("runaway2", (w + 5.0, 50.0, w + 60.0, 80.0)),
+    ])
+    with pytest.raises(GeometryError, match="off-page fraction"):
+        list(be.read_pages(1, 1))
+    assert be.oob_boxes[1] == 2
 
 
 def test_rect_tolerance_absorbs_subpoint_rounding_but_not_real_overshoot(synth, monkeypatch):
     # RED (audit F15 / hunt M9): the four-edge tests plant boxes 5-60 pt out, so widening
     # _RECT_TOLERANCE_PT from 1.0 to 50.0 survived the suite while admitting 50 pt of off-page
     # corruption. Two-sided bind: a box 0.5 pt over the edge (the sub-point OCR rounding the
-    # tolerance exists to absorb) is ACCEPTED; a box 5 pt over is corruption and raises. Together
-    # they pin the tolerance to [0.5, 5) — the intent of "edge rounding", not a loophole.
+    # tolerance exists to absorb) is ACCEPTED; a box 5 pt over is off-page and — as this page's
+    # only candidate, fraction 1/1 — raises through the systemic bound (2026-07-05 amendment).
+    # Together they pin the tolerance to [0.5, 5) — the intent of "edge rounding", not a loophole.
     pdf = synth.pdf([synth.single_column()])
     rect = fitz.open(pdf)[0].rect
     be = PyMuPDFTesseractBackend(pdf, language="eng", dpi=300)
@@ -495,20 +607,27 @@ def test_rect_tolerance_absorbs_subpoint_rounding_but_not_real_overshoot(synth, 
         list(be2.read_pages(1, 1))
 
 
+@pytest.mark.parametrize("bad", [math.nan, math.inf, -math.inf])
 @pytest.mark.parametrize("pos", [0, 1, 2, 3])
-def test_non_finite_box_coordinate_raises_geometry_error_not_valueerror(synth, monkeypatch, pos):
-    # A NaN coordinate slips BOTH the degenerate drop (`x1 <= x0` is False for NaN) and the OOB
-    # bound (NaN compares False), so without the finite guard it reaches WordBox and escapes the axis
-    # as a bare ValueError — the "any geometry fault → GeometryError" contract hole. Every position is
-    # checked so a guard narrowed to a subset survives. (inf is caught by the OOB check; NaN is the
-    # one that needs its own guard.)
+def test_non_finite_box_coordinate_raises_geometry_error_not_valueerror(synth, monkeypatch, pos, bad):
+    # RED (delta audit 2026-07-05): a non-finite coordinate must raise UNCONDITIONALLY — the guard
+    # runs before every other branch. Under bounded drop-and-count the ±inf cases went live: an
+    # x1=-inf box satisfies the degenerate drop's `x1 <= x0` (silently counted as DT-2 debris) and
+    # an x1=+inf box trips the OOB clause (silently dropped as an isolated hallucination) — both
+    # swallow corruption unless the finite guard is checked first and covers inf, not just NaN (an
+    # `isnan`-narrowed guard survives the NaN-only parametrize). NaN still slips both branches
+    # (compares False everywhere) and would reach WordBox as a bare ValueError escaping the axis.
+    # Every position × {nan, +inf, -inf} so a guard narrowed by position or by predicate reds.
     pdf = synth.pdf([synth.single_column()])
     be = PyMuPDFTesseractBackend(pdf, language="eng", dpi=300)
     bbox = [10.0, 20.0, 50.0, 60.0]
-    bbox[pos] = math.nan
-    _stub_ocr(monkeypatch, [_word("nanbox", tuple(bbox))])
+    bbox[pos] = bad
+    _stub_ocr(monkeypatch, [_word("badbox", tuple(bbox))])
     with pytest.raises(GeometryError, match="non-finite"):
         list(be.read_pages(1, 1))
+    assert be.dropped_boxes == {} and be.oob_boxes == {}, (
+        "a non-finite box must fail loud, never be absorbed into a drop counter"
+    )
 
 
 # --- G-17: fail-loud — rotation, OCR failure, missing tessdata ----------------------------------- #
@@ -639,6 +758,10 @@ def test_blank_page_yields_zero_words_successfully(synth, monkeypatch):
     (pg,) = list(be.read_pages(1, 1))
     assert pg.words == ()
     assert be.dropped_boxes[1] == 0
+    assert be.oob_boxes[1] == 0, (
+        "oob_boxes must key every read page unconditionally — a key-only-when-nonzero mutant "
+        "leaves downstream readers with missing keys (delta audit 2026-07-05)"
+    )
 
 
 def test_multi_page_range_reads_the_requested_pages_with_their_own_numbers_and_rects(synth, monkeypatch):
@@ -657,6 +780,10 @@ def test_multi_page_range_reads_the_requested_pages_with_their_own_numbers_and_r
     got = list(be.read_pages(2, 3))
     assert [(p.page, p.width, p.height) for p in got] == [(2, 550.0, 750.0), (3, 600.0, 800.0)]
     assert set(be.dropped_boxes) == {2, 3}
+    assert set(be.oob_boxes) == {2, 3}, (
+        "oob_boxes must be keyed by the requested pages' 1-based scan numbers — a hardcoded-key "
+        "mutant misattributes every page's count to page 1 (delta audit 2026-07-05)"
+    )
 
 
 def test_unopenable_pdf_raises_geometry_error(tmp_path):

@@ -1,0 +1,160 @@
+{
+  "status": "ok",
+  "run": {
+    "pages": [
+      1,
+      278
+    ],
+    "page_accept_rate": 0.8,
+    "atom_match_floor": 0.6,
+    "engine_id": "pymupdf-1.27.2.3+tesseract-5.5.2:dpi=300:lang=ita",
+    "backend_params": {
+      "dpi": 300,
+      "language": "ita",
+      "pymupdf": "1.27.2.3",
+      "tesseract": "5.5.2"
+    },
+    "match_wall_seconds": 88.58944925002288
+  },
+  "calibration_copy3_blind": {
+    "body_atoms": 521,
+    "exact": 421,
+    "exact_rate": 0.8080614203454894,
+    "small_max_tokens": 5,
+    "clause_a": {
+      "population": "single-page-truth atoms with > 5 tokens",
+      "n": 328,
+      "exact": 327,
+      "rate": 0.9969512195121951
+    },
+    "clause_b": {
+      "population": "all single-page-truth atoms, within +/-1 page",
+      "n": 521,
+      "within_one": 521,
+      "rate": 1.0
+    },
+    "excluded_unmapped": 0,
+    "excluded_multi_page_truth": 0,
+    "excluded_out_of_range": 0,
+    "delta_histogram": {
+      "-1": 2,
+      "0": 421,
+      "1": 98
+    },
+    "small_atom_total": 193,
+    "small_atom_exact": 94,
+    "small_atom_exact_rate": 0.48704663212435234,
+    "wall_seconds": 89.03779516695067,
+    "floors": {
+      "clause_a_exact": 0.95,
+      "clause_b_within_one": 0.98
+    }
+  },
+  "pages": {
+    "status_counts": {
+      "routed": 25,
+      "matched": 253
+    },
+    "rate_histogram": {
+      "0.0": 2,
+      "0.1": 1,
+      "0.2": 2,
+      "0.3": 1,
+      "0.5": 1,
+      "0.6": 1,
+      "0.7": 10,
+      "0.8": 70,
+      "0.9": 183
+    },
+    "locate_failed": [
+      1,
+      4,
+      272,
+      273,
+      274,
+      277,
+      278
+    ]
+  },
+  "atoms": {
+    "records": 3411,
+    "status_counts": {
+      "matched": 2401,
+      "ambiguous": 113,
+      "below_atom_floor": 50,
+      "zero_match": 847
+    },
+    "pending": 210,
+    "tokenless": 45,
+    "straddler_windows": 53
+  },
+  "coverage": {
+    "pages_locate_failed": 7,
+    "atoms_unmatched_on_accepted_pages": 1010,
+    "canonical_no_primary_derivation": 1165,
+    "canonical_multi_primary_derivation": 0
+  },
+  "hyphen_fragment_boxes": 6878,
+  "oob_boxes": {
+    "total": 20,
+    "pages_with_drops": {
+      "4": 4,
+      "5": 2,
+      "273": 1,
+      "274": 10,
+      "276": 3
+    }
+  },
+  "tripwire": {
+    "absent_token_mass_rate": 0.013608071107310535,
+    "prose_absent_rate": 0.009552757273122015,
+    "bands": {
+      "<=3": {
+        "atoms": 1108,
+        "absent_atoms": 988,
+        "token_mass": 1590,
+        "absent_token_mass": 1348,
+        "reasons": {
+          "ambiguous": 110,
+          "zero_match": 845,
+          "below_atom_floor": 33
+        }
+      },
+      "4-10": {
+        "atoms": 206,
+        "absent_atoms": 14,
+        "token_mass": 1440,
+        "absent_token_mass": 74,
+        "reasons": {
+          "below_atom_floor": 9,
+          "ambiguous": 3,
+          "zero_match": 2
+        }
+      },
+      ">10": {
+        "atoms": 2097,
+        "absent_atoms": 8,
+        "token_mass": 118589,
+        "absent_token_mass": 233,
+        "reasons": {
+          "below_atom_floor": 8
+        }
+      }
+    },
+    "confidence_histogram": {
+      "0.0-0.1": 847,
+      "0.1-0.2": 0,
+      "0.2-0.3": 5,
+      "0.3-0.4": 46,
+      "0.4-0.5": 2,
+      "0.5-0.6": 31,
+      "0.6-0.7": 34,
+      "0.7-0.8": 70,
+      "0.8-0.9": 535,
+      "0.9-1.0": 1841
+    },
+    "flags": [
+      "band <=3: auto-absent token mass 1348/121619 exceeds 1% of accepted-page token mass"
+    ]
+  }
+}

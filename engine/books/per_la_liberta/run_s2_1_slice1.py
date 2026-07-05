@@ -7,13 +7,17 @@ The LOCAL-ONLY real run (the scan PDF is gitignored and CI has no copy — DT-11
    (``work/data/geometry/_boxes_dpi300.json``, keyed on scan hash + engine id, checkpointed every
    20 pages and resumable), so neither a mid-pass fail-loud nor an interrupted ~40-minute pass
    discards completed pages, and matcher re-runs never repeat the OCR.
-2. **Calibration gate (P-1, RULED 2026-07-03):** page-locate runs on copy3 *blind* (its page map
-   ignored) and the derived pages are compared to the map — the only ground truth we own.
-   "Exact" is strict page equality on single-page-truth body atoms; unmapped or multi-page-truth
-   atoms are excluded AND counted (the map-coverage cross-check). Below the 95% floor the run
-   HARD-BLOCKS: no ``copy1_geom.json`` is published, the failure distribution is **persisted** to
-   the stats file (status ``calibration_blocked``), and the ruling goes to Ben with DT-3's three
-   named options.
+2. **Calibration gate (P-1, RULED 2026-07-03; SUPERSEDED by Ben 2026-07-05 — two complementary
+   clauses, BOTH must hold):** page-locate runs on copy3 *blind* (its page map ignored) and the
+   derived pages are compared to the map — the only ground truth we own. Clause A: exact (strict
+   page equality) ≥ 95% over single-page-truth atoms with > 5 tokens — the discriminable
+   population; exactness is what catches a systematic one-page offset. Clause B: within ±1 ≥ 98%
+   over ALL single-page-truth atoms — bounds worst-case error for the tiny atoms clause A cannot
+   see. Unmapped or multi-page-truth atoms are excluded AND counted (the map-coverage
+   cross-check); floors and the token cutoff are CLI-tunable (ruled values as defaults). On any
+   clause failure the run HARD-BLOCKS: no ``copy1_geom.json`` is published, the failure
+   distribution is **persisted** to the stats file (status ``calibration_blocked``), and the
+   ruling goes to Ben with DT-3's three named options.
 3. copy1 page-locate + token-bow-v1 match -> ``build_geom_sidecar`` (canonical stream loaded for
    the DT-13 coverage counters) -> P-5 tripwire -> ``save_geom_sidecar``. A tripwire trip also
    persists its evidence (status ``tripwire_blocked``) before failing; the sidecar is not saved.
@@ -66,7 +70,14 @@ STATS_PATH = ENGINE_ROOT / "docs" / "probes" / "s2_1_run_stats.json"
 
 LANGUAGE = "ita"
 DPI = 300
-CALIBRATION_FLOOR = 0.95  # P-1 (RULED 2026-07-03); re-evaluated at the run report
+# P-1 (RULED 2026-07-03: 95% exact over all single-page atoms; SUPERSEDED by Ben 2026-07-05:
+# two complementary clauses, both must hold — each covers the other's structural blind spot,
+# see docs/probes/s2_1_band_drift.md and the P-1 row). Ruled values are the defaults; the CLI
+# flags below exist so the floors and the population cutoff are tunable for sensitivity probes
+# without code changes (same pattern as the DT-8 --accept-rate/--atom-floor proposals).
+CALIBRATION_EXACT_FLOOR = 0.95  # clause A: exact, atoms with > SMALL_ATOM_MAX_TOKENS tokens
+CALIBRATION_WINDOW_FLOOR = 0.98  # clause B: within +/-1 page, ALL single-page atoms
+SMALL_ATOM_MAX_TOKENS = 5  # the discriminability cutoff between clause A's population and the reported slice
 CHECKPOINT_EVERY = 20  # pages between incremental cache writes during the OCR pass
 
 
@@ -190,12 +201,17 @@ def _load_or_ocr_pages(workspace, pdf_path, scan_sha, first, last, refresh):
     return pages, dropped, oob, backend.engine_id, backend.backend_params
 
 
-def _calibrate_copy3_blind(copy3, pages, floor):
-    """P-1's gate: page-locate copy3 blind, hold the derived pages against its map.
+def _calibrate_copy3_blind(copy3, pages, *, small_max_tokens):
+    """P-1's measurement: page-locate copy3 blind, hold the derived pages against its map.
 
-    Exact = strict page equality, scoped to single-page-truth included-scope atoms; unmapped and
-    multi-page-truth atoms are excluded from the denominator and counted (the plan's exactness
-    claim must never silently loosen into window containment)."""
+    Measurement only — the pass/block judgment lives in :func:`_gate_verdict` so the floors are
+    tunable (CLI flags) without touching this pass. Two-clause populations (P-1 SUPERSEDED by Ben
+    2026-07-05, two complementary gates): clause A = strict page equality over single-page-truth
+    atoms with MORE than ``small_max_tokens`` tokens (the discriminable population — the plan's
+    exactness claim must never silently loosen into window containment); clause B = within ±1
+    over ALL single-page-truth atoms (bounds worst-case error for the tiny atoms clause A cannot
+    see, and only exactness catches the systematic one-page offset clause B alone would pass).
+    Unmapped / multi-page-truth atoms are excluded from both denominators and counted."""
     started = time.monotonic()
     outcome = match_stream(copy3, pages, page_accept_rate=0.0, atom_match_floor=0.0)
     wall = time.monotonic() - started
@@ -205,7 +221,8 @@ def _calibrate_copy3_blind(copy3, pages, floor):
     excluded_out_of_range = 0
     deltas = Counter()
     small_total = small_exact = 0
-    body_total = exact = 0
+    big_total = big_exact = 0
+    body_total = exact = within_one = 0
     for atom in copy3.atoms:
         if atom.processing_scope != "included":
             continue
@@ -220,34 +237,70 @@ def _calibrate_copy3_blind(copy3, pages, floor):
             excluded_out_of_range += 1
             continue
         assigned = outcome.atom_pages[atom.atom_id].assigned
-        hit = assigned == true_first
+        delta = assigned - true_first
+        hit = delta == 0
         body_total += 1
         exact += hit
-        deltas[assigned - true_first] += 1
-        if outcome.token_counts[atom.atom_id] <= 5:
+        within_one += abs(delta) <= 1
+        deltas[delta] += 1
+        if outcome.token_counts[atom.atom_id] <= small_max_tokens:
             small_total += 1
             small_exact += hit
-    rate = exact / body_total if body_total else 0.0
+        else:
+            big_total += 1
+            big_exact += hit
     stats = {
         "body_atoms": body_total,
         "exact": exact,
-        "exact_rate": rate,
-        "floor": floor,
+        "exact_rate": (exact / body_total) if body_total else 0.0,
+        "small_max_tokens": small_max_tokens,
+        "clause_a": {
+            "population": f"single-page-truth atoms with > {small_max_tokens} tokens",
+            "n": big_total,
+            "exact": big_exact,
+            "rate": (big_exact / big_total) if big_total else 0.0,
+        },
+        "clause_b": {
+            "population": "all single-page-truth atoms, within +/-1 page",
+            "n": body_total,
+            "within_one": within_one,
+            "rate": (within_one / body_total) if body_total else 0.0,
+        },
         "excluded_unmapped": excluded_unmapped,
         "excluded_multi_page_truth": excluded_multi_page_truth,
         "excluded_out_of_range": excluded_out_of_range,
         "delta_histogram": {str(k): v for k, v in sorted(deltas.items())},
-        "small_atom_total_le5_tokens": small_total,
-        "small_atom_exact_le5_tokens": small_exact,
+        "small_atom_total": small_total,
+        "small_atom_exact": small_exact,
         "small_atom_exact_rate": (small_exact / small_total) if small_total else None,
         "wall_seconds": wall,
     }
-    print(
-        f"calibration (copy3 blind): {exact}/{body_total} single-page body atoms exact = "
-        f"{rate:.4f} (floor {floor}); <=5-token slice {small_exact}/{small_total}; "
-        f"excluded unmapped={excluded_unmapped} multi-page={excluded_multi_page_truth}; {wall:.1f}s"
-    )
-    return stats, rate >= floor
+    return stats
+
+
+def _gate_verdict(stats, *, exact_floor, window_floor):
+    """The pure P-1 judgment over measured calibration stats: BOTH clauses must hold.
+
+    An empty clause population fails its clause — a book that yields no discriminable atoms (or
+    no mapped atoms at all) cannot be *certified*, only investigated; passing vacuously would
+    publish a sidecar on zero evidence."""
+    a, b = stats["clause_a"], stats["clause_b"]
+    a_ok = a["n"] > 0 and a["rate"] >= exact_floor
+    b_ok = b["n"] > 0 and b["rate"] >= window_floor
+    reasons = []
+    if not a_ok:
+        reasons.append(
+            f"clause A: exact {a['exact']}/{a['n']} = {a['rate']:.4f} < floor {exact_floor}"
+            if a["n"]
+            else "clause A: empty population — nothing discriminable to certify"
+        )
+    if not b_ok:
+        reasons.append(
+            f"clause B: within +/-1 {b['within_one']}/{b['n']} = {b['rate']:.4f} < floor {window_floor}"
+            if b["n"]
+            else "clause B: empty population — no mapped atoms to certify"
+        )
+    return a_ok and b_ok, reasons
 
 
 def _decade_bin(rate: float) -> str:
@@ -270,6 +323,15 @@ def main() -> None:
     parser.add_argument("--atom-floor", type=float, default=0.60,
                         help="DT-8 per-atom floor proposal (ratified at the run report)")
     parser.add_argument("--refresh-boxes", action="store_true")
+    parser.add_argument("--calibration-exact-floor", type=float, default=CALIBRATION_EXACT_FLOOR,
+                        help="P-1 clause A: exact-rate floor over > small-max-tokens atoms "
+                             "(ruled 0.95; override for sensitivity probes)")
+    parser.add_argument("--calibration-window-floor", type=float, default=CALIBRATION_WINDOW_FLOOR,
+                        help="P-1 clause B: within-±1 floor over all single-page atoms "
+                             "(ruled 0.98; override for sensitivity probes)")
+    parser.add_argument("--small-max-tokens", type=int, default=SMALL_ATOM_MAX_TOKENS,
+                        help="token cutoff splitting clause A's population from the reported "
+                             "small-atom slice (ruled 5)")
     args = parser.parse_args()
 
     pdf_path = ENGINE_ROOT.parent / MANIFEST["scan"]["pdf"]
@@ -299,16 +361,31 @@ def main() -> None:
     run_params.update({"engine_id": engine_id, "backend_params": backend_params})
 
     copy3 = load_stream(workspace, "copy3")
-    calibration, calibration_ok = _calibrate_copy3_blind(copy3, pages, CALIBRATION_FLOOR)
+    calibration = _calibrate_copy3_blind(copy3, pages, small_max_tokens=args.small_max_tokens)
+    calibration["floors"] = {
+        "clause_a_exact": args.calibration_exact_floor,
+        "clause_b_within_one": args.calibration_window_floor,
+    }
+    a, b = calibration["clause_a"], calibration["clause_b"]
+    print(
+        f"calibration (copy3 blind): clause A exact {a['exact']}/{a['n']} = {a['rate']:.4f} "
+        f"(floor {args.calibration_exact_floor}); clause B within ±1 {b['within_one']}/{b['n']} "
+        f"= {b['rate']:.4f} (floor {args.calibration_window_floor}); "
+        f"≤{args.small_max_tokens}-token slice {calibration['small_atom_exact']}"
+        f"/{calibration['small_atom_total']}; {calibration['wall_seconds']:.1f}s"
+    )
+    calibration_ok, gate_reasons = _gate_verdict(
+        calibration,
+        exact_floor=args.calibration_exact_floor,
+        window_floor=args.calibration_window_floor,
+    )
     if not calibration_ok:
         # DT-3's failure route: hard-block, PERSIST the failure distribution, ruling to Ben.
+        calibration["gate_failures"] = gate_reasons
         _write_stats("calibration_blocked", run=run_params, calibration_copy3_blind=calibration)
-        print("calibration BELOW FLOOR — slice 1 hard-blocks (DT-3 failure route).")
-        print(
-            "  Ruling to Ben, the three named options: (i) ratify a page±1 tolerance tier with a "
-            "re-derived floor; (ii) route the failing page-regions to the DT-10 worklist; "
-            "(iii) reopen S2.1-alt."
-        )
+        for reason in gate_reasons:
+            print(f"calibration BLOCKED — {reason}")
+        print("slice 1 hard-blocks (DT-3 failure route); distribution persisted, ruling to Ben.")
         raise SystemExit(13)
 
     copy1 = load_stream(workspace, "copy1")

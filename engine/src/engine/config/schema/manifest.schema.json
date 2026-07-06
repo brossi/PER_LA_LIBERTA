@@ -130,6 +130,31 @@
         "author": {"type": "string", "minLength": 1},
         "year": {"type": "integer"}
       }
+    },
+    "segmentation": {
+      "type": "object",
+      "$comment": "S2.1.4 density band pre-check config (DT-6). OPTIONAL — only a book whose scans go through the geometry/segmentation front-end carries it; the classifier's constructor enforces the value RANGES (this schema pins only presence + JSON type). Band values ruled by Ben 2026-07-06 at the S2.1.4 calibration checkpoint; the labeled calibration set lives in review/density_calibration.json. The pipeline reads density_bands to construct the DensityClassifier at the two-branch wiring step (#39).",
+      "additionalProperties": false,
+      "required": ["density_bands"],
+      "properties": {
+        "density_bands": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "yield_content_min", "box_content_min", "ink_blank_max", "ink_dark_min",
+            "confidence_margin", "cover_edge_leaves", "ink_saturation_min"
+          ],
+          "properties": {
+            "yield_content_min": {"type": "number"},
+            "box_content_min": {"type": "integer"},
+            "ink_blank_max": {"type": "number"},
+            "ink_dark_min": {"type": "number"},
+            "confidence_margin": {"type": "number"},
+            "cover_edge_leaves": {"type": "integer"},
+            "ink_saturation_min": {"type": "number"}
+          }
+        }
+      }
     }
   }
 }

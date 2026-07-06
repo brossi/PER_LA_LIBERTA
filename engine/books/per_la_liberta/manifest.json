@@ -69,5 +69,16 @@
       "Radetzky",
       "Napoleon III"
     ]
+  },
+  "segmentation": {
+    "density_bands": {
+      "yield_content_min": 0.70,
+      "box_content_min": 40,
+      "ink_blank_max": 0.15,
+      "ink_dark_min": 0.60,
+      "confidence_margin": 0.05,
+      "cover_edge_leaves": 7,
+      "ink_saturation_min": 0.90
+    }
   }
 }

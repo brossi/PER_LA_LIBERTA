@@ -30,27 +30,18 @@ from engine.structure.segmentation import (
     page_density_features,
 )
 
-# PROPOSED band values (Ben ratified the 5 density bands at the 2026-07-06 checkpoint; the two cover
-# params are proposed from this calibration — covers observed at leaves 1/272/278, all ink >= 0.97,
-# leaf 272 sits 6 from the end; content tops out at ink 0.115). NOT ground truth until Ben rules the
-# two cover numbers; the labels this produces are the handoff for that ruling.
-PROPOSED_BANDS = dict(
-    yield_content_min=0.70,
-    box_content_min=40,
-    ink_blank_max=0.50,
-    ink_dark_min=0.60,
-    confidence_margin=0.05,
-    cover_edge_leaves=7,
-    ink_saturation_min=0.90,
-)
-
+# The density bands are read from the tracked book config (RATIFIED by Ben 2026-07-06 at the S2.1.4
+# calibration checkpoint: yield_content_min=0.70, box_content_min=40, ink_blank_max=0.15,
+# ink_dark_min=0.60, confidence_margin=0.05, cover_edge_leaves=7, ink_saturation_min=0.90). This probe
+# is the reproducible record behind the ground-truth labelled set (density_calibration.json).
 BOOK = Path(__file__).resolve().parents[1]
+MANIFEST = BOOK / "manifest.json"
 PDF = Path(os.environ.get(
     "PLL_LOC_PDF",
     BOOK.parents[2] / "public-gdcmassbookdig-perlalibertdal00cres-perlalibertdal00cres.pdf",
 ))
 BOX_CACHE = BOOK / "work" / "data" / "geometry" / "_boxes_dpi300.json"
-OUT = BOOK / "review" / "density_calibration.proposed.json"
+OUT = BOOK / "review" / "density_calibration.json"
 INK_DPI = int(os.environ.get("PLL_DENSITY_DPI", "150"))
 
 # Calibration pages: (scan_page, semantic hint from S2.0 strata + the #37 run report). The hint is
@@ -85,7 +76,8 @@ def _boxes_by_page() -> dict[int, list]:
 def run() -> None:
     boxes_by_page = _boxes_by_page()
     n_leaves = json.loads(BOX_CACHE.read_text())["last"]
-    clf = DensityClassifier(**PROPOSED_BANDS)
+    bands = json.loads(MANIFEST.read_text())["segmentation"]["density_bands"]
+    clf = DensityClassifier(**bands)
     doc = fitz.open(PDF)
     rows = []
     print(f"# S2.1.4 density calibration  pdf={PDF.name}  ink_dpi={INK_DPI}  {SEGMENTATION_VERSION}\n")
@@ -99,20 +91,23 @@ def run() -> None:
         rows.append({"scan": scan, "hint": hint, "ink_fraction": round(feats.ink_fraction, 4),
                      "box_count": feats.box_count, "token_yield": round(feats.token_yield, 4),
                      "mean_token_length": round(feats.mean_token_length, 3),
-                     "proposed_label": verdict.band.value, "confidence": round(verdict.confidence, 4)})
+                     "label": verdict.band.value, "confidence": round(verdict.confidence, 4)})
         print(f"{scan:>4} {hint:<22} {feats.ink_fraction:6.4f} {feats.box_count:6d} "
               f"{feats.token_yield:6.4f} {feats.mean_token_length:7.3f} {verdict.band.value:<14} "
               f"{verdict.confidence:6.4f}")
 
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps({
-        "note": "PROPOSED labels + bands — not ground truth until Ben ratifies the two cover numbers "
-                "(cover_edge_leaves, ink_saturation_min) at the DT-6 human checkpoint.",
+        "note": "Ground-truth density labels for the S2.1.4 calibration set. RATIFIED by Ben "
+                "2026-07-06 at the DT-6 human checkpoint (labels + the manifest density_bands). "
+                "Reproducible: uv run python books/per_la_liberta/probes/s2_1_density_probe.py.",
+        "ratified_by": "Ben",
+        "ratified_at": "2026-07-06",
         "segmentation_version": SEGMENTATION_VERSION,
         "ink_dpi": INK_DPI,
         "n_leaves": n_leaves,
         "box_cache_engine": json.loads(BOX_CACHE.read_text())["engine_id"],
-        "proposed_bands": clf.params,
+        "density_bands": clf.params,
         "features": rows,
     }, indent=2))
     print(f"\nwrote {OUT.relative_to(BOOK.parents[2])}")

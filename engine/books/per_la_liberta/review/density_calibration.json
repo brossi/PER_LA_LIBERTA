@@ -1,13 +1,15 @@
 {
-  "note": "PROPOSED labels + bands \u2014 not ground truth until Ben ratifies the two cover numbers (cover_edge_leaves, ink_saturation_min) at the DT-6 human checkpoint.",
+  "note": "Ground-truth density labels for the S2.1.4 calibration set. RATIFIED by Ben 2026-07-06 at the DT-6 human checkpoint (labels + the manifest density_bands). Reproducible: uv run python books/per_la_liberta/probes/s2_1_density_probe.py.",
+  "ratified_by": "Ben",
+  "ratified_at": "2026-07-06",
   "segmentation_version": "density-bands-v1",
   "ink_dpi": 150,
   "n_leaves": 278,
   "box_cache_engine": "pymupdf-1.27.2.3+tesseract-5.5.2:dpi=300:lang=ita",
-  "proposed_bands": {
+  "density_bands": {
     "yield_content_min": 0.7,
     "box_content_min": 40,
-    "ink_blank_max": 0.5,
+    "ink_blank_max": 0.15,
     "ink_dark_min": 0.6,
     "confidence_margin": 0.05,
     "cover_edge_leaves": 7,
@@ -21,7 +23,7 @@
       "box_count": 0,
       "token_yield": 0.0,
       "mean_token_length": 0.0,
-      "proposed_label": "cover",
+      "label": "cover",
       "confidence": 0.0763
     },
     {
@@ -31,8 +33,8 @@
       "box_count": 10,
       "token_yield": 0.6,
       "mean_token_length": 3.7,
-      "proposed_label": "near_blank",
-      "confidence": 0.4943
+      "label": "near_blank",
+      "confidence": 0.1443
     },
     {
       "scan": 3,
@@ -41,8 +43,8 @@
       "box_count": 1477,
       "token_yield": 0.4198,
       "mean_token_length": 1.448,
-      "proposed_label": "near_blank",
-      "confidence": 0.2802
+      "label": "near_blank",
+      "confidence": 0.15
     },
     {
       "scan": 4,
@@ -51,8 +53,8 @@
       "box_count": 315,
       "token_yield": 0.4,
       "mean_token_length": 1.403,
-      "proposed_label": "near_blank",
-      "confidence": 0.3
+      "label": "near_blank",
+      "confidence": 0.15
     },
     {
       "scan": 5,
@@ -61,7 +63,7 @@
       "box_count": 88,
       "token_yield": 0.6364,
       "mean_token_length": 3.977,
-      "proposed_label": "near_blank",
+      "label": "near_blank",
       "confidence": 0.0636
     },
     {
@@ -71,8 +73,8 @@
       "box_count": 658,
       "token_yield": 0.4331,
       "mean_token_length": 1.465,
-      "proposed_label": "near_blank",
-      "confidence": 0.2669
+      "label": "near_blank",
+      "confidence": 0.1492
     },
     {
       "scan": 7,
@@ -81,7 +83,7 @@
       "box_count": 278,
       "token_yield": 0.8849,
       "mean_token_length": 4.881,
-      "proposed_label": "content",
+      "label": "content",
       "confidence": 0.1849
     },
     {
@@ -91,7 +93,7 @@
       "box_count": 382,
       "token_yield": 0.9424,
       "mean_token_length": 4.908,
-      "proposed_label": "content",
+      "label": "content",
       "confidence": 0.2424
     },
     {
@@ -101,7 +103,7 @@
       "box_count": 417,
       "token_yield": 0.952,
       "mean_token_length": 4.911,
-      "proposed_label": "content",
+      "label": "content",
       "confidence": 0.252
     },
     {
@@ -111,7 +113,7 @@
       "box_count": 578,
       "token_yield": 0.9256,
       "mean_token_length": 4.962,
-      "proposed_label": "content",
+      "label": "content",
       "confidence": 0.2256
     },
     {
@@ -121,7 +123,7 @@
       "box_count": 585,
       "token_yield": 0.9128,
       "mean_token_length": 4.757,
-      "proposed_label": "content",
+      "label": "content",
       "confidence": 0.2128
     },
     {
@@ -131,7 +133,7 @@
       "box_count": 586,
       "token_yield": 0.93,
       "mean_token_length": 4.998,
-      "proposed_label": "content",
+      "label": "content",
       "confidence": 0.23
     },
     {
@@ -141,7 +143,7 @@
       "box_count": 630,
       "token_yield": 0.9032,
       "mean_token_length": 4.425,
-      "proposed_label": "content",
+      "label": "content",
       "confidence": 0.2032
     },
     {
@@ -151,7 +153,7 @@
       "box_count": 490,
       "token_yield": 0.9429,
       "mean_token_length": 4.951,
-      "proposed_label": "content",
+      "label": "content",
       "confidence": 0.2429
     },
     {
@@ -161,7 +163,7 @@
       "box_count": 602,
       "token_yield": 0.9302,
       "mean_token_length": 4.997,
-      "proposed_label": "content",
+      "label": "content",
       "confidence": 0.2302
     },
     {
@@ -171,7 +173,7 @@
       "box_count": 555,
       "token_yield": 0.9315,
       "mean_token_length": 4.998,
-      "proposed_label": "content",
+      "label": "content",
       "confidence": 0.2315
     },
     {
@@ -181,7 +183,7 @@
       "box_count": 623,
       "token_yield": 0.9181,
       "mean_token_length": 4.742,
-      "proposed_label": "content",
+      "label": "content",
       "confidence": 0.2181
     },
     {
@@ -191,7 +193,7 @@
       "box_count": 557,
       "token_yield": 0.9156,
       "mean_token_length": 4.519,
-      "proposed_label": "content",
+      "label": "content",
       "confidence": 0.2156
     },
     {
@@ -201,7 +203,7 @@
       "box_count": 153,
       "token_yield": 0.9085,
       "mean_token_length": 4.595,
-      "proposed_label": "content",
+      "label": "content",
       "confidence": 0.2085
     },
     {
@@ -211,7 +213,7 @@
       "box_count": 260,
       "token_yield": 0.8962,
       "mean_token_length": 5.019,
-      "proposed_label": "content",
+      "label": "content",
       "confidence": 0.1962
     },
     {
@@ -221,8 +223,8 @@
       "box_count": 2,
       "token_yield": 1.0,
       "mean_token_length": 6.0,
-      "proposed_label": "near_blank",
-      "confidence": 0.4961
+      "label": "near_blank",
+      "confidence": 0.1461
     },
     {
       "scan": 126,
@@ -231,8 +233,8 @@
       "box_count": 252,
       "token_yield": 0.4484,
       "mean_token_length": 1.603,
-      "proposed_label": "near_blank",
-      "confidence": 0.2516
+      "label": "near_blank",
+      "confidence": 0.15
     },
     {
       "scan": 168,
@@ -241,7 +243,7 @@
       "box_count": 524,
       "token_yield": 0.8931,
       "mean_token_length": 4.601,
-      "proposed_label": "content",
+      "label": "content",
       "confidence": 0.1931
     },
     {
@@ -251,7 +253,7 @@
       "box_count": 374,
       "token_yield": 0.8048,
       "mean_token_length": 4.174,
-      "proposed_label": "content",
+      "label": "content",
       "confidence": 0.1048
     },
     {
@@ -261,7 +263,7 @@
       "box_count": 511,
       "token_yield": 0.8728,
       "mean_token_length": 4.605,
-      "proposed_label": "content",
+      "label": "content",
       "confidence": 0.1728
     },
     {
@@ -271,7 +273,7 @@
       "box_count": 519,
       "token_yield": 0.8805,
       "mean_token_length": 4.399,
-      "proposed_label": "content",
+      "label": "content",
       "confidence": 0.1805
     },
     {
@@ -281,7 +283,7 @@
       "box_count": 551,
       "token_yield": 0.8475,
       "mean_token_length": 4.132,
-      "proposed_label": "content",
+      "label": "content",
       "confidence": 0.1475
     },
     {
@@ -291,7 +293,7 @@
       "box_count": 548,
       "token_yield": 0.9234,
       "mean_token_length": 4.954,
-      "proposed_label": "content",
+      "label": "content",
       "confidence": 0.2234
     },
     {
@@ -301,7 +303,7 @@
       "box_count": 169,
       "token_yield": 0.8876,
       "mean_token_length": 4.201,
-      "proposed_label": "content",
+      "label": "content",
       "confidence": 0.1876
     },
     {
@@ -311,7 +313,7 @@
       "box_count": 534,
       "token_yield": 0.9045,
       "mean_token_length": 4.667,
-      "proposed_label": "content",
+      "label": "content",
       "confidence": 0.2045
     },
     {
@@ -321,7 +323,7 @@
       "box_count": 499,
       "token_yield": 0.9399,
       "mean_token_length": 5.381,
-      "proposed_label": "content",
+      "label": "content",
       "confidence": 0.2399
     },
     {
@@ -331,7 +333,7 @@
       "box_count": 634,
       "token_yield": 0.836,
       "mean_token_length": 4.166,
-      "proposed_label": "content",
+      "label": "content",
       "confidence": 0.136
     },
     {
@@ -341,7 +343,7 @@
       "box_count": 584,
       "token_yield": 0.9161,
       "mean_token_length": 4.673,
-      "proposed_label": "content",
+      "label": "content",
       "confidence": 0.2161
     },
     {
@@ -351,7 +353,7 @@
       "box_count": 569,
       "token_yield": 0.9438,
       "mean_token_length": 5.021,
-      "proposed_label": "content",
+      "label": "content",
       "confidence": 0.2438
     },
     {
@@ -361,7 +363,7 @@
       "box_count": 168,
       "token_yield": 0.7917,
       "mean_token_length": 4.571,
-      "proposed_label": "content",
+      "label": "content",
       "confidence": 0.0917
     },
     {
@@ -371,7 +373,7 @@
       "box_count": 3,
       "token_yield": 0.0,
       "mean_token_length": 0.667,
-      "proposed_label": "cover",
+      "label": "cover",
       "confidence": 0.0716
     },
     {
@@ -381,8 +383,8 @@
       "box_count": 968,
       "token_yield": 0.4669,
       "mean_token_length": 1.591,
-      "proposed_label": "near_blank",
-      "confidence": 0.2331
+      "label": "near_blank",
+      "confidence": 0.15
     },
     {
       "scan": 274,
@@ -391,8 +393,8 @@
       "box_count": 213,
       "token_yield": 0.4366,
       "mean_token_length": 1.418,
-      "proposed_label": "near_blank",
-      "confidence": 0.2634
+      "label": "near_blank",
+      "confidence": 0.15
     },
     {
       "scan": 275,
@@ -401,8 +403,8 @@
       "box_count": 1133,
       "token_yield": 0.4863,
       "mean_token_length": 1.618,
-      "proposed_label": "near_blank",
-      "confidence": 0.2137
+      "label": "near_blank",
+      "confidence": 0.15
     },
     {
       "scan": 276,
@@ -411,8 +413,8 @@
       "box_count": 371,
       "token_yield": 0.407,
       "mean_token_length": 1.518,
-      "proposed_label": "near_blank",
-      "confidence": 0.293
+      "label": "near_blank",
+      "confidence": 0.1486
     },
     {
       "scan": 277,
@@ -421,8 +423,8 @@
       "box_count": 696,
       "token_yield": 0.4497,
       "mean_token_length": 1.543,
-      "proposed_label": "near_blank",
-      "confidence": 0.2503
+      "label": "near_blank",
+      "confidence": 0.15
     },
     {
       "scan": 278,
@@ -431,7 +433,7 @@
       "box_count": 1189,
       "token_yield": 0.7527,
       "mean_token_length": 2.917,
-      "proposed_label": "cover",
+      "label": "cover",
       "confidence": 0.1
     }
   ]

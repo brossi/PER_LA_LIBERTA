@@ -155,6 +155,10 @@ class Segmentation:
     order_source: str
     density_bands: DensityBands
     column_detector: ColumnDetectorPolicy
+    #: The per-stage human-review volume bound (DT-10 / P-6; S2.1.6 #40). Optional — ``None`` lets
+    #: the run reach for the ruled default (``geom_review.REVIEW_FRACTION_MAX_DEFAULT`` = 0.15); a
+    #: book carries it only to tune its own budget.
+    review_fraction_max: float | None = None
 
 
 @dataclass(frozen=True, slots=True)

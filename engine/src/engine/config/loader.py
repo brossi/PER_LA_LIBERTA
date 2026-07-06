@@ -94,6 +94,7 @@ def _build_segmentation(data: dict) -> Segmentation | None:
             decision_threshold=cols["decision_threshold"],
             hysteresis_margin=cols["hysteresis_margin"],
         ),
+        review_fraction_max=seg.get("review_fraction_max"),  # optional (DT-10/P-6, #40)
     )
 
 

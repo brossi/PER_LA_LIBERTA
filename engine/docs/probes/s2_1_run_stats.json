@@ -14,7 +14,7 @@
       "pymupdf": "1.27.2.3",
       "tesseract": "5.5.2"
     },
-    "match_wall_seconds": 92.94129433401395
+    "match_wall_seconds": 87.37929787498433
   },
   "calibration_copy3_blind": {
     "body_atoms": 521,
@@ -44,7 +44,7 @@
     "small_atom_total": 193,
     "small_atom_exact": 94,
     "small_atom_exact_rate": 0.48704663212435234,
-    "wall_seconds": 90.33694208296947,
+    "wall_seconds": 86.2114400829887,
     "floors": {
       "clause_a_exact": 0.95,
       "clause_b_within_one": 0.98
@@ -198,6 +198,41 @@
       "182": 0.8473413379073756
     }
   },
+  "order_qa": {
+    "n_pages": 253,
+    "mean": 0.8417281984174582,
+    "median": 0.9080962800875274,
+    "pass_at_0_85": 0.7786561264822134,
+    "histogram": {
+      "0.0": 0,
+      "0.1": 0,
+      "0.2": 0,
+      "0.3": 0,
+      "0.4": 32,
+      "0.5": 6,
+      "0.6": 0,
+      "0.7": 5,
+      "0.8": 62,
+      "0.9": 148
+    },
+    "front_end_wall_seconds": 21.337105832993984
+  },
+  "column_policy_auto_propose": {
+    "bimodal": true,
+    "reason": "bimodal: 56 single-column pages below 0.05, 222 two-column pages at/above 0.45, empty valley [0.05, 0.45] — proposing threshold 0.250 (valley centre), margin 0.200 (half width). A PROPOSAL: ratify + freeze into manifest.segmentation.column_detector",
+    "decision_threshold": 0.25,
+    "hysteresis_margin": 0.2,
+    "valley": [
+      0.05,
+      0.45
+    ],
+    "low_cluster_mass": 56,
+    "high_cluster_mass": 222,
+    "ratified_in_manifest": {
+      "decision_threshold": 0.5,
+      "hysteresis_margin": 0.15
+    }
+  },
   "tripwire": {
     "absent_token_mass_rate": 0.013608071107310535,
     "prose_absent_rate": 0.009552757273122015,
@@ -249,5 +284,14 @@
     "flags": [
       "band <=3: auto-absent token mass 1348/121619 exceeds 1% of accepted-page token mass"
     ]
+  },
+  "worklist": {
+    "candidates": 25,
+    "by_stage": {
+      "locate": 7,
+      "match": 18
+    },
+    "review_fraction_max": 0.15,
+    "fingerprint": "sha256:c3ce75082479a49cd954df5f44f05c5effd70588c12583dcd7d388674f7dd82a"
   }
 }

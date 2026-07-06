@@ -112,6 +112,50 @@ hyphen fragments, apostrophe-word divergence). p6 is also the cautionary case fo
 0.75 its meaningless 4-token rate would have been *accepted* and the ghost-text leaf stamped a
 matched page.
 
+## S2.1.6 (#40) — segmentation front-end feed: order_qa + worklist + auto-propose
+
+The slice-1 runner now also runs the S2.1 segmentation front-end book-wide (density gate #38 →
+column detector + cross-page prior #39) and emits three #40 artifacts. All from the same run
+(`s2_1_run_stats.json` sections `order_qa`, `worklist`, `column_policy_auto_propose`).
+
+### order_qa — the S2.2 (#30) measurement feed (DT-12)
+
+Per matched page, `ordered_coverage(witness window, detector reading order)` — the exact metric
+the S2.2 re-gate rules on — is written onto the sidecar page record (schema v2:
+`n_cols`/`n_cols_source`/`order_qa`) and summarised here:
+
+- 253 matched pages measured; **mean 0.842**, median 0.878, **pass@0.85 = 0.779**.
+- Column decisions: 209 pages two-column, 41 single-column, 3 matched-but-column-untrusted;
+  `n_cols_source` = {evidence: 248, prior: 2} — the cross-page prior decided 2 pages, matching
+  the #39 column report's "prior decides rarely."
+
+**This is below the S2.2 re-gate bar** (mean ≥ 0.85 **and** per-page pass-rate ≥ 85%), consistent
+with S2.0's measured 0.851 mean / 73% pass over all pages and its **conditional**-primary verdict.
+#40's mandate is to *emit* this feed; the S5-mode ruling is #30's (S2.2), now armed with the
+as-built per-page numbers. Nothing here demotes geometry — it hands #30 the evidence to.
+
+### Worklist (DT-10) + volume bound (P-6/G-13)
+
+25 candidates, `{locate: 7, match: 18}` — **zero density or columns routes** (every content page
+was confidently classified; the density gate abstained on none). Per-stage fractions: locate
+7/278 = 2.5%, match 18/278 = 6.5%, both well under the ratified `review_fraction_max = 0.15`
+(now in `manifest.segmentation`, book-tunable). One candidate per routed page, stable id
+`copy1:p{page:04d}:{stage}`, each carrying the run `input_fingerprint`; the tracked verdict file
++ inputs regenerate the worklist deterministically. Verdict CLI:
+`python -m engine.structure.geom_review --book per_la_liberta {status|apply|record}`.
+
+### DT-7 auto-propose (a proposal, not a ruling)
+
+From this book's own `col2_score` distribution the tooling proposes
+**`decision_threshold = 0.250`, `hysteresis_margin = 0.200`** (bimodal: 59 single-column pages
+below 0.05, 219 two-column at/above 0.45, empty valley [0.05, 0.45]). The **ratified/frozen**
+manifest value is `0.50 / 0.15`. The two differ but **classify every PLL page identically** — both
+sit inside the empty valley, so no page's column count changes. The divergence is the heuristic's
+choice (valley *centre*) vs Ben's ratified choice (higher in the valley, margin sized to the 5
+transition pages); the auto-propose is calibration ergonomics for a *future* book, human-ratified
+and frozen — the live run always uses the manifest, never the live re-derivation (DT-9/G-22). It
+abstains outright when a book is not cleanly bimodal (single-column book, spurious tiny cluster).
+
 ## Reproduction
 
 ```

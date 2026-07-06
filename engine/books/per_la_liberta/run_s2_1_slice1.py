@@ -57,17 +57,36 @@ import fitz
 
 from engine.paths import BookWorkspace
 from engine.structure import (
+    ColumnDetector,
+    DensityClassifier,
     GeometryError,
+    PageColumnInput,
     PageGeometry,
     SourceScan,
     WordBox,
     assert_auto_absent_tripwire,
     build_geom_sidecar,
+    detect_columns,
+    ink_fraction_from_pixmap,
     load_stream,
     match_stream,
+    normalize_tokens,
+    page_density_features,
+    resolve_reading_columns,
     save_geom_sidecar,
 )
+from engine.structure.column_calibration import propose_column_policy
+from engine.structure.geom_review import (
+    REVIEW_FRACTION_MAX_DEFAULT,
+    RouteInput,
+    build_worklist,
+    input_fingerprint,
+    page_order_qa,
+    save_worklist,
+)
+from engine.structure.geom_sidecar import PAGE_MATCHED, PAGE_ROUTED, with_detector_fields
 from engine.structure.geometry_pymupdf import PyMuPDFTesseractBackend
+from engine.structure.segmentation import is_alpha_token
 from engine.util.jsonio import atomic_write_json
 
 BOOK_DIR = Path(__file__).resolve().parent
@@ -375,6 +394,111 @@ def _write_stats(status: str, **sections) -> None:
     print(f"run stats ({status}) -> {STATS_PATH}")
 
 
+INK_DPI = 150  # density pre-check ink-fraction dpi (the #38 calibration resolution)
+
+
+def _front_end_pass(pages, document, seg, copy1, boundaries, matched_pages):
+    """The S2.1 segmentation front-end over the OCR'd book (DT-5/6/7/12; #38/#39 built the pieces,
+    #40 wires them book-wide): density gate → column detector + cross-page prior → per-matched-page
+    ``order_qa`` (the S2.2 feed) + the routed-page worklist inputs + the ``col2_score`` distribution
+    (the DT-7 auto-propose evidence).
+
+    ``pages`` are in scan order, aligned with ``boundaries`` (page-locate's per-page-index cuts) and
+    the reconstructed copy1 witness stream — so ``stream_tokens[boundaries[i]:boundaries[i+1]]`` is
+    the witness window of ``pages[i]``. Pure over its inputs except the density pixmap render (I/O).
+    """
+    bands, cols = seg["density_bands"], seg["column_detector"]
+    clf = DensityClassifier(**bands)
+    detector = ColumnDetector(**cols)
+    n_leaves = pages[-1].page if pages else 0  # last scan page = leaf count for the COVER position gate
+    # Rebuild the witness stream exactly as match_stream did (full stream, DT-3): normalize every
+    # copy1 atom's text and concatenate — so the boundaries index this token list.
+    stream_tokens = [tok for atom in copy1.atoms for tok in normalize_tokens(atom.text)]
+
+    densities, evidences, feats = [], [], []
+    for page in pages:
+        pixmap = document[page.page - 1].get_pixmap(dpi=INK_DPI)
+        ink = ink_fraction_from_pixmap(pixmap)
+        density_features = page_density_features(ink_fraction=ink, boxes=page.words)
+        densities.append(clf.classify(density_features, leaf_index=page.page, n_leaves=n_leaves))
+        evidences.append(detect_columns(page.words, page.width))
+        feats.append((ink, len(page.words), sum(1 for w in page.words if is_alpha_token(w.text))))
+    verdicts = resolve_reading_columns(
+        [PageColumnInput(density=d, evidence=e) for d, e in zip(densities, evidences)], detector
+    )
+
+    detector_fields: dict[int, dict] = {}
+    order_qa_values: dict[int, float] = {}
+    routes: list[RouteInput] = []
+    col2_scores = [e.col2_score for e in evidences]
+    for i, page in enumerate(pages):
+        verdict = verdicts[i]
+        if page.page in matched_pages:
+            # A matched page has accepted geometry (the matcher's token evidence). The density gate
+            # and the matcher are independent classifiers, so a page can be ink-ABSTAIN yet
+            # token-matched; reconcile in the matcher's favour — emit its order_qa, no review route
+            # (never publish a page as both accepted and needing review).
+            split_x = evidences[i].split_x if verdict.n_cols == 2 else None
+            window = stream_tokens[boundaries[i]:boundaries[i + 1]]
+            oqa = page_order_qa(window, page.words, split_x)
+            detector_fields[page.page] = {
+                "n_cols": verdict.n_cols, "n_cols_source": verdict.n_cols_source, "order_qa": oqa,
+            }
+            order_qa_values[page.page] = oqa
+            continue
+        ink, box_count, token_count = feats[i]
+        if verdict.routed and verdict.signal == "density-routed":
+            routes.append(RouteInput(
+                page=page.page, stage="density", signal=densities[i].signal,
+                value=densities[i].confidence, threshold=bands["confidence_margin"],
+                tentative={"box_count": box_count, "token_count": token_count,
+                           "ink": ink, "band": densities[i].band.name},
+            ))
+        elif verdict.routed and verdict.signal == "prior-ambiguous":
+            routes.append(RouteInput(
+                page=page.page, stage="columns", signal="valley-confidence",
+                value=evidences[i].col2_score, threshold=cols["decision_threshold"],
+                tentative={"split_x": evidences[i].split_x, "col2_score": evidences[i].col2_score,
+                           "n_cols_hint": detector.classify(evidences[i]).n_cols},
+            ))
+    return detector_fields, order_qa_values, routes, col2_scores
+
+
+def _matcher_routes(sidecar, accept_rate):
+    """The matcher-stage worklist inputs: the sidecar's already-routed pages (locate empty-window
+    and sub-threshold match rate). The front-end (density/columns) routes are disjoint by stage, so
+    a page routed at two gates surfaces as two candidates."""
+    routes = []
+    for page, rec in sorted(sidecar.pages.items()):
+        if rec.status != PAGE_ROUTED:
+            continue
+        threshold = accept_rate if rec.stage == "match" else 0.0
+        tentative = {"match_rate": rec.value} if rec.stage == "match" else {}
+        routes.append(RouteInput(
+            page=page, stage=rec.stage, signal=rec.signal, value=rec.value,
+            threshold=threshold, tentative=tentative,
+        ))
+    return routes
+
+
+def _order_qa_summary(order_qa_values):
+    """The S2.2 measurement feed (DT-12): per-page order_qa distribution + mean + pass@0.85 (the
+    re-gate's own metric, so #30 becomes a ruling over persisted numbers, not new machinery)."""
+    vals = sorted(order_qa_values.values())
+    n = len(vals)
+    histogram = {}
+    for i in range(10):
+        lo, hi = i / 10, (i + 1) / 10
+        histogram[f"{lo:.1f}"] = sum(1 for v in vals if (lo <= v < hi) or (i == 9 and v == 1.0))
+    return {
+        "n_pages": n,
+        "mean": (sum(vals) / n) if n else None,
+        "median": (vals[n // 2] if n else None),
+        "pass_at_0_85": (sum(1 for v in vals if v >= 0.85) / n) if n else None,
+        "histogram": histogram,
+    }
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="PLL slice-1 geometry run (S2.1.3 #37)")
     parser.add_argument("--accept-rate", type=float, default=0.80,
@@ -469,6 +593,29 @@ def main() -> None:
         canonical_stream=canonical,
     )
 
+    # --- S2.1.6 (#40): segmentation front-end — order_qa feed (DT-12) + worklist (DT-10) + DT-7 ---
+    seg = MANIFEST["segmentation"]
+    matched_pages = {p for p, rec in sidecar.pages.items() if rec.status == PAGE_MATCHED}
+    fe_started = time.monotonic()
+    with fitz.open(pdf_path) as document:
+        detector_fields, order_qa_values, front_end_routes, col2_scores = _front_end_pass(
+            pages, document, seg, copy1, outcome.boundaries, matched_pages
+        )
+    front_end_wall = time.monotonic() - fe_started
+    sidecar = with_detector_fields(sidecar, detector_fields)  # order_qa onto the matched pages
+
+    review_fraction_max = seg.get("review_fraction_max") or REVIEW_FRACTION_MAX_DEFAULT
+    fingerprint = input_fingerprint(
+        stream_source_hash=sidecar.stream_source_hash,
+        source_scan_sha256=scan_sha,
+        engine_id=engine_id,
+        classifier_version=DensityClassifier(**seg["density_bands"]).version,
+        policy_values={**seg["density_bands"], **seg["column_detector"],
+                       "review_fraction_max": review_fraction_max},
+    )
+    all_routes = front_end_routes + _matcher_routes(sidecar, args.accept_rate)
+    proposal = propose_column_policy(col2_scores)
+
     page_status = Counter(record.status for record in sidecar.pages.values())
     rate_histogram = Counter()
     for record in sidecar.pages.values():
@@ -509,6 +656,21 @@ def main() -> None:
             "pages_with_drops": {str(k): v for k, v in sorted(oob.items()) if v},
         },
         "threshold_sweep": _threshold_sweep(sidecar, args.accept_rate),
+        # S2.1.6 (#40): the DT-12 S2.2 measurement feed — per-page order_qa over the as-built
+        # detector, the exact metric #30 re-gates on (mean + pass@0.85).
+        "order_qa": {**_order_qa_summary(order_qa_values), "front_end_wall_seconds": front_end_wall},
+        # DT-7 amendment (auto-propose): the column policy this book's own col2_score distribution
+        # suggests — a PROPOSAL Ben ratifies + freezes; the live run uses the manifest's frozen 0.50/0.15.
+        "column_policy_auto_propose": {
+            "bimodal": proposal.bimodal,
+            "reason": proposal.reason,
+            "decision_threshold": proposal.decision_threshold,
+            "hysteresis_margin": proposal.hysteresis_margin,
+            "valley": list(proposal.valley) if proposal.valley else None,
+            "low_cluster_mass": proposal.low_cluster_mass,
+            "high_cluster_mass": proposal.high_cluster_mass,
+            "ratified_in_manifest": seg["column_detector"],
+        },
     }
 
     try:
@@ -519,14 +681,47 @@ def main() -> None:
         raise SystemExit(f"auto-absent tripwire fired (exit 13): {exc}") from exc
     sections["tripwire"] = tripwire
 
+    # The DT-10 human-review worklist — one candidate per routed page; the per-stage volume bound
+    # (P-6/G-13) hard-fails the run if any gate floods the queue (re-design the classifier, never
+    # lower the bar). Built AFTER the tripwire so a blocked run publishes no worklist either.
+    try:
+        worklist = build_worklist(
+            all_routes, witness_id="copy1", n_pages=page_count,
+            review_fraction_max=review_fraction_max, fingerprint=fingerprint,
+        )
+    except GeometryError as exc:
+        sections["worklist_volume_breach"] = str(exc)
+        _write_stats("review_volume_blocked", **sections)
+        raise SystemExit(f"review volume bound breached (exit 13): {exc}") from exc
+    stage_counts = Counter(c.stage for c in worklist.candidates)
+    sections["worklist"] = {
+        "candidates": len(worklist.candidates),
+        "by_stage": dict(stage_counts),
+        "review_fraction_max": review_fraction_max,
+        "fingerprint": fingerprint,
+    }
+
     sidecar_path = save_geom_sidecar(workspace, sidecar)
+    worklist_out = save_worklist(workspace, worklist)
     _write_stats("ok", **sections)
 
     print(f"\nsidecar -> {sidecar_path}")
+    print(f"worklist -> {worklist_out}  ({len(worklist.candidates)} candidates: {dict(stage_counts)})")
     print(f"pages: {dict(page_status)}   atoms: {dict(atom_status)}   pending: {pending}")
     print(f"coverage: {dict(sidecar.coverage)}")
     print(f"tripwire: massA={tripwire['absent_token_mass_rate']:.4f} "
           f"proseB={tripwire['prose_absent_rate']:.4f} flags={len(tripwire['flags'])}")
+    oqa = sections["order_qa"]
+    print(f"\norder_qa (S2.2 feed, DT-12): {oqa['n_pages']} matched pages, "
+          f"mean {oqa['mean']:.4f}, pass@0.85 {oqa['pass_at_0_85']:.3f} "
+          f"({front_end_wall:.0f}s front-end)" if oqa["n_pages"] else "\norder_qa: no matched pages")
+    prop = sections["column_policy_auto_propose"]
+    if prop["bimodal"]:
+        print(f"column policy auto-propose (DT-7): threshold {prop['decision_threshold']:.3f} / "
+              f"margin {prop['hysteresis_margin']:.3f} — a PROPOSAL; live run uses manifest "
+              f"{prop['ratified_in_manifest']}")
+    else:
+        print(f"column policy auto-propose (DT-7): ABSTAIN — {prop['reason']}")
     sweep = sections["threshold_sweep"]
     print(f"\nthreshold sweep (DT-8 procedure — applied cut {sweep['applied_cut']}):")
     for t, c in sweep["ladder"].items():

@@ -167,6 +167,10 @@
             "decision_threshold": {"type": "number"},
             "hysteresis_margin": {"type": "number"}
           }
+        },
+        "review_fraction_max": {
+          "$comment": "DT-10 / P-6 (S2.1.6 #40): the per-stage human-review volume bound. OPTIONAL — absent lets the run reach for the ruled default 0.15 (geom_review.REVIEW_FRACTION_MAX_DEFAULT); a book carries it only to tune its own budget. build_worklist enforces the range.",
+          "type": "number"
         }
       }
     }

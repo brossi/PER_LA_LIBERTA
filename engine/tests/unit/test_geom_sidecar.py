@@ -49,6 +49,7 @@ from engine.structure.geom_sidecar import (
     load_geom_sidecar,
     save_geom_sidecar,
     to_json,
+    with_detector_fields,
 )
 
 SCAN = SourceScan(kind="pdf", sha256="scan-sentinel-hash", n_pages=9, n_bytes=1234)
@@ -383,15 +384,16 @@ def test_loader_wraps_model_violations_as_stale(matchkit):
 
 
 def test_loader_rejects_unknown_record_keys_never_field_loss(matchkit):
-    # A record carrying a key this schema version does not define (e.g. a #38-era n_cols) is a
-    # wrong-era or corrupt file: refused loud, never loaded with silent field loss.
+    # A record carrying a key this schema version does not define is a wrong-era or corrupt file:
+    # refused loud, never loaded with silent field loss. (n_cols/n_cols_source/order_qa ARE defined
+    # on a page record at schema v2 — DT-12 — so an unknown key must be a genuinely-undefined one.)
     _, sidecar = routed_world(matchkit)
     with_page_extra = json.loads(json.dumps(to_json(sidecar)))
-    with_page_extra["pages"]["1"]["n_cols"] = 2
+    with_page_extra["pages"]["1"]["mystery_field"] = 2
     with pytest.raises(StaleArtifactError, match="unknown key"):
         from_json(with_page_extra)
     with_atom_extra = json.loads(json.dumps(to_json(sidecar)))
-    with_atom_extra["atoms"]["good"]["order_qa"] = 0.9
+    with_atom_extra["atoms"]["good"]["order_qa"] = 0.9  # order_qa is a PAGE field, never an atom key
     with pytest.raises(StaleArtifactError, match="unknown key"):
         from_json(with_atom_extra)
     # ...and the same at the envelope and source_scan levels, not only inside records
@@ -547,8 +549,84 @@ def test_to_json_canonicalizes_nested_payloads_too():
 
 
 def test_schema_constants_are_pinned():
-    assert GEOM_SIDECAR_SCHEMA_VERSION == 1
+    assert GEOM_SIDECAR_SCHEMA_VERSION == 2  # bumped at #40 (DT-12: page-record detector fields)
     assert GEOM_SIDECAR_STALE_CLASS == "geometry-sidecar"
+
+
+# --- schema v2: the detector fields (DT-12, the S2.2 order_qa feed) ------------------------ #
+
+
+def test_matched_page_carries_detector_fields():
+    rec = PageRecord(status=PAGE_MATCHED, match_rate=0.94, n_cols=2, n_cols_source="evidence", order_qa=0.91)
+    assert (rec.n_cols, rec.n_cols_source, rec.order_qa) == (2, "evidence", 0.91)
+
+
+@pytest.mark.parametrize(
+    "kwargs, phrase",
+    [
+        (dict(n_cols=3, n_cols_source="evidence"), "n_cols must be 1, 2, or None"),
+        (dict(n_cols=True, n_cols_source="evidence"), "n_cols must be 1, 2, or None"),  # bool is not a count
+        (dict(n_cols=2, n_cols_source="oracle"), "n_cols_source must be one of"),
+        (dict(n_cols=2, n_cols_source=None), "set together"),  # count without an origin
+        (dict(n_cols=None, n_cols_source="evidence"), "set together"),  # origin without a count
+        (dict(order_qa=1.5), "order_qa must be a rate"),
+        (dict(order_qa=float("nan")), "order_qa must be a rate"),
+    ],
+)
+def test_detector_field_domains_are_enforced(kwargs, phrase):
+    with pytest.raises(ValueError, match=phrase):
+        PageRecord(status=PAGE_MATCHED, match_rate=0.9, **kwargs)
+
+
+@pytest.mark.parametrize(
+    "route_kwargs",
+    [
+        dict(status=PAGE_ROUTED, stage="match", signal="match-rate", value=0.7),
+        dict(status=PAGE_DECLINED, verdict=VERDICT),
+    ],
+)
+def test_detector_fields_forbidden_on_non_matched_pages(route_kwargs):
+    with pytest.raises(ValueError, match="only a matched page carries detector fields"):
+        PageRecord(n_cols=2, n_cols_source="evidence", **route_kwargs)
+
+
+def test_detector_fields_round_trip_through_save_load(workspace):
+    sidecar = mk_sidecar(
+        pages={1: PageRecord(status=PAGE_MATCHED, match_rate=0.9, n_cols=1, n_cols_source="prior", order_qa=0.87)},
+    )
+    save_geom_sidecar(workspace, sidecar)
+    loaded = load_geom_sidecar(workspace, "w-sentinel-3")
+    assert loaded.pages[1].n_cols == 1 and loaded.pages[1].n_cols_source == "prior" and loaded.pages[1].order_qa == 0.87
+
+
+def test_with_detector_fields_populates_matched_pages():
+    sidecar = mk_sidecar()  # one matched page (1), one matched atom
+    out = with_detector_fields(sidecar, {1: {"n_cols": 2, "n_cols_source": "evidence", "order_qa": 0.91}})
+    assert out.pages[1].n_cols == 2 and out.pages[1].order_qa == 0.91
+    assert sidecar.pages[1].n_cols is None  # input untouched (frozen)
+
+
+def test_with_detector_fields_empty_is_identity():
+    sidecar = mk_sidecar()
+    assert with_detector_fields(sidecar, {}) is sidecar
+
+
+def test_with_detector_fields_rejects_a_non_matched_page():
+    sidecar = mk_sidecar(
+        pages={1: matched_page(), 2: routed_page()},
+        atoms={"a0": matched_atom(1)},
+        atom_pages={"a0": AtomPages(1, 1, 1)},
+    )
+    with pytest.raises(ValueError, match="not 'matched'"):
+        with_detector_fields(sidecar, {2: {"n_cols": 2, "n_cols_source": "evidence", "order_qa": 0.9}})
+
+
+def test_with_detector_fields_rejects_unknown_field_keys():
+    # A typo'd key would otherwise be silently dropped (partial data loss); reject it like the
+    # loaders do — the field dict carries only n_cols/n_cols_source/order_qa.
+    sidecar = mk_sidecar()
+    with pytest.raises(ValueError, match="unknown"):
+        with_detector_fields(sidecar, {1: {"n_colz": 2, "order_qa": 0.7}})
 
 
 # --- G-26: the P-5 two-leg auto-absent tripwire ------------------------------------------------ #

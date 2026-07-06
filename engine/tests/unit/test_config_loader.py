@@ -452,3 +452,20 @@ def test_schema_requires_column_detector_when_segmentation_present(tmp_path):
     books = _write_book(tmp_path, "nocd", m)
     with pytest.raises(ConfigError, match="schema validation"):
         load_book("nocd", books_dir=books, profiles_dir=REAL_PROFILES)
+
+
+def test_review_fraction_max_resolves_for_pll():
+    # DT-10 / P-6 (#40): PLL carries the ruled 0.15 explicitly, book-tunable per stage.
+    seg = load_book("per_la_liberta").manifest.segmentation
+    assert seg.review_fraction_max == 0.15
+
+
+def test_review_fraction_max_is_optional_and_defaults_none(tmp_path):
+    # Absent from the manifest → None (the run reaches for REVIEW_FRACTION_MAX_DEFAULT). A book still
+    # validates without it, so it never becomes silently required.
+    m = _real_manifest()
+    m["id"] = "norfm"
+    m["segmentation"].pop("review_fraction_max", None)
+    books = _write_book(tmp_path, "norfm", m)
+    seg = load_book("norfm", books_dir=books, profiles_dir=REAL_PROFILES).manifest.segmentation
+    assert seg.review_fraction_max is None

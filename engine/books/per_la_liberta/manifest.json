@@ -84,6 +84,7 @@
     "column_detector": {
       "decision_threshold": 0.50,
       "hysteresis_margin": 0.15
-    }
+    },
+    "review_fraction_max": 0.15
   }
 }

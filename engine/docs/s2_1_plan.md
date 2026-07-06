@@ -373,9 +373,26 @@ someone later mistakes for support.
 
 ### DT-6 — Density pre-check: band classifier, calibrated to abstain
 
+**AMENDED — RULED by Ben 2026-07-06, at the S2.1.4 (#38) calibration checkpoint** (the calibration
+run surfaced two things the original four-class design missed):
+1. **Ink gate on content.** Content requires `ink < ink_dark_min` — the dark check runs *before*
+   content, so a solid-dark page can never be labelled content on hallucinated yield. Evidence:
+   calibration page 278 (the back cover) is ink 1.000 with 1189 Tesseract-hallucinated boxes at
+   0.753 yield; the original content-before-ink order mis-trusted it as content (the Finding-B trap
+   G-11 exists to stop; the original G-11 fixture only exercised a *low*-yield dark page).
+2. **`COVER` — a fifth class (position × saturation).** A near-saturated leaf at the document
+   extremes is binding material (front/back cover, pastedown endpaper) — confidently untrusted and
+   auto-declinable, distinct from `non_text_dark` (whose route-vs-decline handling is the
+   worklist's). The classifier therefore **takes page position** (`leaf_index`, `n_leaves`); a leaf
+   within `cover_edge_leaves` of either end with `ink ≥ ink_saturation_min` is a `COVER`. An
+   *interior* saturated page is **not** a cover — it stays `non_text_dark` (the anomaly). Two new
+   book-config band params (`cover_edge_leaves`, `ink_saturation_min`), required and defaultless like
+   the rest. PLL covers observed at leaves 1 / 272 / 278 (all ink ≥ 0.97), content tops out at 0.115.
+
 Audit Finding B stands: a single fixed ink threshold is dead (non-monotone continuum; dark
 endpaper 0.97 > densest prose; 22 real chapter-end pages < the old 0.038 "floor"). The classifier
-maps per-page features → `{content, near_blank, non_text_dark, abstain}`:
+maps per-page features → `{content, near_blank, non_text_dark, cover, abstain}` (`cover` per the
+2026-07-06 amendment above):
 
 - Features: ink fraction (binarized pixmap), box count, token yield (alpha-token count / box
   count — p6's hallucination signature is 658 boxes / 7 tokens), mean token length.

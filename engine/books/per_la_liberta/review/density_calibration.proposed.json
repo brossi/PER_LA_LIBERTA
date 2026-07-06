@@ -1,0 +1,438 @@
+{
+  "note": "PROPOSED labels + bands \u2014 not ground truth until Ben ratifies the two cover numbers (cover_edge_leaves, ink_saturation_min) at the DT-6 human checkpoint.",
+  "segmentation_version": "density-bands-v1",
+  "ink_dpi": 150,
+  "n_leaves": 278,
+  "box_cache_engine": "pymupdf-1.27.2.3+tesseract-5.5.2:dpi=300:lang=ita",
+  "proposed_bands": {
+    "yield_content_min": 0.7,
+    "box_content_min": 40,
+    "ink_blank_max": 0.5,
+    "ink_dark_min": 0.6,
+    "confidence_margin": 0.05,
+    "cover_edge_leaves": 7,
+    "ink_saturation_min": 0.9
+  },
+  "features": [
+    {
+      "scan": 1,
+      "hint": "cover",
+      "ink_fraction": 0.9763,
+      "box_count": 0,
+      "token_yield": 0.0,
+      "mean_token_length": 0.0,
+      "proposed_label": "cover",
+      "confidence": 0.0763
+    },
+    {
+      "scan": 2,
+      "hint": "front_matter",
+      "ink_fraction": 0.0057,
+      "box_count": 10,
+      "token_yield": 0.6,
+      "mean_token_length": 3.7,
+      "proposed_label": "near_blank",
+      "confidence": 0.4943
+    },
+    {
+      "scan": 3,
+      "hint": "front_matter",
+      "ink_fraction": 0.0,
+      "box_count": 1477,
+      "token_yield": 0.4198,
+      "mean_token_length": 1.448,
+      "proposed_label": "near_blank",
+      "confidence": 0.2802
+    },
+    {
+      "scan": 4,
+      "hint": "scan_target_noise",
+      "ink_fraction": 0.0,
+      "box_count": 315,
+      "token_yield": 0.4,
+      "mean_token_length": 1.403,
+      "proposed_label": "near_blank",
+      "confidence": 0.3
+    },
+    {
+      "scan": 5,
+      "hint": "front_matter_1col",
+      "ink_fraction": 0.0676,
+      "box_count": 88,
+      "token_yield": 0.6364,
+      "mean_token_length": 3.977,
+      "proposed_label": "near_blank",
+      "confidence": 0.0636
+    },
+    {
+      "scan": 6,
+      "hint": "ghost_verso_658boxes",
+      "ink_fraction": 0.0008,
+      "box_count": 658,
+      "token_yield": 0.4331,
+      "mean_token_length": 1.465,
+      "proposed_label": "near_blank",
+      "confidence": 0.2669
+    },
+    {
+      "scan": 7,
+      "hint": "chapter_open_1col",
+      "ink_fraction": 0.0468,
+      "box_count": 278,
+      "token_yield": 0.8849,
+      "mean_token_length": 4.881,
+      "proposed_label": "content",
+      "confidence": 0.1849
+    },
+    {
+      "scan": 9,
+      "hint": "chapter_open_2col",
+      "ink_fraction": 0.0718,
+      "box_count": 382,
+      "token_yield": 0.9424,
+      "mean_token_length": 4.908,
+      "proposed_label": "content",
+      "confidence": 0.2424
+    },
+    {
+      "scan": 127,
+      "hint": "chapter_open_2col",
+      "ink_fraction": 0.0725,
+      "box_count": 417,
+      "token_yield": 0.952,
+      "mean_token_length": 4.911,
+      "proposed_label": "content",
+      "confidence": 0.252
+    },
+    {
+      "scan": 21,
+      "hint": "dense_prose",
+      "ink_fraction": 0.084,
+      "box_count": 578,
+      "token_yield": 0.9256,
+      "mean_token_length": 4.962,
+      "proposed_label": "content",
+      "confidence": 0.2256
+    },
+    {
+      "scan": 28,
+      "hint": "dense_prose",
+      "ink_fraction": 0.0807,
+      "box_count": 585,
+      "token_yield": 0.9128,
+      "mean_token_length": 4.757,
+      "proposed_label": "content",
+      "confidence": 0.2128
+    },
+    {
+      "scan": 50,
+      "hint": "dense_prose",
+      "ink_fraction": 0.1047,
+      "box_count": 586,
+      "token_yield": 0.93,
+      "mean_token_length": 4.998,
+      "proposed_label": "content",
+      "confidence": 0.23
+    },
+    {
+      "scan": 57,
+      "hint": "dense_prose",
+      "ink_fraction": 0.1021,
+      "box_count": 630,
+      "token_yield": 0.9032,
+      "mean_token_length": 4.425,
+      "proposed_label": "content",
+      "confidence": 0.2032
+    },
+    {
+      "scan": 100,
+      "hint": "dense_prose",
+      "ink_fraction": 0.1017,
+      "box_count": 490,
+      "token_yield": 0.9429,
+      "mean_token_length": 4.951,
+      "proposed_label": "content",
+      "confidence": 0.2429
+    },
+    {
+      "scan": 140,
+      "hint": "dense_prose",
+      "ink_fraction": 0.1014,
+      "box_count": 602,
+      "token_yield": 0.9302,
+      "mean_token_length": 4.997,
+      "proposed_label": "content",
+      "confidence": 0.2302
+    },
+    {
+      "scan": 150,
+      "hint": "dense_prose",
+      "ink_fraction": 0.0906,
+      "box_count": 555,
+      "token_yield": 0.9315,
+      "mean_token_length": 4.998,
+      "proposed_label": "content",
+      "confidence": 0.2315
+    },
+    {
+      "scan": 204,
+      "hint": "dense_prose",
+      "ink_fraction": 0.101,
+      "box_count": 623,
+      "token_yield": 0.9181,
+      "mean_token_length": 4.742,
+      "proposed_label": "content",
+      "confidence": 0.2181
+    },
+    {
+      "scan": 72,
+      "hint": "footnote_callout",
+      "ink_fraction": 0.1005,
+      "box_count": 557,
+      "token_yield": 0.9156,
+      "mean_token_length": 4.519,
+      "proposed_label": "content",
+      "confidence": 0.2156
+    },
+    {
+      "scan": 73,
+      "hint": "footnote_body",
+      "ink_fraction": 0.0355,
+      "box_count": 153,
+      "token_yield": 0.9085,
+      "mean_token_length": 4.595,
+      "proposed_label": "content",
+      "confidence": 0.2085
+    },
+    {
+      "scan": 82,
+      "hint": "footnote_body",
+      "ink_fraction": 0.0562,
+      "box_count": 260,
+      "token_yield": 0.8962,
+      "mean_token_length": 5.019,
+      "proposed_label": "content",
+      "confidence": 0.1962
+    },
+    {
+      "scan": 125,
+      "hint": "part_divider",
+      "ink_fraction": 0.0039,
+      "box_count": 2,
+      "token_yield": 1.0,
+      "mean_token_length": 6.0,
+      "proposed_label": "near_blank",
+      "confidence": 0.4961
+    },
+    {
+      "scan": 126,
+      "hint": "part_divider",
+      "ink_fraction": 0.0,
+      "box_count": 252,
+      "token_yield": 0.4484,
+      "mean_token_length": 1.603,
+      "proposed_label": "near_blank",
+      "confidence": 0.2516
+    },
+    {
+      "scan": 168,
+      "hint": "low_coverage_routed",
+      "ink_fraction": 0.1096,
+      "box_count": 524,
+      "token_yield": 0.8931,
+      "mean_token_length": 4.601,
+      "proposed_label": "content",
+      "confidence": 0.1931
+    },
+    {
+      "scan": 231,
+      "hint": "low_coverage_routed",
+      "ink_fraction": 0.0611,
+      "box_count": 374,
+      "token_yield": 0.8048,
+      "mean_token_length": 4.174,
+      "proposed_label": "content",
+      "confidence": 0.1048
+    },
+    {
+      "scan": 117,
+      "hint": "blotchy_prose_routed",
+      "ink_fraction": 0.1072,
+      "box_count": 511,
+      "token_yield": 0.8728,
+      "mean_token_length": 4.605,
+      "proposed_label": "content",
+      "confidence": 0.1728
+    },
+    {
+      "scan": 139,
+      "hint": "blotchy_prose_routed",
+      "ink_fraction": 0.0982,
+      "box_count": 519,
+      "token_yield": 0.8805,
+      "mean_token_length": 4.399,
+      "proposed_label": "content",
+      "confidence": 0.1805
+    },
+    {
+      "scan": 75,
+      "hint": "routed",
+      "ink_fraction": 0.0843,
+      "box_count": 551,
+      "token_yield": 0.8475,
+      "mean_token_length": 4.132,
+      "proposed_label": "content",
+      "confidence": 0.1475
+    },
+    {
+      "scan": 192,
+      "hint": "near_bar_routed",
+      "ink_fraction": 0.115,
+      "box_count": 548,
+      "token_yield": 0.9234,
+      "mean_token_length": 4.954,
+      "proposed_label": "content",
+      "confidence": 0.2234
+    },
+    {
+      "scan": 206,
+      "hint": "routed",
+      "ink_fraction": 0.0299,
+      "box_count": 169,
+      "token_yield": 0.8876,
+      "mean_token_length": 4.201,
+      "proposed_label": "content",
+      "confidence": 0.1876
+    },
+    {
+      "scan": 220,
+      "hint": "routed",
+      "ink_fraction": 0.0904,
+      "box_count": 534,
+      "token_yield": 0.9045,
+      "mean_token_length": 4.667,
+      "proposed_label": "content",
+      "confidence": 0.2045
+    },
+    {
+      "scan": 253,
+      "hint": "near_bar_routed",
+      "ink_fraction": 0.0781,
+      "box_count": 499,
+      "token_yield": 0.9399,
+      "mean_token_length": 5.381,
+      "proposed_label": "content",
+      "confidence": 0.2399
+    },
+    {
+      "scan": 265,
+      "hint": "near_bar_routed",
+      "ink_fraction": 0.0846,
+      "box_count": 634,
+      "token_yield": 0.836,
+      "mean_token_length": 4.166,
+      "proposed_label": "content",
+      "confidence": 0.136
+    },
+    {
+      "scan": 189,
+      "hint": "orsini_prose",
+      "ink_fraction": 0.1086,
+      "box_count": 584,
+      "token_yield": 0.9161,
+      "mean_token_length": 4.673,
+      "proposed_label": "content",
+      "confidence": 0.2161
+    },
+    {
+      "scan": 193,
+      "hint": "orsini_prose",
+      "ink_fraction": 0.1115,
+      "box_count": 569,
+      "token_yield": 0.9438,
+      "mean_token_length": 5.021,
+      "proposed_label": "content",
+      "confidence": 0.2438
+    },
+    {
+      "scan": 269,
+      "hint": "toc_smalltype",
+      "ink_fraction": 0.0375,
+      "box_count": 168,
+      "token_yield": 0.7917,
+      "mean_token_length": 4.571,
+      "proposed_label": "content",
+      "confidence": 0.0917
+    },
+    {
+      "scan": 272,
+      "hint": "back_matter",
+      "ink_fraction": 0.9716,
+      "box_count": 3,
+      "token_yield": 0.0,
+      "mean_token_length": 0.667,
+      "proposed_label": "cover",
+      "confidence": 0.0716
+    },
+    {
+      "scan": 273,
+      "hint": "back_matter_noise",
+      "ink_fraction": 0.0,
+      "box_count": 968,
+      "token_yield": 0.4669,
+      "mean_token_length": 1.591,
+      "proposed_label": "near_blank",
+      "confidence": 0.2331
+    },
+    {
+      "scan": 274,
+      "hint": "back_matter_noise",
+      "ink_fraction": 0.0,
+      "box_count": 213,
+      "token_yield": 0.4366,
+      "mean_token_length": 1.418,
+      "proposed_label": "near_blank",
+      "confidence": 0.2634
+    },
+    {
+      "scan": 275,
+      "hint": "back_matter",
+      "ink_fraction": 0.0,
+      "box_count": 1133,
+      "token_yield": 0.4863,
+      "mean_token_length": 1.618,
+      "proposed_label": "near_blank",
+      "confidence": 0.2137
+    },
+    {
+      "scan": 276,
+      "hint": "back_matter_noise",
+      "ink_fraction": 0.0014,
+      "box_count": 371,
+      "token_yield": 0.407,
+      "mean_token_length": 1.518,
+      "proposed_label": "near_blank",
+      "confidence": 0.293
+    },
+    {
+      "scan": 277,
+      "hint": "back_matter",
+      "ink_fraction": 0.0,
+      "box_count": 696,
+      "token_yield": 0.4497,
+      "mean_token_length": 1.543,
+      "proposed_label": "near_blank",
+      "confidence": 0.2503
+    },
+    {
+      "scan": 278,
+      "hint": "back_matter",
+      "ink_fraction": 1.0,
+      "box_count": 1189,
+      "token_yield": 0.7527,
+      "mean_token_length": 2.917,
+      "proposed_label": "cover",
+      "confidence": 0.1
+    }
+  ]
+}

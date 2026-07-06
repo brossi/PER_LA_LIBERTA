@@ -11,10 +11,11 @@ features, calibrated to *abstain* rather than guess.
   ``box_count``, ``token_yield`` (alpha-token count / box count — the discriminator: PLL's ghost
   leaf p6 is 658 boxes / ~7 real tokens, yield ≈ 0.01), and ``mean_token_length``. Validity is
   enforced at construction.
-- :class:`DensityBand` — the four-class output ``{content, near_blank, non_text_dark, abstain}``.
+- :class:`DensityBand` — the output ``{content, near_blank, non_text_dark, cover, abstain}``.
   ``abstain`` is a **first-class** result routing to the human worklist (#40), never a class forced
-  onto an ambiguous page (G-9). ``near_blank`` (low ink, low yield) and ``non_text_dark`` (high ink,
-  low yield) are distinct classes but both mean *boxes untrusted* (G-11).
+  onto an ambiguous page (G-9). ``near_blank`` (low ink, low yield), ``non_text_dark`` (high ink),
+  and ``cover`` (near-saturated at the document extremes) all mean *boxes untrusted* (G-11).
+  ``cover`` was added as a fifth class (Ben, 2026-07-06) — see :class:`DensityBand`.
 - :class:`DensityClassifier` — maps features → a :class:`DensityVerdict`. Its band thresholds are
   **required constructor parameters with no defaults** (the G-1 numberless-core posture — a baked
   default band is a scan-profile opinion in core; PLL's calibrated values live in ``manifest.json``,
@@ -74,12 +75,20 @@ _INK_TABLE = bytes(1 if v < _INK_LUMA_THRESHOLD else 0 for v in range(256))
 
 
 class DensityBand(Enum):
-    """The four-class density verdict (DT-6). ``ABSTAIN`` is first-class — it routes to the worklist,
-    it is never a fallback synonym for one of the trusted/untrusted classes."""
+    """The density verdict (DT-6, extended). ``ABSTAIN`` is first-class — it routes to the worklist,
+    it is never a fallback synonym for one of the trusted/untrusted classes.
+
+    ``COVER`` was added as a fifth class (RULED by Ben 2026-07-06, at the S2.1.4 calibration
+    checkpoint, amending DT-6's original four): a near-saturated leaf at the document extremes is
+    binding material (front/back cover or pastedown endpaper), confidently untrusted and
+    auto-declinable — distinct from ``NON_TEXT_DARK``, which is any other high-ink page whose
+    handling (route vs auto-decline) is the worklist's. The distinction is positional × saturation:
+    an interior saturated page is *not* a cover (it is an anomaly classed ``NON_TEXT_DARK``)."""
 
     CONTENT = "content"
     NEAR_BLANK = "near_blank"
     NON_TEXT_DARK = "non_text_dark"
+    COVER = "cover"
     ABSTAIN = "abstain"
 
 
@@ -147,8 +156,8 @@ class DensityVerdict:
 
     @property
     def boxes_trusted(self) -> bool:
-        """True only for ``CONTENT``. ``near_blank`` and ``non_text_dark`` both mean boxes untrusted
-        (G-11); ``abstain`` is undecided, not trusted."""
+        """True only for ``CONTENT``. ``near_blank`` / ``non_text_dark`` / ``cover`` all mean boxes
+        untrusted (G-11); ``abstain`` is undecided, not trusted."""
         return self.band is DensityBand.CONTENT
 
 
@@ -214,12 +223,15 @@ class DensityClassifier:
     ``manifest.json`` (book config), the labeled calibration set from
     ``books/<id>/review/density_calibration.json`` (DT-6/R7).
 
-    The decision plane is two-sided: ``token_yield`` is the trust axis (real words vs hallucinated
-    boxes) and ``ink_fraction`` splits an untrusted page into ``near_blank`` (low ink) vs
-    ``non_text_dark`` (high ink); ``box_content_min`` is a hard eligibility gate (a two-box divider
-    is not content however clean its two tokens). ``confidence`` is the margin to the nearest edge
-    that would change the class; a page inside ``confidence_margin`` of an edge, or in the
-    low-yield ink mid-band, **abstains** — the never-guess posture (G-9).
+    Decision order: a near-saturated leaf at the document extremes is a ``COVER`` (position ×
+    saturation, Ben 2026-07-06); else a high-ink page is ``NON_TEXT_DARK`` — checked *before*
+    content, so ``ink >= ink_dark_min`` gates content out (a saturated page can never be content on
+    hallucinated yield); else ``token_yield`` (the trust axis) + ``box_content_min`` (a hard
+    eligibility gate — a two-box divider is not content however clean its tokens) decide ``CONTENT``,
+    with ``ink_fraction`` splitting the remaining untrusted low-yield pages into ``NEAR_BLANK`` (low
+    ink) vs the ink mid-band. ``confidence`` is the margin to the nearest edge that would change the
+    class; a page inside ``confidence_margin`` of an edge, or in the low-yield ink mid-band,
+    **abstains** — the never-guess posture (G-9).
     """
 
     def __init__(
@@ -230,6 +242,8 @@ class DensityClassifier:
         ink_blank_max: float,
         ink_dark_min: float,
         confidence_margin: float,
+        cover_edge_leaves: int,
+        ink_saturation_min: float,
     ) -> None:
         if not (math.isfinite(yield_content_min) and 0.0 < yield_content_min <= 1.0):
             raise ValueError(f"yield_content_min must be in (0, 1], got {yield_content_min!r}")
@@ -247,11 +261,22 @@ class DensityClassifier:
             )
         if not (math.isfinite(confidence_margin) and 0.0 < confidence_margin <= 1.0):
             raise ValueError(f"confidence_margin must be in (0, 1], got {confidence_margin!r}")
+        if not (type(cover_edge_leaves) is int and cover_edge_leaves >= 0):
+            raise ValueError(f"cover_edge_leaves must be a non-negative integer, got {cover_edge_leaves!r}")
+        # A cover is *near-saturated*, strictly darker than the ordinary high-ink (non_text_dark) band —
+        # else "cover" would collapse into "any dark leaf at the extremes" and lose the saturation
+        # signal that separates binding material from a merely-dark endpaper.
+        if not (math.isfinite(ink_saturation_min) and ink_dark_min < ink_saturation_min <= 1.0):
+            raise ValueError(
+                f"ink_saturation_min must be in (ink_dark_min={ink_dark_min!r}, 1], got {ink_saturation_min!r}"
+            )
         self._yield_content_min = yield_content_min
         self._box_content_min = box_content_min
         self._ink_blank_max = ink_blank_max
         self._ink_dark_min = ink_dark_min
         self._confidence_margin = confidence_margin
+        self._cover_edge_leaves = cover_edge_leaves
+        self._ink_saturation_min = ink_saturation_min
 
     @property
     def version(self) -> str:
@@ -267,18 +292,42 @@ class DensityClassifier:
             "ink_blank_max": self._ink_blank_max,
             "ink_dark_min": self._ink_dark_min,
             "confidence_margin": self._confidence_margin,
+            "cover_edge_leaves": self._cover_edge_leaves,
+            "ink_saturation_min": self._ink_saturation_min,
         }
 
-    def classify(self, features: PageDensityFeatures) -> DensityVerdict:
-        """Classify one page. Pure function of ``(band values, features)`` — deterministic."""
+    def classify(self, features: PageDensityFeatures, *, leaf_index: int, n_leaves: int) -> DensityVerdict:
+        """Classify one page. Pure function of ``(band values, features, position)`` — deterministic.
+
+        ``leaf_index`` is the page's 1-based scan-leaf number and ``n_leaves`` the document leaf count
+        (RULED by Ben 2026-07-06 — position is a classifier input): a near-saturated leaf within
+        ``cover_edge_leaves`` of either end is a ``COVER``.
+        """
+        if not (type(n_leaves) is int and n_leaves >= 1):
+            raise ValueError(f"n_leaves must be a positive integer leaf count, got {n_leaves!r}")
+        if not (type(leaf_index) is int and 1 <= leaf_index <= n_leaves):
+            raise ValueError(f"leaf_index must be an integer in [1, {n_leaves}], got {leaf_index!r}")
+
         yield_ok = features.token_yield >= self._yield_content_min
         boxes_ok = features.box_count >= self._box_content_min
+        at_extreme = leaf_index <= self._cover_edge_leaves or leaf_index > n_leaves - self._cover_edge_leaves
 
-        if yield_ok and boxes_ok:
+        if at_extreme and features.ink_fraction >= self._ink_saturation_min:
+            # Position × saturation: binding material at the extremes. Untrusted, auto-declinable.
+            raw = DensityBand.COVER
+            margin = features.ink_fraction - self._ink_saturation_min
+        elif features.ink_fraction >= self._ink_dark_min:
+            # A high-ink page's boxes are untrusted regardless of yield (Finding-B); this is also the
+            # ink gate on content (RULED by Ben 2026-07-06) — checked BEFORE content, so a saturated
+            # page can never be mislabeled content on hallucinated yield (calibration page 278).
+            raw = DensityBand.NON_TEXT_DARK
+            margin = features.ink_fraction - self._ink_dark_min  # distance down to the ink mid-band
+        elif yield_ok and boxes_ok:
             raw = DensityBand.CONTENT
-            # The nearest flip out of content is losing yield_ok; box_content_min is a hard gate, not
-            # a confidence axis (a content page sits far above it — DT-6's axes are yield and ink).
-            margin = features.token_yield - self._yield_content_min
+            # Content flips to NON_TEXT_DARK if ink rises to ink_dark_min and to ABSTAIN if yield
+            # drops to the floor — the margin is the distance to the nearer of those two edges.
+            margin = min(features.token_yield - self._yield_content_min,
+                         self._ink_dark_min - features.ink_fraction)
         elif features.ink_fraction <= self._ink_blank_max:
             raw = DensityBand.NEAR_BLANK
             margin = self._ink_blank_max - features.ink_fraction  # distance up to the ink mid-band
@@ -287,23 +336,22 @@ class DensityClassifier:
                 # a live edge; when boxes are short too, more boxes are needed to reach content, so
                 # the yield axis alone cannot flip it and is not a near edge.
                 margin = min(margin, self._yield_content_min - features.token_yield)
-        elif features.ink_fraction >= self._ink_dark_min:
-            raw = DensityBand.NON_TEXT_DARK
-            margin = features.ink_fraction - self._ink_dark_min  # distance down to the ink mid-band
-            if boxes_ok:
-                margin = min(margin, self._yield_content_min - features.token_yield)
         else:
             # Low yield/boxes with ink in the mid-band: cannot tell near-blank from dark. Inherently
             # undecidable — route, do not guess (G-9). Confidence 0.0: maximally uncertain.
             return DensityVerdict(DensityBand.ABSTAIN, confidence=0.0, signal="ink-ambiguous")
 
         if margin < self._confidence_margin:
-            # Inside the band-edge margin: too close to call, route rather than commit (G-9).
+            # Inside the band-edge margin: too close to call, route rather than commit (G-9). Applies
+            # to COVER too — a leaf whose ink barely clears saturation routes rather than auto-declines.
             return DensityVerdict(DensityBand.ABSTAIN, confidence=margin, signal="band-margin")
         return DensityVerdict(raw, confidence=margin, signal=raw.value)
 
-    def classify_page(self, *, pixmap: fitz.Pixmap, boxes: Sequence) -> tuple[PageDensityFeatures, DensityVerdict]:
-        """Extract features from a page pixmap + its boxes, then classify. The calibration probe (#38)
-        and the two-branch wiring (#39) enter here; returns both so the features can be recorded."""
+    def classify_page(
+        self, *, pixmap: fitz.Pixmap, boxes: Sequence, leaf_index: int, n_leaves: int
+    ) -> tuple[PageDensityFeatures, DensityVerdict]:
+        """Extract features from a page pixmap + its boxes, then classify at its leaf position. The
+        calibration probe (#38) and the two-branch wiring (#39) enter here; returns both so the
+        features can be recorded."""
         features = page_density_features(ink_fraction=ink_fraction_from_pixmap(pixmap), boxes=boxes)
-        return features, self.classify(features)
+        return features, self.classify(features, leaf_index=leaf_index, n_leaves=n_leaves)

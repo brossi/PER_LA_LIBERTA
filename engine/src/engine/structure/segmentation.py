@@ -34,8 +34,10 @@ from __future__ import annotations
 
 import math
 import re
+import statistics
 from collections.abc import Sequence
 from dataclasses import dataclass
+from difflib import SequenceMatcher
 from enum import Enum
 from typing import TYPE_CHECKING
 
@@ -278,6 +280,21 @@ class DensityClassifier:
         self._cover_edge_leaves = cover_edge_leaves
         self._ink_saturation_min = ink_saturation_min
 
+    @classmethod
+    def from_config(cls, bands) -> DensityClassifier:
+        """Build a classifier from a config ``DensityBands`` model (the DT-5 wiring seam, #39). Read
+        duck-typed on the seven band attributes so neutral ``structure/`` needs no import of
+        ``config/``; the constructor above still enforces every value range."""
+        return cls(
+            yield_content_min=bands.yield_content_min,
+            box_content_min=bands.box_content_min,
+            ink_blank_max=bands.ink_blank_max,
+            ink_dark_min=bands.ink_dark_min,
+            confidence_margin=bands.confidence_margin,
+            cover_edge_leaves=bands.cover_edge_leaves,
+            ink_saturation_min=bands.ink_saturation_min,
+        )
+
     @property
     def version(self) -> str:
         return SEGMENTATION_VERSION
@@ -355,3 +372,352 @@ class DensityClassifier:
         features can be recorded."""
         features = page_density_features(ink_fraction=ink_fraction_from_pixmap(pixmap), boxes=boxes)
         return features, self.classify(features, leaf_index=leaf_index, n_leaves=n_leaves)
+
+
+# ================================================================================================ #
+# Column / reading-order detector (S2.1.5, #39; DT-7)
+#
+# Promotes the S2.0 probe's ``detect_columns``/``reading_order`` into core with the adversarial
+# audit's rulings baked in: a contiguous central valley (>= 3 bins) that splits the page into two
+# genuinely-populated halves is a real gutter; the audit-killed ``min(single-bin)`` detector (every
+# page two-column) and the redundant mirror-symmetry rule are BOTH gone. Detection is pure geometry
+# — box x-centers only, no witness text, no language — so it lives in neutral core beside the density
+# classifier. Like the density feature constants, the projection-profile geometry is fixed and
+# versioned (``COLUMN_DETECTOR_VERSION``); the calibrated *decision* (threshold + hysteresis margin)
+# is book config, defaultless (the G-1 numberless-core posture), because how deep/balanced a gutter
+# must be to count is a scan-profile opinion, not a universal.
+# ================================================================================================ #
+
+# A separate version string from SEGMENTATION_VERSION: a column verdict and a density verdict have
+# independent staleness (DT-9/G-22 — the sidecar fingerprints each), so an algorithm change to one
+# must not silently invalidate the other. The projection-profile constants below are this string's
+# contract; changing any of them bumps it.
+COLUMN_DETECTOR_VERSION = "columns-v1"
+
+# Projection-profile geometry — versioned structural constants, NOT book config (a bin count / a
+# central-search window / a populated-halves band carry no source-language or typeface opinion, so
+# the neutrality budget does not reach them; they define what the col2 signal MEANS, so they join
+# COLUMN_DETECTOR_VERSION).
+_COLUMN_MIN_BOXES = 25            # below this the profile is too sparse to assert a gutter -> 1 column
+_PROJECTION_BINS = 100            # x-axis histogram resolution (page width -> this many bins)
+_CENTRAL_BAND = (33, 67)         # a gutter is searched in the central third of the page only
+_GUTTER_EMPTY_FRACTION = 0.15    # a bin counts as "empty" at <= this fraction of the peak bin
+_MIN_GUTTER_BINS = 3             # a real gutter is a contiguous run of >= this many empty central bins
+_GUTTER_CENTER_RANGE = (0.40, 0.60)     # the gutter midpoint must sit near page center
+_POPULATED_HALVES_RANGE = (0.28, 0.72)  # both columns must be genuinely populated (fraction on the left)
+_LINE_HEIGHT_FRACTION = 0.6      # a reading line is this fraction of the median box height (row binning)
+
+
+def _box_x_center(box) -> float:
+    """The x-midpoint of a box, in page-point space (``box.bbox = (x0, y0, x1, y1)``)."""
+    x0, _, x1, _ = box.bbox
+    return (x0 + x1) / 2.0
+
+
+@dataclass(frozen=True, slots=True)
+class ColumnEvidence:
+    """Projection-profile evidence for one page's column layout (DT-7). Pure geometry, no config.
+
+    ``col2_score`` = valley depth x column balance in ``[0, 1]`` — how strongly the box coordinates
+    support a two-column reading. It is ``0.0`` when no structural gutter exists (a confidently
+    single-column page: too few boxes, no >= 3-bin central valley, an off-center valley, or an
+    unbalanced split). ``split_x`` is the gutter's page-point x when a gutter exists, else the page
+    width (the whole page is one column). The *decision* (how high a score counts as two-column) is
+    the :class:`ColumnDetector`'s, not this record's.
+    """
+
+    col2_score: float
+    split_x: float
+
+    def __post_init__(self) -> None:
+        if not (math.isfinite(self.col2_score) and 0.0 <= self.col2_score <= 1.0):
+            raise ValueError(f"ColumnEvidence.col2_score must be a fraction in [0, 1], got {self.col2_score!r}")
+        if not (math.isfinite(self.split_x) and self.split_x > 0.0):
+            raise ValueError(f"ColumnEvidence.split_x must be a positive page-point x, got {self.split_x!r}")
+
+
+@dataclass(frozen=True, slots=True)
+class ColumnVerdict:
+    """A page's column decision under a calibrated :class:`ColumnDetector`.
+
+    ``n_cols`` is the leaning column count (1 or 2) by the decision threshold; ``confidence`` is the
+    margin ``|col2_score - decision_threshold|`` (distance from the decision boundary, never the raw
+    score — the same edge-margin discipline the density classifier uses); ``confident`` is
+    ``confidence >= hysteresis_margin`` — only a confident page's own evidence stands alone, an
+    in-margin page defers to the cross-page prior (DT-7/R8). ``signal`` names the basis.
+    """
+
+    n_cols: int
+    confidence: float
+    confident: bool
+    signal: str
+
+    def __post_init__(self) -> None:
+        if self.n_cols not in (1, 2):
+            raise ValueError(f"ColumnVerdict.n_cols must be 1 or 2 (S2.1 scope), got {self.n_cols!r}")
+        if not (math.isfinite(self.confidence) and self.confidence >= 0.0):
+            raise ValueError(f"ColumnVerdict.confidence must be a non-negative margin, got {self.confidence!r}")
+        if not self.signal:
+            raise ValueError("ColumnVerdict.signal must name the deciding basis")
+
+
+def detect_columns(boxes: Sequence, width: float) -> ColumnEvidence:
+    """Projection-profile column evidence for one page (DT-7). Reads only box x-centers — no witness
+    text, no language.
+
+    A two-column page is one whose box x-centers form two populated clusters separated by a
+    contiguous central low-density gutter. Every ``>= _MIN_GUTTER_BINS`` central empty run is a
+    candidate gutter; each is scored ``col2_score = valley_depth x column_balance`` where
+    ``valley_depth`` = ``1 - mean(gutter-run bin counts) / peak bin`` (how empty the gutter is
+    relative to the columns) and ``column_balance`` = ``min(left, right) / max(left, right)`` over
+    the fraction of boxes each side (1.0 at an even 50/50 split, lower as it lopsides). The best-
+    scoring candidate whose midpoint is near page center AND whose split leaves both halves populated
+    wins. Considering *all* runs — not only the single longest — is what stops a longer OFF-center run
+    (e.g. a centered running head / folio splitting the gutter band) from shadowing a valid centered
+    gutter. The four single-column rejections (too few boxes, no >= 3-bin run, no run both centered
+    and balanced) all return ``col2_score = 0.0`` and ``split_x = width``.
+    """
+    if len(boxes) < _COLUMN_MIN_BOXES:
+        return ColumnEvidence(col2_score=0.0, split_x=width)
+    if not (math.isfinite(width) and width > 0.0):
+        raise ValueError(f"detect_columns width must be a positive page dimension, got {width!r}")
+
+    bins = [0] * _PROJECTION_BINS
+    for box in boxes:
+        idx = int(_box_x_center(box) / width * _PROJECTION_BINS)
+        bins[max(0, min(_PROJECTION_BINS - 1, idx))] += 1  # clamp both ends (a box on the far edge)
+    peak = max(bins) or 1
+    empty_at = _GUTTER_EMPTY_FRACTION * peak
+
+    # Collect every contiguous central empty run of >= _MIN_GUTTER_BINS (G-10's real-gutter floor).
+    lo, hi = _CENTRAL_BAND
+    runs: list[tuple[int, int]] = []
+    run = 0
+    run_start = lo
+    for b in range(lo, hi):
+        if bins[b] <= empty_at:
+            if run == 0:
+                run_start = b
+            run += 1
+        else:
+            if run >= _MIN_GUTTER_BINS:
+                runs.append((run_start, run))
+            run = 0
+    if run >= _MIN_GUTTER_BINS:  # a run flush against the central-band edge
+        runs.append((run_start, run))
+
+    center_lo, center_hi = _GUTTER_CENTER_RANGE
+    halves_lo, halves_hi = _POPULATED_HALVES_RANGE
+    best = ColumnEvidence(col2_score=0.0, split_x=width)
+    for start, length in runs:
+        split = (start + length / 2.0) / _PROJECTION_BINS * width
+        if not (center_lo * width <= split <= center_hi * width):  # gutter must sit near page center
+            continue
+        left_fraction = sum(1 for box in boxes if _box_x_center(box) < split) / len(boxes)
+        if not (halves_lo <= left_fraction <= halves_hi):  # both columns genuinely populated (G-10)
+            continue
+        gutter_mean = statistics.mean(bins[start:start + length])
+        valley_depth = 1.0 - gutter_mean / peak
+        right_fraction = 1.0 - left_fraction
+        column_balance = min(left_fraction, right_fraction) / max(left_fraction, right_fraction)
+        score = valley_depth * column_balance
+        if score > best.col2_score:  # keep the strongest valid two-column interpretation
+            best = ColumnEvidence(col2_score=score, split_x=split)
+    return best
+
+
+class ColumnDetector:
+    """Applies a book's calibrated column-decision policy to :class:`ColumnEvidence`.
+
+    Two required, defaultless keyword params (the G-1 numberless-core posture): ``decision_threshold``
+    — the ``col2_score`` at/above which a page leans two-column — and ``hysteresis_margin`` — the
+    distance from that threshold within which the evidence is too weak to stand alone, so the
+    cross-page prior decides (DT-7). Both are proposed in-code and ratified against the run-report
+    valley/balance distribution (the DT-7 checkpoint); the core carries no default.
+    """
+
+    def __init__(self, *, decision_threshold: float, hysteresis_margin: float) -> None:
+        if not (math.isfinite(decision_threshold) and 0.0 < decision_threshold < 1.0):
+            raise ValueError(f"decision_threshold must be in (0, 1), got {decision_threshold!r}")
+        if not (math.isfinite(hysteresis_margin) and 0.0 < hysteresis_margin <= 1.0):
+            raise ValueError(f"hysteresis_margin must be in (0, 1], got {hysteresis_margin!r}")
+        self._decision_threshold = decision_threshold
+        self._hysteresis_margin = hysteresis_margin
+
+    @property
+    def version(self) -> str:
+        return COLUMN_DETECTOR_VERSION
+
+    @property
+    def params(self) -> dict[str, float]:
+        """The decision values, for the sidecar fingerprint (DT-9). Ordered for a stable fingerprint."""
+        return {"decision_threshold": self._decision_threshold, "hysteresis_margin": self._hysteresis_margin}
+
+    def classify(self, evidence: ColumnEvidence) -> ColumnVerdict:
+        """Map column evidence to a leaning count + confidence. Pure, deterministic."""
+        score = evidence.col2_score
+        n_cols = 2 if score >= self._decision_threshold else 1
+        confidence = abs(score - self._decision_threshold)
+        confident = confidence >= self._hysteresis_margin
+        return ColumnVerdict(
+            n_cols=n_cols,
+            confidence=confidence,
+            confident=confident,
+            signal="evidence" if confident else "weak-evidence",
+        )
+
+
+def reading_order(boxes: Sequence, *, split_x: float | None) -> tuple[str, ...]:
+    """Recover reading order from box coordinates (DT-7): columns left-to-right, each top-to-bottom,
+    line-binned by median box height. Returns the box texts in order.
+
+    ``split_x`` is the gutter x when the page is two-column (boxes left of it read before boxes right
+    of it), or ``None`` for a single column (a plain top-to-bottom, left-to-right line sort). The
+    caller supplies the column decision (the :class:`ColumnDetector`'s), so this stays a mechanical
+    consequence of geometry.
+    """
+    if not boxes:
+        return ()
+    heights = [box.bbox[3] - box.bbox[1] for box in boxes]
+    median_height = statistics.median(heights)
+    line_height = (median_height if median_height > 0 else 10.0) * _LINE_HEIGHT_FRACTION
+
+    def _key(box):
+        y_center = (box.bbox[1] + box.bbox[3]) / 2.0
+        return (round(y_center / line_height), box.bbox[0])
+
+    if split_x is None:
+        ordered = sorted(boxes, key=_key)
+    else:
+        left = sorted((box for box in boxes if _box_x_center(box) < split_x), key=_key)
+        right = sorted((box for box in boxes if _box_x_center(box) >= split_x), key=_key)
+        ordered = [*left, *right]
+    return tuple(box.text for box in ordered)
+
+
+def ordered_coverage(expected: Sequence[str], actual: Sequence[str]) -> float:
+    """Fraction of ``expected`` tokens recovered IN ORDER by ``actual`` — the order-coverage metric
+    the detector's QA cross-check emits (DT-5 ``order_qa``; the G-16 no-witness pin).
+
+    Order-sensitive by construction: the summed size of ``difflib.SequenceMatcher``'s matching blocks
+    over ``len(expected)`` (``autojunk`` off so nothing is silently ignored on long inputs). Those are
+    Ratcliff/Obershelp longest-*contiguous*-matching blocks, so the total is a CONSERVATIVE lower
+    bound on the true longest-common-subsequence length (equal for the cases here; it can under-report
+    on adversarially interleaved inputs — a note for #40 if it needs exact LCS for the book-wide
+    ``order_qa``). ``1.0`` iff every expected token appears in ``actual`` in order; a column-
+    interleaved order scores below ``1.0``. Empty ``expected`` -> ``0.0`` (coverage is undefined
+    there; 0.0 refuses a vacuous perfect score, never 1.0/NaN).
+    """
+    if not expected:
+        return 0.0
+    matcher = SequenceMatcher(a=list(expected), b=list(actual), autojunk=False)
+    matched = sum(block.size for block in matcher.get_matching_blocks())
+    return matched / len(expected)
+
+
+# --- Cross-page prior (DT-7 / R8): layout is locally constant ----------------------------------- #
+
+
+@dataclass(frozen=True, slots=True)
+class PageColumnInput:
+    """One page's inputs to the cross-page prior: its density verdict (the trust gate) and its column
+    evidence. The density verdict runs first — a routed page routes, a non-content page has untrusted
+    boxes — so the prior only ever chains ``content``-band pages (R8 clause 1)."""
+
+    density: DensityVerdict
+    evidence: ColumnEvidence
+
+
+@dataclass(frozen=True, slots=True)
+class PageColumnVerdict:
+    """The resolved column decision for one page under the prior.
+
+    ``n_cols`` is 1/2 for a decided content page, ``None`` for a routed or boxes-untrusted page.
+    ``n_cols_source`` is ``"evidence"`` (the page's own confident detector verdict) or ``"prior"``
+    (inherited from an agreeing content neighbor), and ``None`` when there is no column decision —
+    the S2.2 re-gate reads this to measure how often the prior decided (R8 clause 4). ``routed`` sends
+    the page to the human worklist; ``signal`` names the basis.
+    """
+
+    n_cols: int | None
+    n_cols_source: str | None
+    routed: bool
+    signal: str
+
+    def __post_init__(self) -> None:
+        if self.n_cols is not None and self.n_cols not in (1, 2):
+            raise ValueError(f"PageColumnVerdict.n_cols must be 1, 2, or None, got {self.n_cols!r}")
+        if self.n_cols_source not in (None, "evidence", "prior"):
+            raise ValueError(f"PageColumnVerdict.n_cols_source must be evidence/prior/None, got {self.n_cols_source!r}")
+        if not self.signal:
+            raise ValueError("PageColumnVerdict.signal must name the deciding basis")
+
+
+# A page's own-evidence classification for the prior pass — the three kinds the density gate + the
+# detector produce, tagged so pass 2 can chain them without re-deriving. (kind, own n_cols, confident).
+_ROUTED, _UNTRUSTED, _CONTENT = "routed", "untrusted", "content"
+
+
+def _next_confident_neighbor(own: list[tuple], i: int) -> int | None:
+    """The immediately-next page's own confident column count, iff that next page is a confident
+    content page — the forward neighbor for the prior. One step only: a non-content/routed page or an
+    in-margin page is not a class to inherit, so the neighbor is ``None`` there (no tunneling across a
+    reset or a second undecided page — R8 clause 1)."""
+    if i + 1 >= len(own):
+        return None
+    kind, lean, confident = own[i + 1]
+    return lean if (kind == _CONTENT and confident) else None
+
+
+def resolve_reading_columns(
+    page_inputs: Sequence[PageColumnInput], detector: ColumnDetector
+) -> list[PageColumnVerdict]:
+    """Resolve each page's column count with the cross-page prior (DT-7 / R8).
+
+    Two passes. Pass 1 classifies every page by the density gate: a density-routed page routes, a
+    non-content page is boxes-untrusted, and a content page gets its own detector verdict (confident
+    or in-margin). Pass 2 walks the book carrying ``prior`` — the last *confident* content column
+    count within the unbroken content chain — and:
+
+    - a routed or non-content page routes/records untrusted and **resets** ``prior`` (clause 1: the
+      prior never tunnels an endpaper or a routed page);
+    - a confident content page keeps its own evidence and becomes the new ``prior`` (clause 2: own
+      evidence outside the margin always wins);
+    - an in-margin content page inherits the class shared by its available confident content
+      neighbors (the previous ``prior`` and the immediate next confident page); if those neighbors
+      **disagree**, or none exists, it abstains to the worklist (clause 3). An inherited page does
+      not overwrite ``prior`` — a weak inheritance never becomes new confident evidence.
+
+    Every decided page records ``n_cols_source`` (clause 4).
+    """
+    own: list[tuple] = []
+    for page in page_inputs:
+        if page.density.routed:
+            own.append((_ROUTED, None, None))
+        elif not page.density.boxes_trusted:
+            own.append((_UNTRUSTED, None, None))
+        else:
+            verdict = detector.classify(page.evidence)
+            own.append((_CONTENT, verdict.n_cols, verdict.confident))
+
+    verdicts: list[PageColumnVerdict] = []
+    prior: int | None = None
+    for i, (kind, lean, confident) in enumerate(own):
+        if kind == _ROUTED:
+            verdicts.append(PageColumnVerdict(None, None, routed=True, signal="density-routed"))
+            prior = None
+        elif kind == _UNTRUSTED:
+            verdicts.append(PageColumnVerdict(None, None, routed=False, signal="boxes-untrusted"))
+            prior = None
+        elif confident:
+            verdicts.append(PageColumnVerdict(lean, "evidence", routed=False, signal="evidence"))
+            prior = lean
+        else:
+            neighbors = [c for c in (prior, _next_confident_neighbor(own, i)) if c is not None]
+            if neighbors and all(c == neighbors[0] for c in neighbors):
+                verdicts.append(PageColumnVerdict(neighbors[0], "prior", routed=False, signal="prior-inherit"))
+                # prior UNCHANGED: an inherited page is not confident own-evidence (do not propagate).
+            else:
+                verdicts.append(PageColumnVerdict(None, None, routed=True, signal="prior-ambiguous"))
+                prior = None  # an abstaining content page is worklist-routed -> resets the chain.
+    return verdicts

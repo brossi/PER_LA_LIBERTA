@@ -77,8 +77,8 @@ def _resolves(cited: str, actual: set[str]) -> bool:
 # doc-scoped), and a child that ships its tests under a *different* name never resolves the entry,
 # leaving the plan citation dangling behind it — pruning that case belongs to the child-close
 # review (the issue tags below exist for that review, not for this test).
-PENDING_TEST_HOMES = {
-    "test_geometry_e2e": "#39",
+PENDING_TEST_HOMES: dict[str, str] = {
+    # (empty) — test_geometry_e2e landed with #39 (S2.1.5); its entry was deleted on resolution.
 }
 
 

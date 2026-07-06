@@ -353,3 +353,71 @@ def test_unimplemented_but_consistent_language_reaches_unknown_language_error(tm
     assert cfg.language_id == "xx"
     with pytest.raises(UnknownLanguageError):
         get_language_plugin(cfg.language_id)
+
+
+# --- S2.1.5 (#39) — segmentation front-end config: DT-5 order_source + DT-6 density bands -------- #
+
+
+def test_segmentation_config_resolves_for_pll():
+    # The manifest->typed-model wiring deferred from #38: manifest.segmentation carries the DT-5
+    # order_source (PLL = witness: copy1 is the column-ordered reading-order oracle) and the DT-6
+    # density bands ratified by Ben 2026-07-06.
+    seg = load_book("per_la_liberta").manifest.segmentation
+    assert seg is not None
+    assert seg.order_source == "witness"
+    b = seg.density_bands
+    assert (b.yield_content_min, b.box_content_min, b.ink_blank_max) == (0.70, 40, 0.15)
+    assert (b.ink_dark_min, b.confidence_margin) == (0.60, 0.05)
+    assert (b.cover_edge_leaves, b.ink_saturation_min) == (7, 0.90)
+
+
+def test_density_classifier_constructs_from_config():
+    # The construction seam #39 owns: the typed band model -> a live DensityClassifier, its params
+    # exactly the manifest values, and it classifies (proves the round-trip is a working classifier,
+    # not just a data copy).
+    from engine.structure import DensityBand, DensityClassifier, PageDensityFeatures
+
+    seg = load_book("per_la_liberta").manifest.segmentation
+    clf = DensityClassifier.from_config(seg.density_bands)
+    assert clf.params == {
+        "yield_content_min": 0.70, "box_content_min": 40, "ink_blank_max": 0.15,
+        "ink_dark_min": 0.60, "confidence_margin": 0.05, "cover_edge_leaves": 7,
+        "ink_saturation_min": 0.90,
+    }
+    feats = PageDensityFeatures(ink_fraction=0.10, box_count=400, token_yield=0.95, mean_token_length=5.0)
+    assert clf.classify(feats, leaf_index=100, n_leaves=278).band is DensityBand.CONTENT
+
+
+def test_book_without_segmentation_is_valid_and_has_none():
+    # Segmentation is OPTIONAL top-level config — only a book routed through the geometry front-end
+    # carries it. The synthetic fixture book has none: it loads, and manifest.segmentation is None.
+    assert load_book("synthetic").manifest.segmentation is None
+
+
+def test_schema_rejects_unknown_order_source(tmp_path):
+    m = _real_manifest()
+    m["id"] = "os"
+    m["segmentation"]["order_source"] = "sideways"   # not witness|geometry
+    books = _write_book(tmp_path, "os", m)
+    with pytest.raises(ConfigError, match="schema validation"):
+        load_book("os", books_dir=books, profiles_dir=REAL_PROFILES)
+
+
+def test_schema_requires_order_source_when_segmentation_present(tmp_path):
+    m = _real_manifest()
+    m["id"] = "noos"
+    del m["segmentation"]["order_source"]
+    books = _write_book(tmp_path, "noos", m)
+    with pytest.raises(ConfigError, match="schema validation"):
+        load_book("noos", books_dir=books, profiles_dir=REAL_PROFILES)
+
+
+def test_schema_rejects_incomplete_density_bands(tmp_path):
+    # The band block is all-or-nothing: a missing band would leave the defaultless DensityClassifier
+    # unconstructible, so the schema rejects it at load rather than deep in from_config.
+    m = _real_manifest()
+    m["id"] = "nb"
+    del m["segmentation"]["density_bands"]["ink_dark_min"]
+    books = _write_book(tmp_path, "nb", m)
+    with pytest.raises(ConfigError, match="schema validation"):
+        load_book("nb", books_dir=books, profiles_dir=REAL_PROFILES)

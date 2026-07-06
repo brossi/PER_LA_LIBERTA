@@ -23,6 +23,7 @@ import jsonschema
 from .models import (
     BookManifest,
     CoverageSpec,
+    DensityBands,
     Edition,
     LanguageProfile,
     OcrConfig,
@@ -30,6 +31,7 @@ from .models import (
     PeriodDictionary,
     ResolvedConfig,
     ScanFacts,
+    Segmentation,
     SourceNoiseProfile,
     Source,
     Structure,
@@ -66,6 +68,28 @@ def _validate(data: dict, schema_name: str, *, what: str) -> None:
 
 
 # --- dataclass builders (dict → typed) ------------------------------------- #
+
+def _build_segmentation(data: dict) -> Segmentation | None:
+    """Build the optional geometry front-end config (``manifest.segmentation``; S2.1, DT-5/DT-6).
+    Absent for most books -> ``None``. When present the schema has already guaranteed all seven bands
+    + a valid ``order_source``, so this is a straight transcription."""
+    seg = data.get("segmentation")
+    if seg is None:
+        return None
+    bands = seg["density_bands"]
+    return Segmentation(
+        order_source=seg["order_source"],
+        density_bands=DensityBands(
+            yield_content_min=bands["yield_content_min"],
+            box_content_min=bands["box_content_min"],
+            ink_blank_max=bands["ink_blank_max"],
+            ink_dark_min=bands["ink_dark_min"],
+            confidence_margin=bands["confidence_margin"],
+            cover_edge_leaves=bands["cover_edge_leaves"],
+            ink_saturation_min=bands["ink_saturation_min"],
+        ),
+    )
+
 
 def _build_manifest(data: dict) -> BookManifest:
     structure = data["structure"]
@@ -116,6 +140,7 @@ def _build_manifest(data: dict) -> BookManifest:
             site_base=edition["site_base"],
         ),
         prompt_context=dict(data["prompt_context"]),
+        segmentation=_build_segmentation(data),
     )
 
 

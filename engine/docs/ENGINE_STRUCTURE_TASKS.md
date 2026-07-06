@@ -443,6 +443,25 @@ Immutable, addressed capture units — the floor everything pins to.
 > synthetic manifest unaffected). Red-first + mutation hunt 64/64; two adversarial audits. Row stays `WIP` —
 > #39 (column detect + two-branch wiring, consumes the manifest bands) and #40 (worklist) remain.
 
+> **Pointer (S2.1.5 / #39 close, 2026-07-06):** the column / reading-order detector + cross-page
+> prior + two-branch order sourcing are built (DT-5, DT-7). `structure/segmentation.py` gains
+> `detect_columns` (projection-profile gutter: **all** ≥3-bin central runs scored `valley_depth ×
+> column_balance`, best centered+balanced candidate wins — the "longest-run-only" shadowing bug an
+> adversarial audit surfaced is fixed), `ColumnDetector` (defaultless `decision_threshold` +
+> `hysteresis_margin` — numberless core), `reading_order`, `ordered_coverage`, and the cross-page
+> prior `resolve_reading_columns` (R8: content-only chain, non-content/routed resets, confident
+> own-evidence wins **G-23**, disagreeing neighbors abstain, `n_cols_source` recorded). **DT-5
+> wiring:** `order_source` (`witness|geometry`) added to manifest + schema + typed `Segmentation`
+> model; PLL = `witness`; `DensityClassifier.from_config` builds the classifier from the ratified
+> bands (the wiring deferred from #38). **G-16** no-witness e2e (`test_geometry_e2e.py`, real OCR)
+> pins detector-recovered reading order at `ordered_coverage == 1.0`. Column-decision policy is
+> **PROPOSED not ratified** — `decision_threshold=0.50` / `hysteresis_margin=0.15`, evidence in
+> `docs/probes/s2_1_column_report.md` (col2_score sharply bimodal: 59 pages ≈0.0, 211 ≥0.80, empty
+> [0.05,0.40) valley; 5 pages in-margin) via `probes/s2_1_column_probe.py`, awaiting Ben's DT-7
+> ruling before landing in `manifest.json` `segmentation.column_detector`. Red-first + mutation hunt
+> **32/32**; three adversarial audits (wide + narrow found & drove the shadowing fix + a Rule-A
+> delta re-audit). Row stays `WIP` — #40 (worklist + verdict CLI + book-wide `order_qa` feed) remains.
+
 | S2.2 | Geometry property tests: boxes within page bounds; source-order ↔ geometric-order coherence on a real page; primary-witness box on canonical atoms **where matched**; **absent/unmatched geom is representable and excluded from primary re-bind**. **PLUS the S2.0-mandated RE-GATE** (binding, not prose — the S2.0 verdict was *conditional*-primary): measure col-aware ordered coverage on the **as-built** S2.1 detector over a breadth sample (n≥30), require **mean ≥0.85 AND per-page pass-rate ≥85%** (not a page median — the audit showed median hid a 0.82 mean / ~30% fail tail), and on the result **confirm S5 `geometry-primary` or demote** the mode (record in lineage). Until this passes, S5 runs conditional-primary | §9; `docs/probes/s2_0_geometry_alignment.md` | S2.1; issue #30 | property: those four assertions hold **and** the re-gate measures the as-built detector on mean+pass-rate and sets/confirms the S5 mode | `BUILD`/`GATE` | `TODO` |
 
 > **Risk (now gated, not just noted):** geometry presupposes a usable OCR bbox layer on the

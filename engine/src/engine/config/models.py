@@ -105,6 +105,41 @@ class Edition:
 
 
 @dataclass(frozen=True, slots=True)
+class DensityBands:
+    """The DT-6 density-band thresholds (``manifest.segmentation.density_bands``; S2.1.4 #38).
+
+    A faithful 1:1 transcription of the seven calibrated band values (ratified by Ben 2026-07-06);
+    :meth:`DensityClassifier.from_config` reads them to build the classifier. They live in book
+    config — not a core default — because a band is a scan-profile opinion (the G-1 numberless-core
+    posture); the classifier's constructor is where the value *ranges* are enforced, this is just
+    the typed carrier.
+    """
+
+    yield_content_min: float
+    box_content_min: int
+    ink_blank_max: float
+    ink_dark_min: float
+    confidence_margin: float
+    cover_edge_leaves: int
+    ink_saturation_min: float
+
+
+@dataclass(frozen=True, slots=True)
+class Segmentation:
+    """The geometry/segmentation front-end config (``manifest.segmentation``; S2.1, DT-5/DT-6).
+
+    ``order_source`` selects the two-branch reading-order policy (DT-5): ``"witness"`` — a
+    column-ordered text witness supplies reading order and the detector is only a QA cross-check
+    (PLL, copy1); ``"geometry"`` — the geometric detector is the authoritative order source
+    (image-only sources). ``density_bands`` is the DT-6 pre-check calibration. Optional book-wide:
+    only a book routed through the geometry front-end carries a ``segmentation`` block.
+    """
+
+    order_source: str
+    density_bands: DensityBands
+
+
+@dataclass(frozen=True, slots=True)
 class BookManifest:
     schema_version: int
     id: str
@@ -117,6 +152,7 @@ class BookManifest:
     structure: Structure
     edition: Edition
     prompt_context: dict  # free-form; keys defined by the M4 prompt templates
+    segmentation: Segmentation | None = None  # geometry front-end config (S2.1); absent for most books
 
 
 # --- shared profiles ------------------------------------------------------- #

@@ -24,16 +24,26 @@ import fitz  # PyMuPDF — a declared engine dependency; builds the in-memory pi
 import pytest
 
 from engine.structure import (
+    COLUMN_DETECTOR_VERSION,
     SEGMENTATION_VERSION,
+    ColumnDetector,
+    ColumnEvidence,
+    ColumnVerdict,
     DensityBand,
     DensityClassifier,
     DensityVerdict,
+    PageColumnInput,
+    PageColumnVerdict,
     PageDensityFeatures,
     WordBox,
+    detect_columns,
     edge_strip,
     ink_fraction_from_pixmap,
     is_alpha_token,
+    ordered_coverage,
     page_density_features,
+    reading_order,
+    resolve_reading_columns,
 )
 from engine.structure.segmentation import _INK_LUMA_THRESHOLD
 
@@ -562,3 +572,474 @@ def test_classify_page_extracts_then_classifies():
     features, verdict = _clf().classify_page(pixmap=pm, boxes=boxes, leaf_index=10, n_leaves=20)
     assert features.ink_fraction == pytest.approx(0.75)
     assert verdict.band is DensityBand.NON_TEXT_DARK
+
+
+# ================================================================================================ #
+# S2.1.5 (#39) — column / reading-order detector (DT-7) + cross-page prior (R8).
+#
+# The projection-profile column detector generalized from the S2.0 probe with the adversarial
+# audit's rulings baked in: a contiguous central valley (>= 3 bins) splitting the page into two
+# genuinely-populated halves, mirror-symmetry DROPPED. ``detect_columns`` is pure geometry
+# (col2_score = valley depth x column balance); ``ColumnDetector`` applies the calibrated decision
+# threshold + hysteresis margin; ``resolve_reading_columns`` threads the cross-page prior under the
+# density gate. Fake tier: synthetic WordBox layouts, no PDF/OCR (the real-OCR end-to-end is
+# ``test_geometry_e2e.py``, G-16).
+# ================================================================================================ #
+
+_W = 1000.0  # page width used by the column fixtures; 100 projection bins -> bin b spans [10b, 10b+10)
+
+
+def _boxc(b: int, *, row: int = 0, text: str = "w", width: float = _W, bins: int = 100) -> WordBox:
+    """A WordBox whose x-center falls in projection bin ``b``, on line ``row`` (distinct y). The
+    detector reads only box x-centers (for binning) and y/height (for line-order); text is carried
+    for reading_order."""
+    xc = (b + 0.5) / bins * width
+    y = 20.0 + row * 30.0
+    return WordBox(text=text, bbox=(xc - 3.0, y, xc + 3.0, y + 12.0))
+
+
+def _two_col_boxes(*, left_bins=range(15, 41), right_bins=range(60, 86)) -> list[WordBox]:
+    """Two dense clusters (one box per bin, so peak count = 1) with an empty central gutter
+    (bins 41-59). Left texts ``L0..``, right ``R0..``, each on its own line top-to-bottom."""
+    boxes = [_boxc(b, row=i, text=f"L{i}") for i, b in enumerate(left_bins)]
+    boxes += [_boxc(b, row=i, text=f"R{i}") for i, b in enumerate(right_bins)]
+    return boxes
+
+
+def _sparse_single_col_boxes() -> list[WordBox]:
+    """>= 25 boxes filling the central third EXCEPT a 2-bin gap (bins 49-50) — a stray sparse gap,
+    NOT a >= 3-bin gutter, split ~50/50. The G-10 fixture: only the >= 3-bin run guard keeps this
+    single-column (the populated-halves guard passes at 50/50)."""
+    populated = list(range(33, 49)) + list(range(51, 67))  # 16 + 16 = 32 boxes; bins 49,50 empty
+    return [_boxc(b, row=i) for i, b in enumerate(populated)]
+
+
+def _det(**overrides) -> ColumnDetector:
+    params = dict(decision_threshold=0.5, hysteresis_margin=0.15)
+    params.update(overrides)
+    return ColumnDetector(**params)
+
+
+def _dense_two_col(*, strays: tuple[int, ...] = ()) -> list[WordBox]:
+    """Two columns stacked 7-deep per bin (peak = 7, so a lone box in a gutter bin, count 1 <=
+    0.15*7 = 1.05, still reads as 'empty') plus optional single-box strays in central gutter bins.
+    Columns sit OUTSIDE the central band (bins 20-30 / 70-80) so they never break the gutter run;
+    the strays are placed symmetrically about the split, so they move valley depth WITHOUT touching
+    column balance."""
+    boxes: list[WordBox] = []
+    row = 0
+    for b in (*range(20, 31), *range(70, 81)):
+        boxes += [_boxc(b, row=row + k) for k in range(7)]
+        row += 7
+    for b in strays:
+        boxes.append(_boxc(b, row=row))
+        row += 1
+    return boxes
+
+
+# --- detect_columns: projection-profile evidence (pure geometry) -------------------------------- #
+
+
+def test_two_column_page_scores_a_deep_balanced_gutter():
+    ev = detect_columns(_two_col_boxes(), _W)
+    assert isinstance(ev, ColumnEvidence)
+    assert ev.col2_score == pytest.approx(1.0)         # depth 1.0 (empty gutter) x balance 1.0 (50/50)
+    assert 0.40 * _W <= ev.split_x <= 0.60 * _W        # gutter near center
+
+
+def test_sparse_single_column_is_not_two_column_g10():
+    # G-10: a sparse page with a 2-bin central gap (no >= 3-bin contiguous gutter) is single-column,
+    # col2_score 0.0. RED (mutant): remove the >= 3-bin run guard (min_gutter_bins 3 -> 1) -> the
+    # 2-bin gap reads as a gutter, splits 50/50, and scores > 0.
+    ev = detect_columns(_sparse_single_col_boxes(), _W)
+    assert ev.col2_score == 0.0
+    assert ev.split_x == pytest.approx(_W)             # no gutter -> full width
+
+
+def test_too_few_boxes_is_single_column():
+    # Below the min-box floor the projection profile is too sparse to assert a gutter at all.
+    ev = detect_columns([_boxc(20), _boxc(80)], _W)    # 2 boxes, clearly < the floor
+    assert ev.col2_score == 0.0
+
+
+def test_gutter_must_sit_near_center_not_at_the_margin():
+    # A real >= 3-bin empty run that lies INSIDE the central search band but off to one side (bins
+    # 33-37, midpoint ~0.355w) is not a true center gutter: the center-range guard (0.40-0.60)
+    # rejects it. RED (mutant): drop the center guard -> this off-center valley scores > 0. (The empty
+    # run is inside 33-66 so the >= 3-bin guard passes it through to the center check — this fixture
+    # isolates the center guard, unlike a margin band the >= 3-bin guard would already reject.)
+    boxes = [_boxc(b, row=i) for i, b in enumerate(range(12, 33))]        # left cluster bins 12-32
+    boxes += [_boxc(b, row=i) for i, b in enumerate(range(38, 67))]       # right cluster bins 38-66
+    ev = detect_columns(boxes, _W)                                        # empty run bins 33-37, off-center
+    assert ev.col2_score == 0.0
+
+
+def test_unbalanced_halves_lower_the_score_via_column_balance():
+    # A real gutter but a lopsided split (26 left vs 13 right = 0.667/0.333) still detects two columns
+    # but at a lower score: depth 1.0 x balance (0.333/0.667 = 0.5) = 0.5. Pins col2_score = depth x
+    # balance (a mutant dropping the balance factor returns 1.0).
+    ev = detect_columns(_two_col_boxes(left_bins=range(15, 41), right_bins=range(60, 73)), _W)
+    assert ev.col2_score == pytest.approx(0.5)
+
+
+def test_lopsided_beyond_the_populated_halves_band_is_single_column():
+    # A tiny right stub (26 left vs 4 right = 0.867/0.133) fails the populated-halves guard (0.133 <
+    # 0.28): not two genuinely-populated columns. RED (mutant): drop the populated-halves guard -> the
+    # stub scores as a column.
+    ev = detect_columns(_two_col_boxes(left_bins=range(15, 41), right_bins=range(60, 64)), _W)
+    assert ev.col2_score == 0.0
+
+
+def test_valley_depth_lowers_score_for_a_partially_filled_gutter():
+    # col2_score = valley_depth x balance: a gutter with sub-threshold strays is less confidently a
+    # gutter than an empty one. The strays are symmetric about the split, so column balance is
+    # identical between the two and ONLY valley depth changes. RED (mutant): valley_depth -> 1.0 drops
+    # the depth factor -> the two score equally and `strays < empty` fails.
+    empty = detect_columns(_dense_two_col(), _W).col2_score
+    strays = detect_columns(_dense_two_col(strays=(45, 46, 47, 48, 49, 51, 52, 53, 54, 55)), _W).col2_score
+    assert empty == pytest.approx(1.0)                 # empty gutter, 50/50 split -> depth 1 x balance 1
+    assert 0.0 < strays < empty
+
+
+def test_centered_gutter_element_does_not_shadow_a_valid_gutter():
+    # A two-column page with a centered element sitting in the gutter zone (a centered running head /
+    # folio / caption) splits the central empty band into two runs: a longer OFF-center run and a
+    # shorter CENTERED one. The detector must not fix on the global-longest run, reject it on the
+    # center guard, and declare a confident single column — it must find the valid centered gutter.
+    # RED (pre-fix / mutant that keeps only the longest run): returns col2_score 0.0 (confident
+    # single-column) even though the control (same boxes, no centered element) is a clean two-column.
+    bins = [*range(20, 33), 46, 47, 48, *range(52, 65)]  # two columns + 3 centered gutter boxes
+    boxes = [_boxc(b, row=i) for i, b in enumerate(bins)]
+    ev = detect_columns(boxes, _W)
+    assert ev.col2_score > 0.0, "a centered element must not shadow the real centered gutter"
+    assert 0.40 * _W <= ev.split_x <= 0.60 * _W
+    # and the control (drop the 3 centered boxes) is unambiguously two-column
+    control = [_boxc(b, row=i) for i, b in enumerate([*range(20, 33), *range(52, 65)])]
+    assert detect_columns(control, _W).col2_score == pytest.approx(1.0)
+
+
+def test_detect_columns_rejects_nonpositive_width():
+    # Defensive: a non-positive page width would divide by zero in the projection binning. Page width
+    # from the backend is always positive; a clear ValueError beats a ZeroDivisionError deep inside.
+    with pytest.raises(ValueError, match="width"):
+        detect_columns(_two_col_boxes(), 0.0)
+
+
+def test_detect_columns_reads_word_boxes_not_tuples():
+    # The promoted detector reads production WordBox records (.bbox), not the probe's raw tuples.
+    boxes = _two_col_boxes()
+    assert all(isinstance(b, WordBox) for b in boxes)
+    assert detect_columns(boxes, _W).col2_score > 0.0
+
+
+# --- ColumnDetector: calibrated decision threshold + hysteresis margin --------------------------- #
+
+
+def test_column_detector_requires_both_params_no_default():
+    with pytest.raises(TypeError):
+        ColumnDetector(decision_threshold=0.5)          # hysteresis_margin omitted
+    with pytest.raises(TypeError):
+        ColumnDetector(hysteresis_margin=0.15)          # decision_threshold omitted
+
+
+@pytest.mark.parametrize(
+    "overrides,needle",
+    [
+        ({"decision_threshold": 0.0}, "decision_threshold"),   # must be in (0, 1)
+        ({"decision_threshold": 1.0}, "decision_threshold"),
+        ({"decision_threshold": float("nan")}, "decision_threshold"),
+        ({"hysteresis_margin": 0.0}, "hysteresis_margin"),     # must be in (0, 1]
+        ({"hysteresis_margin": 1.5}, "hysteresis_margin"),
+    ],
+)
+def test_column_detector_rejects_incoherent_params(overrides, needle):
+    with pytest.raises(ValueError, match=needle):
+        _det(**overrides)
+
+
+def test_confident_two_column_verdict():
+    ev = ColumnEvidence(col2_score=1.0, split_x=505.0)
+    v = _det().classify(ev)
+    assert isinstance(v, ColumnVerdict)
+    assert v.n_cols == 2
+    assert v.confident is True                          # margin |1.0 - 0.5| = 0.5 >= 0.15
+    assert v.confidence == pytest.approx(0.5)
+    assert v.signal == "evidence"
+
+
+def test_confident_single_column_verdict():
+    ev = ColumnEvidence(col2_score=0.0, split_x=_W)
+    v = _det().classify(ev)
+    assert v.n_cols == 1
+    assert v.confident is True                          # margin |0.0 - 0.5| = 0.5 >= 0.15
+    assert v.confidence == pytest.approx(0.5)
+
+
+def test_score_inside_the_hysteresis_margin_is_not_confident():
+    # A score just above the decision threshold (0.55, margin 0.05 < 0.15) leans two-column but is
+    # NOT confident — the cross-page prior decides it. RED (mutant): drop the margin comparison ->
+    # every page reads confident and the prior never engages.
+    ev = ColumnEvidence(col2_score=0.55, split_x=505.0)
+    v = _det().classify(ev)
+    assert v.n_cols == 2                                # lean is by the threshold
+    assert v.confident is False
+    assert v.confidence == pytest.approx(0.05)
+    assert v.signal == "weak-evidence"
+
+
+def test_decision_threshold_boundary_is_inclusive_for_two_columns():
+    # A score exactly at the threshold leans two-column (>=), margin 0 -> not confident.
+    v = _det().classify(ColumnEvidence(col2_score=0.5, split_x=505.0))
+    assert v.n_cols == 2
+    assert v.confident is False
+    assert v.confidence == pytest.approx(0.0)
+
+
+def test_hysteresis_margin_boundary_is_inclusive():
+    # confidence exactly at the hysteresis margin is confident (>=). Dyadic-exact values (0.75, 0.5,
+    # 0.25 are all exact in IEEE-754, so |0.75 - 0.5| == 0.25 with no float residue) put confidence
+    # EXACTLY on the margin — a value like 0.65 - 0.5 = 0.15000000000000002 would sit just above it
+    # and hide the comparator. RED (mutant): >= -> > drops the exact boundary out of confident.
+    v = _det(hysteresis_margin=0.25).classify(ColumnEvidence(col2_score=0.75, split_x=505.0))
+    assert v.confidence == 0.25          # exact, not approx — the point is the boundary is exact
+    assert v.confident is True
+
+
+def test_column_detector_version_is_pinned():
+    assert _det().version == COLUMN_DETECTOR_VERSION
+    assert isinstance(COLUMN_DETECTOR_VERSION, str) and COLUMN_DETECTOR_VERSION
+
+
+# --- ColumnEvidence / ColumnVerdict / PageColumnVerdict record validity ------------------------- #
+
+
+@pytest.mark.parametrize("bad", [1.5, -0.1, float("nan"), float("inf")])
+def test_column_evidence_rejects_out_of_range_score(bad):
+    with pytest.raises(ValueError, match="col2_score"):
+        ColumnEvidence(col2_score=bad, split_x=505.0)
+
+
+@pytest.mark.parametrize("bad", [0.0, -1.0, float("nan")])
+def test_column_evidence_rejects_nonpositive_split(bad):
+    with pytest.raises(ValueError, match="split_x"):
+        ColumnEvidence(col2_score=0.5, split_x=bad)
+
+
+@pytest.mark.parametrize("bad", [0, 3, -1])
+def test_column_verdict_rejects_bad_n_cols(bad):
+    with pytest.raises(ValueError, match="n_cols"):
+        ColumnVerdict(n_cols=bad, confidence=0.2, confident=True, signal="evidence")
+
+
+def test_column_verdict_rejects_negative_confidence():
+    with pytest.raises(ValueError, match="confidence"):
+        ColumnVerdict(n_cols=2, confidence=-0.1, confident=True, signal="evidence")
+
+
+def test_page_column_verdict_rejects_bad_source_and_count():
+    with pytest.raises(ValueError, match="n_cols_source"):
+        PageColumnVerdict(n_cols=2, n_cols_source="banana", routed=False, signal="evidence")
+    with pytest.raises(ValueError, match="n_cols"):
+        PageColumnVerdict(n_cols=5, n_cols_source="evidence", routed=False, signal="evidence")
+
+
+# --- reading_order: columns top-to-bottom, left column first ------------------------------------ #
+
+
+def test_reading_order_two_columns_reads_left_column_then_right():
+    boxes = _two_col_boxes()
+    ev = detect_columns(boxes, _W)
+    order = reading_order(boxes, split_x=ev.split_x)
+    expected = [f"L{i}" for i in range(26)] + [f"R{i}" for i in range(26)]
+    assert list(order) == expected
+
+
+def test_reading_order_single_column_sorts_by_line_then_x():
+    # Single column (split_x None): a plain top-to-bottom, left-to-right line sort.
+    boxes = [_boxc(30, row=2, text="third"), _boxc(10, row=0, text="first"), _boxc(50, row=1, text="second")]
+    assert list(reading_order(boxes, split_x=None)) == ["first", "second", "third"]
+
+
+def test_reading_order_two_columns_beats_naive_full_width_order():
+    # The unit companion to G-16: recovering the column split reproduces the true reading order
+    # (coverage 1.0), while a naive full-width line sort interleaves the columns and loses it.
+    boxes = _two_col_boxes()
+    ev = detect_columns(boxes, _W)
+    expected = [f"L{i}" for i in range(26)] + [f"R{i}" for i in range(26)]
+    col_order = reading_order(boxes, split_x=ev.split_x)
+    naive_order = reading_order(boxes, split_x=None)     # ignore columns -> row-interleaved
+    assert ordered_coverage(expected, col_order) == pytest.approx(1.0)
+    assert ordered_coverage(expected, naive_order) < 1.0
+
+
+# --- ordered_coverage: LCS-based order metric (DT-5 order_qa feed; G-16 pin) --------------------- #
+
+
+def test_ordered_coverage_identical_is_one():
+    assert ordered_coverage(["a", "b", "c"], ["a", "b", "c"]) == pytest.approx(1.0)
+
+
+def test_ordered_coverage_all_expected_in_order_with_extras_is_one():
+    assert ordered_coverage(["a", "b"], ["x", "a", "y", "b", "z"]) == pytest.approx(1.0)
+
+
+def test_ordered_coverage_out_of_order_is_partial():
+    # Reversed: only a length-1 subsequence is common -> 1/3.
+    assert ordered_coverage(["a", "b", "c"], ["c", "b", "a"]) == pytest.approx(1.0 / 3.0)
+
+
+def test_ordered_coverage_partial_fraction():
+    assert ordered_coverage(["a", "b", "c", "d"], ["a", "b"]) == pytest.approx(0.5)
+
+
+def test_ordered_coverage_empty_expected_is_zero_not_vacuous_one():
+    # No expected tokens is undefined coverage; 0.0 avoids a vacuous perfect score on an empty page.
+    assert ordered_coverage([], ["a", "b"]) == 0.0
+
+
+# --- resolve_reading_columns: cross-page prior under the density gate (DT-7 / R8; G-23) ---------- #
+#
+# ``resolve_reading_columns`` threads a book's pages through the prior: a content page whose own
+# column evidence is confident keeps it (clause 2); an in-margin content page inherits an agreeing
+# neighbor's class (locally-constant layout) but abstains to the worklist on disagreement (clause 3);
+# any non-content or routed page RESETS the chain so the prior never tunnels an endpaper (clause 1);
+# every decided page records n_cols_source "evidence"/"prior" (clause 4). The score->band coupling
+# uses tiny synthetic evidence + density verdicts (no PDF).
+
+
+def _content_dv() -> DensityVerdict:
+    """A density verdict that trusts the boxes (band CONTENT) — the gate that lets a page carry a
+    column verdict at all."""
+    return DensityVerdict(DensityBand.CONTENT, confidence=0.30, signal="content")
+
+
+def _dark_dv() -> DensityVerdict:
+    """An untrusted (non-content) density verdict — near_blank/dark/cover all reset the prior chain."""
+    return DensityVerdict(DensityBand.NON_TEXT_DARK, confidence=0.30, signal="non_text_dark")
+
+
+def _routed_dv() -> DensityVerdict:
+    """A density-abstained (routed) page — routes to the worklist and resets the prior chain."""
+    return DensityVerdict(DensityBand.ABSTAIN, confidence=0.0, signal="ink-ambiguous")
+
+
+def _pin(score: float, density: DensityVerdict | None = None) -> PageColumnInput:
+    """A page input: a column evidence of the given col2_score + a density verdict (content default)."""
+    return PageColumnInput(density=density or _content_dv(), evidence=ColumnEvidence(col2_score=score, split_x=505.0))
+
+
+# Under _det() (threshold 0.5, margin 0.15): score 1.0 -> confident 2-col; score 0.0 -> confident
+# 1-col; score 0.55 -> in-margin (margin 0.05 < 0.15), leans 2-col but not confident.
+_CONF2, _CONF1, _INMARGIN = 1.0, 0.0, 0.55
+
+
+def test_confident_pages_keep_their_own_evidence():
+    verdicts = resolve_reading_columns([_pin(_CONF2), _pin(_CONF1)], _det())
+    assert [v.n_cols for v in verdicts] == [2, 1]
+    assert all(v.n_cols_source == "evidence" and not v.routed for v in verdicts)
+
+
+def test_strong_single_column_between_two_two_columns_keeps_its_own_evidence_g23():
+    # G-23: the middle page's own evidence is confidently single-column; the prior must NOT override
+    # it to two-column just because both neighbors are two-column. RED (mutant): let the prior override
+    # strong own-page evidence (drop the `confident` guard / force the prior branch) -> the middle page
+    # inherits 2 columns from its neighbors.
+    verdicts = resolve_reading_columns([_pin(_CONF2), _pin(_CONF1), _pin(_CONF2)], _det())
+    assert verdicts[1].n_cols == 1
+    assert verdicts[1].n_cols_source == "evidence"
+    assert verdicts[1].routed is False
+
+
+def test_in_margin_page_inherits_agreeing_neighbors():
+    # An in-margin content page between two confident two-column pages inherits two columns — layout
+    # is locally constant, the prior breaking a tie inside the margin (R8 clause 2; the disagree->
+    # abstain half is clause 3, tested separately). Records source "prior".
+    verdicts = resolve_reading_columns([_pin(_CONF2), _pin(_INMARGIN), _pin(_CONF2)], _det())
+    assert verdicts[1].n_cols == 2
+    assert verdicts[1].n_cols_source == "prior"
+    assert verdicts[1].routed is False
+
+
+def test_in_margin_page_between_disagreeing_neighbors_abstains():
+    # Clause 3: an in-margin page whose confident neighbors DISAGREE (2-col before, 1-col after) cannot
+    # inherit — it abstains to the worklist. RED (mutant): inherit from one side only / ignore the
+    # disagreement -> it takes a column count instead of routing.
+    verdicts = resolve_reading_columns([_pin(_CONF2), _pin(_INMARGIN), _pin(_CONF1)], _det())
+    assert verdicts[1].routed is True
+    assert verdicts[1].n_cols is None
+    assert verdicts[1].n_cols_source is None
+    assert verdicts[1].signal == "prior-ambiguous"
+
+
+def test_untrusted_page_resets_the_prior_chain():
+    # Clause 1: a non-content (untrusted) page breaks the chain — an in-margin page after it cannot
+    # inherit the two-column class from before it (the prior must never tunnel an endpaper). RED
+    # (mutant): don't reset the prior on a non-content page -> the in-margin page inherits across it.
+    verdicts = resolve_reading_columns([_pin(_CONF2), _pin(0.0, _dark_dv()), _pin(_INMARGIN)], _det())
+    assert verdicts[1].n_cols is None and verdicts[1].routed is False
+    assert verdicts[1].signal == "boxes-untrusted"
+    assert verdicts[2].routed is True          # no prior survived the reset -> nothing to inherit
+    assert verdicts[2].n_cols is None
+
+
+def test_routed_density_page_resets_the_prior_chain_and_routes():
+    # Clause 1, routed variant: a density-abstained page routes AND resets the chain.
+    verdicts = resolve_reading_columns([_pin(_CONF2), _pin(0.0, _routed_dv()), _pin(_INMARGIN)], _det())
+    assert verdicts[1].routed is True and verdicts[1].n_cols is None
+    assert verdicts[1].signal == "density-routed"
+    assert verdicts[2].routed is True          # chain reset -> the in-margin page has no neighbor to inherit
+
+
+def test_in_margin_page_with_a_single_agreeing_neighbor_inherits():
+    # At a chain boundary only one side has a confident content neighbor; the in-margin page still
+    # inherits it (locally-constant layout), it does not need both sides. Two trailing in-margin pages
+    # both inherit the single leading confident 1-col page.
+    verdicts = resolve_reading_columns([_pin(_CONF1), _pin(_INMARGIN), _pin(_INMARGIN)], _det())
+    assert [v.n_cols for v in verdicts] == [1, 1, 1]
+    assert verdicts[1].n_cols_source == "prior" and verdicts[2].n_cols_source == "prior"
+
+
+def test_isolated_in_margin_page_abstains():
+    # An in-margin page with NO confident content neighbor on either side has nothing to inherit ->
+    # abstain (the calibrate-to-abstain posture; a lone weak page is a human's call).
+    verdicts = resolve_reading_columns([_pin(_INMARGIN)], _det())
+    assert verdicts[0].routed is True
+    assert verdicts[0].n_cols is None
+
+
+def test_untrusted_page_carries_no_column_verdict():
+    # A non-content page itself gets no column count (its boxes are untrusted) but is NOT routed by
+    # the column stage — the density stage already made its trust ruling.
+    verdicts = resolve_reading_columns([_pin(0.0, _dark_dv())], _det())
+    assert verdicts[0].n_cols is None
+    assert verdicts[0].n_cols_source is None
+    assert verdicts[0].routed is False
+    assert verdicts[0].signal == "boxes-untrusted"
+
+
+def test_resolve_reading_columns_empty_is_empty():
+    assert resolve_reading_columns([], _det()) == []
+
+
+def test_realistic_book_slice_threads_every_clause():
+    # End-to-end over one book slice exercising all four clauses in order: a dark cover (untrusted,
+    # resets), a 1-col front-matter page (evidence), a weak chapter-open BETWEEN a 1-col and a 2-col
+    # page (disagreeing neighbors -> abstain), two 2-col body pages (evidence), a routed smudge
+    # (routes + resets), and a trailing weak page isolated by the reset (abstain).
+    pages = [
+        _pin(0.0, _dark_dv()),   # 0 cover -> untrusted
+        _pin(_CONF1),            # 1 front matter -> evidence 1
+        _pin(_INMARGIN),         # 2 chapter open, weak; neighbors 1 (prev) and 2 (next) disagree
+        _pin(_CONF2),            # 3 body -> evidence 2
+        _pin(_CONF2),            # 4 body -> evidence 2
+        _pin(0.0, _routed_dv()), # 5 smudge -> routed
+        _pin(_INMARGIN),         # 6 weak, isolated by the reset -> abstain
+    ]
+    v = resolve_reading_columns(pages, _det())
+    assert [x.n_cols for x in v] == [None, 1, None, 2, 2, None, None]
+    assert [x.n_cols_source for x in v] == [None, "evidence", None, "evidence", "evidence", None, None]
+    assert [x.routed for x in v] == [False, False, True, False, False, True, True]
+    assert [x.signal for x in v] == [
+        "boxes-untrusted", "evidence", "prior-ambiguous", "evidence", "evidence",
+        "density-routed", "prior-ambiguous",
+    ]

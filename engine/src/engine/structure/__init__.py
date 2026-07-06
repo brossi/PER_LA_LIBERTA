@@ -140,15 +140,25 @@ from engine.structure.geom_sidecar import (
     save_geom_sidecar,
 )
 from engine.structure.segmentation import (
+    COLUMN_DETECTOR_VERSION,
     SEGMENTATION_VERSION,
+    ColumnDetector,
+    ColumnEvidence,
+    ColumnVerdict,
     DensityBand,
     DensityClassifier,
     DensityVerdict,
+    PageColumnInput,
+    PageColumnVerdict,
     PageDensityFeatures,
+    detect_columns,
     edge_strip,
     ink_fraction_from_pixmap,
     is_alpha_token,
+    ordered_coverage,
     page_density_features,
+    reading_order,
+    resolve_reading_columns,
 )
 from engine.structure.capture import (
     PAGE_UNMAPPED,
@@ -286,6 +296,17 @@ __all__ = [
     "ink_fraction_from_pixmap",
     "is_alpha_token",
     "page_density_features",
+    # S2.1.5 — column / reading-order detector (segmentation)
+    "COLUMN_DETECTOR_VERSION",
+    "ColumnDetector",
+    "ColumnEvidence",
+    "ColumnVerdict",
+    "PageColumnInput",
+    "PageColumnVerdict",
+    "detect_columns",
+    "ordered_coverage",
+    "reading_order",
+    "resolve_reading_columns",
     # S0.4 — block-classifier seam (concern A typing)
     "BlockClassifier",
     "BlockClassification",

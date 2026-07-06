@@ -135,8 +135,12 @@
       "type": "object",
       "$comment": "S2.1.4 density band pre-check config (DT-6). OPTIONAL — only a book whose scans go through the geometry/segmentation front-end carries it; the classifier's constructor enforces the value RANGES (this schema pins only presence + JSON type). Band values ruled by Ben 2026-07-06 at the S2.1.4 calibration checkpoint; the labeled calibration set lives in review/density_calibration.json. The pipeline reads density_bands to construct the DensityClassifier at the two-branch wiring step (#39).",
       "additionalProperties": false,
-      "required": ["density_bands"],
+      "required": ["order_source", "density_bands"],
       "properties": {
+        "order_source": {
+          "$comment": "DT-5 two-branch reading-order sourcing. 'witness': a column-ordered text witness supplies order, the detector is a QA cross-check (PLL/copy1). 'geometry': the detector is authoritative (image-only sources).",
+          "enum": ["witness", "geometry"]
+        },
         "density_bands": {
           "type": "object",
           "additionalProperties": false,

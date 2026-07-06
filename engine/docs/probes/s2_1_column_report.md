@@ -4,11 +4,10 @@ Issue #39 (S2.1.5). Reproduce with
 `cd engine && uv run python books/per_la_liberta/probes/s2_1_column_probe.py`
 (needs the local `_boxes_dpi300.json` box cache + the LOC PDF for the density gate).
 
-**Status: PROPOSED, awaiting Ben's DT-7 ratification.** DT-7 rules the column-decision policy
-(`decision_threshold`, `hysteresis_margin`) "proposed in-code, ratified by the run report
-distribution" — the same governance as the DT-8 thresholds at the slice-1 report. Nothing here is
-stamped as ruled; the values live in the probe as proposals and do **not** yet appear in
-`manifest.json`. On ratification they land in `manifest.json` `segmentation.column_detector`.
+**Status: RATIFIED by Ben 2026-07-06** (`decision_threshold = 0.50`, `hysteresis_margin = 0.15`) —
+DT-7's "proposed in-code, ratified by the run report distribution," the same governance as the DT-8
+thresholds at the slice-1 report. The ratified values now live in `manifest.json`
+`segmentation.column_detector`; the loader builds the `ColumnDetector` from them via `from_config`.
 
 The values below are **hand-read** from the distribution. Per Ben's 2026-07-06 ruling (DT-7
 amendment), **#40's run-report tooling will auto-*propose* them per book** from this same
@@ -36,7 +35,7 @@ The score is **sharply bimodal**: a single-column cluster at 0.0 and a two-colum
 separated by a completely empty band [0.05, 0.40). Only 8 pages fall in the whole [0.40, 0.80)
 transition zone.
 
-## Proposal (for ratification)
+## Ratified policy (Ben, 2026-07-06)
 
 - **`decision_threshold = 0.50`** — sits in the empty valley between the two clusters, so no clean
   page is near it. Two-column detection rate at 0.50: **218/278** (78%), consistent with the S2.0

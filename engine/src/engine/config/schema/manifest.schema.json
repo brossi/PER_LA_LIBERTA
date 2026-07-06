@@ -133,9 +133,9 @@
     },
     "segmentation": {
       "type": "object",
-      "$comment": "S2.1.4 density band pre-check config (DT-6). OPTIONAL — only a book whose scans go through the geometry/segmentation front-end carries it; the classifier's constructor enforces the value RANGES (this schema pins only presence + JSON type). Band values ruled by Ben 2026-07-06 at the S2.1.4 calibration checkpoint; the labeled calibration set lives in review/density_calibration.json. The pipeline reads density_bands to construct the DensityClassifier at the two-branch wiring step (#39).",
+      "$comment": "S2.1 segmentation front-end config (DT-5/DT-6/DT-7). OPTIONAL — only a book whose scans go through the geometry/segmentation front-end carries it; the classifiers' constructors enforce the value RANGES (this schema pins only presence + JSON type). density_bands ruled by Ben 2026-07-06 at the S2.1.4 calibration checkpoint (labeled set in review/density_calibration.json); column_detector ruled by Ben 2026-07-06 at the S2.1.5 (#39) run-report checkpoint (evidence in docs/probes/s2_1_column_report.md). The loader reads both to construct the DensityClassifier + ColumnDetector via from_config.",
       "additionalProperties": false,
-      "required": ["order_source", "density_bands"],
+      "required": ["order_source", "density_bands", "column_detector"],
       "properties": {
         "order_source": {
           "$comment": "DT-5 two-branch reading-order sourcing. 'witness': a column-ordered text witness supplies order, the detector is a QA cross-check (PLL/copy1). 'geometry': the detector is authoritative (image-only sources).",
@@ -156,6 +156,16 @@
             "confidence_margin": {"type": "number"},
             "cover_edge_leaves": {"type": "integer"},
             "ink_saturation_min": {"type": "number"}
+          }
+        },
+        "column_detector": {
+          "$comment": "DT-7 column-decision policy. The classifier's constructor enforces the ranges (both in (0,1)); this schema pins presence + JSON type. Per-book config (numberless core); #40's run-report tooling can auto-propose these from the book's col2_score distribution, human-ratified and frozen here.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["decision_threshold", "hysteresis_margin"],
+          "properties": {
+            "decision_threshold": {"type": "number"},
+            "hysteresis_margin": {"type": "number"}
           }
         }
       }

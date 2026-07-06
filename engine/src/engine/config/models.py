@@ -125,18 +125,36 @@ class DensityBands:
 
 
 @dataclass(frozen=True, slots=True)
+class ColumnDetectorPolicy:
+    """The DT-7 column-decision policy (``manifest.segmentation.column_detector``; S2.1.5 #39).
+
+    ``decision_threshold`` — the ``col2_score`` at/above which a page leans two-column;
+    ``hysteresis_margin`` — the distance from it within which the cross-page prior decides. Ruled by
+    Ben 2026-07-06 at the #39 run-report checkpoint. Per-book config, not a core default (the G-1
+    numberless-core posture); ``ColumnDetector.from_config`` reads it, the constructor enforces the
+    ``(0, 1)`` ranges. This is just the typed carrier.
+    """
+
+    decision_threshold: float
+    hysteresis_margin: float
+
+
+@dataclass(frozen=True, slots=True)
 class Segmentation:
-    """The geometry/segmentation front-end config (``manifest.segmentation``; S2.1, DT-5/DT-6).
+    """The geometry/segmentation front-end config (``manifest.segmentation``; S2.1, DT-5/DT-6/DT-7).
 
     ``order_source`` selects the two-branch reading-order policy (DT-5): ``"witness"`` — a
     column-ordered text witness supplies reading order and the detector is only a QA cross-check
     (PLL, copy1); ``"geometry"`` — the geometric detector is the authoritative order source
-    (image-only sources). ``density_bands`` is the DT-6 pre-check calibration. Optional book-wide:
-    only a book routed through the geometry front-end carries a ``segmentation`` block.
+    (image-only sources). ``density_bands`` is the DT-6 pre-check calibration; ``column_detector`` is
+    the DT-7 column-decision policy. Optional book-wide: only a book routed through the geometry
+    front-end carries a ``segmentation`` block, and the block runs the whole front-end (density +
+    column), so both sub-configs are present.
     """
 
     order_source: str
     density_bands: DensityBands
+    column_detector: ColumnDetectorPolicy
 
 
 @dataclass(frozen=True, slots=True)

@@ -421,3 +421,34 @@ def test_schema_rejects_incomplete_density_bands(tmp_path):
     books = _write_book(tmp_path, "nb", m)
     with pytest.raises(ConfigError, match="schema validation"):
         load_book("nb", books_dir=books, profiles_dir=REAL_PROFILES)
+
+
+def test_column_detector_policy_resolves_for_pll():
+    # The DT-7 column-decision policy ratified by Ben 2026-07-06 at the #39 run-report checkpoint
+    # (decision_threshold 0.50 sits in the empty col2_score valley; hysteresis_margin 0.15 covers the
+    # 5 transition pages). Per-book config, defaultless in core.
+    seg = load_book("per_la_liberta").manifest.segmentation
+    assert seg.column_detector is not None
+    assert (seg.column_detector.decision_threshold, seg.column_detector.hysteresis_margin) == (0.50, 0.15)
+
+
+def test_column_detector_constructs_from_config():
+    # Mirror of the density from_config seam: the typed policy -> a live ColumnDetector, params exactly
+    # the manifest values, and it classifies (a working detector, not a data copy).
+    from engine.structure import ColumnDetector, ColumnEvidence
+
+    seg = load_book("per_la_liberta").manifest.segmentation
+    det = ColumnDetector.from_config(seg.column_detector)
+    assert det.params == {"decision_threshold": 0.50, "hysteresis_margin": 0.15}
+    assert det.classify(ColumnEvidence(col2_score=1.0, split_x=305.0)).n_cols == 2
+
+
+def test_schema_requires_column_detector_when_segmentation_present(tmp_path):
+    # A segmentation block runs the whole front-end (density + column), so column_detector is required
+    # within it — a missing block would leave the defaultless ColumnDetector unconstructible.
+    m = _real_manifest()
+    m["id"] = "nocd"
+    del m["segmentation"]["column_detector"]
+    books = _write_book(tmp_path, "nocd", m)
+    with pytest.raises(ConfigError, match="schema validation"):
+        load_book("nocd", books_dir=books, profiles_dir=REAL_PROFILES)

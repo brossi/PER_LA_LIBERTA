@@ -544,6 +544,16 @@ class ColumnDetector:
         self._decision_threshold = decision_threshold
         self._hysteresis_margin = hysteresis_margin
 
+    @classmethod
+    def from_config(cls, policy) -> ColumnDetector:
+        """Build a detector from a config ``ColumnDetectorPolicy`` model (the DT-7 wiring seam, #39,
+        ratified 2026-07-06). Duck-typed on the two policy attributes so neutral ``structure/`` needs
+        no import of ``config/``; the constructor above still enforces both value ranges."""
+        return cls(
+            decision_threshold=policy.decision_threshold,
+            hysteresis_margin=policy.hysteresis_margin,
+        )
+
     @property
     def version(self) -> str:
         return COLUMN_DETECTOR_VERSION

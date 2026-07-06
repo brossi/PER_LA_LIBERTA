@@ -80,6 +80,10 @@
       "confidence_margin": 0.05,
       "cover_edge_leaves": 7,
       "ink_saturation_min": 0.90
+    },
+    "column_detector": {
+      "decision_threshold": 0.50,
+      "hysteresis_margin": 0.15
     }
   }
 }

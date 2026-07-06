@@ -166,6 +166,11 @@ MUTANTS = [
       "            ink_blank_max=bands.ink_dark_min,",
       "test_density_classifier_constructs_from_config",
       test_file="tests/unit/test_config_loader.py"),
+    m("column-from-config-field-swapped",
+      "            decision_threshold=policy.decision_threshold,",
+      "            decision_threshold=policy.hysteresis_margin,",
+      "test_column_detector_constructs_from_config",
+      test_file="tests/unit/test_config_loader.py"),
     # --- new record guards -------------------------------------------------------------------------
     m("column-evidence-score-guard-dropped",
       "        if not (math.isfinite(self.col2_score) and 0.0 <= self.col2_score <= 1.0):",

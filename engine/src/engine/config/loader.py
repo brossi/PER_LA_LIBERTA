@@ -22,6 +22,7 @@ import jsonschema
 
 from .models import (
     BookManifest,
+    ColumnDetectorPolicy,
     CoverageSpec,
     DensityBands,
     Edition,
@@ -77,6 +78,7 @@ def _build_segmentation(data: dict) -> Segmentation | None:
     if seg is None:
         return None
     bands = seg["density_bands"]
+    cols = seg["column_detector"]
     return Segmentation(
         order_source=seg["order_source"],
         density_bands=DensityBands(
@@ -87,6 +89,10 @@ def _build_segmentation(data: dict) -> Segmentation | None:
             confidence_margin=bands["confidence_margin"],
             cover_edge_leaves=bands["cover_edge_leaves"],
             ink_saturation_min=bands["ink_saturation_min"],
+        ),
+        column_detector=ColumnDetectorPolicy(
+            decision_threshold=cols["decision_threshold"],
+            hysteresis_margin=cols["hysteresis_margin"],
         ),
     )
 

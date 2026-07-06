@@ -922,11 +922,15 @@ is no default to fall back to.
 | P-6 | `review_fraction_max` = 0.15 per stage | DT-10 | #40 (volume bound) | **RULED 2026-07-03: accepted** |
 | P-7 | off-page OCR boxes: bounded drop-and-count — isolated boxes dropped + counted per page (`oob_boxes`), a page's off-page fraction > 20% of candidates still fails loud | DT-4 / G-8 | #36 backend (blocking the #37 slice-1 run) | **RULED by Ben 2026-07-05: accepted (option (a) of three presented), superseding the unconditional fail-loud ratified at DT-4** — evidence: the first slice-1 run tripped G-8 on scan page 4; whole-book probe same day: 20/136,385 boxes (0.015%) off-page, confined to 5 noise pages {4, 5, 273, 274, 276}, worst page 4.5%, all garbage text — an isolated-hallucination class, while the pixmap-space-leak class the tripwire exists for displaces ~100% of a page's boxes, so the 20% bound sits in the wide gap and preserves it. Bound-check reds: boundary (`>` not `>=`), denominator (candidates, not raw), banked-counter, all-off-page — hunt 48/48 KILLED. |
 
-Separately: the **hysteresis margins** (DT-7) — and the column `decision_threshold` — are ratified
-at their consumer's run report — the **#39** column-detector run (`s2_1_column_probe.py` →
+Separately: the **hysteresis margin** (DT-7) and the column **`decision_threshold`** are ratified at
+their consumer's run report — the **#39** column-detector run (`s2_1_column_probe.py` →
 `docs/probes/s2_1_column_report.md`), which is what produces the col2_score (valley × balance)
 distribution; the #37 slice-1 run had no such evidence, and #38 built only the density band
 classifier, not the column detector (proposing them final before #39 would be measurement-blind).
+**RATIFIED by Ben 2026-07-06 at the #39 run report: `decision_threshold = 0.50`,
+`hysteresis_margin = 0.15`** (threshold in the empty col2_score valley; margin covering the 5
+transition pages). Now in `manifest.json` `segmentation.column_detector`; the loader builds the
+`ColumnDetector` via `from_config`.
 
 **DT-8 thresholds — RATIFIED by Ben 2026-07-05, at the slice-1 run report:**
 `atom_match_floor = 0.60` is ratified as a **constant** (it guards individual atoms, not review

@@ -443,6 +443,40 @@ first, line-binned by median box height) comes free from the split.
 5. Red fixture (G-23): a strong-evidence single-column page between two two-column pages — a
    mutant that lets the prior override strong own-page evidence reds.
 
+**AMENDED — RULED by Ben 2026-07-06 (the #39 run report checkpoint): per-book auto-propose of the
+column-decision policy, folded into #40's run-report tooling.** The policy values
+(`decision_threshold`, `hysteresis_margin`) stay **per-book config, defaultless in core** (a book
+supplies them via `manifest.segmentation.column_detector`; the classifier never bakes a default —
+the G-1 numberless-core posture is unchanged). What changes is how the *proposal* is produced: the
+#40 run-report tooling **auto-proposes** the values from *that book's own* `col2_score` distribution
+(the #39 probe `s2_1_column_probe.py` already computes it) — antimode / largest-empty-band detection
+(Otsu / Jenks / KDE-valley; the specific method is a #40 build choice) places the threshold in the
+distribution's valley and sizes the margin from the valley width / cluster spread — instead of a
+hand-eyeballed constant. Governance is preserved on three points:
+
+- **Human ratifies, tooling proposes.** The auto-value is the *proposed* number a human rules on
+  (the DT-7 checkpoint stands); it is never self-applied.
+- **Abstain on a non-bimodal distribution.** A book with no clean two-cluster valley (a purely
+  single-column book has none; a trimodal one has a spurious one) makes the tooling **route the
+  whole book to manual calibration** rather than emit a guessed threshold — the calibrate-to-abstain
+  / ingestion-human-in-the-loop stance, applied to calibration itself.
+- **Derive-then-freeze, never live re-derive (the DT-9/G-22 constraint).** The ratified value is
+  **frozen into config**; the runtime classifier never recomputes the threshold from the live
+  distribution. Re-deriving each run would let adding/removing pages shift the distribution and
+  silently flip an *unrelated* page's class — breaking the sidecar's "classifier changed vs input
+  changed" fingerprint. The auto-propose replaces "read the histogram, type a number," not the
+  frozen-config runtime.
+
+Rationale (why this is a proposal-ergonomics change, not a semantics change): `col2_score` is a
+normalized `[0,1]` product (valley depth × balance), so the two clusters are structural — a clean
+two-column page scores ≈1.0 and a single-column page 0.0 by construction — which makes the
+**threshold near book-invariant** (PLL's valley `[0.05,0.40)` is empty; ~0.5 generalizes). The
+**hysteresis margin is the genuinely book-sensitive knob** (a book with more partial-column /
+transitional pages has a fatter ambiguous band), which is exactly what per-book auto-sizing serves.
+The auto-propose computation is **calibration tooling, not core** — it emits config a human ratifies;
+`ColumnDetector` still takes the frozen values as required params. Home: #40 (S2.1.6), beside the
+book-wide `order_qa` feed (DT-12).
+
 ### DT-8 — Matcher: normalizer, window match, confidence formula, thresholds, absence semantics
 
 - **Normalizer** (promoted from the probe, one place, shared by page-locate + matcher): NFC →

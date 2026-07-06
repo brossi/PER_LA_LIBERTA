@@ -10,6 +10,15 @@ distribution" — the same governance as the DT-8 thresholds at the slice-1 repo
 stamped as ruled; the values live in the probe as proposals and do **not** yet appear in
 `manifest.json`. On ratification they land in `manifest.json` `segmentation.column_detector`.
 
+The values below are **hand-read** from the distribution. Per Ben's 2026-07-06 ruling (DT-7
+amendment), **#40's run-report tooling will auto-*propose* them per book** from this same
+`col2_score` distribution — antimode / largest-empty-band detection places the threshold in the
+valley and sizes the margin from the valley width, **abstaining to manual calibration when a book
+isn't cleanly bimodal**. It stays a *proposal* a human ratifies, frozen into config (never live
+re-derived — the DT-9/G-22 fingerprint constraint). The threshold is near book-invariant (the
+`col2_score` clusters are structural: clean two-column ≈1.0, single-column 0.0 by construction); the
+hysteresis margin is the genuinely per-book knob.
+
 ## col2_score distribution (valley-depth × column-balance) — all 278 pages
 
 ```

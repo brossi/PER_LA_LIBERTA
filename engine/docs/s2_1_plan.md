@@ -641,6 +641,10 @@ sidecar migrates trivially; churning Ben's authoring substrate now doesn't.
 
 ### DT-10 — Human-review worklist: specified, not a slogan (audit Finding E)
 
+> **Read-side adjunct — #46 (S2.1.6a):** the `review sheet` (read-only HTML evidence sheet) +
+> `review next` walk mode render this worklist + overlays for the eyes; the verdict **write** path is
+> unchanged (only the `record` CLI, G-14/G-22). "Not a new HTML sheet" governs the write path.
+
 Home (paths per R7): generated candidates
 `books/<id>/work/state/geometry_review/worklist_candidates.json` + on-demand overlay renders
 `books/<id>/work/output/geometry_review/overlays/page_NNNN.png` (both in existing ignored work
@@ -860,8 +864,13 @@ S2.2.
 - The **S2.2 re-gate ruling itself** (#30) — S2.1 emits the measurements; S2.2 rules the S5 mode.
 - **S3.1** Zipf-DP segmentation (own plan stub exists); **S5.1** rebind consumption.
 - **Stream supersession** with inline geom (DT-9 defers; sidecar first).
-- **HTML review sheet** tooling — the deviation-sheet pattern exists for later; slice 2 ships
-  JSON worklist + PNG overlays + CLI only.
+- **HTML review sheet** tooling — ~~the deviation-sheet pattern exists for later; slice 2 ships
+  JSON worklist + PNG overlays + CLI only~~ **DELIVERED as #46 (S2.1.6a, child of #40):** a
+  read-only `review sheet` + `review next` walk mode over the DT-10 worklist + overlays (eyes get a
+  sheet, hands keep the CLI — verdicts still enter only through the #40 `record` path). Its
+  denominator rule surfaced a #40 data gap — match candidates shipped a bare rate — closed at the
+  matcher (`MatchOutcome.page_match_evidence`: the rate's matched/total denominator + unmatched-token
+  chips, in-memory, feeding the worklist `tentative`).
 - **Image-only-book ingestion** — atom capture from OCR text (raw_span/raw_source_hash/capture
   round-trip against the OCR text as witness) is a future lane through S1.3a's machinery, not an
   S2.1 deliverable; the no-witness branch here proves segmentation only (DT-5).

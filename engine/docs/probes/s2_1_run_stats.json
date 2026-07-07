@@ -14,7 +14,7 @@
       "pymupdf": "1.27.2.3",
       "tesseract": "5.5.2"
     },
-    "match_wall_seconds": 87.43172729201615
+    "match_wall_seconds": 85.16656741697807
   },
   "calibration_copy3_blind": {
     "body_atoms": 521,
@@ -44,7 +44,7 @@
     "small_atom_total": 193,
     "small_atom_exact": 94,
     "small_atom_exact_rate": 0.48704663212435234,
-    "wall_seconds": 87.91732629202306,
+    "wall_seconds": 85.37193120806478,
     "floors": {
       "clause_a_exact": 0.95,
       "clause_b_within_one": 0.98
@@ -215,7 +215,7 @@
       "0.8": 62,
       "0.9": 148
     },
-    "front_end_wall_seconds": 21.109646292054094
+    "front_end_wall_seconds": 20.770617582951672
   },
   "column_policy_auto_propose": {
     "bimodal": true,
@@ -292,6 +292,7 @@
       "match": 18
     },
     "review_fraction_max": 0.15,
-    "fingerprint": "sha256:c3ce75082479a49cd954df5f44f05c5effd70588c12583dcd7d388674f7dd82a"
+    "fingerprint": "sha256:c3ce75082479a49cd954df5f44f05c5effd70588c12583dcd7d388674f7dd82a",
+    "overlays_rendered": 25
   }
 }

@@ -746,12 +746,22 @@ OVERLAY_SUBDIR = "geometry_review"
 OVERLAY_OVERLAYS = "overlays"
 
 
-def overlay_path(workspace: BookWorkspace, page: int) -> Path:
-    """The containment-checked path to a page's review overlay
-    ``<work>/output/geometry_review/overlays/page_NNNN.png`` (disposable, gitignored work area)."""
+def overlay_path(workspace: BookWorkspace, page: int, stage: str) -> Path:
+    """The containment-checked path to a candidate's review overlay
+    ``<work>/output/geometry_review/overlays/page_NNNN_{stage}.png`` (disposable, gitignored). Keyed
+    by **(page, stage)**, not page alone: a page routed at two gates (e.g. ``columns`` + ``match``)
+    has two candidates whose overlays differ (only the columns one carries the split + ruler), so a
+    page-keyed file would let one overwrite the other (#46 audit M1)."""
     if not (isinstance(page, int) and not isinstance(page, bool) and page > 0):
         raise ValueError(f"overlay page must be a positive scan page, got {page!r}")
-    return workspace.resolve(OVERLAY_AREA, OVERLAY_SUBDIR, OVERLAY_OVERLAYS, f"page_{page:04d}.png")
+    if stage not in WORKLIST_STAGES:
+        raise ValueError(f"overlay stage must be one of {WORKLIST_STAGES}, got {stage!r}")
+    return workspace.resolve(OVERLAY_AREA, OVERLAY_SUBDIR, OVERLAY_OVERLAYS, f"page_{page:04d}_{stage}.png")
+
+
+#: Ruler tick spacing (page points) — a light grid along the top edge so a reviewer can read an
+#: x-coordinate off a column overlay for ``redraw_split=<x>`` (#46).
+_RULER_TICK_PTS = 50
 
 
 def render_overlay(
@@ -763,11 +773,14 @@ def render_overlay(
     out_path: Path,
     background=None,
     dpi: int = 150,
+    ruler: bool = False,
 ) -> Path:
     """Render a review overlay for one routed page: the tentative boxes (red outlines) and the
     column split (blue line) drawn in the page's point space, over the optional scan ``background``
     pixmap. On-demand — a reviewer renders the pages they are working, not the whole book. ``boxes``
     are objects with a ``bbox`` 4-tuple or bare ``(x0, y0, x1, y1)`` tuples (point space, DT-4).
+    ``ruler`` draws a labelled pixel ruler along the top edge so ``redraw_split=<x>`` can be read
+    straight off a column overlay.
 
     fitz is imported lazily so the CLI's apply/status paths (which never render) stay light."""
     if not (math.isfinite(width) and width > 0.0 and math.isfinite(height) and height > 0.0):
@@ -784,12 +797,319 @@ def render_overlay(
             page.draw_rect(fitz.Rect(*bbox), color=(0.85, 0.1, 0.1), width=0.7)
         if split_x is not None:
             page.draw_line(fitz.Point(split_x, 0.0), fitz.Point(split_x, height), color=(0.1, 0.1, 0.85), width=1.5)
+        if ruler:
+            for x in range(_RULER_TICK_PTS, int(width), _RULER_TICK_PTS):
+                page.draw_line(fitz.Point(x, 0.0), fitz.Point(x, 12.0), color=(0.1, 0.55, 0.1), width=0.5)
+                page.insert_text(fitz.Point(x + 1.0, 20.0), str(x), fontsize=6, color=(0.1, 0.55, 0.1))
         pixmap = page.get_pixmap(dpi=dpi)
         out_path.parent.mkdir(parents=True, exist_ok=True)
         pixmap.save(out_path)
     finally:
         doc.close()
     return out_path
+
+
+# --- read-only review sheet + walk mode (#46, DT-10 read-side) ---------------------------------- #
+
+#: The verbs the sheet/walk pre-fills per stage — the reviewer's *plausible* moves, a strict subset
+#: of :data:`VERDICT_ACTIONS` (so an unknown verb is unemittable; the command-binding green).
+#: ``redraw_split`` is offered only where there is a split to redraw (the ``columns`` stage).
+_PLAUSIBLE_VERBS: dict[str, tuple[str, ...]] = {
+    "density": (ACTION_CONFIRM, ACTION_RECLASSIFY, ACTION_DECLINE_GEOMETRY),
+    "columns": (ACTION_CONFIRM, ACTION_REDRAW_SPLIT, ACTION_RECLASSIFY, ACTION_DECLINE_GEOMETRY),
+    "locate": (ACTION_CONFIRM, ACTION_DECLINE_GEOMETRY),
+    "match": (ACTION_CONFIRM, ACTION_RECLASSIFY, ACTION_DECLINE_GEOMETRY),
+}
+assert set(_PLAUSIBLE_VERBS) == set(WORKLIST_STAGES), "every worklist stage needs a plausible-verb set"
+
+REVIEW_SHEET_FILENAME = "review_sheet.html"
+
+_SHEET_HEAD = """<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>geometry review</title><style>
+body{font:14px/1.5 system-ui,sans-serif;margin:1.5rem;color:#1a1a1a;background:#fafafa}
+header{border-bottom:2px solid #ccc;padding-bottom:.8rem;margin-bottom:1rem}
+table.ladder{border-collapse:collapse;margin:.4rem 0}
+table.ladder td,table.ladder th{border:1px solid #ccc;padding:.1rem .5rem;text-align:right}
+section{border:1px solid #ddd;border-radius:6px;padding:1rem;margin:1rem 0;background:#fff}
+section h2{margin:.2rem 0;font-size:1rem;font-family:monospace}
+img{max-width:100%;border:1px solid #eee}
+.den strong{font-size:1.15em}
+.chips{display:flex;flex-wrap:wrap;gap:.25rem;margin:.3rem 0}
+.chip{background:#fde;border:1px solid #d9a;border-radius:3px;padding:.05rem .4rem;font-family:monospace;font-size:.85em}
+.dz-flag{color:#a30;font-weight:bold}
+ul.cmds{list-style:none;padding:0}
+ul.cmds code{display:block;background:#f4f4f4;padding:.3rem .5rem;border-radius:4px;margin:.2rem 0;font-size:.85em;overflow-x:auto}
+</style></head><body>"""
+_SHEET_FOOT = "</body></html>"
+
+
+def _esc(value: object) -> str:
+    """Minimal HTML-text escape — the sheet is offline and its inputs are ids/tokens/numbers, but a
+    stray ``<`` in a witness token must never break the markup."""
+    return str(value).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
+
+def _plausible_verbs(stage: str) -> tuple[str, ...]:
+    return _PLAUSIBLE_VERBS[stage]  # stage is WORKLIST_STAGES-validated at the candidate model
+
+
+def prefilled_record_command(book_id: str, candidate: "WorklistCandidate", action: str) -> str:
+    """The copy-paste ``record`` command for one (candidate, verb) — the sheet proposes, the DT-10
+    CLI disposes. The command-binding guard: an ``action`` outside :data:`VERDICT_ACTIONS` is
+    refused, so the sheet can only ever emit a runnable verdict. ``redraw_split`` carries a
+    ``split_x`` placeholder read off the overlay ruler."""
+    if action not in VERDICT_ACTIONS:
+        raise ValueError(
+            f"cannot pre-fill a command for unknown verdict action {action!r} — must be one of "
+            f"{VERDICT_ACTIONS} (command-binding: the sheet never emits an unrunnable verb)"
+        )
+    cmd = (
+        f"python -m engine.structure.geom_review --book {book_id} record "
+        f"--id {candidate.id} --action {action} --by YOU"
+    )
+    if action == ACTION_REDRAW_SPLIT:
+        cmd += " --param split_x=<X>"
+    return cmd
+
+
+def _match_denominator(candidate: "WorklistCandidate") -> tuple[object, int]:
+    """The (matched, total) behind a match candidate's bare rate. The **denominator rule**: a match
+    route whose tentative carries no non-negative-integer ``total`` fails loud rather than rendering a
+    rate whose window size is hidden (the p6 4-token-window trap — a healthy-looking 0.75 over 4
+    tokens). A ``total`` of **zero** is honest, not a violation — an all-tokenless page has a real
+    (zero) window size and renders it; only an *absent/malformed* denominator (the #40-as-shipped bare
+    rate) fails loud. ``matched`` is optional (rendered when present)."""
+    total = candidate.tentative.get("total")
+    if not (_is_int(total) and total >= 0):
+        raise GeometryError(
+            f"candidate {candidate.id} is a match route but its tentative carries no integer 'total' "
+            f"— refusing to render a bare rate without its token denominator (the p6 tiny-window trap "
+            f"the review sheet exists to expose); regenerate the worklist from the current matcher"
+        )
+    return candidate.tentative.get("matched"), total
+
+
+def _evidence_html(candidate: "WorklistCandidate") -> str:
+    if candidate.stage == "match":  # the rate-bearing stage — key here, not on the signal wording
+        matched, total = _match_denominator(candidate)
+        if total == 0:
+            return "<p class='den'>0 witness tokens (all-tokenless page — nothing to match)</p>"
+        num = _esc(matched) if matched is not None else "?"
+        chips = candidate.tentative.get("unmatched_tokens") or ()
+        chip_html = "".join(f"<span class='chip'>{_esc(t)}</span>" for t in chips)
+        return (
+            f"<p class='den'>matched <strong>{num}/{_esc(total)}</strong> witness tokens</p>"
+            f"<div class='chips'>{chip_html}</div>"
+        )
+    if not candidate.tentative:
+        empty = candidate.signal == "empty-window"
+        return f"<p class='den'>{'empty window (0 tokens)' if empty else '—'}</p>"
+    rows = "".join(f"<li>{_esc(k)}: {_esc(candidate.tentative[k])}</li>" for k in sorted(candidate.tentative))
+    return f"<ul class='tentative'>{rows}</ul>"
+
+
+def _position_html(candidate: "WorklistCandidate", sweep: Mapping | None) -> str:
+    delta = candidate.value - candidate.threshold
+    flag = ""
+    if sweep and str(candidate.page) in (sweep.get("decision_zone") or {}):
+        flag = " <span class='dz-flag'>· in decision zone</span>"
+    return f"<p class='pos'>Δ vs cut {_esc(candidate.threshold)}: {_esc(round(delta, 4))}{flag}</p>"
+
+
+def _sheet_header(worklist: Worklist, book_id: str, sweep: Mapping | None) -> str:
+    parts = [f"<h1>Geometry review — {_esc(book_id)} · {len(worklist.candidates)} candidate(s)</h1>"]
+    if sweep:
+        parts.append(f"<p>applied cut: <strong>{_esc(sweep.get('applied_cut'))}</strong></p>")
+        ladder = sweep.get("ladder") or {}
+        if ladder:
+            body = "".join(
+                f"<tr><td>{_esc(k)}</td><td>{_esc(v.get('accepted'))}</td><td>{_esc(v.get('routed'))}</td></tr>"
+                for k, v in sorted(ladder.items())
+            )
+            parts.append(
+                "<table class='ladder'><thead><tr><th>cut</th><th>accepted</th><th>routed</th></tr>"
+                f"</thead><tbody>{body}</tbody></table>"
+            )
+        dz = sweep.get("decision_zone") or {}
+        if dz:
+            items = "".join(
+                f"<li>p{_esc(k)} @ {_esc(round(float(v), 4))}</li>"
+                for k, v in sorted(dz.items(), key=lambda kv: (float(kv[1]), kv[0]))
+            )
+            parts.append(f"<details><summary>decision zone ({len(dz)})</summary><ul>{items}</ul></details>")
+    return "<header>" + "".join(parts) + "</header>"
+
+
+def render_review_sheet(
+    worklist: Worklist,
+    *,
+    book_id: str,
+    available_overlays: "set[tuple[int, str]] | frozenset[tuple[int, str]]",
+    sweep: Mapping | None = None,
+    overlay_dir_href: str = "overlays",
+) -> str:
+    """Render the whole worklist into one read-only HTML evidence sheet (#46; DT-10 read-side).
+
+    A **pure function** of ``(worklist, book_id, available_overlays, sweep, overlay_dir_href)`` — no
+    clock, no filesystem, no set-iteration order leaks (candidates render in their stored order,
+    ``available_overlays`` is consulted only for membership) — so the same inputs give byte-identical
+    HTML (**determinism**). Every candidate renders exactly once and a candidate whose overlay is not
+    in ``available_overlays`` is a hard fail, never a silent skip (**totality**). Match-rate entries
+    render their denominator or fail loud (**denominator rule**), and every pre-filled command is a
+    real DT-10 verb (**command binding**). Writes nothing — verdicts enter only through the ``record``
+    CLI (DT-10's "not a new HTML sheet" governs the *write* path)."""
+    if not (isinstance(book_id, str) and _WITNESS_ID.fullmatch(book_id)):
+        raise ValueError(f"book_id must be a flat stem matching {_WITNESS_ID.pattern!r}, got {book_id!r}")
+    sections = [_SHEET_HEAD, _sheet_header(worklist, book_id, sweep)]
+    for c in worklist.candidates:
+        if (c.page, c.stage) not in available_overlays:
+            raise GeometryError(
+                f"no rendered overlay for candidate {c.id} (page {c.page}, stage {c.stage}) — render "
+                f"the worklist overlays before building the sheet; a missing overlay is a hard fail, "
+                f"never a silent skip (totality)"
+            )
+        overlay = f"{overlay_dir_href}/page_{c.page:04d}_{c.stage}.png"
+        cmds = "".join(
+            f"<li><code>{_esc(prefilled_record_command(book_id, c, v))}</code></li>"
+            for v in _plausible_verbs(c.stage)
+        )
+        sections.append(
+            f'<section data-candidate-id="{_esc(c.id)}">'
+            f"<h2>{_esc(c.id)}</h2>"
+            f'<img src="{_esc(overlay)}" alt="page {c.page} overlay">'
+            f"<p class='sig'>{_esc(c.stage)}/{_esc(c.signal)}: value {_esc(round(c.value, 4))} "
+            f"vs threshold {_esc(c.threshold)}</p>"
+            f"{_evidence_html(c)}{_position_html(c, sweep)}"
+            f"<ul class='cmds'>{cmds}</ul></section>"
+        )
+    sections.append(_SHEET_FOOT)
+    return "\n".join(sections) + "\n"
+
+
+def walk_diagnostic(candidate: "WorklistCandidate", *, book_id: str, sweep: Mapping | None = None) -> str:
+    """The plain-text per-candidate block for ``review next`` walk mode — the same evidence the sheet
+    shows (denominator + chips + pre-filled verbs), honouring the denominator rule."""
+    lines = [
+        f"{candidate.id}  [{candidate.stage}/{candidate.signal}]",
+        f"  value {round(candidate.value, 4)} vs threshold {candidate.threshold} "
+        f"(Δ {round(candidate.value - candidate.threshold, 4)})",
+    ]
+    if sweep and str(candidate.page) in (sweep.get("decision_zone") or {}):
+        lines.append("  · in decision zone")
+    if candidate.stage == "match":
+        matched, total = _match_denominator(candidate)
+        lines.append(f"  matched {matched if matched is not None else '?'}/{total} witness tokens")
+        chips = candidate.tentative.get("unmatched_tokens") or ()
+        if chips:
+            lines.append(f"  unmatched: {' '.join(str(t) for t in chips)}")
+    else:
+        for k in sorted(candidate.tentative):
+            lines.append(f"  {k}: {candidate.tentative[k]}")
+    for v in _plausible_verbs(candidate.stage):
+        lines.append(f"  {v}: {prefilled_record_command(book_id, candidate, v)}")
+    return "\n".join(lines)
+
+
+def review_sheet_path(workspace: BookWorkspace) -> Path:
+    """The containment-checked path to the disposable review sheet
+    ``<work>/output/geometry_review/review_sheet.html`` (regenerable from worklist + overlays)."""
+    return workspace.resolve(OVERLAY_AREA, OVERLAY_SUBDIR, REVIEW_SHEET_FILENAME)
+
+
+def available_overlays(workspace: BookWorkspace, worklist: Worklist) -> set[tuple[int, str]]:
+    """The ``(page, stage)`` keys of the worklist whose overlay PNG exists on disk — the sheet's
+    totality check consults this and fails loud on any candidate whose overlay is missing."""
+    return {(c.page, c.stage) for c in worklist.candidates if overlay_path(workspace, c.page, c.stage).is_file()}
+
+
+def _load_sweep(stats_path) -> Mapping | None:
+    """The optional ``threshold_sweep`` header block, read from a run-stats JSON (the ladder +
+    decision zone the header shows). ``None`` when no path is given; a present-but-unreadable/
+    malformed file fails loud (never a silently header-less sheet)."""
+    if stats_path is None:
+        return None
+    path = Path(stats_path)
+    if not path.is_file():
+        raise MissingInputError(f"run-stats file for the review-sheet header not found at {path}")
+    try:
+        data = read_json(path)
+    except (json.JSONDecodeError, OSError, UnicodeDecodeError) as exc:
+        raise StaleArtifactError(f"run-stats file {path} is unloadable: {exc}") from exc
+    if not isinstance(data, Mapping):
+        raise StaleArtifactError(f"run-stats file {path} must be a JSON object, got {type(data).__name__}")
+    return data.get("threshold_sweep")
+
+
+def write_review_sheet(
+    workspace: BookWorkspace, book_id: str, worklist: Worklist, *, sweep: Mapping | None = None
+) -> Path:
+    """Render the worklist into the disposable HTML sheet on disk (the ``sheet`` CLI path). Fails
+    loud if any candidate's overlay is missing (totality). Returns the written path."""
+    html = render_review_sheet(
+        worklist, book_id=book_id, available_overlays=available_overlays(workspace, worklist), sweep=sweep
+    )
+    path = review_sheet_path(workspace)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(html, encoding="utf-8")
+    return path
+
+
+def _open_in_viewer(path: Path) -> None:  # pragma: no cover — OS side effect, injected in tests
+    """Open a rendered overlay in the OS image viewer for walk mode — ``open`` on macOS,
+    ``xdg-open`` elsewhere (Linux reviewers)."""
+    import subprocess
+
+    opener = "open" if sys.platform == "darwin" else "xdg-open"
+    subprocess.run([opener, str(path)], check=False)
+
+
+def walk_review(
+    book_dir,
+    workspace: BookWorkspace,
+    *,
+    by: str,
+    sweep: Mapping | None = None,
+    input_fn=input,
+    open_fn=_open_in_viewer,
+    out=None,
+) -> int:
+    """``review next`` walk mode: step through the OPEN candidates, opening each overlay and printing
+    its diagnostic, and prompt for a verb (or ``skip``/``quit``). A ruled verb is written through the
+    **same** :func:`record_verdict` write path as the CLI (DT-10; no second write path). Returns the
+    number of verdicts recorded. IO is injected so the loop is testable without a TTY."""
+    out = out if out is not None else sys.stdout
+    worklist = load_worklist(workspace)
+    verdicts = load_verdicts(Path(book_dir))
+    book_id = Path(book_dir).name
+    recorded = 0
+    for c in worklist.candidates:
+        if c.id in verdicts:
+            continue  # already ruled — walk only surfaces the open queue
+        overlay = overlay_path(workspace, c.page, c.stage)
+        if overlay.is_file():
+            open_fn(overlay)
+        print(walk_diagnostic(c, book_id=book_id, sweep=sweep), file=out)
+        answer = (input_fn(f"verb for {c.id} ({'/'.join(_plausible_verbs(c.stage))}/skip/quit): ") or "").strip()
+        if answer == "quit":
+            break
+        if answer in ("", "skip"):
+            continue
+        if answer not in _plausible_verbs(c.stage):
+            print(f"  not a plausible verb here: {answer!r} — skipped", file=out)
+            continue
+        params = None
+        if answer == ACTION_REDRAW_SPLIT:
+            # redraw_split is a re-entry WITH a parameter — capture the split_x read off the ruler,
+            # so walk mode records a complete verdict (not a coordinate-less one the re-entry ignores).
+            raw = (input_fn(f"  split_x for {c.id} (blank to skip): ") or "").strip()
+            if not raw:
+                print("  redraw_split needs a split_x — skipped", file=out)
+                continue
+            params = _parse_params([f"split_x={raw}"])
+        record_verdict(book_dir, c.id, action=answer, by=by, params=params)
+        recorded += 1
+        print(f"  recorded {answer} for {c.id}", file=out)
+    return recorded
 
 
 # --- CLI (S4.6b gate-CLI pattern; DT-10) -------------------------------------------------------- #
@@ -828,6 +1148,11 @@ def _build_parser() -> argparse.ArgumentParser:
     record.add_argument("--action", required=True, choices=VERDICT_ACTIONS, help="The verdict action.")
     record.add_argument("--by", required=True, help="Who is ruling (provenance).")
     record.add_argument("--param", action="append", help="A key=value verdict parameter (repeatable).")
+    sheet = sub.add_parser("sheet", help="Render the read-only HTML evidence sheet (#46; writes nothing but HTML).")
+    sheet.add_argument("--stats", help="Optional run-stats JSON for the threshold-sweep header.")
+    nxt = sub.add_parser("next", help="Walk the open candidates, opening each overlay and prompting for a verb.")
+    nxt.add_argument("--by", required=True, help="Who is ruling (provenance, threaded to recorded verdicts).")
+    nxt.add_argument("--stats", help="Optional run-stats JSON for the decision-zone context.")
     return parser
 
 
@@ -857,6 +1182,15 @@ def main(argv: list[str] | None = None) -> int:
         if args.command == "record":
             path = record_verdict(book_dir, args.id, action=args.action, by=args.by, params=_parse_params(args.param))
             print(f"recorded {args.action} for {args.id} -> {path}")
+            return 0
+        if args.command == "sheet":
+            worklist = load_worklist(workspace)
+            path = write_review_sheet(workspace, args.book, worklist, sweep=_load_sweep(args.stats))
+            print(f"review sheet -> {path}  ({len(worklist.candidates)} candidate(s))")
+            return 0
+        if args.command == "next":
+            recorded = walk_review(book_dir, workspace, by=args.by, sweep=_load_sweep(args.stats))
+            print(f"{recorded} verdict(s) recorded")
             return 0
     except EngineError as exc:
         print(f"error: {exc}", file=sys.stderr)

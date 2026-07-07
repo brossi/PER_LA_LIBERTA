@@ -12,6 +12,8 @@ its green. See ``tests/hunts/hunt_review.py`` for the mutation table.
 """
 from __future__ import annotations
 
+import re
+
 import pytest
 
 from engine.errors import MissingInputError, StaleArtifactError
@@ -567,12 +569,17 @@ from engine.structure.geom_review import overlay_path, render_overlay  # noqa: E
 
 
 def test_overlay_path_is_under_work_output(workspace):
-    path = overlay_path(workspace, 6)
-    assert path == workspace.resolve("output", "geometry_review", "overlays", "page_0006.png")
+    path = overlay_path(workspace, 6, "density")
+    assert path == workspace.resolve("output", "geometry_review", "overlays", "page_0006_density.png")
+
+
+def test_overlay_path_rejects_an_unknown_stage(workspace):
+    with pytest.raises(ValueError, match="stage"):
+        overlay_path(workspace, 6, "bogus")
 
 
 def test_render_overlay_two_columns_produces_a_png(workspace, tmp_path):
-    out = overlay_path(workspace, 47)
+    out = overlay_path(workspace, 47, "columns")
     boxes = [(50.0, 40.0, 260.0, 55.0), (330.0, 40.0, 540.0, 55.0), (50.0, 60.0, 260.0, 75.0)]
     result = render_overlay(width=612.0, height=792.0, boxes=boxes, split_x=300.0, out_path=out, dpi=72)
     assert result == out and out.is_file()
@@ -581,15 +588,24 @@ def test_render_overlay_two_columns_produces_a_png(workspace, tmp_path):
 
 
 def test_render_overlay_single_column_without_a_split(workspace):
-    out = overlay_path(workspace, 6)
+    out = overlay_path(workspace, 6, "match")
     render_overlay(width=612.0, height=792.0, boxes=[(50.0, 40.0, 540.0, 55.0)], split_x=None, out_path=out, dpi=72)
     assert out.is_file() and out.read_bytes()[:8] == b"\x89PNG\r\n\x1a\n"
 
 
 def test_render_overlay_rejects_nonpositive_dimensions(workspace):
-    out = overlay_path(workspace, 6)
+    out = overlay_path(workspace, 6, "match")
     with pytest.raises(ValueError, match="positive"):
         render_overlay(width=0.0, height=792.0, boxes=[], split_x=None, out_path=out)
+
+
+def test_render_overlay_with_ruler_renders_a_valid_png(workspace):
+    # #46: a column candidate's overlay draws a pixel ruler so redraw_split can be read off it. The
+    # ruler path executes and produces a real PNG (its appearance is a visual, local-review concern).
+    out = overlay_path(workspace, 47, "columns")
+    render_overlay(width=612.0, height=792.0, boxes=[(50.0, 40.0, 540.0, 55.0)], split_x=306.0,
+                   out_path=out, dpi=72, ruler=True)
+    assert out.is_file() and out.read_bytes()[:8] == b"\x89PNG\r\n\x1a\n"
 
 
 # --- page_order_qa: the S2.2 measurement feed (DT-12) ------------------------------------------- #
@@ -623,3 +639,210 @@ def test_page_order_qa_normalizes_box_text_into_the_witness_token_space():
     # A box carrying two whitespace-separated words + punctuation normalizes to two witness tokens.
     boxes = [_box("Alfa, bravo", 50, 40)]
     assert page_order_qa(["alfa", "bravo"], boxes, split_x=None) == pytest.approx(1.0)
+
+
+# --- #46: read-only review sheet + walk mode (DT-10 read-side) ---------------------------------- #
+
+from engine.structure.geom_review import (  # noqa: E402
+    ACTION_DECLINE_GEOMETRY,
+    ACTION_REDRAW_SPLIT,
+    prefilled_record_command,
+    render_review_sheet,
+    review_sheet_path,
+    walk_diagnostic,
+)
+
+SWEEP = {"applied_cut": 0.80, "ladder": {"0.80": {"accepted": 253, "routed": 25}},
+         "decision_zone": {"192": 0.7974683544303798}}
+
+
+def _match_cand(page, *, value=0.1667, matched=1, total=6, unmatched=("bravo", "charlie")):
+    # A match-routed candidate carrying the #46 review evidence in its tentative (as the runner
+    # now fills it from MatchOutcome.page_match_evidence).
+    return route(page, stage="match", signal="match-rate", value=value, threshold=0.80,
+                 tentative={"matched": matched, "total": total, "unmatched_tokens": list(unmatched)})
+
+
+def _cols_cand(page):
+    return route(page, stage="columns", signal="valley-confidence", value=0.55, threshold=0.50,
+                 tentative={"split_x": 306.0, "col2_score": 0.55, "n_cols_hint": 2})
+
+
+def _ovl(wl):
+    # The (page, stage) overlay keys for every candidate — overlays are per-candidate, not per-page.
+    return {(c.page, c.stage) for c in wl.candidates}
+
+
+def test_review_sheet_renders_every_candidate_exactly_once():
+    # Totality: N candidates in → each id appears exactly once in the HTML, none dropped.
+    wl = build([route(6), _cols_cand(47), _match_cand(75), _match_cand(192)])
+    html = render_review_sheet(wl, book_id="geombook", available_overlays=_ovl(wl), sweep=SWEEP)
+    for c in wl.candidates:
+        assert html.count(c.id) >= 1
+    assert html.count("data-candidate-id=") == len(wl.candidates)  # one entry block per candidate
+
+
+def test_review_sheet_missing_overlay_fails_loud():
+    # Totality: a candidate whose overlay was never rendered is a hard fail, never a silent skip.
+    wl = build([_match_cand(75), _match_cand(192)])
+    with pytest.raises(GeometryError, match="overlay"):
+        render_review_sheet(wl, book_id="geombook", available_overlays={(75, "match")}, sweep=SWEEP)  # 192 absent
+
+
+def test_review_sheet_two_gate_page_gets_distinct_overlays(workspace):
+    # #46 audit M1: a page routed at both `columns` and `match` yields two candidates whose overlays
+    # differ (only columns carries the split+ruler). They must resolve to DISTINCT files, so neither
+    # silently overwrites the other. Same page (47), two stages → two per-(page,stage) paths.
+    cols, match = overlay_path(workspace, 47, "columns"), overlay_path(workspace, 47, "match")
+    assert cols != match
+    wl = build([_cols_cand(47), _match_cand(47)])
+    html = render_review_sheet(wl, book_id="geombook", available_overlays=_ovl(wl), sweep=SWEEP)
+    assert "page_0047_columns.png" in html and "page_0047_match.png" in html
+
+
+def test_review_sheet_is_byte_identical_across_renders():
+    # Determinism: same worklist + overlays + sweep → identical HTML (no timestamp, no set order).
+    wl = build([route(6), _cols_cand(47), _match_cand(75)])
+    a = render_review_sheet(wl, book_id="geombook", available_overlays=_ovl(wl), sweep=SWEEP)
+    b = render_review_sheet(wl, book_id="geombook", available_overlays=set(reversed(list(_ovl(wl)))), sweep=SWEEP)
+    assert a == b
+
+
+def test_review_sheet_match_entry_without_denominator_fails_loud():
+    # Denominator rule: a match entry whose tentative lacks `total` cannot render a bare rate.
+    bad = route(75, stage="match", signal="match-rate", value=0.1667, threshold=0.80,
+                tentative={"match_rate": 0.1667})  # the #40-as-shipped shape: no denominator
+    wl = build([bad])
+    with pytest.raises(GeometryError, match="denominator"):
+        render_review_sheet(wl, book_id="geombook", available_overlays=_ovl(wl), sweep=SWEEP)
+
+
+def test_review_sheet_zero_token_match_page_renders_not_aborts():
+    # #46 audit BUG2: an all-tokenless match page routes with total=0. Zero is an HONEST denominator
+    # (a real, zero-size window), not the #40 absent-denominator gap — it must render, never abort.
+    wl = build([_match_cand(75, value=0.0, matched=0, total=0, unmatched=())])
+    html = render_review_sheet(wl, book_id="geombook", available_overlays=_ovl(wl), sweep=SWEEP)
+    assert "all-tokenless" in html and "0 witness tokens" in html
+
+
+def test_review_sheet_shows_denominator_and_unmatched_chips():
+    wl = build([_match_cand(75, matched=1, total=6, unmatched=("bravo", "charlie", "golf"))])
+    html = render_review_sheet(wl, book_id="geombook", available_overlays=_ovl(wl), sweep=SWEEP)
+    assert "1/6" in html  # the denominator that unmasks the p6 trap
+    for chip in ("bravo", "charlie", "golf"):
+        assert chip in html
+
+
+def test_review_sheet_prefilled_commands_are_all_valid_verdict_actions():
+    # Command binding: every emitted `--action X` is a real DT-10 verb — an unknown verb is
+    # impossible to emit because commands are built only from VERDICT_ACTIONS.
+    wl = build([route(6), _cols_cand(47), _match_cand(75)])
+    html = render_review_sheet(wl, book_id="geombook", available_overlays=_ovl(wl), sweep=SWEEP)
+    actions = re.findall(r"--action (\S+)", html)
+    assert actions  # commands were emitted
+    assert all(a in VERDICT_ACTIONS for a in actions)
+
+
+def test_prefilled_command_rejects_an_unknown_action():
+    # The command builder is the command-binding guard: it refuses to emit a non-DT-10 verb.
+    wl = build([_match_cand(75)])
+    with pytest.raises(ValueError, match="action"):
+        prefilled_record_command("geombook", wl.candidates[0], "approve")  # not a verdict action
+
+
+def test_redraw_split_is_offered_only_where_there_is_a_split_to_redraw():
+    # Plausible-verb mapping: redraw_split is a columns-only verb; a match entry never offers it.
+    cwl, mwl = build([_cols_cand(47)]), build([_match_cand(75)])
+    cols_html = render_review_sheet(cwl, book_id="b", available_overlays=_ovl(cwl), sweep=SWEEP)
+    match_html = render_review_sheet(mwl, book_id="b", available_overlays=_ovl(mwl), sweep=SWEEP)
+    assert ACTION_REDRAW_SPLIT in cols_html
+    assert ACTION_REDRAW_SPLIT not in match_html
+    assert ACTION_DECLINE_GEOMETRY in match_html  # decline is always offered
+
+
+def test_walk_diagnostic_carries_denominator_chips_and_verbs():
+    # Walk mode's per-candidate text: denominator, chips, and the pre-filled verbs — same evidence
+    # as the sheet, plain-text. Also honours the denominator rule.
+    text = walk_diagnostic(_build_one(_match_cand(75, matched=2, total=8, unmatched=("delta",))),
+                           book_id="geombook", sweep=SWEEP)
+    assert "2/8" in text and "delta" in text
+    assert "--action" in text
+
+
+def _build_one(r):
+    return build([r]).candidates[0]
+
+
+def test_review_sheet_path_is_under_work_output(workspace):
+    path = review_sheet_path(workspace)
+    assert path.name == "review_sheet.html"
+    assert "geometry_review" in str(path) and "output" in str(path)
+
+
+# --- #46 CLI: `sheet` + `next` (over the DT-10 record write path) ------------------------------- #
+
+from engine.structure.geom_review import (  # noqa: E402
+    walk_review,
+    write_review_sheet,
+)
+
+
+def _seed_sheet_world(workspace):
+    # A saved worklist + a rendered overlay for each candidate page — the sheet's two inputs.
+    wl = build([_match_cand(75), _match_cand(192)])
+    save_worklist(workspace, wl)
+    for c in wl.candidates:
+        render_overlay(width=200.0, height=260.0, boxes=[(20.0, 20.0, 180.0, 40.0)],
+                       split_x=None, out_path=overlay_path(workspace, c.page, c.stage), dpi=36)
+    return wl
+
+
+def test_write_review_sheet_persists_html_when_overlays_present(workspace):
+    _seed_sheet_world(workspace)
+    wl = build([_match_cand(75), _match_cand(192)])
+    path = write_review_sheet(workspace, "geombook", wl)
+    assert path == review_sheet_path(workspace)
+    assert path.read_text(encoding="utf-8").startswith("<!doctype html>")
+
+
+def test_sheet_cli_writes_the_file(workspace, tmp_path):
+    _seed_sheet_world(workspace)
+    rc = main(["--book", "geombook", "--books-dir", str(tmp_path), "sheet"])
+    assert rc == 0
+    assert review_sheet_path(workspace).is_file()
+
+
+def test_sheet_cli_fails_loud_when_an_overlay_is_missing(workspace, tmp_path):
+    _seed_sheet_world(workspace)
+    overlay_path(workspace, 192, "match").unlink()  # drop one overlay → totality breach
+    rc = main(["--book", "geombook", "--books-dir", str(tmp_path), "sheet"])
+    assert rc == 13  # GeometryError exit code — a hard fail, not a half-written sheet
+
+
+def test_next_walk_records_a_verdict_through_the_dt10_write_path(workspace, tmp_path):
+    _seed_sheet_world(workspace)
+    book_dir = tmp_path / "geombook"
+    answers = iter(["confirm", "quit"])  # rule the first candidate, then stop
+    opened = []
+    n = walk_review(book_dir, workspace, by="ben",
+                    input_fn=lambda _prompt: next(answers), open_fn=opened.append)
+    assert n == 1
+    verdicts = load_verdicts(book_dir)
+    assert len(verdicts) == 1 and next(iter(verdicts.values()))["action"] == "confirm"
+    assert opened  # the overlay was opened for the walked candidate
+
+
+def test_next_walk_redraw_split_captures_the_split_x_param(workspace, tmp_path):
+    # #46 audit BUG3: redraw_split is a parametric re-entry — walk mode must capture split_x, not
+    # record a coordinate-less verdict the re-entry would ignore. Prompts: verb, then the split_x.
+    wl = build([_cols_cand(47)])
+    save_worklist(workspace, wl)
+    render_overlay(width=200.0, height=260.0, boxes=[(20.0, 20.0, 180.0, 40.0)], split_x=100.0,
+                   out_path=overlay_path(workspace, 47, "columns"), dpi=36)
+    book_dir = tmp_path / "geombook"
+    answers = iter(["redraw_split", "150.5"])  # the verb, then the split_x read off the ruler
+    n = walk_review(book_dir, workspace, by="ben",
+                    input_fn=lambda _prompt: next(answers), open_fn=lambda _p: None)
+    assert n == 1
+    v = next(iter(load_verdicts(book_dir).values()))
+    assert v["action"] == "redraw_split" and v["params"]["split_x"] == 150.5

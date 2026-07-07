@@ -644,6 +644,31 @@ def test_page_below_accept_rate_routes_and_discards_tentative_outcomes(matchkit)
     assert outcome.atoms == {}
 
 
+def test_match_routed_page_carries_review_evidence_denominator_and_unmatched_tokens(matchkit):
+    # #46 (DT-10 read-side): a match-routed page's `value` is a bare rate; the review sheet needs
+    # its DENOMINATOR (the p6 4-token-window trap) and WHICH witness tokens disagreed. The matcher
+    # already computes both in its per-atom loop and threw them away — now it surfaces them on the
+    # in-memory MatchOutcome.page_match_evidence (NOT persisted to the lean sidecar). alfa matches;
+    # the other five witness tokens find no box → matched 1 / total 6, five unmatched chips.
+    stream = matchkit.witness_stream(["alfa bravo charlie golf hotel india"])
+    page = matchkit.page(1, ["alfa", "kilo", "lima", "mike"])
+    outcome = match_stream(stream, [page], page_accept_rate=0.8, atom_match_floor=0.5)
+    ev = outcome.page_match_evidence[1]
+    assert (ev.matched, ev.total) == (1, 6)  # the denominator the bare 1/6 rate hides
+    assert ev.unmatched_tokens == ("bravo", "charlie", "golf", "hotel", "india")  # witness order
+
+
+def test_accepted_and_locate_pages_carry_no_match_evidence(matchkit):
+    # Evidence is match-review-only: an ACCEPTED page needs no review, and a locate empty-window
+    # page has no match to evidence (its signal IS the empty window). Only match-routed pages appear
+    # in the map — so the sheet never renders a denominator for a page that isn't in review.
+    stream = matchkit.witness_stream(["alfa bravo charlie"])
+    pages = [matchkit.page(1, ["alfa", "bravo", "charlie"]), matchkit.page(2, ["zulu"])]
+    outcome = match_stream(stream, pages, page_accept_rate=0.5, atom_match_floor=0.5)
+    assert outcome.pages[1].status == "matched" and outcome.pages[2].stage == "locate"
+    assert outcome.page_match_evidence == {}
+
+
 def test_empty_window_page_routes_as_a_locate_failure(matchkit):
     # All witness tokens sit on page 1; page 2's located window is empty -> routed at the locate
     # stage and counted in the coverage counter, never silently "matched with nothing".

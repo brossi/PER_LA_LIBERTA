@@ -23,9 +23,11 @@ TIMEOUT = 300
 R = "src/engine/structure/geom_review.py"
 S = "src/engine/structure/geom_sidecar.py"
 C = "src/engine/structure/column_calibration.py"
+GM = "src/engine/structure/geom_match.py"
 TR = "tests/unit/test_geom_review.py"
 TS = "tests/unit/test_geom_sidecar.py"
 TC = "tests/unit/test_column_calibration.py"
+TGM = "tests/unit/test_geom_match.py"
 
 
 def m(label, old, new, test_id, *, file=R, test_file=TR):
@@ -168,4 +170,46 @@ MUTANTS = [
       "    high_bottom = _run_bottom(counts, populated[-1], n_bins)  # lower edge of the dense two-column cluster",
       "    high_bottom = valley_hi",
       "test_asymmetric_gap_anchors_the_threshold_above_the_transition_band", file=C, test_file=TC),
+    # --- #46: review-sheet greens (denominator / totality / command-binding / plausible verbs) ---
+    m("denominator-rule-dropped",
+      "    if not (_is_int(total) and total >= 0):",
+      "    if False:",
+      "test_review_sheet_match_entry_without_denominator_fails_loud"),
+    m("denominator-rule-rejects-honest-zero",
+      "    if not (_is_int(total) and total >= 0):",
+      "    if not (_is_int(total) and total > 0):",
+      "test_review_sheet_zero_token_match_page_renders_not_aborts"),
+    m("missing-overlay-not-fatal",
+      "        if (c.page, c.stage) not in available_overlays:",
+      "        if False:",
+      "test_review_sheet_missing_overlay_fails_loud"),
+    m("overlay-path-stage-domain-unchecked",
+      "    if stage not in WORKLIST_STAGES:\n"
+      "        raise ValueError(f\"overlay stage must be one of {WORKLIST_STAGES}, got {stage!r}\")",
+      "    if False:\n"
+      "        raise ValueError(f\"overlay stage must be one of {WORKLIST_STAGES}, got {stage!r}\")",
+      "test_overlay_path_rejects_an_unknown_stage"),
+    m("walk-redraw-split-param-not-captured",
+      "        if answer == ACTION_REDRAW_SPLIT:",
+      "        if False:",
+      "test_next_walk_redraw_split_captures_the_split_x_param"),
+    m("command-binding-unknown-verb-emittable",
+      "    if action not in VERDICT_ACTIONS:",
+      "    if False:",
+      "test_prefilled_command_rejects_an_unknown_action"),
+    m("redraw-split-offered-everywhere",
+      "    \"columns\": (ACTION_CONFIRM, ACTION_REDRAW_SPLIT, ACTION_RECLASSIFY, ACTION_DECLINE_GEOMETRY),",
+      "    \"columns\": (ACTION_CONFIRM, ACTION_RECLASSIFY, ACTION_DECLINE_GEOMETRY),",
+      "test_redraw_split_is_offered_only_where_there_is_a_split_to_redraw"),
+    # --- #46: matcher review evidence (Part A) ---------------------------------------------------
+    m("unmatched-tokens-not-collected",
+      "                    page_unmatched.append(t)  # #46: no available box token → a disagreement chip",
+      "                    pass",
+      "test_match_routed_page_carries_review_evidence_denominator_and_unmatched_tokens",
+      file=GM, test_file=TGM),
+    m("match-evidence-matched-total-swapped",
+      "                matched=matched_sum, total=total_sum, unmatched_tokens=tuple(page_unmatched)",
+      "                matched=total_sum, total=matched_sum, unmatched_tokens=tuple(page_unmatched)",
+      "test_match_routed_page_carries_review_evidence_denominator_and_unmatched_tokens",
+      file=GM, test_file=TGM),
 ]

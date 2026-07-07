@@ -482,13 +482,33 @@ Immutable, addressed capture units — the floor everything pins to.
 > match 18}, 0 density/columns routes (every stage well under 0.15); `order_qa` over 253 matched
 > pages **mean 0.842 / pass@0.85 0.779** — the S2.2 feed, **below** the #30 re-gate bar (mean ≥0.85
 > AND pass ≥85%), consistent with S2.0's conditional-primary verdict → **#30 rules the S5 mode; S5
-> runs conditional-primary until then.** DT-7 auto-propose suggested 0.25/0.20 (valley centre;
-> classifies PLL identically to the frozen 0.50/0.15) — a proposal for future books, the live run
-> uses the manifest. Red-first + mutation hunt **29/29** (`tests/hunts/hunt_review.py`) + two
+> runs conditional-primary until then.** DT-7 auto-propose suggested 0.40/0.35 (dense-cluster-edge
+> anchor, retuned from the initial valley-centre 0.25/0.20 that under-anchored PLL's transition band —
+> commit `f6f259a`); diverges from the frozen 0.50/0.15 on 2 pages, a proposal for future books, the
+> live run uses the manifest. Red-first + mutation hunt **29/29** (`tests/hunts/hunt_review.py`) + two
 > adversarial audits (narrow found+fixed the (page,stage)-uniqueness / matched-page route-hygiene /
 > unknown-key-drop gaps; wide confirmed DT-10/12/7 fidelity + numberless-core). Suite **1617** green.
-> **DT-13 stays (b)** (ruled 2026-07-05; revisit = first copy2-only consumer). #46 (S2.1.6a HTML
-> sheet) remains open as the read-only review-evidence adjunct.
+> **DT-13 stays (b)** (ruled 2026-07-05; revisit = first copy2-only consumer).
+
+> **Pointer (S2.1.6a / #46 close, 2026-07-07):** the read-only **review sheet** + **`review next`**
+> walk mode are built — the eyes-half of DT-10 (verdicts still enter only through the #40 `record`
+> CLI). New in `structure/geom_review.py`: pure `render_review_sheet` (four greens red-first —
+> determinism, totality [every candidate once, missing overlay fails loud], denominator rule
+> [a match-rate entry without its `total` fails loud], command binding [pre-filled commands only from
+> `VERDICT_ACTIONS`]) + `prefilled_record_command` + `walk_diagnostic`/`walk_review` + overlay pixel
+> ruler + `sheet`/`next` CLI subcommands. The denominator rule surfaced a **#40 data gap** (match
+> candidates shipped a bare rate, no denominator/chips) — closed at the source:
+> `MatchOutcome.page_match_evidence` (matched/total + unmatched tokens, in-memory, feeding the
+> worklist `tentative`; **not** persisted to the lean sidecar). **PLL run:** 25 per-`(page,stage)`
+> overlays + a well-formed 62 KB sheet; the enriched match entries expose the p6 trap (a `3/4` rate
+> over a 4-token window) with OCR-garble chips. **Pre-commit audit (wide+narrow, both converged on
+> one bug):** overlay files were page-keyed → a page routed at two gates would overwrite the columns
+> ruler/split (fixed: per-`(page,stage)` overlay filenames, structurally collision-proof); a
+> `total==0` all-tokenless match page tripped the denominator rule → aborted the whole sheet (fixed:
+> zero is an honest denominator, rendered; only an *absent* one fails loud); walk `redraw_split`
+> recorded a coordinate-less verdict (fixed: prompts for `split_x`); + L1 (denominator rule keys on
+> `stage`, not signal wording) / L3 (`xdg-open` off macOS). Rule-A delta re-audit of the fixes.
+> Mutation hunt **39/39** (9 new #46 mutants). Suite **1641** green, ruff clean.
 
 | S2.2 | Geometry property tests: boxes within page bounds; source-order ↔ geometric-order coherence on a real page; primary-witness box on canonical atoms **where matched**; **absent/unmatched geom is representable and excluded from primary re-bind**. **PLUS the S2.0-mandated RE-GATE** (binding, not prose — the S2.0 verdict was *conditional*-primary): measure col-aware ordered coverage on the **as-built** S2.1 detector over a breadth sample (n≥30), require **mean ≥0.85 AND per-page pass-rate ≥85%** (not a page median — the audit showed median hid a 0.82 mean / ~30% fail tail), and on the result **confirm S5 `geometry-primary` or demote** the mode (record in lineage). Until this passes, S5 runs conditional-primary | §9; `docs/probes/s2_0_geometry_alignment.md` | S2.1; issue #30 | property: those four assertions hold **and** the re-gate measures the as-built detector on mean+pass-rate and sets/confirms the S5 mode | `BUILD`/`GATE` | `TODO` |
 

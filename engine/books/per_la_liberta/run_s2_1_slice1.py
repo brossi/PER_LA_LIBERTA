@@ -81,8 +81,11 @@ from engine.structure.geom_review import (
     RouteInput,
     build_worklist,
     input_fingerprint,
+    overlay_path,
     page_order_qa,
+    render_overlay,
     save_worklist,
+    write_review_sheet,
 )
 from engine.structure.geom_sidecar import PAGE_MATCHED, PAGE_ROUTED, with_detector_fields
 from engine.structure.geometry_pymupdf import PyMuPDFTesseractBackend
@@ -395,6 +398,7 @@ def _write_stats(status: str, **sections) -> None:
 
 
 INK_DPI = 150  # density pre-check ink-fraction dpi (the #38 calibration resolution)
+OVERLAY_DPI = 150  # review-overlay render dpi (#46) — legible on screen, page-bounded output
 
 
 def _front_end_pass(pages, document, seg, copy1, boundaries, matched_pages):
@@ -464,21 +468,56 @@ def _front_end_pass(pages, document, seg, copy1, boundaries, matched_pages):
     return detector_fields, order_qa_values, routes, col2_scores
 
 
-def _matcher_routes(sidecar, accept_rate):
+def _matcher_routes(sidecar, outcome, accept_rate):
     """The matcher-stage worklist inputs: the sidecar's already-routed pages (locate empty-window
     and sub-threshold match rate). The front-end (density/columns) routes are disjoint by stage, so
-    a page routed at two gates surfaces as two candidates."""
+    a page routed at two gates surfaces as two candidates.
+
+    #46: a match route carries the review evidence behind its bare rate — the ``matched``/``total``
+    token denominator (the p6 tiny-window trap) and the ``unmatched_tokens`` chips — from the
+    matcher's in-memory :attr:`MatchOutcome.page_match_evidence` (never persisted to the lean
+    sidecar). The review sheet's denominator rule requires ``total`` for a match-rate entry."""
     routes = []
     for page, rec in sorted(sidecar.pages.items()):
         if rec.status != PAGE_ROUTED:
             continue
-        threshold = accept_rate if rec.stage == "match" else 0.0
-        tentative = {"match_rate": rec.value} if rec.stage == "match" else {}
+        if rec.stage == "match":
+            ev = outcome.page_match_evidence[page]  # KeyError = a match route with no evidence: a bug
+            threshold = accept_rate
+            tentative = {"matched": ev.matched, "total": ev.total,
+                         "unmatched_tokens": list(ev.unmatched_tokens)}
+        else:
+            threshold = 0.0
+            tentative = {}
         routes.append(RouteInput(
             page=page, stage=rec.stage, signal=rec.signal, value=rec.value,
             threshold=threshold, tentative=tentative,
         ))
     return routes
+
+
+def _render_worklist_overlays(worklist, pages_by_scan, pdf_path, workspace):
+    """Render one review overlay per worklist **candidate** (#46): the routed page's scan with its
+    OCR boxes drawn, plus the detected split + a pixel ruler on ``columns`` candidates (so
+    ``redraw_split`` can be read off the image). Overlays are keyed by ``(page, stage)`` — a page
+    routed at two gates gets two distinct files, so the plain match/locate overlay never overwrites
+    the columns one that needs the ruler (#46 audit M1). On-demand and page-bounded — only the routed
+    pages (≤ the P-6 review fraction), never the whole book. Returns the count rendered."""
+    count = 0
+    with fitz.open(pdf_path) as document:
+        for c in worklist.candidates:
+            page = pages_by_scan.get(c.page)
+            if page is None:  # a candidate page outside the read range — should not happen
+                continue
+            split_x = c.tentative.get("split_x") if c.stage == "columns" else None
+            background = document[c.page - 1].get_pixmap(dpi=OVERLAY_DPI)
+            render_overlay(
+                width=page.width, height=page.height, boxes=page.words, split_x=split_x,
+                out_path=overlay_path(workspace, c.page, c.stage), background=background,
+                dpi=OVERLAY_DPI, ruler=(c.stage == "columns"),
+            )
+            count += 1
+    return count
 
 
 def _order_qa_summary(order_qa_values):
@@ -613,7 +652,7 @@ def main() -> None:
         policy_values={**seg["density_bands"], **seg["column_detector"],
                        "review_fraction_max": review_fraction_max},
     )
-    all_routes = front_end_routes + _matcher_routes(sidecar, args.accept_rate)
+    all_routes = front_end_routes + _matcher_routes(sidecar, outcome, args.accept_rate)
     proposal = propose_column_policy(col2_scores)
 
     page_status = Counter(record.status for record in sidecar.pages.values())
@@ -703,10 +742,17 @@ def main() -> None:
 
     sidecar_path = save_geom_sidecar(workspace, sidecar)
     worklist_out = save_worklist(workspace, worklist)
+    # #46: render the per-candidate review overlays (page-bounded to the routed pages) + the
+    # read-only HTML evidence sheet — the eyes-half of DT-10; verdicts still enter only via the CLI.
+    pages_by_scan = {pg.page: pg for pg in pages}
+    overlays_rendered = _render_worklist_overlays(worklist, pages_by_scan, pdf_path, workspace)
+    sheet_path = write_review_sheet(workspace, "per_la_liberta", worklist, sweep=sections["threshold_sweep"])
+    sections["worklist"]["overlays_rendered"] = overlays_rendered
     _write_stats("ok", **sections)
 
     print(f"\nsidecar -> {sidecar_path}")
     print(f"worklist -> {worklist_out}  ({len(worklist.candidates)} candidates: {dict(stage_counts)})")
+    print(f"review sheet -> {sheet_path}  ({overlays_rendered} overlays)")
     print(f"pages: {dict(page_status)}   atoms: {dict(atom_status)}   pending: {pending}")
     print(f"coverage: {dict(sidecar.coverage)}")
     print(f"tripwire: massA={tripwire['absent_token_mass_rate']:.4f} "

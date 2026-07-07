@@ -46,7 +46,7 @@ import unicodedata
 from bisect import bisect_right
 from collections import Counter
 from collections.abc import Mapping, Sequence
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, field, replace
 
 from engine.errors import StaleArtifactError
 from engine.structure.atom_store import CANONICAL, WITNESS, AtomStream
@@ -333,6 +333,19 @@ def locate_pages(
 
 
 @dataclass(frozen=True, slots=True)
+class PageMatchEvidence:
+    """The match-review evidence behind one match-routed page's bare rate (#46, DT-10 read-side):
+    the rate's ``matched``/``total`` token denominator — the p6 trap, a healthy-looking rate over a
+    tiny window — and ``unmatched_tokens``, the witness tokens that found no box, in witness order
+    (the review sheet's disagreement chips). Populated only for pages routed at the ``match`` stage
+    (an accepted page needs no review; a locate empty-window page has no match to evidence)."""
+
+    matched: int
+    total: int
+    unmatched_tokens: tuple[str, ...]
+
+
+@dataclass(frozen=True, slots=True)
 class MatchOutcome:
     """Everything one :func:`match_stream` run produced, in sidecar-record vocabulary: the located
     ``boundaries``, a :class:`~engine.structure.geom_sidecar.PageRecord` per input page, an
@@ -340,7 +353,11 @@ class MatchOutcome:
     atoms are pending — no records, G-12), the derived per-atom page attribution (DT-3's
     byproduct), and the per-atom normalizer token counts (the P-5 tripwire's denominators).
     ``witness_id``/``stream_source_hash`` are captured from the matched stream so the sidecar
-    builder cannot be handed a different stream's identity."""
+    builder cannot be handed a different stream's identity.
+
+    ``page_match_evidence`` is the #46 review adjunct: per match-routed page, the rate's denominator
+    + unmatched-token chips. In-memory only — it feeds the DT-10 worklist candidate ``tentative``
+    (the durable review home), never the lean persisted sidecar (DT-9)."""
 
     witness_id: str
     stream_source_hash: str
@@ -350,6 +367,7 @@ class MatchOutcome:
     atom_pages: Mapping[str, AtomPages]
     token_counts: Mapping[str, int]
     locate_failed_pages: tuple[int, ...]
+    page_match_evidence: Mapping[int, PageMatchEvidence] = field(default_factory=dict)
 
 
 def _canonical_box_order(page: PageGeometry) -> list[int]:
@@ -466,6 +484,7 @@ def match_stream(
     page_records: dict[int, PageRecord] = {}
     atom_records: dict[str, AtomRecord] = {}
     locate_failed: list[int] = []
+    page_match_evidence: dict[int, PageMatchEvidence] = {}  # #46: routed-match review evidence
     for p_idx, pg in enumerate(pages):
         dropped = dropped_boxes.get(pg.page) if dropped_boxes is not None else None
         members = per_page_atoms[p_idx]
@@ -488,6 +507,7 @@ def match_stream(
         tentative: list[tuple[str, AtomRecord]] = []
         matched_sum = 0
         total_sum = 0
+        page_unmatched: list[str] = []  # #46: witness tokens finding no box — the review chips
         for i in members:
             atom = stream.atoms[i]
             toks = atom_tokens[i]
@@ -504,6 +524,8 @@ def match_stream(
                     matched += 1
                     if original_bag[t] == 1:
                         has_page_unique = True
+                else:
+                    page_unmatched.append(t)  # #46: no available box token → a disagreement chip
             matched_sum += matched
             total_sum += total
             confidence = (matched / total) if total else 0.0
@@ -539,6 +561,11 @@ def match_stream(
             page_records[pg.page] = PageRecord(
                 status=PAGE_ROUTED, stage="match", signal="match-rate", value=rate, dropped_boxes=dropped
             )
+            # #46: keep the rate's denominator + the disagreeing tokens as review evidence (the
+            # sheet's denominator + chips). In-memory only, feeding the DT-10 worklist tentative.
+            page_match_evidence[pg.page] = PageMatchEvidence(
+                matched=matched_sum, total=total_sum, unmatched_tokens=tuple(page_unmatched)
+            )
 
     return MatchOutcome(
         witness_id=stream.stream_id,
@@ -549,6 +576,7 @@ def match_stream(
         atom_pages=atom_windows,
         token_counts=token_counts,
         locate_failed_pages=tuple(locate_failed),
+        page_match_evidence=page_match_evidence,
     )
 
 

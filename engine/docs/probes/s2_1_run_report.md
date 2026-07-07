@@ -163,6 +163,32 @@ behaviour. It remains a proposal a human ratifies and freezes; the live run alwa
 (never the live re-derivation, DT-9/G-22), and it abstains outright when a book is not cleanly
 bimodal (single-column book, spurious tiny cluster, clusters too close).
 
+## S2.1.6a (#46) — read-only review sheet + the match-evidence denominator
+
+The runner now also renders the eyes-half of DT-10: one review overlay per worklist candidate,
+keyed by `(page, stage)` (`work/output/geometry_review/overlays/page_NNNN_{stage}.png` — so a page
+routed at two gates gets two distinct overlays, the columns one carrying the split + ruler), and a
+read-only HTML evidence sheet
+(`work/output/geometry_review/review_sheet.html`) — both disposable/gitignored, regenerable from the
+worklist + overlays. Verdicts still enter **only** through the #40 `record` CLI (the sheet writes
+nothing). The 2026-07-07 run: **25 overlays + a well-formed 62 KB sheet**, one entry block per
+candidate.
+
+Building the sheet's **denominator rule** (no match rate rendered without its token denominator)
+exposed a #40 data gap: match candidates shipped a bare rate (`{"match_rate": 0.167}`) — no
+denominator, no unmatched tokens, the two things that made the run-1 worklist legible in minutes.
+Closed at the source: `match_stream` now surfaces `MatchOutcome.page_match_evidence` per match-routed
+page — the rate's `matched`/`total` token denominator and the `unmatched_tokens` chips — in-memory,
+feeding the worklist candidate `tentative` (never persisted to the lean sidecar, DT-9). On the real
+run the enriched entries make the trap visible: a candidate reading **`3/4`** — a healthy-looking
+0.75 rate over a 4-token window, exactly the p6 ghost-text failure the denominator exists to catch —
+with its disagreeing tokens as OCR-garble chips (`i1(jl^s`, `ì3`, …).
+
+The `order_qa` feed, worklist counts, sidecar, and auto-propose are byte-identical to the #40 run
+(the enrichment rides existing evidence; only the worklist `tentative` payload and the new overlays/
+sheet are added). `render_review_sheet` is a pure function of (worklist, book, overlays, sweep) —
+byte-identical across renders. Red-first, mutation hunt **36/36**.
+
 ## Reproduction
 
 ```

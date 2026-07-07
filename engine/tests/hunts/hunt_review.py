@@ -164,4 +164,8 @@ MUTANTS = [
       "            raise ValueError(f\"col2_score must be a finite number in [0, 1], got {s!r}\")",
       "            pass",
       "test_out_of_range_score_is_rejected", file=C, test_file=TC),
+    m("propose-anchors-on-valley-not-dense-edge",
+      "    high_bottom = _run_bottom(counts, populated[-1], n_bins)  # lower edge of the dense two-column cluster",
+      "    high_bottom = valley_hi",
+      "test_asymmetric_gap_anchors_the_threshold_above_the_transition_band", file=C, test_file=TC),
 ]

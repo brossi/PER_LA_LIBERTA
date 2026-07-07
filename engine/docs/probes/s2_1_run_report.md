@@ -147,14 +147,21 @@ was confidently classified; the density gate abstained on none). Per-stage fract
 ### DT-7 auto-propose (a proposal, not a ruling)
 
 From this book's own `col2_score` distribution the tooling proposes
-**`decision_threshold = 0.250`, `hysteresis_margin = 0.200`** (bimodal: 59 single-column pages
-below 0.05, 219 two-column at/above 0.45, empty valley [0.05, 0.45]). The **ratified/frozen**
-manifest value is `0.50 / 0.15`. The two differ but **classify every PLL page identically** — both
-sit inside the empty valley, so no page's column count changes. The divergence is the heuristic's
-choice (valley *centre*) vs Ben's ratified choice (higher in the valley, margin sized to the 5
-transition pages); the auto-propose is calibration ergonomics for a *future* book, human-ratified
-and frozen — the live run always uses the manifest, never the live re-derivation (DT-9/G-22). It
-abstains outright when a book is not cleanly bimodal (single-column book, spurious tiny cluster).
+**`decision_threshold = 0.400`, `hysteresis_margin = 0.350`**. The **ratified/frozen** manifest
+value is `0.50 / 0.15`; the two now diverge on only **2 of 278 pages**, and the weak transition
+pages (0.46–0.70) defer under both.
+
+The anchor is the **dense-cluster edges**, not the empty-valley centre. PLL's scores are a
+single-column cluster at ≈0, a *sparse transition band* (partial columns, weak gutters) at
+0.46–0.70, and a dense two-column cluster from ~0.75 — the transition pages sit **low in the gap**,
+not at its centre. A naive valley-centre anchor lands at 0.25 (below the transition band) and would
+confidently stamp those weak-evidence pages two-column — the exact thing the hysteresis margin
+exists to prevent. Anchoring the threshold high in the inter-cluster span (between the top of the
+single-column cluster and the bottom of the dense two-column cluster) keeps the whole transition
+band inside the margin, deferred to the cross-page prior / human — matching the ratified policy's
+behaviour. It remains a proposal a human ratifies and freezes; the live run always uses the manifest
+(never the live re-derivation, DT-9/G-22), and it abstains outright when a book is not cleanly
+bimodal (single-column book, spurious tiny cluster, clusters too close).
 
 ## Reproduction
 

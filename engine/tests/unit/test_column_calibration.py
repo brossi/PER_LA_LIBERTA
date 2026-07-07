@@ -21,7 +21,7 @@ from __future__ import annotations
 import pytest
 
 from engine.structure.column_calibration import ColumnPolicyProposal, propose_column_policy
-from engine.structure.segmentation import ColumnDetector
+from engine.structure.segmentation import ColumnDetector, ColumnEvidence
 
 
 def _bimodal(low_n=60, high_n=210, low=0.0, high=0.9):
@@ -55,6 +55,25 @@ def test_proposal_is_a_valid_detector_policy():
         decision_threshold=prop.decision_threshold, hysteresis_margin=prop.hysteresis_margin
     )
     assert detector.params["decision_threshold"] == prop.decision_threshold
+
+
+def test_asymmetric_gap_anchors_the_threshold_above_the_transition_band():
+    # The PLL shape: a single-column cluster at ~0, a sparse TRANSITION band low in the gap
+    # (0.46-0.64 — partial columns / weak gutters), then a dense two-column cluster at ~0.9. The
+    # LARGEST empty run is [0.05, 0.45] (below the transition), so valley-CENTRE would place the
+    # threshold at ~0.25 — below the transition pages, confidently stamping them two-column. The
+    # dense-cluster-edge anchor must place the threshold HIGH so a weak 0.46 page defers (in-margin)
+    # rather than self-declaring two columns; the whole point of the hysteresis margin.
+    scores = [0.0] * 60 + [0.46, 0.52, 0.58, 0.64] + [0.90] * 200
+    prop = propose_column_policy(scores)
+    assert prop.bimodal
+    assert prop.decision_threshold > 0.35  # anchored high, NOT at the ~0.25 valley centre
+    det = ColumnDetector(
+        decision_threshold=prop.decision_threshold, hysteresis_margin=prop.hysteresis_margin
+    )
+    weak = det.classify(ColumnEvidence(col2_score=0.46, split_x=1.0))
+    assert not (weak.n_cols == 2 and weak.confident)  # deferred, never confidently two-column
+    assert det.classify(ColumnEvidence(col2_score=0.90, split_x=1.0)).confident  # a clean page IS
 
 
 def test_pll_like_distribution_is_bimodal_with_a_mid_valley():

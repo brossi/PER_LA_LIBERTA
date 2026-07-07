@@ -14,7 +14,7 @@
       "pymupdf": "1.27.2.3",
       "tesseract": "5.5.2"
     },
-    "match_wall_seconds": 87.37929787498433
+    "match_wall_seconds": 87.43172729201615
   },
   "calibration_copy3_blind": {
     "body_atoms": 521,
@@ -44,7 +44,7 @@
     "small_atom_total": 193,
     "small_atom_exact": 94,
     "small_atom_exact_rate": 0.48704663212435234,
-    "wall_seconds": 86.2114400829887,
+    "wall_seconds": 87.91732629202306,
     "floors": {
       "clause_a_exact": 0.95,
       "clause_b_within_one": 0.98
@@ -215,16 +215,16 @@
       "0.8": 62,
       "0.9": 148
     },
-    "front_end_wall_seconds": 21.337105832993984
+    "front_end_wall_seconds": 21.109646292054094
   },
   "column_policy_auto_propose": {
     "bimodal": true,
-    "reason": "bimodal: 56 single-column pages below 0.05, 222 two-column pages at/above 0.45, empty valley [0.05, 0.45] — proposing threshold 0.250 (valley centre), margin 0.200 (half width). A PROPOSAL: ratify + freeze into manifest.segmentation.column_detector",
-    "decision_threshold": 0.25,
-    "hysteresis_margin": 0.2,
+    "reason": "bimodal: 56 single-column pages below 0.05, 222 pages at/above the empty valley, dense two-column cluster from 0.75 — proposing threshold 0.400 (anchored between the cluster edges, high in the gap), margin 0.350 (any sparse transition band between the clusters falls in-margin, deferred to the prior/human, never confidently two-column). A PROPOSAL: ratify + freeze into manifest.segmentation.column_detector",
+    "decision_threshold": 0.4,
+    "hysteresis_margin": 0.35,
     "valley": [
       0.05,
-      0.45
+      0.75
     ],
     "low_cluster_mass": 56,
     "high_cluster_mass": 222,

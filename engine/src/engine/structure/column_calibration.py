@@ -67,6 +67,24 @@ def _abstain(reason: str, n: int, **evidence) -> ColumnPolicyProposal:
     return ColumnPolicyProposal(bimodal=False, reason=reason, n_scores=n, **evidence)
 
 
+def _run_top(counts: list[int], start: int, n_bins: int) -> float:
+    """Upper score edge of the contiguous populated run beginning at bin ``start`` (the low
+    cluster's top). Extends up while bins stay populated, stopping at the first empty bin."""
+    b = start
+    while b + 1 < n_bins and counts[b + 1] > 0:
+        b += 1
+    return (b + 1) / n_bins
+
+
+def _run_bottom(counts: list[int], end: int, n_bins: int) -> float:
+    """Lower score edge of the contiguous populated run ending at bin ``end`` (the dense high
+    cluster's bottom). Extends down while bins stay populated, stopping at the first empty bin."""
+    b = end
+    while b - 1 >= 0 and counts[b - 1] > 0:
+        b -= 1
+    return b / n_bins
+
+
 def propose_column_policy(
     col2_scores: Sequence[float],
     *,
@@ -139,20 +157,33 @@ def propose_column_policy(
             high_cluster_mass=high_mass,
         )
 
-    threshold = (valley_lo + valley_hi) / 2.0
-    margin = (valley_hi - valley_lo) / 2.0
+    # High-edge anchor: place the decision on the DENSE cluster edges, not the empty-valley edges.
+    # A book's transition pages (weak/partial-column gutters) sit in a sparse band just ABOVE the
+    # empty valley, below the dense two-column cluster. Anchoring on the valley top would drop the
+    # threshold below them and stamp them confidently two-column — the exact thin evidence the
+    # hysteresis margin exists to distrust. Extending the anchor to the dense two-column cluster's
+    # bottom edge puts the whole transition band inside the ±margin (deferred to the prior/human),
+    # and leaves the threshold high in the inter-cluster span (near-invariant, per DT-7's rationale).
+    # For a clean bimodal (no transition band) the cluster edges coincide with the valley edges, so
+    # this reduces to the valley centre.
+    low_top = _run_top(counts, populated[0], n_bins)          # upper edge of the single-column cluster
+    high_bottom = _run_bottom(counts, populated[-1], n_bins)  # lower edge of the dense two-column cluster
+    threshold = (low_top + high_bottom) / 2.0
+    margin = (high_bottom - low_top) / 2.0
     return ColumnPolicyProposal(
         bimodal=True,
         reason=(
-            f"bimodal: {low_mass} single-column pages below {valley_lo:.2f}, {high_mass} two-column "
-            f"pages at/above {valley_hi:.2f}, empty valley [{valley_lo:.2f}, {valley_hi:.2f}] — "
-            f"proposing threshold {threshold:.3f} (valley centre), margin {margin:.3f} (half width). "
-            f"A PROPOSAL: ratify + freeze into manifest.segmentation.column_detector"
+            f"bimodal: {low_mass} single-column pages below {low_top:.2f}, {high_mass} pages at/above "
+            f"the empty valley, dense two-column cluster from {high_bottom:.2f} — proposing threshold "
+            f"{threshold:.3f} (anchored between the cluster edges, high in the gap), margin "
+            f"{margin:.3f} (any sparse transition band between the clusters falls in-margin, deferred "
+            f"to the prior/human, never confidently two-column). A PROPOSAL: ratify + freeze into "
+            f"manifest.segmentation.column_detector"
         ),
         n_scores=n,
         decision_threshold=threshold,
         hysteresis_margin=margin,
-        valley=(valley_lo, valley_hi),
+        valley=(low_top, high_bottom),
         low_cluster_mass=low_mass,
         high_cluster_mass=high_mass,
     )

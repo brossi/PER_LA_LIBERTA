@@ -822,25 +822,98 @@ _PLAUSIBLE_VERBS: dict[str, tuple[str, ...]] = {
 }
 assert set(_PLAUSIBLE_VERBS) == set(WORKLIST_STAGES), "every worklist stage needs a plausible-verb set"
 
+#: Per-stage human framing for the sheet — a short badge naming the check, and the plain-language
+#: question the reviewer answers by looking at the scan. The stages ask genuinely different things
+#: (locate = "is this a real page?"; match = "is the attached word-geometry sound?"), so the sheet
+#: frames the decision per stage rather than dumping the same telemetry on each.
+_STAGE_COPY: dict[str, tuple[str, str]] = {
+    "locate": (
+        "Real-page check",
+        "This scan leaf has no text mapped to it. Decide, from the scan, whether it is a genuinely "
+        "blank leaf — a cover, plate, divider, or empty page — or a real page whose text was missed.",
+    ),
+    "match": (
+        "Geometry check",
+        "The text mapped to this page, but its words attached to the scan's OCR word-boxes weakly. "
+        "Decide, from the scan, whether the word-geometry is sound to keep or the page should be dropped.",
+    ),
+    "density": (
+        "Blank-page check",
+        "This page reads as near-blank by ink coverage. Decide whether it is real content or an empty "
+        "/ bleed-through leaf whose boxes are noise.",
+    ),
+    "columns": (
+        "Column check",
+        "The column layout is ambiguous. Decide whether the page is one column or two, and where the "
+        "divider falls — read the split off the pixel ruler on the scan.",
+    ),
+}
+
+#: Plain-language meaning of each verdict verb (what it DOES to the page), shown beside its
+#: copy-paste command. The command still carries the raw DT-10 action (command-binding green).
+_VERB_LABEL: dict[str, str] = {
+    ACTION_CONFIRM: "Keep — accept this page's geometry as sound (re-runs, marked human-reviewed)",
+    ACTION_DECLINE_GEOMETRY: "Drop — no trustworthy geometry here; mark the page's atoms absent",
+    ACTION_REDRAW_SPLIT: "Fix the split — supply the correct column divider (split_x, read off the ruler)",
+    ACTION_RECLASSIFY: "Reclassify — re-run the page with a corrected classification",
+}
+assert set(_VERB_LABEL) == set(VERDICT_ACTIONS), "every verdict action needs a human label"
+
 REVIEW_SHEET_FILENAME = "review_sheet.html"
 
 _SHEET_HEAD = """<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><title>geometry review</title><style>
-body{font:14px/1.5 system-ui,sans-serif;margin:1.5rem;color:#1a1a1a;background:#fafafa}
-header{border-bottom:2px solid #ccc;padding-bottom:.8rem;margin-bottom:1rem}
-table.ladder{border-collapse:collapse;margin:.4rem 0}
-table.ladder td,table.ladder th{border:1px solid #ccc;padding:.1rem .5rem;text-align:right}
-section{border:1px solid #ddd;border-radius:6px;padding:1rem;margin:1rem 0;background:#fff}
-section h2{margin:.2rem 0;font-size:1rem;font-family:monospace}
-img{max-width:100%;border:1px solid #eee}
-.den strong{font-size:1.15em}
-.chips{display:flex;flex-wrap:wrap;gap:.25rem;margin:.3rem 0}
-.chip{background:#fde;border:1px solid #d9a;border-radius:3px;padding:.05rem .4rem;font-family:monospace;font-size:.85em}
-.dz-flag{color:#a30;font-weight:bold}
-ul.cmds{list-style:none;padding:0}
-ul.cmds code{display:block;background:#f4f4f4;padding:.3rem .5rem;border-radius:4px;margin:.2rem 0;font-size:.85em;overflow-x:auto}
-</style></head><body>"""
-_SHEET_FOOT = "</body></html>"
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Geometry review</title><style>
+:root{--paper:#f4f2ee;--card:#fff;--ink:#232020;--muted:#6f6860;--line:#e0dcd4;--accent:#3a4a7a;
+  --keep:#2f7d4f;--drop:#b23b3b;--fix:#b8791f;
+  --b-locate:#7a5a3a;--b-match:#3a4a7a;--b-density:#5a6a3a;--b-columns:#6a3a6a}
+*{box-sizing:border-box}
+body{font:15px/1.55 system-ui,-apple-system,sans-serif;margin:0;color:var(--ink);background:var(--paper)}
+.wrap{max-width:1200px;margin:0 auto;padding:0 1.5rem 2rem}
+header{border-bottom:2px solid var(--line);padding:1rem 0 .8rem;margin-bottom:1.2rem}
+header h1{font-size:1.15rem;margin:0 0 .3rem;text-wrap:balance}
+header p{margin:.2rem 0;max-width:66ch}
+header details{margin:.4rem 0}
+table.ladder{border-collapse:collapse;margin:.4rem 0;font-size:.82rem;font-variant-numeric:tabular-nums}
+table.ladder td,table.ladder th{border:1px solid var(--line);padding:.1rem .55rem;text-align:right}
+details summary{cursor:pointer;color:var(--accent)}
+.entry{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:1.3rem;background:var(--card);
+  border:1px solid var(--line);border-radius:10px;padding:1rem;margin:0 0 1.3rem;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.scan{align-self:start;position:sticky;top:1rem}
+.scan img{width:100%;max-height:82vh;object-fit:contain;border:1px solid var(--line);border-radius:6px;background:#fbfaf8}
+.adjudicate{min-width:0}
+.ehead{display:flex;align-items:center;gap:.6rem;margin-bottom:.7rem}
+.pageno{font-weight:700;font-size:1.15rem}
+.cid{font-family:ui-monospace,Menlo,monospace;font-size:.72rem;color:var(--muted);margin-left:auto}
+.badge{font-size:.68rem;letter-spacing:.05em;text-transform:uppercase;font-weight:700;color:#fff;padding:.18rem .55rem;border-radius:20px}
+.b-locate{background:var(--b-locate)}.b-match{background:var(--b-match)}
+.b-density{background:var(--b-density)}.b-columns{background:var(--b-columns)}
+.deciding,.why{margin:.4rem 0}
+.deciding{font-size:1.03rem}
+.lbl{display:block;font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:.1rem}
+.support{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:.55rem 0;margin:.8rem 0;font-size:.9rem;color:var(--muted)}
+.support strong{color:var(--ink)}
+.den{margin:0}.den strong{font-size:1.05em}
+.chips{display:flex;flex-wrap:wrap;gap:.25rem;margin:.4rem 0 0}
+.chip{background:#f6ecec;border:1px solid #d8b0b0;border-radius:3px;padding:.05rem .4rem;font-family:ui-monospace,Menlo,monospace;font-size:.82em;color:#7a3838}
+.pos{margin:.4rem 0 0}.dz-flag{color:var(--drop);font-weight:700}
+ul.cmds{list-style:none;padding:0;margin:.7rem 0 0;display:flex;flex-direction:column;gap:.55rem}
+.act{border-left:3px solid var(--line);padding-left:.65rem}
+.act-confirm{border-left-color:var(--keep)}.act-decline_geometry{border-left-color:var(--drop)}
+.act-redraw_split,.act-reclassify{border-left-color:var(--fix)}
+.vlabel{display:block;font-size:.87rem;margin-bottom:.18rem;font-weight:600}
+.act-confirm .vlabel{color:var(--keep)}.act-decline_geometry .vlabel{color:var(--drop)}
+.act-redraw_split .vlabel,.act-reclassify .vlabel{color:var(--fix)}
+ul.cmds code{display:block;background:#f3f1ec;padding:.32rem .5rem;border-radius:4px;font-family:ui-monospace,Menlo,monospace;font-size:.77rem;overflow-x:auto;color:#555}
+@media (max-width:820px){.entry{grid-template-columns:1fr}.scan{position:static}}
+@media (prefers-color-scheme:dark){
+  :root{--paper:#1a1816;--card:#232020;--ink:#eae6e0;--muted:#a89e92;--line:#3a352f;--accent:#8a9ad0}
+  .scan img{background:#2a2622}
+  .chip{background:#3a2828;border-color:#6a4444;color:#e0a0a0}
+  ul.cmds code{background:#2a2622;color:#c8c0b4}
+}
+</style></head><body><div class="wrap">"""
+_SHEET_FOOT = "</div></body></html>"
 
 
 def _esc(value: object) -> str:
@@ -909,17 +982,56 @@ def _evidence_html(candidate: "WorklistCandidate") -> str:
 
 
 def _position_html(candidate: "WorklistCandidate", sweep: Mapping | None) -> str:
-    delta = candidate.value - candidate.threshold
+    # The accept-rate cut + its decision zone are match-stage concepts (the page-accept sweep); other
+    # stages have no such bar, so this line renders only for match.
+    if candidate.stage != "match":
+        return ""
+    gap = candidate.threshold - candidate.value
     flag = ""
     if sweep and str(candidate.page) in (sweep.get("decision_zone") or {}):
-        flag = " <span class='dz-flag'>· in decision zone</span>"
-    return f"<p class='pos'>Δ vs cut {_esc(candidate.threshold)}: {_esc(round(delta, 4))}{flag}</p>"
+        flag = " <span class='dz-flag'>· just under the cut (in the decision zone — a close call)</span>"
+    return f"<p class='pos'>Auto-accept bar {_esc(candidate.threshold)}; fell short by {_esc(round(gap, 4))}.{flag}</p>"
+
+
+def _why_html(candidate: "WorklistCandidate") -> str:
+    """Plain-language reason this page was flagged — the numbers as a sentence, not raw telemetry."""
+    stage = candidate.stage
+    if stage == "match":
+        total = candidate.tentative.get("total")
+        matched = candidate.tentative.get("matched")
+        if _is_int(total) and total > 0 and matched is not None:
+            pct = 100.0 * matched / total
+            return (
+                f"Only <strong>{_esc(matched)} of {_esc(total)}</strong> witness words attached to the "
+                f"scan's OCR boxes ({pct:.0f}%), under the {candidate.threshold * 100:.0f}% we accept "
+                f"automatically."
+            )
+        return "This page's words attached to the scan's OCR boxes below the auto-accept bar."
+    if stage == "locate":
+        return "Page-locate found no witness text anywhere on this scan leaf — an empty window."
+    if stage == "density":
+        return (
+            f"The density gate could not confidently call this leaf content vs blank "
+            f"({_esc(candidate.signal)} {_esc(round(candidate.value, 3))})."
+        )
+    if stage == "columns":
+        return (
+            f"Column confidence {_esc(round(candidate.value, 3))} sits in the undecided margin around "
+            f"the {_esc(candidate.threshold)} threshold — the detector isn't sure of the layout."
+        )
+    return ""
 
 
 def _sheet_header(worklist: Worklist, book_id: str, sweep: Mapping | None) -> str:
-    parts = [f"<h1>Geometry review — {_esc(book_id)} · {len(worklist.candidates)} candidate(s)</h1>"]
+    parts = [
+        f"<h1>Geometry review — {_esc(book_id)} · {len(worklist.candidates)} page(s) to adjudicate</h1>",
+        "<p>Pages the geometry stage couldn’t auto-accept while attaching word-boxes to the text. For "
+        "each, read the scan and decide whether to <strong>keep</strong> or <strong>drop</strong> its "
+        "geometry (or fix a column split). Nothing here changes anything — record a verdict by running "
+        "the command shown under your choice.</p>",
+    ]
     if sweep:
-        parts.append(f"<p>applied cut: <strong>{_esc(sweep.get('applied_cut'))}</strong></p>")
+        parts.append(f"<p>Applied auto-accept cut: <strong>{_esc(sweep.get('applied_cut'))}</strong>.</p>")
         ladder = sweep.get("ladder") or {}
         if ladder:
             body = "".join(
@@ -927,8 +1039,9 @@ def _sheet_header(worklist: Worklist, book_id: str, sweep: Mapping | None) -> st
                 for k, v in sorted(ladder.items())
             )
             parts.append(
+                "<details><summary>threshold sweep — accepted / routed at each candidate cut</summary>"
                 "<table class='ladder'><thead><tr><th>cut</th><th>accepted</th><th>routed</th></tr>"
-                f"</thead><tbody>{body}</tbody></table>"
+                f"</thead><tbody>{body}</tbody></table></details>"
             )
         dz = sweep.get("decision_zone") or {}
         if dz:
@@ -936,7 +1049,7 @@ def _sheet_header(worklist: Worklist, book_id: str, sweep: Mapping | None) -> st
                 f"<li>p{_esc(k)} @ {_esc(round(float(v), 4))}</li>"
                 for k, v in sorted(dz.items(), key=lambda kv: (float(kv[1]), kv[0]))
             )
-            parts.append(f"<details><summary>decision zone ({len(dz)})</summary><ul>{items}</ul></details>")
+            parts.append(f"<details><summary>decision zone — {len(dz)} pages near the cut</summary><ul>{items}</ul></details>")
     return "<header>" + "".join(parts) + "</header>"
 
 
@@ -969,18 +1082,25 @@ def render_review_sheet(
                 f"never a silent skip (totality)"
             )
         overlay = f"{overlay_dir_href}/page_{c.page:04d}_{c.stage}.png"
+        badge, deciding = _STAGE_COPY[c.stage]
         cmds = "".join(
-            f"<li><code>{_esc(prefilled_record_command(book_id, c, v))}</code></li>"
+            f'<li class="act act-{v}"><span class="vlabel">{_esc(_VERB_LABEL[v])}</span>'
+            f"<code>{_esc(prefilled_record_command(book_id, c, v))}</code></li>"
             for v in _plausible_verbs(c.stage)
         )
         sections.append(
-            f'<section data-candidate-id="{_esc(c.id)}">'
-            f"<h2>{_esc(c.id)}</h2>"
-            f'<img src="{_esc(overlay)}" alt="page {c.page} overlay">'
-            f"<p class='sig'>{_esc(c.stage)}/{_esc(c.signal)}: value {_esc(round(c.value, 4))} "
-            f"vs threshold {_esc(c.threshold)}</p>"
-            f"{_evidence_html(c)}{_position_html(c, sweep)}"
-            f"<ul class='cmds'>{cmds}</ul></section>"
+            f'<section class="entry" data-candidate-id="{_esc(c.id)}">'
+            f'<div class="scan"><a href="{_esc(overlay)}" target="_blank" rel="noopener">'
+            f'<img src="{_esc(overlay)}" alt="page {c.page} scan with detected boxes"></a></div>'
+            f'<div class="adjudicate">'
+            f'<div class="ehead"><span class="pageno">Page {c.page}</span>'
+            f'<span class="badge b-{c.stage}">{_esc(badge)}</span>'
+            f'<span class="cid">{_esc(c.id)}</span></div>'
+            f'<p class="deciding"><span class="lbl">What you’re deciding</span>{_esc(deciding)}</p>'
+            f'<p class="why"><span class="lbl">Why it’s flagged</span>{_why_html(c)}</p>'
+            f'<div class="support">{_evidence_html(c)}{_position_html(c, sweep)}</div>'
+            f'<ul class="cmds"><li class="lbl" style="list-style:none">Your options</li>{cmds}</ul>'
+            f"</div></section>"
         )
     sections.append(_SHEET_FOOT)
     return "\n".join(sections) + "\n"

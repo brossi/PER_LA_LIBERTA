@@ -751,13 +751,15 @@ def test_prefilled_command_rejects_an_unknown_action():
 
 
 def test_redraw_split_is_offered_only_where_there_is_a_split_to_redraw():
-    # Plausible-verb mapping: redraw_split is a columns-only verb; a match entry never offers it.
+    # Plausible-verb mapping: redraw_split is a columns-only verb; a match entry never OFFERS it as a
+    # command. (Check the emitted `--action` verbs, not a raw substring — the CSS names every verb's
+    # class, so "redraw_split" legitimately appears in the stylesheet of every sheet.)
     cwl, mwl = build([_cols_cand(47)]), build([_match_cand(75)])
-    cols_html = render_review_sheet(cwl, book_id="b", available_overlays=_ovl(cwl), sweep=SWEEP)
-    match_html = render_review_sheet(mwl, book_id="b", available_overlays=_ovl(mwl), sweep=SWEEP)
-    assert ACTION_REDRAW_SPLIT in cols_html
-    assert ACTION_REDRAW_SPLIT not in match_html
-    assert ACTION_DECLINE_GEOMETRY in match_html  # decline is always offered
+    cols_actions = re.findall(r"--action (\S+)", render_review_sheet(cwl, book_id="b", available_overlays=_ovl(cwl), sweep=SWEEP))
+    match_actions = re.findall(r"--action (\S+)", render_review_sheet(mwl, book_id="b", available_overlays=_ovl(mwl), sweep=SWEEP))
+    assert ACTION_REDRAW_SPLIT in cols_actions
+    assert ACTION_REDRAW_SPLIT not in match_actions
+    assert ACTION_DECLINE_GEOMETRY in match_actions  # decline is always offered
 
 
 def test_walk_diagnostic_carries_denominator_chips_and_verbs():

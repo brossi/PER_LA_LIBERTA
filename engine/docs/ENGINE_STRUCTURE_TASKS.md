@@ -510,6 +510,20 @@ Immutable, addressed capture units — the floor everything pins to.
 > `stage`, not signal wording) / L3 (`xdg-open` off macOS). Rule-A delta re-audit of the fixes.
 > Mutation hunt **39/39** (9 new #46 mutants). Suite **1641** green, ruff clean.
 
+> **#46 sheet UX follow-up (2026-07-07, interim — read-only path unchanged):** on Ben's review the
+> sheet was reworked from an engine-telemetry dump into a reviewer's decision aid — a per-entry
+> **two-column** card (scan sticky-left, adjudication panel right) framed **by stage** (`_STAGE_COPY`:
+> locate="Real-page check", match="Geometry check", + density/columns), a plain-language "what you're
+> deciding" + "why it's flagged" (numbers interpolated, e.g. p6 "3 of 4 words … 75% under 80%"), and
+> verb labels (`_VERB_LABEL`) with semantic colour (keep/drop/fix). **Copy is deterministic templates,
+> NOT LLM-generated — a deliberate constraint** (the determinism green forbids a model call anyway).
+> Header un-stuck + sweep collapsed (it was eating ⅓ the viewport). **Deferred to a future
+> input-capture pass:** the actions section + "how it's asked" + the `reclassify`-on-match soft spot —
+> and the ratified architecture for that pass is **UI emits a JSON proposal doc → the audited CLI
+> batch-ingests it** (`{id:{action,params,by}}` through the same `record_verdict`/`validate_verdict`
+> path, so G-14/G-22 fingerprint-binding + fail-loud still hold; the CLI stays the sole writer, DT-10
+> read/write boundary intact).
+
 | S2.2 | Geometry property tests: boxes within page bounds; source-order ↔ geometric-order coherence on a real page; primary-witness box on canonical atoms **where matched**; **absent/unmatched geom is representable and excluded from primary re-bind**. **PLUS the S2.0-mandated RE-GATE** (binding, not prose — the S2.0 verdict was *conditional*-primary): measure col-aware ordered coverage on the **as-built** S2.1 detector over a breadth sample (n≥30), require **mean ≥0.85 AND per-page pass-rate ≥85%** (not a page median — the audit showed median hid a 0.82 mean / ~30% fail tail), and on the result **confirm S5 `geometry-primary` or demote** the mode (record in lineage). Until this passes, S5 runs conditional-primary | §9; `docs/probes/s2_0_geometry_alignment.md` | S2.1; issue #30 | property: those four assertions hold **and** the re-gate measures the as-built detector on mean+pass-rate and sets/confirms the S5 mode | `BUILD`/`GATE` | `TODO` |
 
 > **Risk (now gated, not just noted):** geometry presupposes a usable OCR bbox layer on the

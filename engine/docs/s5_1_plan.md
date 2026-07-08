@@ -1,7 +1,11 @@
 # S5.1 — `rebind_anchors` + the store-and-rebind mechanism (plan — rev 2)
 
-**Status: DRAFT rev 2 (2026-07-08). All open decisions ruled by Ben 2026-07-08 — pending his final
-read before code.** No code, schema-version bump, manifest change, or issue mint until this rev is
+**Status: DRAFT rev 2 (2026-07-08) — pending Ben's final read before code.** Provenance of the
+decisions is deliberately split (see §3): **seven decisions are Ben's explicit rulings (2026-07-08)** —
+D-1, D-3b, candidate grammar, no-rescue, per-slot fingerprint, provenance, and fingerprint-required;
+**the remaining ledger rows were resolved during the three-round inline review** (Ben's audit points +
+my accepted responses), which Ben drove but did not each rule as standalone decisions — they stand
+pending his final read. No code, schema-version bump, manifest change, or issue mint until this rev is
 signed off. Issue **#TBD** (mint on ratification; none exists yet).
 
 This rev consolidates the three-round inline review into a resolved spec. The **verbatim review trail**
@@ -12,6 +16,10 @@ D-3b walk-through) is retained in [`s5_1_plan-discussion.md`](s5_1_plan-discussi
 `ENGINE_STRUCTURE_PLAN.md` (§3.4, §3.6, D33, R2) → `s4_plan.md` (§0.3 A-3/BR-022 coordinate contract;
 §1.4.1b re-stamp protocol) → this plan. Evidence anchor: `spike/document-structure`, discussion-draft
 baseline `3d94d40`; file:line cites verified on disk **2026-07-08**.
+
+**On ratification** (before code): replace the approximate `~L581` above with the exact tracker-row
+identity, pin the ratifying commit hash, and mint + record the S5.1 issue id — so the spec-authority
+pointer does not drift with branch edits.
 
 Deps (all MET *for the mechanism*): **S2** (geometry backend + #30 re-gate, DONE), **S4.5** (structure
 map born, schema v1, DONE). **Live-PLL migration additionally needs S4.6** (the hand-authored PLL
@@ -56,9 +64,11 @@ result; `authoring_evidence.json` is not written here (that persist + its regen-
 1. **region seed** — a single `{page, bbox_region}` object (D-3b): the `bbox` of the node's **first
    own-atom in canonical order whose `geom.present` is True** (absent / routed / pending skipped); if
    **no own-atom has present geometry, the region is absent** and the node rides the assignment
-   unpinned. `page` is the 1-based scan number (`page >= 1`); `bbox_region` is in the matcher's emitted
-   `Geom.bbox` space (D30 primary-witness box space). A locate *seed*, not a whole-extent map — a
-   multi-page own-extent is recovered by the assignment (§1.3), not stored per page.
+   unpinned. The `Geom` model carries **no outlier predicate**, so S5.1 does **not** invent one (that
+   would be a non-deterministic rule); outlier-box exclusion is **deferred to S5.2** calibration if it
+   ever proves necessary. `page` is the 1-based scan number (`page >= 1`); `bbox_region` is in the
+   matcher's emitted `Geom.bbox` space (D30 primary-witness box space). A locate *seed*, not a
+   whole-extent map — a multi-page own-extent is recovered by the assignment (§1.3), not stored per page.
 2. **content fingerprint** — **per slot, over own atoms only** (per-slot ruling): a **leaf** fingerprints
    its `body_atoms`; a **container** fingerprints its `heading_atoms` and `signature_atoms` as
    **separate** fingerprints; **never descendant text** (descendants carry their own). Fuzzy,
@@ -102,8 +112,13 @@ pattern already in `geom_match` (`_bands` / `locate_pages` / `_BandMax`).
   is "successful" until the whole map validates** — a parent bound with a failed child, an out-of-parent
   child span, or double-owned atoms is a `global-conflict` finding, not a silent bind.
 - **Per-node outcome:** unique + score ≥ τ + globally consistent → **bind**; else a typed finding
-  (§1.5). **Fingerprint required for auto-bind (locked):** a node lacking the fingerprint its mode
-  needs → `missing-anchor`, never bound on geometry/path alone (optional-at-schema ≠ permissive-at-rebind).
+  (§1.5). **Fingerprint required for auto-bind** (**[Ben-ruled]** 2026-07-08): a node lacking the
+  fingerprint its mode needs → `missing-anchor`, never bound on geometry/path alone (optional-at-schema
+  ≠ permissive-at-rebind).
+- **Complexity:** naive full-shingle storage + all-windows matching is quadratic; the banded monotone
+  DP (DT-3 pattern) with a page/path-bounded candidate index holds it to one near-linear pass. This is
+  the op **S4.7 names under its scale gate** ("re-bind lookup … sub-quadratic across 10⁴→10⁵ leaf
+  nodes", tracker S4.7/#33), so the DP's boundedness is a scale-check obligation, not just a nicety.
 
 ### 1.4 `RebindContext` — the two-substrate frame (D-5)
 
@@ -184,7 +199,7 @@ concern, not faked here.
     calibration question**, made *detectable* — a normalizer change flips the id, never a silent swap);
   - `k` = shingle size (default 3, build detail), with a **short-slot fallback** `k' = min(k,
     token_count)` down to unigrams; a slot too short to fingerprint reliably binds only with
-    corroboration or fails loud (never on an empty set);
+    **geometry/path** corroboration or fails loud (never on an empty set);
   - `shingles` sorted + `maxItems`/serialized-size bounded (byte-stable, diff-able);
   - `token_count` retained for the multiplicity check (§ scorer).
 - `additionalProperties:false` throughout still **rejects** `.geom` / atom-level `present` smuggling
@@ -198,23 +213,27 @@ build detail; the **threshold τ is a default here, calibrated at S5.2**.
 
 ---
 
-## §3 Decisions ledger (RULED — Ben 2026-07-08 unless noted)
+## §3 Decisions ledger
 
-| # | Decision | Ruling |
-|---|---|---|
-| **D-1** | anchor storage + schema bump (keystone) | **(a) in-map bump** — store fingerprint, derive structural-path, typed anchors, take v1→v2 + re-birth |
-| **D-2** | fingerprint shape + similarity | shingle-set Jaccard + `normalizer_id` / short-slot `k'` fallback / `token_count` + multiplicity / `ordered_coverage` in report / sorted-bounded shingles |
-| **D-3** | region coordinate space | scan `page` (`>=1`) + matcher `Geom.bbox` space; single space (no discriminator for PLL); provenance in report |
-| **D-3b** | region shape | **single `{page, bbox_region}` seed** (first present own-atom box), not a per-page list |
-| **candidate grammar** | assignment | **one joint monotone DP**, geometry as pins, fingerprint as cost, `no-geometry` = no pins |
-| **no-rescue** | signal combination | geometry/path only break ties among **≥ τ** candidates; never lift sub-τ over τ |
-| **per-slot fp** | fingerprint granularity | leaf=body; container=heading + signature separately; **never descendant text** |
-| **provenance** | where match-provenance lives | **report** (anchor minimal); **map-only re-bind fails loud**; revisit-trigger = *map-only re-bind ∨ multi-witness geometry* |
-| **D-4** | default threshold posture | named high uncalibrated `DEFAULT_FINGERPRINT_THRESHOLD`; exact enum tokens; structural default-ordering check `τ(no-geometry) ≥ τ(tie-break) ≥ τ(primary)`; non-calibration acceptance rule (§0) |
-| **D-5** | two-canonical state | in-memory `RebindContext(old_map, old_streams, fresh_streams)`; ref-integrity + dual-hash baseline at construction; shared hash producers; persist form = S5.2 |
-| **D-6** | output shape | `RebindResult` (migrated doc + report + separate re-stamped evidence); typed `RebindReport` + closed reason enum; non-raising `rebind()` + strict `assert_all_bound()` |
-| **D-7** | mode recorded in lineage | mode + source in `RebindReport` provenance now; **S5.2 is the named persist owner** |
-| **fingerprint-required** | eligibility | required for auto-bind in all modes; absent → `missing-anchor` → worklist (locked round 2) |
+**Provenance key:** rows tagged **[Ben-ruled]** are Ben's explicit rulings (2026-07-08). `[review]`
+rows were **resolved in the three-round review** — Ben raised the audit point, I proposed the
+resolution and he did not object — and stand **pending his final read**, not as standalone Ben rulings.
+
+| # | Decision | Ruling | Provenance |
+|---|---|---|---|
+| **D-1** | anchor storage + schema bump (keystone) | **(a) in-map bump** — store fingerprint, derive structural-path, typed anchors, take v1→v2 + re-birth | **[Ben-ruled]** |
+| **D-2** | fingerprint shape + similarity | shingle-set Jaccard + `normalizer_id` / short-slot `k'` fallback / `token_count` + multiplicity / `ordered_coverage` in report / sorted-bounded shingles | [review] |
+| **D-3** | region coordinate space | scan `page` (`>=1`) + matcher `Geom.bbox` space; single space (no discriminator for PLL); provenance in report | [review] |
+| **D-3b** | region shape | **single `{page, bbox_region}` seed** (first present own-atom box), not a per-page list; no outlier predicate invented — outlier exclusion deferred to S5.2 | **[Ben-ruled]** |
+| **candidate grammar** | assignment | **one joint monotone DP**, geometry as pins, fingerprint as cost, `no-geometry` = no pins | **[Ben-ruled]** |
+| **no-rescue** | signal combination | geometry/path only break ties among **≥ τ** candidates; never lift sub-τ over τ | **[Ben-ruled]** |
+| **per-slot fp** | fingerprint granularity | leaf=body; container=heading + signature separately; **never descendant text** | **[Ben-ruled]** |
+| **provenance** | where match-provenance lives | **report** (anchor minimal); **map-only re-bind fails loud**; revisit-trigger = *map-only re-bind ∨ multi-witness geometry* | **[Ben-ruled]** |
+| **D-4** | default threshold posture | named high uncalibrated `DEFAULT_FINGERPRINT_THRESHOLD`; exact enum tokens; per-mode τ in a `RebindPolicy` object with the structural default-ordering check `τ(no-geometry) ≥ τ(tie-break) ≥ τ(primary)`; non-calibration acceptance rule (§0) | [review] |
+| **D-5** | two-canonical state | in-memory `RebindContext(old_map, old_streams, fresh_streams)`; ref-integrity + dual-hash baseline at construction; shared hash producers; persist form = S5.2 | [review] |
+| **D-6** | output shape | `RebindResult` (migrated doc + report + separate re-stamped evidence); typed `RebindReport` + closed reason enum; non-raising `rebind()` + strict `assert_all_bound()` | [review] |
+| **D-7** | mode recorded in lineage | mode + source in `RebindReport` provenance now; **S5.2 is the named persist owner** | [review] |
+| **fingerprint-required** | eligibility | required for auto-bind in all modes; absent → `missing-anchor` → worklist | **[Ben-ruled]** |
 
 ---
 
@@ -238,8 +257,8 @@ Each invariant is enumerated in the module docstring and **seen red on violation
 - **No rescue** — geometry never lifts a sub-τ fingerprint over τ. *Mutant:* geometry-boost-rescues → red.
 - **R2 / non-substring** — a superstring fresh node does not auto-bind at full score; a locally-edited
   node still binds (fuzzy). *Mutant:* exact-substring fallback → red (the tombstone control).
-- **Short-slot** — a 1–2 token heading (no k=3 shingles) binds only with corroboration or fails loud.
-  *Mutant:* empty-shingle-set → false pass → red.
+- **Short-slot** — a 1–2 token heading (no k=3 shingles) binds only with geometry/path corroboration
+  or fails loud. *Mutant:* empty-shingle-set → false pass → red.
 - **Page/coordinate** — `region.page` rejects 0 / any value not comparable to `Geom.page`. *Mutant:*
   keep `minimum:0` → red.
 - **Typed-model round-trip** — a loaded v2 map exposes `content_fingerprint` to `rebind.py` and
@@ -253,7 +272,9 @@ Each invariant is enumerated in the module docstring and **seen red on violation
   *Mutant:* ignore `seg.geometry_mode` → red.
 - **Schema born** — v2 is `provisional` until the new differ-fixture births it; `assert_schema_born()`
   raises `SCHEMA_NOT_BORN` on v2 until then (inv 23 re-run).
-- **Default monotone-ordering** — `τ(no-geometry) ≥ τ(tie-break) ≥ τ(primary)` on the defaults.
+- **Default monotone-ordering** — the per-mode τ live in one `RebindPolicy` object (with
+  `DEFAULT_FINGERPRINT_THRESHOLD` as the base), and `τ(no-geometry) ≥ τ(tie-break) ≥ τ(primary)` holds
+  on the defaults. *Mutant:* a default ordering that inverts → red.
 
 **Mutation hunt** at green (`PYTHONDONTWRITEBYTECODE=1`, purge `__pycache__`) over `hunt_rebind.py`;
 **wide+narrow adversarial audit** pre-commit; **Rule-A** re-audit of behavior-changing remediation to a
@@ -263,11 +284,14 @@ synthetic fixtures.
 
 ## §5 What lands where
 
-- `src/engine/structure/rebind.py` **(new)** — `RebindContext`, the monotone-DP assignment, the
-  per-slot fingerprint scorer, eligibility / no-rescue gating, the bottom-up re-stamp,
-  `RebindResult` / `RebindReport` / `RebindError`, non-raising `rebind()` + `assert_all_bound()`.
-  Engine-neutral.
+- `src/engine/structure/rebind.py` **(new)** — `RebindContext`, `RebindPolicy` (per-mode τ + the
+  `DEFAULT_FINGERPRINT_THRESHOLD` base), the monotone-DP assignment, the per-slot fingerprint scorer,
+  eligibility / no-rescue gating, the bottom-up re-stamp, `RebindResult` / `RebindReport` /
+  `RebindError`, non-raising `rebind()` + `assert_all_bound()`. Engine-neutral.
 - `src/engine/structure/projection.py` — `ContainerNode` / `LeafNode` gain typed `rebind_anchors`.
+  **Only `rebind_anchors` is promoted to typed;** the node-level `decision` field stays **raw/inert**
+  (S8.2, not read by S5.1) — which is why the inv-25 carve-out is anchors-only, not a general "model
+  every reserved field" change.
 - `src/engine/structure/structure_map.py` — `_node_from_json` parses anchors; `render_structure_map`
   emits them; **extract shared `canonical_content_hash` / `canonical_geometry_hash` producers** (called
   by `build_manifest` **and** the baseline check).
@@ -278,7 +302,9 @@ synthetic fixtures.
 - `src/engine/structure/__init__.py` — export pins for the new public rebind types.
 - `tests/fixtures/structure/` — mechanical `1→2` bump of conforming fixtures; a **new v2 differ-fixture**
   (populates the fingerprint, births v2); rebind-positive fixtures (full anchor set).
-- `tests/unit/test_rebind.py` **(new)** — §4 invariants. `tests/hunts/hunt_rebind.py` **(new)** — the
+- `tests/unit/test_rebind.py` **(new)** — §4 invariants. Threshold tests **reference
+  `DEFAULT_FINGERPRINT_THRESHOLD` by name, never an inline numeric literal**, so a default change
+  cannot silently pass a stale hardcoded number. `tests/hunts/hunt_rebind.py` **(new)** — the
   mutant table. `tests/unit/test_structure_map.py` — inv 13/24 updated for the v2 anchor shape +
   malformed-fingerprint rejection + retained `.geom`/`present` smuggling rejection + inv-25 carve-out.
 - `docs/ENGINE_STRUCTURE_TASKS.md` — `S5.1 → DONE` row + the S5.2 note (two-canonical persist form +
@@ -291,9 +317,9 @@ synthetic fixtures.
 
 1. Re-binds a regenerated stream's stored `node_id`s under unchanged geometry (happy tier) **and the
    rebound projection validates globally** (`validate_projection` + reference integrity) **and
-   `old_canonical` matches the old map's lineage** (dual-hash baseline); **fails loud** on ambiguous /
-   below-threshold / missing-anchor / stale-decision / global-conflict — each red-proven with a named
-   red input (§4).
+   `old_canonical` matches the old map's lineage** (dual-hash baseline); **fails loud** on
+   zero-candidate / ambiguous / below-threshold / missing-anchor / stale-decision / global-conflict —
+   each red-proven with a named red input (§4).
 2. Re-stamp protocol holds: extent digests **mechanically** re-stamped bottom-up only on unique+above-τ
    binds and re-verify through the producer; decision digests **never** machine-refreshed.
 3. Three modes honored, read from `seg.geometry_mode` (PLL = `geometry-tie-break`); active **mode +

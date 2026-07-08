@@ -1,25 +1,27 @@
 # S5.1 — `rebind_anchors` + the store-and-rebind mechanism (plan — rev 2)
 
-**Status: DRAFT rev 2 (2026-07-08) — pending Ben's final read before code.** Provenance of the
-decisions is deliberately split (see §3): **seven decisions are Ben's explicit rulings (2026-07-08)** —
-D-1, D-3b, candidate grammar, no-rescue, per-slot fingerprint, provenance, and fingerprint-required;
-**the remaining ledger rows were resolved during the three-round inline review** (Ben's audit points +
-my accepted responses), which Ben drove but did not each rule as standalone decisions — they stand
-pending his final read. No code, schema-version bump, manifest change, or issue mint until this rev is
-signed off. Issue **#TBD** (mint on ratification; none exists yet).
+**Status: RATIFIED rev 2 — Ben, 2026-07-08.** The rev-2 content Ben read and signed off is commit
+`b79f566` on `spike/document-structure`. Provenance of the decisions is deliberately split (see §3):
+**seven decisions are Ben's explicit rulings (2026-07-08)** — D-1, D-3b, candidate grammar, no-rescue,
+per-slot fingerprint, provenance, and fingerprint-required; **the remaining ledger rows were resolved
+during the three-round inline review** (Ben's audit points + my accepted responses), which Ben drove
+but did not each rule as standalone decisions. Ratification clears code, the schema-version bump, and
+the manifest change to proceed. Tracked as **issue #47** (milestone S5).
 
 This rev consolidates the three-round inline review into a resolved spec. The **verbatim review trail**
 (round 1 `@@@@@@`/`======`, round 2 `@@@@@!`/`====!!`, round 3 `@@@@!!`/`===!!!`, plus the D-1…D-7 +
 D-3b walk-through) is retained in [`s5_1_plan-discussion.md`](s5_1_plan-discussion.md).
 
-**Spec authority (on any disagreement):** tracker row `S5.1` in `ENGINE_STRUCTURE_TASKS.md` (~L581) →
-`ENGINE_STRUCTURE_PLAN.md` (§3.4, §3.6, D33, R2) → `s4_plan.md` (§0.3 A-3/BR-022 coordinate contract;
-§1.4.1b re-stamp protocol) → this plan. Evidence anchor: `spike/document-structure`, discussion-draft
-baseline `3d94d40`; file:line cites verified on disk **2026-07-08**.
+**Spec authority (on any disagreement):** tracker row `S5.1` in `ENGINE_STRUCTURE_TASKS.md` (the
+`| S5.1 |` row of the task table) → `ENGINE_STRUCTURE_PLAN.md` (§3.4, §3.6, D33, R2) → `s4_plan.md`
+(§0.3 A-3/BR-022 coordinate contract; §1.4.1b re-stamp protocol) → this plan. Evidence anchor:
+`spike/document-structure`, ratified rev-2 baseline `b79f566`; file:line cites verified on disk
+**2026-07-08**.
 
-**On ratification** (before code): replace the approximate `~L581` above with the exact tracker-row
-identity, pin the ratifying commit hash, and mint + record the S5.1 issue id — so the spec-authority
-pointer does not drift with branch edits.
+**Ratification record** (2026-07-08): the spec-authority pointer above now keys on the `| S5.1 |`
+table row (line-number-independent), the ratified rev-2 baseline `b79f566`, and issue **#47**
+(milestone S5) — so it does not drift with branch edits. Tracker row `S5.1` moves `TODO → WIP` in the
+housekeeping commit that carries this status flip.
 
 Deps (all MET *for the mechanism*): **S2** (geometry backend + #30 re-gate, DONE), **S4.5** (structure
 map born, schema v1, DONE). **Live-PLL migration additionally needs S4.6** (the hand-authored PLL

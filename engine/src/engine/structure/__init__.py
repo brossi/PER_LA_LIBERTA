@@ -212,6 +212,25 @@ from engine.structure.typed import (
     check_completeness,
     typed_projection,
 )
+# NB: the ``rebind()`` **function** is deliberately NOT re-exported here — binding it as a package
+# attribute would shadow the ``engine.structure.rebind`` **submodule** (same name), breaking
+# ``import engine.structure.rebind``. It stays public via ``from engine.structure.rebind import rebind``.
+from engine.structure.rebind import (
+    DEFAULT_FINGERPRINT_THRESHOLD,
+    REBIND_UNRESOLVED_REASONS,
+    ModeProvenance,
+    NodeOutcome,
+    RebindContext,
+    RebindError,
+    RebindPolicy,
+    RebindReport,
+    RebindResult,
+    SlotOutcome,
+    assert_all_bound,
+    fingerprint_slot,
+    resolve_mode,
+    slot_similarity,
+)
 
 __all__ = [
     "ATOM_STORE_SCHEMA_VERSION",
@@ -238,6 +257,21 @@ __all__ = [
     "Region",
     "SlotFingerprint",
     "FINGERPRINT_SLOTS",
+    # S5.1 — the store-and-rebind engine (context/policy/DP/re-stamp/outputs) + fingerprint producer
+    "RebindContext",
+    "RebindPolicy",
+    "RebindResult",
+    "RebindReport",
+    "RebindError",
+    "ModeProvenance",
+    "NodeOutcome",
+    "SlotOutcome",
+    "assert_all_bound",
+    "fingerprint_slot",
+    "slot_similarity",
+    "resolve_mode",
+    "DEFAULT_FINGERPRINT_THRESHOLD",
+    "REBIND_UNRESOLVED_REASONS",
     # S4.2 — node_id identity + minting split (mint_node_id seam; minted_by/designation/title fields)
     "mint_node_id",
     # S4.3 — handle policy + rendered handles + alias records (render_handle/resolve; Alias record)

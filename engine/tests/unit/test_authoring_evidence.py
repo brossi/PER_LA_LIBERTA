@@ -630,20 +630,21 @@ def test_evidence_gate_error_is_an_engine_error_at_exit_code_12():
     assert EvidenceGateError.exit_code == 12
 
 
-def test_engine_error_exit_codes_are_globally_unique_across_the_four_owner_modules():
-    # DT-1 owned ripple: the exit-code sweep now spans FOUR files — engine.errors (3–10),
+def test_engine_error_exit_codes_are_globally_unique_across_the_owner_modules():
+    # DT-1 owned ripple: the exit-code sweep now spans FIVE files — engine.errors (3–10),
     # structure.errors (11, StructureValidationError), structure.evidence (12, EvidenceGateError),
-    # and structure.geometry (13, GeometryError). Collect every EngineError subclass across all
-    # four (a set, deduped by class identity since each module imports the base) and assert exit
-    # codes are globally unique. Proven to actually SEE the 4th file during #35's red phase: with
-    # GeometryError.exit_code temporarily set to 11 it collides with StructureValidationError and
-    # this assertion reds — so a green here is "13 is unique because the sweep checked it", not
-    # "13 happens to be unclaimed today".
+    # structure.geometry (13, GeometryError), and structure.rebind (14, RebindError). Collect every
+    # EngineError subclass across all five (a set, deduped by class identity since each module imports
+    # the base) and assert exit codes are globally unique. Proven to actually SEE the 5th file during
+    # S5.1's red phase: with RebindError.exit_code temporarily set to 13 it collides with GeometryError
+    # and this assertion reds — so a green here is "14 is unique because the sweep checked it", not
+    # "14 happens to be unclaimed today".
     import engine.structure.errors as structure_errors
     import engine.structure.evidence as evidence_mod
     import engine.structure.geometry as geometry_mod
+    import engine.structure.rebind as rebind_mod
 
-    modules = [engine_errors, structure_errors, evidence_mod, geometry_mod]
+    modules = [engine_errors, structure_errors, evidence_mod, geometry_mod, rebind_mod]
     classes = {
         obj
         for module in modules
@@ -656,6 +657,7 @@ def test_engine_error_exit_codes_are_globally_unique_across_the_four_owner_modul
     collisions = {code: names for code, names in by_code.items() if len(names) > 1}
     assert not collisions, f"EngineError exit codes collide across owner modules: {collisions}"
     assert geometry_mod.GeometryError.exit_code == 13
+    assert rebind_mod.RebindError.exit_code == 14
 
 
 def test_evidence_gate_error_rejects_an_empty_payload():

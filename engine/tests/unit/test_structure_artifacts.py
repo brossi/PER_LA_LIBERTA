@@ -137,6 +137,12 @@ PUBLIC_SURFACE_BY_CONCERN = {
     "projection": ("Node", "ContainerNode", "LeafNode", "FurnitureAtom", "ProjectionMap",
                    "validate_projection", "StructureValidationError", "mint_node_id",
                    "RebindAnchors", "Region", "SlotFingerprint", "FINGERPRINT_SLOTS"),
+    # the rebind() function is intentionally NOT package-exported (it would shadow the rebind
+    # submodule) — it stays public via ``from engine.structure.rebind import rebind``.
+    "rebind": ("RebindContext", "RebindPolicy", "RebindResult", "RebindReport", "RebindError",
+               "ModeProvenance", "NodeOutcome", "SlotOutcome", "assert_all_bound",
+               "fingerprint_slot", "slot_similarity", "resolve_mode",
+               "DEFAULT_FINGERPRINT_THRESHOLD", "REBIND_UNRESOLVED_REASONS"),
     "structure_map": ("StructureMap", "StreamAtomReader", "validate_structure_map",
                       "load_structure_map", "write_structure_map", "render_structure_map",
                       "build_manifest", "canonical_content_hash", "canonical_geometry_hash",
@@ -244,6 +250,21 @@ EXPECTED_PUBLIC_SURFACE = frozenset(
         "Region",
         "SlotFingerprint",
         "FINGERPRINT_SLOTS",
+        # S5.1 — the store-and-rebind engine + fingerprint producer
+        "RebindContext",
+        "RebindPolicy",
+        "RebindResult",
+        "RebindReport",
+        "RebindError",
+        "ModeProvenance",
+        "NodeOutcome",
+        "SlotOutcome",
+        "assert_all_bound",
+        "fingerprint_slot",
+        "slot_similarity",
+        "resolve_mode",
+        "DEFAULT_FINGERPRINT_THRESHOLD",
+        "REBIND_UNRESOLVED_REASONS",
         # S4.2 — node_id identity + minting split (mint_node_id seam)
         "mint_node_id",
         # S4.3 — handle policy + rendered handles + alias records

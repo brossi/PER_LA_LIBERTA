@@ -95,6 +95,7 @@ def _build_segmentation(data: dict) -> Segmentation | None:
             hysteresis_margin=cols["hysteresis_margin"],
         ),
         review_fraction_max=seg.get("review_fraction_max"),  # optional (DT-10/P-6, #40)
+        geometry_mode=seg.get("geometry_mode"),  # optional (S2.2 re-gate output, #30)
     )
 
 

@@ -171,6 +171,10 @@
         "review_fraction_max": {
           "$comment": "DT-10 / P-6 (S2.1.6 #40): the per-stage human-review volume bound. OPTIONAL — absent lets the run reach for the ruled default 0.15 (geom_review.REVIEW_FRACTION_MAX_DEFAULT); a book carries it only to tune its own budget. build_worklist enforces the range.",
           "type": "number"
+        },
+        "geometry_mode": {
+          "$comment": "S2.2 (#30) re-gate output: the S5 geometry operating mode ruled from the as-built order_qa breadth feed (geom_regate.regate_verdict). OPTIONAL — a book carries it once the re-gate has run; absent means the mode is unruled (S5 falls back to conditional-primary). Values are the geom_regate MODE_* vocabulary (enum bound to the module by test_geom_regate). PLL landed geometry-tie-break 2026-07-08 (mean 0.842 / pass@0.85 0.779 < the 0.85 bar; docs/probes/s2_2_regate.md).",
+          "enum": ["geometry-primary", "geometry-tie-break", "no-geometry"]
         }
       }
     }

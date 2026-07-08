@@ -72,6 +72,7 @@
   },
   "segmentation": {
     "order_source": "witness",
+    "geometry_mode": "geometry-tie-break",
     "density_bands": {
       "yield_content_min": 0.70,
       "box_content_min": 40,

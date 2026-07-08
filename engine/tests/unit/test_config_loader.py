@@ -469,3 +469,21 @@ def test_review_fraction_max_is_optional_and_defaults_none(tmp_path):
     books = _write_book(tmp_path, "norfm", m)
     seg = load_book("norfm", books_dir=books, profiles_dir=REAL_PROFILES).manifest.segmentation
     assert seg.review_fraction_max is None
+
+
+def test_geometry_mode_resolves_for_pll_through_the_typed_model():
+    # S2.2 (#30): the re-gate landed geometry-tie-break in the manifest, and it is first-class on the
+    # LOADED model (not just raw JSON) — so S5.1 reads seg.geometry_mode, never an AttributeError.
+    seg = load_book("per_la_liberta").manifest.segmentation
+    assert seg.geometry_mode == "geometry-tie-break"
+
+
+def test_geometry_mode_is_optional_and_defaults_none(tmp_path):
+    # Absent from the manifest → None (S5 falls back to conditional-primary). A book routed through the
+    # front-end but not yet re-gated validates and loads without it.
+    m = _real_manifest()
+    m["id"] = "nogm"
+    m["segmentation"].pop("geometry_mode", None)
+    books = _write_book(tmp_path, "nogm", m)
+    seg = load_book("nogm", books_dir=books, profiles_dir=REAL_PROFILES).manifest.segmentation
+    assert seg.geometry_mode is None

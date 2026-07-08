@@ -159,6 +159,10 @@ class Segmentation:
     #: the run reach for the ruled default (``geom_review.REVIEW_FRACTION_MAX_DEFAULT`` = 0.15); a
     #: book carries it only to tune its own budget.
     review_fraction_max: float | None = None
+    #: The S5 geometry operating mode ruled by the S2.2 re-gate (#30; ``geom_regate.MODE_*``).
+    #: Optional — ``None`` until the re-gate has run (S5 falls back to conditional-primary); PLL
+    #: carries ``"geometry-tie-break"`` (``docs/probes/s2_2_regate.md``). Consumed by S5.1's rebind.
+    geometry_mode: str | None = None
 
 
 @dataclass(frozen=True, slots=True)

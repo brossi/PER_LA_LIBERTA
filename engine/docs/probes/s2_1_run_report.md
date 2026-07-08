@@ -134,6 +134,10 @@ with S2.0's measured 0.851 mean / 73% pass over all pages and its **conditional*
 #40's mandate is to *emit* this feed; the S5-mode ruling is #30's (S2.2), now armed with the
 as-built per-page numbers. Nothing here demotes geometry — it hands #30 the evidence to.
 
+> **Resolved at S2.2 (#30, 2026-07-08):** the re-gate read this feed and ruled **DEMOTE →
+> `geometry-tie-break`** (both bars fail; mean 0.842 ∈ [0.50, 0.85)). Landed in
+> `manifest.segmentation.geometry_mode`; ruling + tail analysis in `docs/probes/s2_2_regate.md`.
+
 ### Worklist (DT-10) + volume bound (P-6/G-13)
 
 25 candidates, `{locate: 7, match: 18}` — **zero density or columns routes** (every content page

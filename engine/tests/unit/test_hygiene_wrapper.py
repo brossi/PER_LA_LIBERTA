@@ -214,6 +214,9 @@ class TestPurge:
         try:
             f = _write(tmp_path, "test_ok.py", OK)
             assert wrapper.main([str(f)]) == 0
+            # best-effort, not silent-skip: the purge tried and hit the permission wall, so the
+            # undeletable cache dir SURVIVES (0o500 keeps search rights, so exists() still resolves).
+            assert pyc.exists()
         finally:
             os.chmod(probe, 0o700)
             shutil.rmtree(probe, ignore_errors=True)

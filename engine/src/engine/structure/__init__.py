@@ -41,11 +41,15 @@ from engine.structure.artifacts import (
 )
 from engine.structure.errors import EC, StructureValidationError
 from engine.structure.projection import (
+    FINGERPRINT_SLOTS,
     ContainerNode,
     FurnitureAtom,
     LeafNode,
     Node,
     ProjectionMap,
+    RebindAnchors,
+    Region,
+    SlotFingerprint,
     mint_node_id,
     validate_projection,
 )
@@ -59,6 +63,8 @@ from engine.structure.structure_map import (
     StructureMap,
     assert_schema_born,
     build_manifest,
+    canonical_content_hash,
+    canonical_geometry_hash,
     load_structure_map,
     render_structure_map,
     schema_version_const,
@@ -227,6 +233,11 @@ __all__ = [
     "ProjectionMap",
     "validate_projection",
     "StructureValidationError",
+    # S5.1 — typed re-bind anchors (checkpoints R2, never identity): region seed + slot fingerprint
+    "RebindAnchors",
+    "Region",
+    "SlotFingerprint",
+    "FINGERPRINT_SLOTS",
     # S4.2 — node_id identity + minting split (mint_node_id seam; minted_by/designation/title fields)
     "mint_node_id",
     # S4.3 — handle policy + rendered handles + alias records (render_handle/resolve; Alias record)
@@ -241,6 +252,8 @@ __all__ = [
     "write_structure_map",
     "render_structure_map",
     "build_manifest",
+    "canonical_content_hash",
+    "canonical_geometry_hash",
     "schema_version_const",
     "assert_schema_born",
     # S3.0 — resource + normalization-policy lineage constants

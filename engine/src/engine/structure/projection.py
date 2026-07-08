@@ -159,6 +159,103 @@ def _require_identity(node_id: str, node_class: str) -> None:
         raise ValueError("node_class must be a non-empty label (the profile-declared projection type)")
 
 
+#: The admitted content-fingerprint slot names (S5.1 §2.2, per-slot ruling): a **leaf** fingerprints
+#: ``body``; a **container** fingerprints ``heading`` and ``signature`` **separately**; never
+#: descendant text. A process-role vocabulary, not a book/language literal (passes the inv-15 scan).
+FINGERPRINT_SLOTS = ("body", "heading", "signature")
+
+
+@dataclass(frozen=True, slots=True)
+class Region:
+    """A single geometry **region seed** (S5.1 §1.1, D-3b): the ``page`` + ``bbox_region`` of a
+    node's first present own-atom, in the matcher's ``Geom.bbox`` space. A locate *seed*, not a
+    whole-extent map — a multi-page own-extent is recovered by the re-attach assignment, not stored.
+    ``page`` is the 1-based scan number (``>= 1`` — the **Tier-2 backing** for the schema's
+    ``minimum: 1``, so a page 0 that Tier-1 somehow admitted still fails here); ``bbox_region`` is
+    exactly four floats ``[x0, y0, x1, y1]``. The re-attach DP treats a present region as a hard pin.
+    """
+
+    page: int
+    bbox_region: tuple[float, float, float, float]
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "bbox_region", tuple(self.bbox_region))
+        if isinstance(self.page, bool) or not isinstance(self.page, int) or self.page < 1:
+            raise ValueError(f"Region.page must be a 1-based scan number (int >= 1), got {self.page!r}")
+        if len(self.bbox_region) != 4:
+            raise ValueError(
+                f"Region.bbox_region must be four floats [x0, y0, x1, y1], got {len(self.bbox_region)}"
+            )
+
+
+@dataclass(frozen=True, slots=True)
+class SlotFingerprint:
+    """One slot's fuzzy **content fingerprint** (S5.1 §2.2): a shingle **set** over the slot's
+    normalized own-atom tokens. ``shingles`` is a set (no duplicates — the Jaccard primary score is
+    a set operation); ``token_count`` carries the raw multiplicity the scorer's secondary
+    size/multiset checks read. ``algo_id`` / ``normalizer_id`` / ``k`` make an algorithm or
+    normalizer change **detectable** — a change flips the id, never a silent swap. Never the
+    exact-substring primitive the live tree tombstoned (R2): a re-attach *aid*, fail-loud, never
+    identity.
+    """
+
+    algo_id: str
+    normalizer_id: str
+    k: int
+    token_count: int
+    shingles: tuple[str, ...]
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "shingles", tuple(self.shingles))
+        if not self.algo_id:
+            raise ValueError("SlotFingerprint.algo_id must be a non-empty algorithm id")
+        if not self.normalizer_id:
+            raise ValueError("SlotFingerprint.normalizer_id must be a non-empty normalizer id")
+        if isinstance(self.k, bool) or not isinstance(self.k, int) or self.k < 1:
+            raise ValueError(f"SlotFingerprint.k must be an int >= 1 (shingle size), got {self.k!r}")
+        if isinstance(self.token_count, bool) or not isinstance(self.token_count, int) or self.token_count < 0:
+            raise ValueError(
+                f"SlotFingerprint.token_count must be an int >= 0, got {self.token_count!r}"
+            )
+        if len(set(self.shingles)) != len(self.shingles):
+            raise ValueError("SlotFingerprint.shingles must be a set (no duplicate shingles)")
+
+
+@dataclass(frozen=True, slots=True)
+class RebindAnchors:
+    """The typed re-bind **checkpoint** sub-object on a node (S5.1, D-1: stored, so the map is
+    self-sufficient for the content signal). ``region`` is the optional single geometry seed;
+    ``content_fingerprint`` maps a slot name (in :data:`FINGERPRINT_SLOTS`) → its
+    :class:`SlotFingerprint`, only the node's **own** slots. Both are checkpoints (R2), **never
+    identity**. Stored as a tuple of ``(slot, fingerprint)`` pairs so a frozen node stays hashable;
+    resolve a slot via :meth:`fingerprint`. The structural-path anchor is **derived** at re-bind
+    time (§1.1), never stored, so it is deliberately absent here.
+    """
+
+    region: Region | None = None
+    content_fingerprint: tuple[tuple[str, SlotFingerprint], ...] = ()
+
+    def __post_init__(self) -> None:
+        pairs = tuple(self.content_fingerprint)
+        slots = [slot for slot, _ in pairs]
+        if len(set(slots)) != len(slots):
+            raise ValueError(f"RebindAnchors.content_fingerprint has a duplicate slot: {slots}")
+        for slot in slots:
+            if slot not in FINGERPRINT_SLOTS:
+                raise ValueError(
+                    f"RebindAnchors: unknown fingerprint slot {slot!r} — admitted slots are "
+                    f"{FINGERPRINT_SLOTS} (per-slot ruling; never descendant text)"
+                )
+        object.__setattr__(self, "content_fingerprint", pairs)
+
+    def fingerprint(self, slot: str) -> SlotFingerprint | None:
+        """The :class:`SlotFingerprint` stored for ``slot`` (``None`` if the node has none for it)."""
+        for name, fp in self.content_fingerprint:
+            if name == slot:
+                return fp
+        return None
+
+
 @dataclass(frozen=True, slots=True)
 class ContainerNode:
     """A container node: owns ordered ``children`` (child ``node_id`` references, in **reading
@@ -185,6 +282,11 @@ class ContainerNode:
     designation: str = ""
     title: str = ""
     handle_policy: str = ""
+    #: The typed S5.1 re-bind checkpoint (``None`` when the node stores none). Only
+    #: ``rebind_anchors`` is promoted to a typed slot; the node-level ``decision`` field (S8.2) stays
+    #: raw/inert in ``doc`` — the inv-25 no-reader carve-out is anchors-only, not "model every
+    #: reserved field".
+    rebind_anchors: RebindAnchors | None = None
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "children", tuple(self.children))
@@ -213,6 +315,9 @@ class LeafNode:
     designation: str = ""
     title: str = ""
     handle_policy: str = ""
+    #: The typed S5.1 re-bind checkpoint (``None`` when the node stores none); the anchors-only
+    #: inv-25 carve-out (the ``decision`` field stays raw/inert in ``doc``).
+    rebind_anchors: RebindAnchors | None = None
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "body_atoms", tuple(self.body_atoms))

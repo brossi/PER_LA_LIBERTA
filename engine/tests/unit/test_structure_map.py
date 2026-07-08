@@ -273,6 +273,133 @@ def test_rebind_anchors_rejects_smuggled_atom_geom_keys(tmp_path, smuggled):
         _load(tmp_path, doc)
 
 
+# --- inv 13 / 24 (v2, S5.1) — content_fingerprint slot-keyed shape + region page>=1 --------------- #
+
+
+def _valid_slot_fp() -> dict:
+    """A Tier-1-shape-valid per-slot fingerprint (the S5.1 v2 rebind-anchor shape, §2.2)."""
+    return {
+        "algo_id": "shingle-jaccard@v1",
+        "normalizer_id": "geom_match.normalize_tokens@v1",
+        "k": 3,
+        "token_count": 5,
+        "shingles": ["alpha beta gamma", "beta gamma delta", "gamma delta epsilon"],
+    }
+
+
+def test_content_fingerprint_slot_shapes_validate(tmp_path):
+    # inv 13 (v2): a leaf carries {body: fp}; a container carries {heading: fp, signature: fp}
+    # (slots optional). Both slot-keyed shapes load clean through the full loader — the S5.1 anchor
+    # the map stores so it is self-sufficient for the content signal (D-1).
+    doc = _fresh_doc()
+    doc["nodes"][2]["rebind_anchors"] = {"content_fingerprint": {"body": _valid_slot_fp()}}
+    doc["nodes"][1]["rebind_anchors"]["content_fingerprint"] = {
+        "heading": _valid_slot_fp(),
+        "signature": _valid_slot_fp(),
+    }
+    _load(tmp_path, doc)  # no raise
+
+
+@pytest.mark.parametrize(
+    "mutate",
+    [
+        pytest.param(lambda fp: fp.pop("k"), id="missing-k"),
+        pytest.param(lambda fp: fp.pop("shingles"), id="missing-shingles"),
+        pytest.param(lambda fp: fp.update(unexpected=1), id="extra-key"),
+        pytest.param(lambda fp: fp.update(k="3"), id="k-not-int"),
+        pytest.param(lambda fp: fp.update(k=0), id="k-below-1"),
+        pytest.param(lambda fp: fp.update(token_count=-1), id="token-count-negative"),
+        pytest.param(lambda fp: fp.update(algo_id=""), id="algo-id-blank"),
+        pytest.param(lambda fp: fp.update(shingles=["a", "a"]), id="shingles-not-unique"),
+        pytest.param(lambda fp: fp.update(shingles=[1]), id="shingle-not-string"),
+    ],
+)
+def test_content_fingerprint_malformed_slot_is_rejected(tmp_path, mutate):
+    # inv 24 (v2): the per-slot fingerprint is a CLOSED shape (required set + additionalProperties:
+    # false + typed fields + unique shingles) — a malformed slot fails Tier-1, never loads as a
+    # trustworthy anchor. Paired non-vacuously with the positive above (a valid fp DOES validate),
+    # so rejection is the malformation, not a blanket content_fingerprint ban.
+    doc = _fresh_doc()
+    fp = _valid_slot_fp()
+    mutate(fp)
+    doc["nodes"][2]["rebind_anchors"] = {"content_fingerprint": {"body": fp}}
+    with pytest.raises(StaleArtifactError, match="Tier-1"):
+        _load(tmp_path, doc)
+
+
+def test_content_fingerprint_rejects_unknown_slot(tmp_path):
+    # inv 24 (v2): only body/heading/signature are admitted slots — a stray slot key (e.g. a
+    # descendant-text "paragraph") is rejected by additionalProperties:false (per-slot ruling).
+    doc = _fresh_doc()
+    doc["nodes"][2]["rebind_anchors"] = {"content_fingerprint": {"paragraph": _valid_slot_fp()}}
+    with pytest.raises(StaleArtifactError, match="Tier-1"):
+        _load(tmp_path, doc)
+
+
+def test_region_page_zero_is_rejected_at_tier1(tmp_path):
+    # page/coordinate invariant (v2): region.page is the 1-based scan number — page 0 is not a
+    # comparable scan number (atom Geom.page is positive), so the schema tightened minimum 0→1.
+    # (A Tier-2 comparability check backs it in rebind.py, §2.2.)
+    doc = _fresh_doc()
+    doc["nodes"][1]["rebind_anchors"]["region"]["page"] = 0
+    with pytest.raises(StaleArtifactError, match="Tier-1"):
+        _load(tmp_path, doc)
+
+
+# --- typed-model round-trip (S5.1 Phase B): rebind_anchors modeled, exposed, byte-stable --------- #
+
+
+def test_v2_map_exposes_typed_rebind_anchors_to_readers(tmp_path):
+    # Typed-model round-trip: a loaded v2 map exposes rebind_anchors as a typed RebindAnchors
+    # (region → Region, content_fingerprint → SlotFingerprint) to readers like rebind.py — NOT
+    # dropped-on-load (the old reserved-field behavior). Mutant (hunt_rebind): drop the field on
+    # load → red here.
+    doc = _fresh_doc()
+    leaf_id = doc["nodes"][2]["node_id"]
+    doc["nodes"][2]["rebind_anchors"] = {"content_fingerprint": {"body": _valid_slot_fp()}}
+    smap = _load(tmp_path, doc)
+    leaf = smap.projection.by_id[leaf_id]
+    assert isinstance(leaf.rebind_anchors, structure.RebindAnchors)
+    fp = leaf.rebind_anchors.fingerprint("body")
+    assert isinstance(fp, structure.SlotFingerprint)
+    assert fp.k == 3 and fp.token_count == 5
+    assert set(fp.shingles) == {"alpha beta gamma", "beta gamma delta", "gamma delta epsilon"}
+    # the section node's region seed is typed too, and a page>=1 Region is well-formed
+    section = smap.projection.by_id["n-1"]
+    assert isinstance(section.rebind_anchors.region, structure.Region)
+    assert section.rebind_anchors.region.page == 3
+    # a node with no anchor stays None (not an empty RebindAnchors) — absence is first-class
+    assert smap.projection.by_id["n-0"].rebind_anchors is None
+
+
+def test_rebind_anchors_survive_dump_load_dump_byte_identically(tmp_path):
+    # The re-render path is `doc`-driven, so the typed slot is a pure additive read: a v2 map
+    # carrying a region + a slot fingerprint re-renders byte-for-byte (inv 20 extended to anchors).
+    doc = _fresh_doc()
+    doc["nodes"][2]["rebind_anchors"] = {"content_fingerprint": {"body": _valid_slot_fp()}}
+    path = _write_doc(tmp_path, doc)
+    smap = structure.load_structure_map(path, GEN.conforming_atom_store())
+    assert smod.render_structure_map(smap.doc) == path.read_text(encoding="utf-8")
+
+
+def test_shared_canonical_hash_producers_match_the_manifest():
+    # The Phase-B extraction binding: build_manifest's split canonical hashes ARE the shared
+    # canonical_content_hash / canonical_geometry_hash producers (one producer for the manifest
+    # stamp AND S5.1's re-bind baseline check) — a lookalike hash in rebind.py cannot drift from
+    # the manifest.
+    streams = GEN.conforming_streams()
+    canonical = streams[GEN.CANONICAL_STREAM_ID]
+    manifest = structure.build_manifest(
+        streams=streams,
+        canonical_stream_id=GEN.CANONICAL_STREAM_ID,
+        resource_lineage=GEN._fixture_resource_lineage(),
+        profile_version="p",
+        recognizer_version="r",
+    )
+    assert structure.canonical_content_hash(canonical) == manifest["canonical_content_hash"]
+    assert structure.canonical_geometry_hash(canonical) == manifest["canonical_geometry_hash"]
+
+
 # --- inv 11 / 12b — manifest completeness + stale-class stamping ---------------------------------- #
 
 

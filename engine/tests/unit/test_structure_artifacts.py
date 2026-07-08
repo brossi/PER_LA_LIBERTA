@@ -135,10 +135,12 @@ PUBLIC_SURFACE_BY_CONCERN = {
                  "UNKNOWN", "DEGENERATE_CLASSIFIER_NAME"),
     "handles": ("render_handle", "resolve", "Alias"),
     "projection": ("Node", "ContainerNode", "LeafNode", "FurnitureAtom", "ProjectionMap",
-                   "validate_projection", "StructureValidationError", "mint_node_id"),
+                   "validate_projection", "StructureValidationError", "mint_node_id",
+                   "RebindAnchors", "Region", "SlotFingerprint", "FINGERPRINT_SLOTS"),
     "structure_map": ("StructureMap", "StreamAtomReader", "validate_structure_map",
                       "load_structure_map", "write_structure_map", "render_structure_map",
-                      "build_manifest", "schema_version_const", "assert_schema_born"),
+                      "build_manifest", "canonical_content_hash", "canonical_geometry_hash",
+                      "schema_version_const", "assert_schema_born"),
     "reader_glue": ("load_workspace_streams", "workspace_reader"),
     "authoring": ("assert_authoring_integrity", "authoring_status", "explain_evidence_drift",
                   "stamp_evidence", "validate_authoring"),
@@ -237,6 +239,11 @@ EXPECTED_PUBLIC_SURFACE = frozenset(
         "ProjectionMap",
         "validate_projection",
         "StructureValidationError",
+        # S5.1 — typed re-bind anchors (checkpoints R2, never identity)
+        "RebindAnchors",
+        "Region",
+        "SlotFingerprint",
+        "FINGERPRINT_SLOTS",
         # S4.2 — node_id identity + minting split (mint_node_id seam)
         "mint_node_id",
         # S4.3 — handle policy + rendered handles + alias records
@@ -251,6 +258,8 @@ EXPECTED_PUBLIC_SURFACE = frozenset(
         "write_structure_map",
         "render_structure_map",
         "build_manifest",
+        "canonical_content_hash",
+        "canonical_geometry_hash",
         "schema_version_const",
         "assert_schema_born",
         # S3.0 — resource + normalization-policy lineage

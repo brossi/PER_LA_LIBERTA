@@ -93,6 +93,9 @@ from engine.structure.projection import (
     Node,
     FurnitureAtom,
     ProjectionMap,
+    RebindAnchors,
+    Region,
+    SlotFingerprint,
     validate_atom_existence,
     validate_projection,
     validate_reference_integrity,
@@ -173,6 +176,36 @@ class StructureMap:
     map_revision: int
 
 
+def _rebind_anchors_from_json(data: object) -> RebindAnchors | None:
+    """One Tier-1-valid ``rebind_anchors`` object → the typed :class:`RebindAnchors`, or ``None`` when
+    the node stores none. The S5.1 v2 read path (the inv-25 carve-out: ``rebind_anchors`` IS modeled,
+    ``decision`` is not). A ``region: null`` is first-class (absent seed); ``content_fingerprint`` is
+    slot-keyed. Presumes Tier-1 shape (a direct call with malformed data may raise ``KeyError`` /
+    ``TypeError``; the loader wraps those as :class:`~engine.errors.StaleArtifactError`)."""
+    if data is None:
+        return None
+    raw_region = data.get("region")
+    region = (
+        Region(page=raw_region["page"], bbox_region=tuple(raw_region["bbox_region"]))
+        if raw_region is not None
+        else None
+    )
+    fingerprints = tuple(
+        (
+            slot,
+            SlotFingerprint(
+                algo_id=fp["algo_id"],
+                normalizer_id=fp["normalizer_id"],
+                k=fp["k"],
+                token_count=fp["token_count"],
+                shingles=tuple(fp["shingles"]),
+            ),
+        )
+        for slot, fp in data.get("content_fingerprint", {}).items()
+    )
+    return RebindAnchors(region=region, content_fingerprint=fingerprints)
+
+
 def _node_from_json(data: Mapping) -> Node:
     """One Tier-1-valid node object → its dataclass variant (container-xor-leaf is dispatched on the
     ``children`` slot, which Tier-1 guarantees is present exactly on containers)."""
@@ -183,6 +216,7 @@ def _node_from_json(data: Mapping) -> Node:
         designation=data.get("designation", ""),
         title=data.get("title", ""),
         handle_policy=data.get("handle_policy", ""),
+        rebind_anchors=_rebind_anchors_from_json(data.get("rebind_anchors")),
     )
     if "children" in data:
         return ContainerNode(
@@ -438,6 +472,50 @@ def _hash_canonical(obj: object) -> str:
     return _sha256_bytes(_canonical(obj).encode("utf-8"))
 
 
+def canonical_content_hash(canonical: AtomStream) -> str:
+    """THE canonical **content**-hash producer (D-S4-I, §3.E.1): the digest over the per-canonical-atom
+    ``{atom_id, text, raw_span, raw_source_hash}`` payloads in canonical-stream (stored) order.
+
+    Extracted from :func:`build_manifest` so **one** producer serves both the manifest STAMP and
+    S5.1's re-bind **baseline check** (which re-derives this over the old canonical stream and
+    compares it to the stored ``manifest.canonical_content_hash``): a payload/field-list/ordering
+    change then ripples to both, and rebind.py can never grow a lookalike hash (the mutation inv 20
+    already guards the shared :func:`_hash_canonical`)."""
+    return _hash_canonical(
+        [
+            {
+                "atom_id": a.atom_id,
+                "text": a.text,
+                "raw_span": list(a.raw_span),
+                "raw_source_hash": a.raw_source_hash,
+            }
+            for a in canonical.atoms
+        ]
+    )
+
+
+def canonical_geometry_hash(canonical: AtomStream) -> str:
+    """THE canonical **geometry**-hash producer (D-S4-I, §3.E.1): the digest over the per-canonical-atom
+    ``{atom_id, present, page, bbox}`` geom-region payloads in canonical-stream order.
+
+    Match-provenance (engine/method/confidence) is deliberately **outside** the hash — the *region*
+    is what re-binding keys on, and a provenance-only re-stamp must not read as a geometry change
+    (R2-10). Split from the content hash so a geometry re-match never masquerades as a content
+    change. Shared with S5.1's re-bind baseline check under the same one-producer discipline as
+    :func:`canonical_content_hash`."""
+    return _hash_canonical(
+        [
+            {
+                "atom_id": a.atom_id,
+                "present": a.geom.present,
+                "page": a.geom.page,
+                "bbox": list(a.geom.bbox) if a.geom.bbox is not None else None,
+            }
+            for a in canonical.atoms
+        ]
+    )
+
+
 def build_manifest(
     *,
     streams: Mapping[str, AtomStream],
@@ -470,24 +548,6 @@ def build_manifest(
             f"build_manifest: canonical_stream_id {canonical_stream_id!r} does not name a "
             f"canonical-kind stream (have {sorted(streams)})"
         )
-    content_payload = [
-        {
-            "atom_id": a.atom_id,
-            "text": a.text,
-            "raw_span": list(a.raw_span),
-            "raw_source_hash": a.raw_source_hash,
-        }
-        for a in canonical.atoms
-    ]
-    geometry_payload = [
-        {
-            "atom_id": a.atom_id,
-            "present": a.geom.present,
-            "page": a.geom.page,
-            "bbox": list(a.geom.bbox) if a.geom.bbox is not None else None,
-        }
-        for a in canonical.atoms
-    ]
     return {
         "source_artifacts": [
             {"witness": stream_id, "hash": stream.source_hash}
@@ -499,8 +559,8 @@ def build_manifest(
             for stream_id, stream in sorted(streams.items())
         ],
         "canonical_stream_id": canonical_stream_id,
-        "canonical_content_hash": _hash_canonical(content_payload),
-        "canonical_geometry_hash": _hash_canonical(geometry_payload),
+        "canonical_content_hash": canonical_content_hash(canonical),
+        "canonical_geometry_hash": canonical_geometry_hash(canonical),
         "layers": {
             "atom_store": {
                 "schema_version": ATOM_STORE_SCHEMA_VERSION,

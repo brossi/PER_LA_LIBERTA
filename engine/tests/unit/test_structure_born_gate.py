@@ -128,6 +128,55 @@ def test_born_gate_passes_after_the_flip():
     structure.assert_schema_born()  # no raise
 
 
+# --- inv 23 for v2 (S5.1): the fingerprint fixture births the widened v2 shape -------------------- #
+
+REBIND_POSITIVE = FIXTURES / "rebind_positive_structure_map.json"
+
+
+class _MiniStore:
+    """A minimal §4-header reader for the hand-authored v2 fingerprint fixture — its atom universe
+    is three included body atoms (a0/a1/a2), not the differ book's real streams. The v2 birth gate
+    proves the widened *shape* validates; the real-stream backing stays the differ fixture's job."""
+
+    def __init__(self, included: tuple[str, ...]) -> None:
+        self._included = tuple(included)
+        self._scope = {a: structure.PROCESSING_SCOPE_INCLUDED for a in included}
+
+    def included_atom_ids(self) -> tuple[str, ...]:
+        return self._included
+
+    def contains(self, atom_id: str) -> bool:
+        return atom_id in self._scope
+
+    def scope_of(self, atom_id: str) -> str | None:
+        return self._scope.get(atom_id)
+
+
+def test_v2_fingerprint_fixture_validates_and_v2_is_born():
+    # The v2 birth gate (S5.1): a NON-PLL conforming map that POPULATES the slot-keyed
+    # content_fingerprint anchor validates through the born-agnostic loader — the proof the widened
+    # v2 shape generalizes beyond the region-only v1 anchor. Two unconditional asserts (X10): a
+    # broken fixture reds assert 1 even after the flip; a validating fixture with no flip reds
+    # assert 2 (the pre-flip red-first state).
+    smap = structure.load_structure_map(REBIND_POSITIVE, _MiniStore(("a0", "a1", "a2")))
+    assert isinstance(smap, structure.StructureMap)
+    assert STRUCTURE_MAP_SCHEMA_STATUS[STRUCTURE_MAP_SCHEMA_VERSION] == SCHEMA_STATUS_BORN
+
+
+def test_v2_birth_fixture_actually_carries_the_fingerprint_shape():
+    # Non-vacuity guard: the v2 birth proof must exercise the NEW shape (a populated
+    # content_fingerprint), not re-run the differ fixture's fingerprint-omitted map. Without this,
+    # a fixture that quietly dropped its fingerprints would still flip the gate green.
+    doc = json.loads(REBIND_POSITIVE.read_text(encoding="utf-8"))
+    fingerprints = [
+        node["rebind_anchors"]["content_fingerprint"]
+        for node in doc["nodes"]
+        if "content_fingerprint" in node.get("rebind_anchors", {})
+    ]
+    assert fingerprints, "the v2 birth fixture must POPULATE content_fingerprint (the v2 novelty)"
+    assert any("body" in fp for fp in fingerprints), "expected a per-slot body fingerprint"
+
+
 # --- the manifest is live-bound: hand-authored values == what the producers stamp ------------------ #
 
 

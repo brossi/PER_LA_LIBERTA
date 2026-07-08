@@ -1,0 +1,102 @@
+{
+  "schema_version": 2,
+  "root_id": "r-root",
+  "map_revision": 1,
+  "block_vocabulary": [
+    {"name": "collection", "kind": "container", "status": "active"},
+    {"name": "entry", "kind": "leaf", "status": "active"}
+  ],
+  "handle_policies": {
+    "collection": "designation-string",
+    "entry": "designation-string"
+  },
+  "furniture_atoms": [],
+  "aliases": [],
+  "manifest": {
+    "source_artifacts": [
+      {"witness": "wr-a", "hash": "sha256:fixture-witness-a"}
+    ],
+    "atom_streams": [
+      {"id": "canonical", "hash": "sha256:fixture-canonical"},
+      {"id": "wr-a", "hash": "sha256:fixture-witness-a-stream"}
+    ],
+    "canonical_stream_id": "canonical",
+    "canonical_content_hash": "sha256:fixture-content",
+    "canonical_geometry_hash": "sha256:fixture-geometry",
+    "layers": {
+      "atom_store": {"schema_version": 1, "stale_class": "atom-stream", "present": true},
+      "structure_map": {"schema_version": 2, "stale_class": "structure-map", "present": true},
+      "relation_store": {"schema_version": 1, "stale_class": "relation-store", "present": false}
+    },
+    "resource_lineage": {
+      "schema_version": 1,
+      "resource": {
+        "version": "sha256:fixture-resource",
+        "stale_class": "resource-set",
+        "descriptor": {"oracle_min": 2}
+      },
+      "normalizer": {
+        "version": "sha256:fixture-normalizer",
+        "stale_class": "normalization-policy",
+        "descriptor": {"case_fold": "casefold", "accent_fold": {}}
+      }
+    },
+    "profile_version": "fixture-rebind-profile-1",
+    "recognizer_version": "fixture-rebind-recognizer-1",
+    "handle_renderer_version": 1
+  },
+  "nodes": [
+    {
+      "node_id": "r-root",
+      "node_class": "collection",
+      "minted_by": "human",
+      "children": ["l-1", "l-2"],
+      "designation": "The Rebound Collection"
+    },
+    {
+      "node_id": "l-1",
+      "node_class": "entry",
+      "minted_by": "machine",
+      "body_atoms": ["a0", "a1"],
+      "designation": "First Entry",
+      "rebind_anchors": {
+        "region": {"page": 1, "bbox_region": [12.0, 40.0, 388.0, 120.0]},
+        "content_fingerprint": {
+          "body": {
+            "algo_id": "shingle-jaccard@v1",
+            "normalizer_id": "geom_match.normalize_tokens@v1",
+            "k": 3,
+            "token_count": 6,
+            "shingles": [
+              "silence keeps its",
+              "keeps its counsel",
+              "its counsel well",
+              "the wise learn"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "node_id": "l-2",
+      "node_class": "entry",
+      "minted_by": "machine",
+      "body_atoms": ["a2"],
+      "designation": "Second Entry",
+      "rebind_anchors": {
+        "content_fingerprint": {
+          "body": {
+            "algo_id": "shingle-jaccard@v1",
+            "normalizer_id": "geom_match.normalize_tokens@v1",
+            "k": 3,
+            "token_count": 4,
+            "shingles": [
+              "masks conceal the",
+              "conceal the face"
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

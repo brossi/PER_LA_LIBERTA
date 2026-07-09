@@ -122,6 +122,20 @@ pattern already in `geom_match` (`_bands` / `locate_pages` / `_BandMax`).
   the op **S4.7 names under its scale gate** ("re-bind lookup … sub-quadratic across 10⁴→10⁵ leaf
   nodes", tracker S4.7/#33), so the DP's boundedness is a scale-check obligation, not just a nicety.
 
+  > **Correction (falsified-by-#33, 2026-07-09; original preserved above per governance).** The "one
+  > near-linear pass" claim is **false as shipped.** The banded page/path-bounded candidate index was
+  > **deferred, not built** — `rebind.py`'s `_Assignment` docstring says it is "deliberately not built
+  > here (YAGNI at fixture scale)" — so the shipped assignment is **`O(K·N³)`**: `resolve_slot`
+  > enumerates O(N²) windows and scores each by re-tokenizing an O(N) span (`_window_tokens` +
+  > `slot_similarity`), run for each of K slots. (The `rebind.py` docstring's stated `O(K·N²)` counts
+  > only the prefix/suffix lattices and **understates** this — it omits the cubic `resolve_slot`
+  > (`rebind.py:672-679` window scan × `589-598` per-window re-shingle, run K times at `837-838`).)
+  > #33 (S4.7) names this as the scale-gate defect to catch *and* replaces the monotone-tiling DP
+  > wholesale with diff-based annotation re-anchoring (S4.7 **direction DR-0, Ben-ruled 2026-07-08** —
+  > the specific mechanism is unratified DRAFT). The §1.3 mechanism **rewrite** is routed as S5.1
+  > remediation (**G-1, unresolved**);
+  > this note is the G-2 pointer-correction only. See `s4_7_plan.md` §7 + DR-9.
+
 ### 1.4 `RebindContext` — the two-substrate frame (D-5)
 
 `RebindContext(old_map, old_streams, fresh_streams)`, where each `*_streams` is a `{canonical +

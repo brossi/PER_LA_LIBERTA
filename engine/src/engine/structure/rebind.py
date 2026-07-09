@@ -564,10 +564,15 @@ class _Assignment:
     in fact have disambiguated it. That bias is toward **fail-loud / missed-bind**, never a false bind
     (the direction R2 demands); tightening it against real rates is S5.2's calibration, not S5.1's.
 
-    Complexity is ``O(K·N²)`` — correct and bounded for the mechanism's synthetic fixtures. The banded
-    candidate index (DT-3 ``_bands`` / ``locate_pages`` pattern) that holds re-bind lookup
-    sub-quadratic across 10⁴→10⁵ leaf nodes is the op **S4.7 names under its scale gate** (§1.3
-    complexity note); it is a scale obligation, deliberately not built here (YAGNI at fixture scale).
+    Complexity is ``O(K·N³)`` — bounded for the mechanism's synthetic fixtures, but cubic: the
+    prefix/suffix feasibility lattices are ``O(K·N²)``, while :meth:`resolve_slot` dominates by
+    enumerating ``O(N²)`` windows and re-shingling an ``O(N)`` token span per window
+    (:meth:`_window_tokens` + :func:`slot_similarity`), run once per slot. (An earlier note here read
+    ``O(K·N²)`` — it counted only the lattices and omitted the cubic ``resolve_slot``; corrected
+    2026-07-09, falsified-by-#33.) The banded candidate index (DT-3 ``_bands`` / ``locate_pages``
+    pattern) that would hold re-bind lookup sub-quadratic across 10⁴→10⁵ leaf nodes is the op **S4.7
+    names under its scale gate** (§1.3 complexity note); it is a scale obligation, deliberately not
+    built here (YAGNI at fixture scale).
     """
 
     def __init__(self, slots: list[_Slot], context: RebindContext) -> None:

@@ -261,8 +261,11 @@ assignment," which #33 replaces) and the S4.7 Deliverable text.
 
 ## §8 Definition of Done
 1. Plan ratified; `[review]` rows + G-1…G-4 resolved. 2. INV-1…INV-7 red-first (drift generator built
-so INV-2/INV-3 can be seen red). 3. Diff-based re-anchor lands; `bound ⊆ oracle` + anti-inertness
-proven; suite green (1728). **Acceptance is strict-with-characterized-residual, not literal zero (DR-9, [Ben-ruled] 2026-07-09):** INV-1 holds by construction, and the emitted residual is bounded with every survivor magnitude/foreign-content-detectable (routed to the worklist, handed to S5.2 which owns τ-calibrated zero). Forcing "literal zero" here would hard-code a τ value S4.7 explicitly defers (`RebindPolicy`: "S5.1 ships a default; S5.2 calibrates"), baking an uncalibrated knob into the mechanism. Wiring obligation: any future consumer of bound spans runs post-S5.2 or via the strict `assert_all_bound` path. 4. Scale harness + CI; ratios (wall-clock + peak-mem, deep + wide) in
+so INV-2/INV-3 can be seen red). **[§5.2 split, Ben 2026-07-09]** INV-6/INV-7 are seen RED **in item 2**,
+against the shipped cubic `_Assignment` / O(N²) deep-chain, **before** the G-1 port (#48) deletes them
+(now-or-never — after the port they could only red against a contrived mutant); item 2 builds the
+*minimal* size-parameterized fixture + `perf_counter`/`tracemalloc` wrapper for those reds. 3. Diff-based re-anchor lands; `bound ⊆ oracle` + anti-inertness
+proven; suite green (1728). **Acceptance is strict-with-characterized-residual, not literal zero (DR-9, [Ben-ruled] 2026-07-09):** INV-1 holds by construction, and the emitted residual is bounded with every survivor magnitude/foreign-content-detectable (routed to the worklist, handed to S5.2 which owns τ-calibrated zero). Forcing "literal zero" here would hard-code a τ value S4.7 explicitly defers (`RebindPolicy`: "S5.1 ships a default; S5.2 calibrates"), baking an uncalibrated knob into the mechanism. Wiring obligation: any future consumer of bound spans runs post-S5.2 or via the strict `assert_all_bound` path. 4. **Productionize** the scale harness + CI (the minimal timing/`tracemalloc` scaffolding is built in item 2 for the INV-6/7 reds — item 4 is **not** build-from-zero): CI tiers (always-on small ratio + `@pytest.mark.scale` 10⁵ nightly), the full anchor-poor **sweep**, ratios (wall-clock + peak-mem, deep + wide) in
 `docs/probes/s4_7_scale.md`. **[ratified DoD requirement — Ben, 2026-07-09]** the harness must
 include a **deliberately anchor-poor fixture** (low unique-in-both k-gram density — the anchor-rich PLL
 prose measured 71% type-unique 3-grams, the favorable end), because the gap cap that buys linear *time*

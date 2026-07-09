@@ -44,13 +44,30 @@ fixture rather than a scratchpad.
 - **Output:** the perturbed stream **plus a recorded identity map** `old-atom-id ↔ fresh-atom-id`
   (∅ for a dropped or moved atom). **Ground truth by construction — never derived from the mechanism's
   output.** This is what every oracle below reads.
-- **Anchor-density knob (ties §8.4, the ratified DoD requirement):** a control that thins unique-in-both
-  anchors (dilutes type-unique 3-grams) so INV-1 is exercised on **anchor-poor** input, not only PLL's
-  anchor-rich end (71% type-unique 3-grams). As anchors thin, a false-bind must convert to **fail-loud**,
-  not silent mis-bind — the correctness-at-density axis.
+- **Anchor-density knob (ties §8.4, the ratified DoD requirement) — SWEEP, not a point [§5.3 RULED 2026-07-09]:**
+  a control that thins unique-in-both anchors (dilutes type-unique 3-grams), swept across **~6 points from
+  PLL's rich end (71% type-unique 3-grams) down to ~10–15%** (verse, fragmentary/OCR-short atoms, dense
+  repetition are the natural low-density sources; floor + point-count are tunable). **Gate criterion —
+  directional and un-gameable:** the **wrong-content false-bind rate stays at the S5.2-owned floor
+  (≈0 / within the characterized residual) across the entire sweep**; only the **abstention/fail-loud rate**
+  is allowed to rise as density drops (INV-1's fail-loud-not-silent promise; DR-9's split — S5.2 owns the
+  rate). Report the whole curve in `s4_7_scale.md`. A single cherry-picked low point is rejected.
 
-**Guard:** the identity map is the oracle; the mechanism is judged against it. If any invariant's "expected"
-is ever computed from `rebind()`'s own result, the test is circular and void.
+**Guard — the identity map is the oracle for the *conditional property*, NOT a deployment-correctness
+certificate [§5.4 RULED 2026-07-09, Ben's caveat]:**
+1. **Not circular.** No invariant's "expected" may be computed from `rebind()`'s output — that is circular
+   and void.
+2. **Scope of proof.** "All synthetic invariants green" proves the invariant properties *conditional on the
+   modeled drift* — never "correct on real re-extraction." The real-PLL re-extract (post-S4.6) stays a
+   **required** confidence gate, not an optional bonus.
+3. **Oracle independence + teeth.** The identity map must be independent of the mechanism's *design
+   assumptions*, not just its output. A generator that emits only diff-friendly drift makes INV-2 pass
+   **vacuously** — so it **must** include adversarial drift the mechanism could genuinely fail on
+   (reorder/move, heavy re-segmentation), or the invariants have no teeth.
+4. **Drift-model fidelity is itself unvalidated.** Whether the perturbation model resembles real
+   re-extraction is an assumption checkable only against real data — the copy2-derivation PLL proxy now
+   (real distribution, softer oracle), the real re-extract post-S4.6 (highest fidelity). An **open
+   assumption**, not a settled fact.
 
 ---
 
@@ -138,9 +155,14 @@ is ever computed from `rebind()`'s own result, the test is circular and void.
 2. **INV-1 + INV-2 together** — the correct/non-inert pair; INV-1 is the DR-3 keystone.
 3. **INV-3, INV-4** — drift-honesty + boundary discipline.
 4. **INV-5** — mode contracts (reuse S5.1 fixtures).
-5. **INV-6, INV-7** — scale/evidence. **Overlap flag:** INV-6/INV-7's *red tests* can be written now
-   against the cubic mechanism (item 2), but the *harness* they need is DoD item 4. Proposal: write the
-   RED here (proves teeth), build the green-making harness in item 4. Confirm during review (§5).
+5. **INV-6, INV-7** — scale/evidence. **[§5.2 RULED 2026-07-09] Write the RED tests HERE (item 2), against
+   the shipped cubic mechanisms, BEFORE half-B lands.** The real O(K·N³) `_Assignment` (INV-6) and the O(N²)
+   deep-chain (INV-7) *are* the planted violations — the honest red-first. **This is a now-or-never window:**
+   `#48` deletes `_Assignment`, after which INV-6/7 could only red against a contrived slow-mutant. Item 2
+   therefore builds the **minimal** scale scaffolding (size-parameterized fixture + `perf_counter` /
+   `tracemalloc` wrapper) needed to see those reds; **item 4 productionizes it** (CI tiers, 10⁵ nightly, the
+   full anchor-poor sweep) — item 4 is *not* "build from zero." The DoD split is pinned in `s4_7_plan.md` §8
+   so the two items don't double-count.
 
 Mutation hunt at green; **wide+narrow adversarial audit + Rule-A delta re-audit before commit** (§4 +
 [[feedback_adversarial_audit_cadence]]). **INV-1 + INV-2 + INV-3 are the audit's primary target** (correct,
@@ -160,14 +182,24 @@ non-inert, drift-honest).
 
 ---
 
-## §5 Open sub-decisions surfaced for your review
+## §5 Sub-decisions — all RULED (Ben, 2026-07-09)
 
-1. **R-b token granularity** (DR-1's deferred sub-choice): char-level diff vs shingle-tokens vs
-   tolerate-via-ratio. Which INV fixture drives the measured decision — INV-1's char-sub axis, or a
-   dedicated micro-benchmark?
-2. **INV-6/INV-7 ↔ item-4 overlap:** write the red scale/evidence tests here against the cubic mechanism
-   (my proposal), or fold them entirely into item 4?
-3. **Anchor-poor density target (§8.4):** what type-unique-3-gram % defines "anchor-poor"? PLL's rich end
-   is 71%; the gate needs a low-density point — pick a target (e.g. ≤30%?) or sweep a curve.
-4. **Fixture substrate:** synthetic-only for the invariants, or also a real-PLL re-extract? (Real-PLL
-   re-extraction needs S4.6 — human-gated — so synthetic is the item-2 default; confirm.)
+1. **R-b token granularity [RULED]:** **default tolerate-via-ratio; do not pre-build char-level.** Add a
+   *boundary char-sub axis* to INV-1/INV-2 (a char sub landing on a boundary token) as the measurement
+   instrument. Escalate to a **coarse-to-fine hybrid** (token alignment + char-level refinement *only* at
+   boundaries landing in `replace` blocks) **iff** the measured INV-2 fail-loud rate on trivial in-token
+   drift is unacceptable. Deferral-for-information (the invariant fixture *is* the decision instrument),
+   not effort-saving; avoids a ~5–6× N blow-up on spec.
+2. **INV-6/INV-7 ↔ item-4 overlap [RULED]:** write the red scale/evidence tests **here (item 2), against
+   the shipped cubic mechanisms, before half-B lands** (now-or-never — `#48` deletes `_Assignment`). Item 2
+   builds the *minimal* harness to see those reds; **item 4 productionizes** (CI tiers, 10⁵ nightly, full
+   sweep). DoD wording split in `s4_7_plan.md` §8 so the items don't double-count. (See §3 item 5.)
+3. **Anchor-poor density [RULED]:** **sweep, not a point** — ~6 points from 71% down to ~10–15%; gate
+   criterion = **false-bind rate ≈ 0 (S5.2 floor) across the whole sweep, abstention rate allowed to rise**.
+   (Folded into §1 anchor-density knob.)
+4. **Fixture substrate [RULED, with caveat]:** **synthetic-only for the item-2 invariants** — but Ben's
+   caveat governs: the synthetic identity map is the oracle for the *conditional property*, **NOT a
+   deployment-correctness certificate.** The four-part guard (not-circular / scope-of-proof / oracle-
+   independence-and-teeth / drift-fidelity-unvalidated) is in §1. PLL enters only as a real-distribution
+   *confidence* proxy (copy2-derivation); a **true real-PLL re-extract is a required post-S4.6 gate**, not
+   optional.

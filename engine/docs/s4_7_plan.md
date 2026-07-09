@@ -255,6 +255,12 @@ assignment," which #33 replaces) and the S4.7 Deliverable text.
 1. Plan ratified; `[review]` rows + G-1…G-4 resolved. 2. INV-1…INV-7 red-first (drift generator built
 so INV-2/INV-3 can be seen red). 3. Diff-based re-anchor lands; `bound ⊆ oracle` + anti-inertness
 proven; suite green (1728). 4. Scale harness + CI; ratios (wall-clock + peak-mem, deep + wide) in
-`docs/probes/s4_7_scale.md`. 5. Mutation hunt all-killed; wide+narrow + Rule-A clean. 6. `s5_1` §1.3
+`docs/probes/s4_7_scale.md`. **[prototype-derived, 2026-07-08 — pending G-* ruling]** the harness must
+include a **deliberately anchor-poor fixture** (low unique-in-both k-gram density — the anchor-rich PLL
+prose measured 71% type-unique 3-grams, the favorable end), because the gap cap that buys linear *time*
+is the same knob that leaks the wrong-content residual: as anchors thin, **time stays linear while
+correctness degrades**, so a wall-clock-only ratio passes green while the mechanism silently mis-binds.
+The gate therefore measures a **correctness-at-density axis** (residual / fail-loud rate vs. anchor
+density and N), not just the timing ratio. See `s4_7_prototype_findings.md` FRAME. 5. Mutation hunt all-killed; wide+narrow + Rule-A clean. 6. `s5_1` §1.3
 correction landed (G-2); S5.1 + S4.7 tracker rows corrected; #33 closed; push `origin/spike` only.
 Commit only when Ben asks.

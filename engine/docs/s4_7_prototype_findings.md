@@ -1,5 +1,28 @@
 # S4.7 re-bind prototype — findings (2026-07-08)
 
+> **FRAME — read first (what this spike was for, and what it did/didn't settle).**
+> This was a **design spike for S4.7 half (B)** — the re-bind re-architecture (`s4_7_plan.md §0`) —
+> run **before** landing it in `src/`. It was **not** the shipped artifact and **not** the scale gate
+> (half A). Judge it against that charter.
+>
+> **What it settled (its job):** (1) diff-based anchored alignment is **linear-in-shape** → the cubic
+> re-bind DP is retired *as a design direction* (the cubic path is "the defect the gate exists to
+> catch", §0 — not a surprise this spike found). (2) It **falsified** the ratified `s5_1_plan.md §1.3`
+> "near-linear pass" claim (§7). (3) DR-3: **zero false-bind is NOT calibration-free** → calibration is
+> S5.2's, not S4.7's (§6) — the layer boundary is now set. (4) The cleaned rerun measured the residual
+> as ~92% noise-driven with one intrinsic remainder (`s4_7_cleaned_rerun_findings.md`).
+>
+> **What it did NOT (and was never chartered to) settle — these are scheduled, not gaps:** the **port**
+> of (B) into `src/` (DoD §8 item 3, pending); the **scale gate itself** (half A — harness/CI/serialize
+> ·load·index, DoD §8 item 4, not built); **τ calibration + three-rate negatives** (§6 → S5.2);
+> **real-PLL re-extraction** (§6 → S4.6); the **cleaned-substrate correctness number** (blocked on
+> native cleaned segmentation, tracked on the S5.2 row).
+>
+> **The one open item this spike's critique added:** the scale gate (half A) must include a
+> **deliberately anchor-poor fixture** — "linear" was measured on anchor-rich PLL prose (71% type-unique
+> 3-grams), and time vs. correctness diverge as anchors thin (the gap cap that buys linear time is the
+> same knob that leaks the residual). Logged into half A's fixture obligations in `s4_7_plan.md`.
+
 > **HEADLINE CORRECTION (after the real re-atomizer test).** An earlier draft concluded S4.7 could be
 > "calibration-free zero false-bind at atom granularity." **That is FALSE and retracted.** It held only
 > on the oracle-partition proxy. Running the ACTUAL atomizer (`build_canonical` on a perturbed witness,

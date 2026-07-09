@@ -311,9 +311,12 @@ joint monotone tiling over ALL slots incl. failed ones (the O(K·N³) DP S4.7 wa
    red-first (bottom-up re-stamp INV-7, disjointness INV-3, contiguity INV-8, anchor-conflict INV-4,
    reorder INV-2) + a **characterized residual** routed to the worklist. Not "zero," but "sound
    mechanism with a named, bounded, calibration-shaped hole."
-4. **Open decision for the plan:** does S4.7's definition-of-done require zero (→ it must absorb a
-   minimal calibrated plausibility guard, blurring the S4.7/S5.2 line), or does S4.7 ship
-   strict-with-residual and S5.2 owns the zero? The prototype can't rule this; it's a scoping call.
+4. **RULED (DR-9, [Ben-ruled] 2026-07-09):** S4.7 ships **strict-with-characterized-residual; S5.2 owns
+   the zero.** A consumer trace this session found no consumer of `rebind()` binds exists yet (only
+   `tests/unit/test_rebind.py`; no `steps/*.py` imports `engine.structure`; no S5.2 module), and the
+   mechanism/calibration split is already encoded in `rebind.py` `RebindPolicy` ("S5.1 ships a default;
+   S5.2 calibrates"). Forcing zero into S4.7's DoD would hard-code a τ value S4.7 defers. See
+   `s4_7_plan.md` DR-9 + §8 item 3.
 5. **Before either:** re-run the real re-atomizer on a **cleaned** atom stream (norm_layer ≠ raw). If
    the residual vanishes on cleaned input (every current instance is a raw page-marker boundary), the
    calibration need is far smaller than the raw-layer numbers suggest.

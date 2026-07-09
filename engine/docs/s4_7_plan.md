@@ -193,6 +193,7 @@ worst case — state which shape each gate result speaks to.
 | DR-6 | evidence-composite deep-chain: fix (Merkle/rolling) vs characterize-and-defer, on the number | [review] |
 | DR-7 | Scale fixture built on the S1.5 store round-trip primitives (not a new persistence path) | [review] |
 | DR-8 | CI: always-on small ratio + `@pytest.mark.scale` 10⁵ nightly | tracker-fixed |
+| DR-9 | **Zero-false-bind ownership:** S4.7 ships the abstention/fail-loud *mechanism* (`below-threshold`/`ambiguous` reason enum + `assert_all_bound`→`RebindError`); **S5.2 owns the τ calibration that drives the residual to zero.** S4.7 DoD = strict-with-characterized-residual (INV-1 by construction + every survivor magnitude/foreign-content-detectable), **not literal zero** (§8.3). Safe: no consumer of binds exists yet — only `tests/unit/test_rebind.py` calls `rebind()`, no `steps/*.py` imports `engine.structure`, no S5.2 module. Split already encoded in `rebind.py` `RebindPolicy` ("S5.1 ships a default; S5.2 calibrates"). Wiring obligation: any future consumer of bound spans runs post-S5.2 or via the strict `assert_all_bound` path. | **[Ben-ruled] 2026-07-09** (consumer trace this session) |
 
 **Governance forks (yours to rule, §7):** **G-1** rev 3 *replaces the whole S5.1 matcher* — a larger
 reopen than rev 2; route as **S5.1 remediation** (new S5-milestone issue) even though it lands via #33?
@@ -254,7 +255,7 @@ assignment," which #33 replaces) and the S4.7 Deliverable text.
 ## §8 Definition of Done
 1. Plan ratified; `[review]` rows + G-1…G-4 resolved. 2. INV-1…INV-7 red-first (drift generator built
 so INV-2/INV-3 can be seen red). 3. Diff-based re-anchor lands; `bound ⊆ oracle` + anti-inertness
-proven; suite green (1728). 4. Scale harness + CI; ratios (wall-clock + peak-mem, deep + wide) in
+proven; suite green (1728). **Acceptance is strict-with-characterized-residual, not literal zero (DR-9, [Ben-ruled] 2026-07-09):** INV-1 holds by construction, and the emitted residual is bounded with every survivor magnitude/foreign-content-detectable (routed to the worklist, handed to S5.2 which owns τ-calibrated zero). Forcing "literal zero" here would hard-code a τ value S4.7 explicitly defers (`RebindPolicy`: "S5.1 ships a default; S5.2 calibrates"), baking an uncalibrated knob into the mechanism. Wiring obligation: any future consumer of bound spans runs post-S5.2 or via the strict `assert_all_bound` path. 4. Scale harness + CI; ratios (wall-clock + peak-mem, deep + wide) in
 `docs/probes/s4_7_scale.md`. **[prototype-derived, 2026-07-08 — pending G-* ruling]** the harness must
 include a **deliberately anchor-poor fixture** (low unique-in-both k-gram density — the anchor-rich PLL
 prose measured 71% type-unique 3-grams, the favorable end), because the gap cap that buys linear *time*

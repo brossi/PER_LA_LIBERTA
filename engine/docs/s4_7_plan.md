@@ -1,9 +1,13 @@
 # S4.7 — scale check (D35), and the re-bind re-architecture it forces (plan — rev 3)
 
-**Status: DRAFT for review — NOT ratified.** Rev 3 replaces rev 2's mechanism wholesale after a
-second five-lens adversarial pass (2026-07-08) demolished rev 2's *candidate-index-as-uniqueness*
-approach, and after Ben's steer to **stop hand-rolling and reach for the solved-problem tooling**
-([[feedback_solved_problem_first]]). Nothing in `rebind.py` is touched until this is ratified.
+**Status: RATIFIED rev 3 — Ben, 2026-07-09.** All decision rows (DR-1…DR-9) and governance forks
+(G-1…G-4) are ruled (§3 ledger); build (DoD §8 items 2→6) is greenlit. **One conditional:** DR-3 (the
+load-bearing confidence gate) is ratified as *build direction*, **not locked as proven** until INV-1
+(never-a-false-bind, over drift + planted repeated passages) is seen red-then-green. Rev 3 replaced
+rev 2's mechanism wholesale after a second five-lens adversarial pass (2026-07-08) demolished rev 2's
+*candidate-index-as-uniqueness* approach, and after Ben's steer to **stop hand-rolling and reach for the
+solved-problem tooling** ([[feedback_solved_problem_first]]). `rebind.py` may now be modified via the
+S5.1-remediation route (G-1).
 
 **Revision history (recorded, not hidden):**
 - **rev 1** — banding a global monotone-tiling DP. Rejected: a band prunes candidates, but re-bind is a
@@ -185,21 +189,21 @@ worst case — state which shape each gate result speaks to.
 | # | Decision | Disposition |
 |---|---|---|
 | DR-0 | **Direction:** solved-problem tooling (diff-based re-anchoring), not a bespoke matcher | **[Ben-ruled]** 2026-07-08 (the reframe steer; the specific mechanism below is [review]) |
-| DR-1 | Alignment tool = `rapidfuzz.distance` (present) default; `difflib` (stdlib) fallback | [review] |
-| DR-2 | Boundary-in-non-`equal`-block → fail-loud-biased finding, never a silently-invented boundary | [review] |
-| DR-3 | Confidence gate = ratio ≥ τ **and** boundary-anchor uniqueness in both streams (§2.3) | [review] — load-bearing |
-| DR-4 | Stored anchors enriched to prefix+exact+suffix context (schema v2→v3 touch) | [review] |
-| DR-5 | Modes + S5.1 contracts (reason enum, re-stamp, non-raising) preserved (§2.4) | [review] |
-| DR-6 | evidence-composite deep-chain: fix (Merkle/rolling) vs characterize-and-defer, on the number | [review] |
-| DR-7 | Scale fixture built on the S1.5 store round-trip primitives (not a new persistence path) | [review] |
+| DR-1 | Alignment tool = `rapidfuzz.distance` (present) default; `difflib` (stdlib) fallback | **[Ben-ruled] 2026-07-09** (Indel-vs-Levenshtein variant deferred to the R-b measured decision) |
+| DR-2 | Boundary-in-non-`equal`-block → fail-loud-biased finding, never a silently-invented boundary | **[Ben-ruled] 2026-07-09** |
+| DR-3 | Confidence gate = ratio ≥ τ **and** boundary-anchor uniqueness in both streams (§2.3) | **[Ben-ruled] 2026-07-09 — build direction only; NOT locked as proven until INV-1 (never-a-false-bind, over drift + planted repeated passages) is seen red-then-green** (load-bearing) |
+| DR-4 | Stored anchors enriched to prefix+exact+suffix context (schema v2→v3 touch) | **[Ben-ruled] 2026-07-09** (schema bump = G-3, approved) |
+| DR-5 | Modes + S5.1 contracts (reason enum, re-stamp, non-raising) preserved (§2.4) | **[Ben-ruled] 2026-07-09** |
+| DR-6 | evidence-composite deep-chain: fix (Merkle/rolling) vs characterize-and-defer, on the number | **[Ben-ruled] 2026-07-09 — characterize-and-defer**: measure the deep-chain number at scale, **never relax the ceiling**; open a follow-up only if the synthetic worst case proves it matters |
+| DR-7 | Scale fixture built on the S1.5 store round-trip primitives (not a new persistence path) | **[Ben-ruled] 2026-07-09** (framing pinned: the store *primitives* are reused; the scale fixture itself is **new work**, §5) |
 | DR-8 | CI: always-on small ratio + `@pytest.mark.scale` 10⁵ nightly | tracker-fixed |
 | DR-9 | **Zero-false-bind ownership:** S4.7 ships the abstention/fail-loud *mechanism* (`below-threshold`/`ambiguous` reason enum + `assert_all_bound`→`RebindError`); **S5.2 owns the τ calibration that drives the residual to zero.** S4.7 DoD = strict-with-characterized-residual (INV-1 by construction + every survivor magnitude/foreign-content-detectable), **not literal zero** (§8.3). Safe: no consumer of binds exists yet — only `tests/unit/test_rebind.py` calls `rebind()`, no `steps/*.py` imports `engine.structure`, no S5.2 module. Split already encoded in `rebind.py` `RebindPolicy` ("S5.1 ships a default; S5.2 calibrates"). Wiring obligation: any future consumer of bound spans runs post-S5.2 or via the strict `assert_all_bound` path. | **[Ben-ruled] 2026-07-09** (consumer trace this session) |
 
-**Governance forks (yours to rule, §7):** **G-1** rev 3 *replaces the whole S5.1 matcher* — a larger
-reopen than rev 2; route as **S5.1 remediation** (new S5-milestone issue) even though it lands via #33?
-**G-2** the `s5_1_plan.md` §1.3 falsified-claim correction (text ready in §7; **not** pre-applied this
-time — awaits your ruling). **G-3** the schema v2→v3 anchor-enrichment touch. **G-4** the R-c
-contiguity ruling (enforce precondition vs multi-interval spans).
+**Governance forks — all resolved (Ben, §7):**
+- **G-1 [RULED 2026-07-09]:** rev 3 replaces the whole S5.1 matcher → **routed as S5.1 remediation, a new issue** (referenced by #33), not folded into #33's scale-check scope — so the provenance that S5.1's shipped mechanism was replaced stays visible.
+- **G-2 [LANDED 2026-07-09]:** the `s5_1_plan.md` §1.3 falsified-claim correction — applied (commit `7e5d612`).
+- **G-3 [RULED 2026-07-09]:** the schema v2→v3 anchor-enrichment touch → **bump to 3** (window open; only internal fixtures + the PLL probe pin v2; migrate them, no v2/v3 dual-support).
+- **G-4 [RULED 2026-07-09]:** the R-c contiguity ruling → **adopt (i) now** — enforce "container subtree = one contiguous included span" as a fail-loud validated authoring precondition; **defer (ii)** multi-interval spans for information until a genuinely interleaved book constrains the design.
 
 ---
 
@@ -231,8 +235,11 @@ INV-2 + INV-3 together are the audit's primary target (correct, non-inert, drift
 Size-parameterized fixture persisted through the S1.5 store (`save_stream`/`load_stream`) so load/index
 cost is real; measure re-bind on **deep** and **wide** shapes (say which each result speaks to). Named
 ops timed with serialize+load+index inside the span; `tracemalloc` peak; `perf_counter` wall-clock.
-CI = always-on small ratio + `@pytest.mark.scale` 10⁵ nightly. **Honest note:** "shares a fixture with
-S1.4/S1.5" is *primitive* reuse (the store path); no scale fixture pre-exists.
+CI = always-on small ratio + `@pytest.mark.scale` 10⁵ nightly. **Framing (DR-7, pinned unambiguous per
+Ben 2026-07-09):** what is reused from S1.4/S1.5 is the **store round-trip *primitives*** (`save_stream`
+/ `load_stream`) — **not a fixture.** No scale fixture exists; the size-parameterized scale fixture is
+**new work built for S4.7**. Any tracker/plan wording that reads as "shares an existing benchmark
+fixture" is to be corrected to "reuses the store primitives; builds its own scale fixture."
 
 ---
 
@@ -256,7 +263,7 @@ assignment," which #33 replaces) and the S4.7 Deliverable text.
 1. Plan ratified; `[review]` rows + G-1…G-4 resolved. 2. INV-1…INV-7 red-first (drift generator built
 so INV-2/INV-3 can be seen red). 3. Diff-based re-anchor lands; `bound ⊆ oracle` + anti-inertness
 proven; suite green (1728). **Acceptance is strict-with-characterized-residual, not literal zero (DR-9, [Ben-ruled] 2026-07-09):** INV-1 holds by construction, and the emitted residual is bounded with every survivor magnitude/foreign-content-detectable (routed to the worklist, handed to S5.2 which owns τ-calibrated zero). Forcing "literal zero" here would hard-code a τ value S4.7 explicitly defers (`RebindPolicy`: "S5.1 ships a default; S5.2 calibrates"), baking an uncalibrated knob into the mechanism. Wiring obligation: any future consumer of bound spans runs post-S5.2 or via the strict `assert_all_bound` path. 4. Scale harness + CI; ratios (wall-clock + peak-mem, deep + wide) in
-`docs/probes/s4_7_scale.md`. **[prototype-derived, 2026-07-08 — pending G-* ruling]** the harness must
+`docs/probes/s4_7_scale.md`. **[ratified DoD requirement — Ben, 2026-07-09]** the harness must
 include a **deliberately anchor-poor fixture** (low unique-in-both k-gram density — the anchor-rich PLL
 prose measured 71% type-unique 3-grams, the favorable end), because the gap cap that buys linear *time*
 is the same knob that leaks the wrong-content residual: as anchors thin, **time stays linear while

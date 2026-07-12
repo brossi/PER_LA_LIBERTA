@@ -16,8 +16,8 @@
       "url": "https://archive.org/download/ninnolir00roveuoft/ninnolir00roveuoft_djvu.txt"
     },
     {
-      "role": "copy2",
-      "label": "1883 edition / Google scan / Internet Archive OCR (edition-difference preflight required)",
+      "role": "comparison",
+      "label": "1883 edition / Google scan / Internet Archive OCR (diagnostic comparison only; not a voting witness)",
       "ia_item_id": "ninnoli00rovegoog",
       "url": "https://archive.org/download/ninnoli00rovegoog/ninnoli00rovegoog_djvu.txt"
     }
@@ -42,10 +42,55 @@
     "retention_min": 0.60,
     "foreign_char_max": 0.005,
     "word_quality_high_severity_max": 0,
-    "running_heads": []
+    "running_heads": [
+      "(?:[0-9IlOo]+\\s+)?(?i:NINNOLI)(?:\\s+[0-9IlOo]+)?",
+      "(?i:STORIELLA\\s+VECCHIA)(?:\\s+[0-9IlOo]+)?",
+      "(?i:ERA\\s+MAT\\w*\\s+(?:[O0]\\s+)?AVEVA\\s+FAME\\??[,\\.]*)(?:\\s+[0-9IlOo]+)?",
+      "(?i:CAVALLERIA\\s+ASSASSINA)(?:\\s+[0-9IlOo]+)?",
+      "(?i:SCELLERATA\\s*!?[,\\.]*)(?:\\s+[0-9IlOo]+)?",
+      "(?i:QUINTINO\\s+E\\s+MARCO)(?:\\s+[0-9IlOo]+)?"
+    ],
+    "raw_segmentation": {
+      "kind": "flat_sections",
+      "body_start_after_pattern": "GIUSEPPE\\s+FRACCAROLI",
+      "body_end_patterns": [
+        ".*DEPT\\.\\s+FEB\\s+12\\s+1962",
+        "P[OQ]\\s+Ro\\s*vetta,\\s+Gerolamo",
+        "INDICE",
+        "PLEASE\\s+DO\\s+NOT\\s+REMOVE"
+      ],
+      "sections": [
+        {
+          "id": "storiella_vecchia",
+          "title": "Storiella vecchia",
+          "heading_pattern": "STORIELLA\\s+VECCHIA"
+        },
+        {
+          "id": "era_matto_o_aveva_fame",
+          "title": "Era matto o aveva fame?",
+          "heading_pattern": "ERA\\s+MATTO(?:\\s+[O0])?\\s+AVEVA\\s+FAME\\?[,\\.]*"
+        },
+        {
+          "id": "cavalleria_assassina",
+          "title": "Cavalleria assassina",
+          "heading_pattern": "CAVALLERIA\\s+ASSASSINA"
+        },
+        {
+          "id": "scellerata",
+          "title": "Scellerata!",
+          "heading_pattern": "SCELLERATA\\s*!?[,\\.]*"
+        },
+        {
+          "id": "quintino_e_marco",
+          "title": "Quintino e Marco",
+          "heading_pattern": "QUINTINO\\s+E\\s+MARCO"
+        }
+      ]
+    }
   },
   "edition": {
     "title_it": "Ninnoli",
+    "title_en": "Ninnoli",
     "subtitle_it": "",
     "subtitle_en": "",
     "author": "Gerolamo Rovetta",

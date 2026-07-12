@@ -111,6 +111,15 @@ def test_build_witnesses_lists_sources_then_copy3():
     ]
 
 
+def test_build_witnesses_excludes_diagnostic_comparison_sources():
+    cfg = load_book("ninnoli")
+    witnesses = triage.build_witnesses(cfg)
+    assert witnesses == [
+        "Copy 1: 1884 third edition / University of Toronto scan / Internet Archive OCR",
+        "Copy 3: vision-model OCR of the source scan",
+    ]
+
+
 def test_user_message_blocks_every_item():
     batch = [
         {"chapter": "ch", "paragraph": 2, "word_copy1": "a", "word_copy2": "b",

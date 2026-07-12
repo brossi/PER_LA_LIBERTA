@@ -137,7 +137,23 @@ class GeminiOcrBackend:
                 )
             ],
         )
-        return response.text.strip()
+        return _gemini_response_text(response)
+
+
+def _gemini_response_text(response) -> str:
+    """Extract provider text or raise a diagnostic error retaining the finish reason."""
+    text = response.text
+    if not isinstance(text, str):
+        reasons = sorted(
+            {
+                str(candidate.finish_reason).removeprefix("FinishReason.")
+                for candidate in (response.candidates or ())
+                if getattr(candidate, "finish_reason", None) is not None
+            }
+        )
+        detail = ", ".join(reasons) if reasons else "unknown"
+        raise BackendError(f"Gemini returned no text (finish_reason={detail})")
+    return text.strip()
 
 
 # --- pure mechanics ---------------------------------------------------------------------- #

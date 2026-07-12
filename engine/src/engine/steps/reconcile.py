@@ -28,7 +28,7 @@ from difflib import SequenceMatcher
 from functools import lru_cache
 from statistics import median
 
-from ..config.models import ResolvedConfig
+from ..config.models import RawSegmentation, ResolvedConfig
 from ..contracts.markers import PAGE_MARKER_RE
 from ..errors import MissingInputError
 from ..lang.base import LanguagePlugin
@@ -53,6 +53,106 @@ RECONCILED_RAW_FILE = "reconciled_raw.txt"
 
 # Bracket/paren noise inside a word — the one language-neutral score_word penalty pattern.
 _BRACKET_NOISE = re.compile(r"[(){}[\]|\\^~`]")
+_MIN_DECLARED_SECTION_CHARS = 50
+
+
+def split_declared_raw_sections(
+    text: str,
+    spec: RawSegmentation,
+    *,
+    running_heads: tuple[str, ...] = (),
+) -> list[dict]:
+    """Split an ordered flat collection from manifest-declared full-line boundaries.
+
+    The manifest owns every book/edition-specific pattern. The engine owns only the state machine:
+    trim front/back matter, open exactly the next declared section, treat repeats of the current or
+    prior heading as furniture, and fail loud on missing or out-of-order future boundaries.
+    """
+    if spec.kind != "flat_sections":
+        raise MissingInputError(f"unsupported raw segmentation kind: {spec.kind!r}")
+    ids = tuple(section.id for section in spec.sections)
+    if not ids or len(set(ids)) != len(ids):
+        raise MissingInputError("raw flat-section ids must be non-empty and unique")
+
+    try:
+        start_re = re.compile(r"\s*(?:" + spec.body_start_after_pattern + r")\s*$")
+        end_res = tuple(
+            re.compile(r"\s*(?:" + pattern + r")\s*$")
+            for pattern in spec.body_end_patterns
+        )
+        section_res = tuple(
+            re.compile(r"\s*(?:" + section.heading_pattern + r")\s*$")
+            for section in spec.sections
+        )
+        running_head_res = tuple(
+            re.compile(r"\s*(?:" + pattern + r")\s*$") for pattern in running_heads
+        )
+    except re.error as exc:
+        raise MissingInputError(f"invalid raw segmentation regex: {exc}") from exc
+
+    lines = text.splitlines()
+    start = next((index for index, line in enumerate(lines) if start_re.fullmatch(line)), None)
+    if start is None:
+        raise MissingInputError(
+            "raw flat-section body-start anchor was not found; refusing to split possible TOC text"
+        )
+
+    stop = len(lines)
+    if end_res:
+        stop = next(
+            (
+                index
+                for index, line in enumerate(lines[start + 1 :], start=start + 1)
+                if any(pattern.fullmatch(line) for pattern in end_res)
+            ),
+            len(lines),
+        )
+
+    bodies: list[list[str]] = [[] for _ in spec.sections]
+    current = -1
+    for line in lines[start + 1 : stop]:
+        matches = tuple(
+            index for index, pattern in enumerate(section_res) if pattern.fullmatch(line)
+        )
+        if len(matches) > 1:
+            raise MissingInputError(
+                f"raw line matches multiple declared section headings: {line!r}"
+            )
+        if matches:
+            matched = matches[0]
+            expected = current + 1
+            if matched == expected:
+                current = matched
+            elif matched <= current:
+                # Repeated current/prior title heads are page furniture, never new sections.
+                pass
+            else:
+                missing = [section.id for section in spec.sections[expected:matched]]
+                raise MissingInputError(
+                    f"raw section heading {spec.sections[matched].id!r} appeared before expected "
+                    f"section(s) {missing}; refusing to reorder or merge content"
+                )
+            continue
+        if any(pattern.fullmatch(line) for pattern in running_head_res):
+            continue
+        if current >= 0:
+            bodies[current].append(line)
+
+    if current != len(spec.sections) - 1:
+        missing = [section.id for section in spec.sections[current + 1 :]]
+        raise MissingInputError(f"raw witness is missing declared section boundary(s): {missing}")
+
+    result: list[dict] = []
+    for section, body_lines in zip(spec.sections, bodies, strict=True):
+        body = "\n".join(body_lines).strip()
+        if len(body) < _MIN_DECLARED_SECTION_CHARS:
+            raise MissingInputError(
+                f"raw section {section.id!r} is empty or too short ({len(body)} chars)"
+            )
+        result.append(
+            {"id": section.id, "title": section.title, "part": 0, "text": body}
+        )
+    return result
 
 
 @lru_cache(maxsize=None)
@@ -325,9 +425,20 @@ def _find_copy3_text(
 
 
 def reconcile_words(
-    text1: str, text2: str, chapter_id: str, para_idx: int, accents: str
+    text1: str,
+    text2: str,
+    chapter_id: str,
+    para_idx: int,
+    accents: str,
+    *,
+    first_witness_spine: bool = False,
 ) -> tuple[str, list[dict]]:
-    """Reconcile two versions of a paragraph at word level. Returns (best_text, flagged)."""
+    """Reconcile two versions of a paragraph at word level. Returns (best_text, flagged).
+
+    With ``first_witness_spine``, the first witness owns extent: the second may correct aligned
+    tokens but may not inject unmatched text. This is the conservative mode for two OCRs of one
+    physical scan whose paragraph boundaries differ.
+    """
     words1 = text1.split()
     words2 = text2.split()
 
@@ -345,7 +456,8 @@ def reconcile_words(
                 w2 = words2[j1 + k] if k < len2 else None
 
                 if w1 is None:
-                    result.append(w2)
+                    if not first_witness_spine:
+                        result.append(w2)
                 elif w2 is None:
                     result.append(w1)
                 else:
@@ -368,7 +480,8 @@ def reconcile_words(
                             "resolution_method": "score_heuristic",
                         })
         elif tag == "insert":
-            result.extend(words2[j1:j2])
+            if not first_witness_spine:
+                result.extend(words2[j1:j2])
         elif tag == "delete":
             result.extend(words1[i1:i2])
 
@@ -508,25 +621,35 @@ def run(
 ) -> dict:
     """Reconcile the OCR copies in ``workspace`` and write the four artifacts.
 
-    Reads ``copy1_raw.txt`` / ``copy2_raw.txt`` (required) and, if present, a third Gemini
-    witness (``copy3_raw.txt``, else ``copy3_flash.txt``) plus its page map. Writes
+    Reads the manifest-declared voting witnesses: ``copy1_raw.txt`` is required, ``copy2_raw.txt``
+    participates only when the manifest declares a ``copy2`` source, and a Gemini witness
+    (``copy3_raw.txt``, else ``copy3_flash.txt``) participates when present. At least two voting
+    witnesses are required. Other downloaded roles (for example ``comparison``) are evidence but
+    never enter reconciliation. Writes
     ``reconciled_chapters.json``, ``flagged_segments.json``, ``chapter_pages.json`` and
     ``reconciled_raw.txt`` into ``ws.data``. Returns a summary dict.
     """
     ws = workspace
     accents = cfg.language.word_score_accents
 
-    # The two djvu-text witnesses are required (produced by ``download``); a missing copy is a
-    # clean ``MissingInputError`` (CLI exit 3), not a bare ``FileNotFoundError`` traceback (F7).
-    missing = [name for name in (COPY1_FILE, COPY2_FILE) if not (ws.data / name).is_file()]
+    declared_roles = {source.role for source in cfg.manifest.sources}
+    missing = []
+    if "copy1" not in declared_roles or not (ws.data / COPY1_FILE).is_file():
+        missing.append(COPY1_FILE)
+    copy2_declared = "copy2" in declared_roles
+    if copy2_declared and not (ws.data / COPY2_FILE).is_file():
+        missing.append(COPY2_FILE)
     if missing:
         raise MissingInputError(
-            f"reconcile needs the OCR copies in {ws.data}; missing: {', '.join(missing)} "
+            f"reconcile needs its manifest-declared OCR copies in {ws.data}; "
+            f"missing: {', '.join(missing)} "
             f"(run `--step download` first)"
         )
 
     copy1_text = (ws.data / COPY1_FILE).read_text(encoding="utf-8")
-    copy2_text = (ws.data / COPY2_FILE).read_text(encoding="utf-8")
+    copy2_text = (
+        (ws.data / COPY2_FILE).read_text(encoding="utf-8") if copy2_declared else ""
+    )
 
     copy3_path = ws.data / COPY3_PRO_FILE
     if not copy3_path.exists():
@@ -538,32 +661,58 @@ def run(
         copy3_text, copy3_page_breaks = _strip_page_markers(
             copy3_path.read_text(encoding="utf-8")
         )
-        print(f"  3-way mode: Copy 3 loaded ({len(copy3_text):,} chars, "
+        print(f"  Copy 3 loaded ({len(copy3_text):,} chars, "
               f"{len(copy3_page_breaks)} page markers)")
+
+    if not copy2_declared and not has_copy3:
+        raise MissingInputError(
+            "reconcile needs at least two voting witnesses; the manifest declares Copy 1 but no "
+            "Copy 2, and no Copy 3 OCR output was found"
+        )
+    if copy2_declared and has_copy3:
+        print("  3-way mode: Copy 1 + Copy 2 + Copy 3")
+    elif copy2_declared:
+        print("  2-way mode: Copy 1 + Copy 2")
     else:
-        print("  2-way mode: Copy 3 not found, falling back to 2-way reconciliation")
+        print("  2-way mode: Copy 1 + Copy 3")
 
     # Book-level page-furniture (the title running head) the segmenter must drop — from the
     # manifest, not the cross-title language plugin (BR-004).
     running_heads = cfg.structure.running_heads
 
-    stripped1 = collapse_spaces(lang.strip_boilerplate(copy1_text))
-    stripped2 = collapse_spaces(lang.strip_boilerplate(copy2_text))
+    raw_segmentation = cfg.structure.raw_segmentation
 
-    ch_map1 = {ch["id"]: ch for ch in lang.split_raw_chapters(stripped1, running_heads=running_heads)}
-    ch_map2 = {ch["id"]: ch for ch in lang.split_raw_chapters(stripped2, running_heads=running_heads)}
+    def split_witness(raw_text: str) -> tuple[str, list[dict]]:
+        if raw_segmentation is not None:
+            prepared = collapse_spaces(raw_text)
+            return prepared, split_declared_raw_sections(
+                prepared, raw_segmentation, running_heads=running_heads
+            )
+        prepared = collapse_spaces(lang.strip_boilerplate(raw_text))
+        return prepared, lang.split_raw_chapters(
+            prepared, running_heads=running_heads
+        )
+
+    stripped1, chapters1 = split_witness(copy1_text)
+    stripped2, chapters2 = split_witness(copy2_text) if copy2_declared else ("", [])
+    ch_map1 = {ch["id"]: ch for ch in chapters1}
+    ch_map2 = {ch["id"]: ch for ch in chapters2}
 
     ch_map3: dict[str, dict] = {}
     chapters3: list[dict] = []
     stripped3 = ""
     if has_copy3:
-        stripped3 = collapse_spaces(lang.strip_boilerplate(copy3_text))  # same scan as Copy 1
-        chapters3 = lang.split_raw_chapters(stripped3, running_heads=running_heads)
+        stripped3, chapters3 = split_witness(copy3_text)  # same scan as Copy 1
         ch_map3 = {ch["id"]: ch for ch in chapters3}
         print(f"  Copy 3 chapters: {len(chapters3)}")
 
-    _split_merged_chapters(ch_map1, ch_map2, sorted(ch_map1.keys()))
-    all_ids = sorted(set(ch_map1.keys()) | set(ch_map2.keys()) | set(ch_map3.keys()))
+    if raw_segmentation is None and copy2_declared:
+        _split_merged_chapters(ch_map1, ch_map2, sorted(ch_map1.keys()))
+    if raw_segmentation is None:
+        all_ids = sorted(set(ch_map1.keys()) | set(ch_map2.keys()) | set(ch_map3.keys()))
+    else:
+        # Flat-section order is a declared book invariant; alphabetic ID sorting would reorder it.
+        all_ids = [section.id for section in raw_segmentation.sections]
 
     reconciled_chapters: list[dict] = []
     all_flagged: list[dict] = []
@@ -627,6 +776,46 @@ def run(
 
             print(f" {len(aligned)} aligned → {len(reconciled_paras)} kept, "
                   f"{c3_matches} c3 matches", flush=True)
+            reconciled_chapters.append({
+                "id": ch_id, "title": ch1["title"], "part": ch1["part"],
+                "text": "\n\n".join(reconciled_paras),
+            })
+
+        elif ch1 and ch3 and not copy2_declared:
+            # Copy 3 is another OCR of Copy 1's physical scan, but its paragraph boundaries come
+            # from rendered pages rather than IA's djvu text. Pairing the two paragraph lists by
+            # SequenceMatcher can align unrelated blocks and then concatenate both sides at word
+            # level, inflating the book. Copy 1 therefore owns paragraph order/extent; Copy 3 votes
+            # only where a forward, normalized substring match anchors it to that paragraph.
+            stats["shared"] += 1
+            paras1 = split_paragraphs(ch1["text"])
+            ch3_orig = rejoin_lines(ch3["text"])
+            ch3_norm, norm_to_orig = _build_norm_map(ch3_orig)
+            c3_search_pos = 0
+            c3_matches = 0
+            reconciled_paras = []
+
+            for para_idx, p1 in enumerate(paras1):
+                p3 = None
+                if len(normalize_for_comparison(p1)) >= 20:
+                    p3, c3_search_pos = _find_copy3_text(
+                        p1, ch3_norm, ch3_orig, norm_to_orig, c3_search_pos,
+                    )
+                if p3 is None:
+                    reconciled_paras.append(p1)
+                    continue
+
+                c3_matches += 1
+                merged, flagged = reconcile_words(
+                    p1, p3, ch_id, para_idx, accents, first_witness_spine=True,
+                )
+                for item in flagged:
+                    item["word_copy3"] = item.pop("word_copy2")
+                    item["score3"] = item.pop("score2")
+                reconciled_paras.append(merged)
+                all_flagged.extend(flagged)
+
+            print(f" {len(paras1)} Copy 1 paras, {c3_matches} anchored Copy 3 matches", flush=True)
             reconciled_chapters.append({
                 "id": ch_id, "title": ch1["title"], "part": ch1["part"],
                 "text": "\n\n".join(reconciled_paras),
@@ -715,7 +904,7 @@ def run(
     atomic_write_json(ws.resolve("data", RECONCILED_FILE), reconciled_chapters)
     atomic_write_json(ws.resolve("data", FLAGGED_FILE), all_flagged)
 
-    mode = "3-way" if has_copy3 else "2-way"
+    mode = "3-way" if copy2_declared and has_copy3 else "2-way"
     print(f"  Reconciled {len(reconciled_chapters)} chapters ({mode}); "
           f"flagged {stats['total_flagged']} word disagreements")
 

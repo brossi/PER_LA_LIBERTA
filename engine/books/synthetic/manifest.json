@@ -53,6 +53,7 @@
   },
   "edition": {
     "title_it": "Libro di Prova",
+    "title_en": "Synthetic Test Book",
     "subtitle_it": "Edizione sintetica per i test del motore",
     "subtitle_en": "Synthetic edition for engine tests",
     "author": "Autore Sintetico",

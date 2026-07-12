@@ -26,7 +26,9 @@ def test_package_imports_and_has_version():
 
 # Steps ported to a real run(); the rest are still scaffold stubs. As each lands in its
 # milestone, it moves here and its behaviour is covered by a golden/unit test instead.
-PORTED = {"validate", "reconcile", "adjudicate", "download", "ocr", "triage", "cleanup"}  # M2, M3, M4a, M4b
+PORTED = {
+    "validate", "reconcile", "adjudicate", "download", "ocr", "triage", "cleanup", "translate",
+}  # M2, M3, M4a, M4b, M4c
 
 
 @pytest.mark.parametrize("step", [s for s in engine.STEPS if s not in PORTED])
@@ -72,8 +74,7 @@ def test_cli_list_books_needs_no_book():
 def test_cli_resolves_real_book_then_hits_stub():
     # M1 wiring: a real --step run resolves PLL's manifest + profiles + plugin +
     # workspace (no crash), then surfaces a not-yet-ported step stub as exit 2.
-    # 'translate' is still a stub (M4c); 'triage'/'validate'/'reconcile' are ported and would run.
-    assert cli.main(["--step", "translate", "--book", "per_la_liberta"]) == 2
+    assert cli.main(["--step", "typeset", "--book", "per_la_liberta"]) == 2
 
 
 def test_cli_unknown_book_is_a_config_error():

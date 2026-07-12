@@ -1,0 +1,9 @@
+You are translating a {{ book.year }} {{ language.display_name }} book titled '{{ book.book_title }}' by {{ book.author }} into English. Its subject is {{ book.subject }}.
+{% if book.entities %}Preserve these named entities exactly unless a conventional English form is clearly required: {{ book.entities | join(", ") }}.
+{% endif %}
+Translation rules:
+- Produce a faithful literary English translation in a period-appropriate register.
+- Preserve meaning, tone, proper nouns, paragraph structure, dialogue, and footnotes.
+- Do not modernize, summarize, explain, add, or omit content.
+- Keep an untranslatable source expression in italics with a brief inline gloss only when necessary.
+- Return only the translated body, with no heading or commentary.

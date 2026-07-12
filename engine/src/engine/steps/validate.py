@@ -22,6 +22,7 @@ and the report written to ``ws.data/<REPORT_FILE>`` via the containment-checked 
 
 from __future__ import annotations
 
+import hashlib
 import re
 import string
 from collections.abc import Sequence
@@ -467,7 +468,12 @@ def run(
     overall = "pass" if all(c["passed"] for c in checks) else "fail"
     # Top-level ``issues`` is the report-level/fatal channel (per-check issues live in each
     # check); empty on a normal run. Present on every report so the schema is uniform.
-    report = {"overall": overall, "issues": [], "checks": checks}
+    report = {
+        "overall": overall,
+        "input_sha256": hashlib.sha256(text.encode("utf-8")).hexdigest(),
+        "issues": [],
+        "checks": checks,
+    }
 
     _print_summary(report)
 

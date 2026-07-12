@@ -20,9 +20,13 @@ SequenceMatcher / pure string work.
 from __future__ import annotations
 
 import json
+from dataclasses import replace
 from pathlib import Path
 
+import pytest
+
 from engine.config.loader import load_book
+from engine.errors import MissingInputError
 from engine.lang.italian import ItalianLanguagePlugin
 from engine.lang.registry import get_language_plugin
 from engine.paths import BookWorkspace
@@ -101,6 +105,18 @@ def test_reconcile_words_2way_merges_and_flags_close_calls():
     assert (f["word_copy1"], f["word_copy2"], f["chosen"]) == ("casa", "easa", "casa")
     assert f["resolution_method"] == "score_heuristic"
     assert f["chapter"] == "p1_ch01" and f["paragraph"] == 0
+
+
+def test_reconcile_words_first_witness_spine_rejects_unmatched_second_extent():
+    merged, _ = reconcile.reconcile_words(
+        "una frase completa",
+        "una frase completa testo estraneo aggiunto",
+        "chapter",
+        0,
+        ACCENTS,
+        first_witness_spine=True,
+    )
+    assert merged == "una frase completa"
 
 
 # --- reconcile_words_3way: the four majority/score branches ----------------------------- #
@@ -247,6 +263,79 @@ def test_running_head_drop_is_book_config_not_plugin_baked():
     assert "FINE DELLA PRIMA PARTE" not in bodies  # Italian structural word → still dropped
 
 
+def test_declared_flat_sections_ignore_toc_repeats_and_trailing_index():
+    cfg = load_book("ninnoli")
+    spec = cfg.structure.raw_segmentation
+    assert spec is not None
+
+    body = "parole narrative sufficient per superare il limite minimo della sezione " * 2
+    text = "\n".join(
+        [
+            "NINNOLI",
+            "Storiella vecchia",
+            "Era matto o aveva fame?",
+            "Cavalleria assassina - Scellerata! - Quintino e Marco",
+            "GIUSEPPE FRACCAROLI",
+            "STORIELLA VECCHIA",
+            "STORIELLA VECCHIA",  # duplicate opening / running title
+            body + "uno",
+            "12 NINNOLI",
+            "Storiella vecchia 13",
+            "ERA MATTO 0 AVEVA FAME?...",
+            body + "due",
+            "CAVALLERIA ASSASSINA",
+            body + "tre",
+            "SCELLERATA!...",
+            body + "quattro",
+            "QUINTINO E MARCO",
+            body + "cinque",
+            "INDICE",
+            "pubblicità che non appartiene al quinto racconto",
+        ]
+    )
+
+    chapters = reconcile.split_declared_raw_sections(
+        text, spec, running_heads=cfg.structure.running_heads
+    )
+
+    assert [chapter["id"] for chapter in chapters] == [
+        "storiella_vecchia",
+        "era_matto_o_aveva_fame",
+        "cavalleria_assassina",
+        "scellerata",
+        "quintino_e_marco",
+    ]
+    assert [chapter["title"] for chapter in chapters] == [
+        section.title for section in spec.sections
+    ]
+    assert all(chapter["part"] == 0 for chapter in chapters)
+    joined = "\n".join(chapter["text"] for chapter in chapters)
+    assert "pubblicità" not in joined
+    assert "NINNOLI" not in joined
+    assert "Storiella vecchia 13" not in joined
+    for sentinel in ("uno", "due", "tre", "quattro", "cinque"):
+        assert joined.count(sentinel) == 1
+
+
+def test_declared_flat_sections_fail_loud_on_missing_or_reordered_boundary():
+    cfg = load_book("ninnoli")
+    spec = cfg.structure.raw_segmentation
+    text = "\n".join(
+        [
+            "GIUSEPPE FRACCAROLI",
+            "STORIELLA VECCHIA",
+            "testo abbastanza lungo " * 5,
+            "CAVALLERIA ASSASSINA",  # expected Era matto first
+            "testo abbastanza lungo " * 5,
+        ]
+    )
+
+    with pytest.raises(MissingInputError, match="before expected"):
+        reconcile.split_declared_raw_sections(
+            text, spec, running_heads=cfg.structure.running_heads
+        )
+
+
 # --- separability: full reconcile.run on a synthetic, non-PLL book ---------------------- #
 
 def _seed_synthetic(tmp_path: Path) -> BookWorkspace:
@@ -308,6 +397,45 @@ def test_reconcile_two_way_mode_without_copy3(tmp_path):
     chapters = json.loads((ws.data / reconcile.RECONCILED_FILE).read_text(encoding="utf-8"))
     assert [c["id"] for c in chapters] == ["p1_ch01", "p1_ch02", "prefazione"]
     assert not (ws.data / reconcile.CHAPTER_PAGES_FILE).exists()  # no Copy 3 → no page map
+
+
+def test_reconcile_two_way_copy1_and_copy3_ignores_undeclared_stale_copy2(tmp_path):
+    cfg = load_book("synthetic")
+    cfg = replace(
+        cfg,
+        manifest=replace(
+            cfg.manifest,
+            sources=tuple(
+                replace(source, role="comparison") if source.role == "copy2" else source
+                for source in cfg.manifest.sources
+            ),
+        ),
+    )
+    lang = get_language_plugin(cfg.language_id)
+    ws = _seed_synthetic(tmp_path)
+    # _seed_synthetic includes a copy2_raw file. Once its manifest role is diagnostic, that stale
+    # filename must not make it back into the voting set.
+    summary = reconcile.run(workspace=ws, cfg=cfg, lang=lang)
+
+    assert summary["mode"] == "2-way"
+    source_chapters = {
+        chapter["id"]: chapter["text"]
+        for chapter in ItalianLanguagePlugin().split_raw_chapters(
+            reconcile.collapse_spaces(
+                ItalianLanguagePlugin().strip_boilerplate(
+                    (ws.data / reconcile.COPY1_FILE).read_text(encoding="utf-8")
+                )
+            ),
+            running_heads=cfg.structure.running_heads,
+        )
+    }
+    chapters = json.loads((ws.data / reconcile.RECONCILED_FILE).read_text(encoding="utf-8"))
+    # Copy 3 may correct words but cannot inject unmatched paragraph extent into Copy 1's spine.
+    for chapter in chapters:
+        assert len(chapter["text"]) <= len(source_chapters[chapter["id"]]) * 1.05
+    flagged = json.loads((ws.data / reconcile.FLAGGED_FILE).read_text(encoding="utf-8"))
+    assert all("word_copy2" not in item for item in flagged)
+    assert all("word_copy3" in item for item in flagged)
 
 
 # --- contract: reconcile output satisfies validate's word-count input (closes inversion) - #

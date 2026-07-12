@@ -29,6 +29,8 @@ from .models import (
     LanguageProfile,
     OcrConfig,
     PartStructure,
+    RawSection,
+    RawSegmentation,
     PeriodDictionary,
     ResolvedConfig,
     ScanFacts,
@@ -136,9 +138,31 @@ def _build_manifest(data: dict) -> BookManifest:
             foreign_char_max=structure["foreign_char_max"],
             word_quality_high_severity_max=structure["word_quality_high_severity_max"],
             running_heads=tuple(structure["running_heads"]),
+            raw_segmentation=(
+                RawSegmentation(
+                    kind=structure["raw_segmentation"]["kind"],
+                    body_start_after_pattern=structure["raw_segmentation"][
+                        "body_start_after_pattern"
+                    ],
+                    body_end_patterns=tuple(
+                        structure["raw_segmentation"].get("body_end_patterns", [])
+                    ),
+                    sections=tuple(
+                        RawSection(
+                            id=section["id"],
+                            title=section["title"],
+                            heading_pattern=section["heading_pattern"],
+                        )
+                        for section in structure["raw_segmentation"]["sections"]
+                    ),
+                )
+                if "raw_segmentation" in structure
+                else None
+            ),
         ),
         edition=Edition(
             title_it=edition["title_it"],
+            title_en=edition["title_en"],
             subtitle_it=edition["subtitle_it"],
             subtitle_en=edition["subtitle_en"],
             author=edition["author"],

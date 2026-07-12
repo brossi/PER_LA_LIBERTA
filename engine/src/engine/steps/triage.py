@@ -161,10 +161,18 @@ def _is_plausible_correction(original: str, correction: str) -> bool:
 
 
 def build_witnesses(cfg: ResolvedConfig) -> list[str]:
-    """Human-readable witness descriptions for the prompt: each ``manifest.sources[]`` label, then
-    the ocr-produced copy3 (the vision witness has no manifest source entry — D2/BR-011)."""
-    witnesses = [f"Copy {i}: {s.label}" for i, s in enumerate(cfg.manifest.sources, start=1)]
-    witnesses.append(f"Copy {len(witnesses) + 1}: vision-model OCR of the source scan")
+    """Human-readable descriptions of voting witnesses for the triage prompt.
+
+    Downloaded diagnostic roles such as ``comparison`` are intentionally excluded: they did not
+    vote in reconciliation and must not be presented to triage as if they had.
+    """
+    labels = {source.role: source.label for source in cfg.manifest.sources}
+    witnesses = []
+    if "copy1" in labels:
+        witnesses.append(f"Copy 1: {labels['copy1']}")
+    if "copy2" in labels:
+        witnesses.append(f"Copy 2: {labels['copy2']}")
+    witnesses.append("Copy 3: vision-model OCR of the source scan")
     return witnesses
 
 

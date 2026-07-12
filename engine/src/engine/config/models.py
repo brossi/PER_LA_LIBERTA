@@ -59,6 +59,29 @@ class PartStructure:
 
 
 @dataclass(frozen=True, slots=True)
+class RawSection:
+    """One manifest-declared flat content boundary in raw OCR.
+
+    ``heading_pattern`` is a full-line regular expression. It carries book/edition typography and
+    OCR variation; the generic reconciler owns only ordered boundary mechanics.
+    """
+
+    id: str
+    title: str
+    heading_pattern: str
+
+
+@dataclass(frozen=True, slots=True)
+class RawSegmentation:
+    """Manifest-selected raw-OCR segmentation for an ordered flat collection."""
+
+    kind: str
+    body_start_after_pattern: str
+    body_end_patterns: tuple[str, ...]
+    sections: tuple[RawSection, ...]
+
+
+@dataclass(frozen=True, slots=True)
 class Structure:
     """Header-count contract + validation thresholds (``manifest.structure``; M2 ``validate``),
     plus the book's raw-OCR ``running_heads`` (M3 ``reconcile``).
@@ -81,6 +104,7 @@ class Structure:
     foreign_char_max: float
     word_quality_high_severity_max: int
     running_heads: tuple[str, ...]
+    raw_segmentation: RawSegmentation | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -95,6 +119,7 @@ class Edition:
     """
 
     title_it: str
+    title_en: str
     subtitle_it: str
     subtitle_en: str
     author: str

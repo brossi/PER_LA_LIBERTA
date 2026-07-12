@@ -1,5 +1,6 @@
 {
   "overall": "pass",
+  "input_sha256": "5f6dbd8e46fe5fe54829e19de5514d4d992452e11aa1a3d1335001b6cfb94718",
   "issues": [],
   "checks": [
     {

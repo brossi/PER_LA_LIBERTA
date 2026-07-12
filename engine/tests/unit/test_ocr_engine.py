@@ -8,6 +8,8 @@ the producer/consumer inversion.
 
 from __future__ import annotations
 
+from types import SimpleNamespace
+
 import pytest
 
 from engine.config.loader import load_book
@@ -373,6 +375,18 @@ def test_default_gemini_backend_without_key_is_a_backend_error(monkeypatch):
     monkeypatch.delenv("GEMINI_API_KEY", raising=False)
     with pytest.raises(BackendError, match="No Gemini API key"):
         ocr.GeminiOcrBackend(model_id="whatever")
+
+
+def test_gemini_no_text_preserves_finish_reason_as_backend_error():
+    from engine.errors import BackendError
+
+    response = SimpleNamespace(
+        text=None,
+        candidates=[SimpleNamespace(finish_reason="RECITATION")],
+    )
+
+    with pytest.raises(BackendError, match="finish_reason=RECITATION"):
+        ocr._gemini_response_text(response)
 
 
 def test_missing_scan_pdf_is_a_clean_error_with_default_renderer(tmp_path):

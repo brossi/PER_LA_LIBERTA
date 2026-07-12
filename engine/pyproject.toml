@@ -41,6 +41,9 @@ engine = "engine.cli:main"
 it = [
     "it-core-news-lg @ https://github.com/explosion/spacy-models/releases/download/it_core_news_lg-3.8.0/it_core_news_lg-3.8.0-py3-none-any.whl",
 ]
+assessment = [
+    "book-layout-sidecar",
+]
 
 [dependency-groups]
 dev = [
@@ -74,3 +77,6 @@ markers = [
     "golden: reproduces a committed live PLL artifact from frozen inputs",
     "integration: exercises a full step end-to-end",
 ]
+
+[tool.uv.sources]
+book-layout-sidecar = { git = "ssh://git@github.com/brossi/book-layout-sidecar.git", rev = "v0.1.0" }

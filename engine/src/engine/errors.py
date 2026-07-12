@@ -11,9 +11,9 @@ Three structure-owned :class:`EngineError` subclasses live beside their raisers 
 ``StructureValidationError`` (``11``, ``structure/errors.py`` — Tier-2 semantic findings carrying
 the closed ``EC`` payload), ``EvidenceGateError`` (``12``, ``structure/evidence.py`` — the
 authoring-evidence gate's typed ``(kind, message)`` findings), and ``GeometryError`` (``13``,
-``structure/geometry.py`` — the fail-loud geometry/OCR-backend + geometry-integrity carrier,
-deliberately not reusing :class:`BackendError` 5, whose degrade-to-sentinel posture is the
-opposite). The CLI maps every :class:`EngineError` generically via ``exc.exit_code``, so
+``structure/geometry.py`` — the immediate fail-loud geometry/OCR-backend + geometry-integrity
+carrier). OCR page failures retain resumable state but now fail at the pre-publication completeness
+gate. The CLI maps every :class:`EngineError` generically via ``exc.exit_code``, so
 subclassing elsewhere costs nothing here; a new code must stay unique across all four files (pinned
 by ``test_authoring_evidence.py``'s uniqueness sweep).
 
@@ -57,8 +57,9 @@ class AcquisitionError(EngineError):
 
 class BackendError(EngineError):
     """``ocr``'s rendering or transcription backend failed (an unreadable scan PDF at page-count,
-    the vision-model call, or a missing key). A *per-page* render failure does not raise — it
-    degrades to an ``[OCR_ERROR]`` sentinel; this is the whole-document / transcription case."""
+    the vision-model call, a missing key, or an incomplete set of page checkpoints). Per-page
+    failures remain as resumable ``[OCR_ERROR]`` state, but the completeness audit raises this
+    error before publishing a canonical witness."""
 
     exit_code = 5
 
@@ -151,3 +152,14 @@ class StaleArtifactError(EngineError):
     """
 
     exit_code = 10
+
+
+class InvalidInvocationError(EngineError, ValueError):
+    """A caller supplied an invalid step option or a range outside the current input.
+
+    Subclassing :class:`ValueError` preserves the direct Python-call contract while giving the CLI
+    a clean non-zero exit instead of a traceback.  Exit codes 11–14 are owned by structure-layer
+    errors; 15 is the next free engine-wide code.
+    """
+
+    exit_code = 15

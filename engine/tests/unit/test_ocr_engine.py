@@ -95,7 +95,11 @@ def test_blank_sentinel_template_and_stitcher_use_one_constant(tmp_path):
     assert SENTINEL_BLANK not in full_text
 
 
-def test_failing_backend_yields_ocr_error_sentinel_then_drops_body(tmp_path, monkeypatch, acq):
+def test_failing_backend_retains_error_state_but_publishes_no_canonical_output(
+    tmp_path, monkeypatch, acq
+):
+    from engine.errors import BackendError
+
     monkeypatch.setattr(ocr, "_RETRY_BACKOFF", (0, 0, 0))
     monkeypatch.setattr(ocr, "_PAGE_DELAY", 0)
     cfg, lang = _cfg_lang()
@@ -105,17 +109,17 @@ def test_failing_backend_yields_ocr_error_sentinel_then_drops_body(tmp_path, mon
         def transcribe(self, image_bytes, prompt):
             raise RuntimeError("vision-down")
 
-    ocr.run(
-        workspace=ws, cfg=cfg, lang=lang, model="pro", pages=(1, 2),
-        renderer=acq.Renderer(2), backend=_Failing(),
-    )
+    with pytest.raises(BackendError, match="OCR incomplete"):
+        ocr.run(
+            workspace=ws, cfg=cfg, lang=lang, model="pro", pages=(1, 2),
+            renderer=acq.Renderer(2), backend=_Failing(),
+        )
 
-    # progress file carries the typed sentinel; stitched copy3 keeps markers, drops error bodies
+    # Page state remains inspectable/resumable, but an incomplete witness is never published.
     pf = read_json(ws.state / "ocr_pro_pages" / "page_0001.json")
     assert pf["text"].startswith(SENTINEL_OCR_ERROR_PREFIX)
-    text = (ws.data / "copy3_raw.txt").read_text(encoding="utf-8")
-    assert PAGE_MARKER_TEMPLATE.format(1) in text and PAGE_MARKER_TEMPLATE.format(2) in text
-    assert "vision-down" not in text
+    assert not (ws.data / "copy3_raw.txt").exists()
+    assert not (ws.data / "copy3_pro_page_map.json").exists()
 
 
 def test_transient_backend_failure_retries_then_recovers(tmp_path, monkeypatch, acq):
@@ -174,10 +178,10 @@ def test_unreadable_pdf_page_count_failure_is_a_backend_error(tmp_path, acq):
     assert "could not read the source scan PDF" in str(ei.value)
 
 
-def test_per_page_render_failure_becomes_a_sentinel_and_the_run_continues(tmp_path, monkeypatch):
-    # A torn leaf (render raises for one page) does not abort the scan: that page becomes a
-    # render-failure [OCR_ERROR] sentinel (no retry — non-transient) while the rest transcribe
-    # normally, mirroring the transcription-failure policy. Marker kept, failure body dropped.
+def test_per_page_render_failure_retains_state_and_blocks_publication(tmp_path, monkeypatch):
+    from engine.errors import BackendError
+
+    # A torn leaf becomes inspectable resumable state, but blocks the canonical witness.
     monkeypatch.setattr(ocr, "_PAGE_DELAY", 0)
     cfg, lang = _cfg_lang()
     ws = BookWorkspace.for_book("synthetic", tmp_path).ensure()
@@ -198,20 +202,110 @@ def test_per_page_render_failure_becomes_a_sentinel_and_the_run_continues(tmp_pa
         def transcribe(self, image_bytes, prompt):
             return f"page {int(image_bytes.decode())} text"
 
-    ocr.run(
-        workspace=ws, cfg=cfg, lang=lang, model="pro", pages=(1, 2),
-        renderer=_TornLeafRenderer(), backend=_Backend(),
-    )
+    with pytest.raises(BackendError, match=r"page\(s\) 1"):
+        ocr.run(
+            workspace=ws, cfg=cfg, lang=lang, model="pro", pages=(1, 2),
+            renderer=_TornLeafRenderer(), backend=_Backend(),
+        )
 
     pf1 = read_json(ws.state / "ocr_pro_pages" / "page_0001.json")
     assert pf1["text"].startswith(SENTINEL_OCR_ERROR_PREFIX)
     assert "render failed" in pf1["text"]
     assert renders.count(1) == 1, "a render failure is non-transient → not retried"
 
-    text = (ws.data / "copy3_raw.txt").read_text(encoding="utf-8")
-    assert PAGE_MARKER_TEMPLATE.format(1) in text and PAGE_MARKER_TEMPLATE.format(2) in text
-    assert "torn leaf" not in text          # the failure detail never leaks into copy3
-    assert "page 2 text" in text            # the good page transcribed normally
+    assert read_json(ws.state / "ocr_pro_pages" / "page_0002.json")["text"] == "page 2 text"
+    assert not (ws.data / "copy3_raw.txt").exists()
+
+
+def test_error_checkpoint_is_retried_and_then_publishes(tmp_path, monkeypatch):
+    monkeypatch.setattr(ocr, "_PAGE_DELAY", 0)
+    cfg, lang = _cfg_lang()
+    ws = BookWorkspace.for_book("synthetic", tmp_path).ensure()
+    _write_pages(
+        ws.state / "ocr_pro_pages",
+        {1: f"{SENTINEL_OCR_ERROR_PREFIX}: previous outage]"},
+    )
+
+    class _Renderer:
+        def page_count(self, pdf_path):
+            return 1
+
+        def render(self, pdf_path, page, *, dpi):
+            return b"retry"
+
+    class _Backend:
+        def transcribe(self, image_bytes, prompt):
+            return "recovered"
+
+    ocr.run(
+        workspace=ws,
+        cfg=cfg,
+        lang=lang,
+        model="pro",
+        pages=(1, 1),
+        renderer=_Renderer(),
+        backend=_Backend(),
+    )
+
+    assert read_json(ws.state / "ocr_pro_pages" / "page_0001.json")["text"] == "recovered"
+    assert "recovered" in (ws.data / "copy3_raw.txt").read_text(encoding="utf-8")
+
+
+@pytest.mark.parametrize("pages", [(0, 1), (-1, 1), (2, 1), (True, 1), [1, 1]])
+def test_invalid_page_range_fails_before_workspace_initialization(tmp_path, pages, acq):
+    cfg, lang = _cfg_lang()
+    ws = BookWorkspace.for_book("synthetic", tmp_path)
+
+    with pytest.raises(ValueError, match="pages"):
+        ocr.run(
+            workspace=ws,
+            cfg=cfg,
+            lang=lang,
+            model="pro",
+            pages=pages,
+            renderer=acq.Renderer(2),
+            backend=acq.Backend({}),
+        )
+
+    assert not ws.root.exists()
+
+
+def test_out_of_bounds_page_range_is_not_clamped_or_published(tmp_path, acq):
+    cfg, lang = _cfg_lang()
+    ws = BookWorkspace.for_book("synthetic", tmp_path)
+
+    with pytest.raises(ValueError, match="exceeds"):
+        ocr.run(
+            workspace=ws,
+            cfg=cfg,
+            lang=lang,
+            model="pro",
+            pages=(1, 3),
+            renderer=acq.Renderer(2),
+            backend=acq.Backend({}),
+        )
+
+    assert not ws.root.exists()
+
+
+@pytest.mark.parametrize("workers", [0, -1, True, 33])
+def test_invalid_worker_count_fails_before_workspace_initialization(tmp_path, workers, acq):
+    cfg, lang = _cfg_lang()
+    ws = BookWorkspace.for_book("synthetic", tmp_path)
+
+    with pytest.raises(ValueError, match="workers"):
+        ocr.run(
+            workspace=ws,
+            cfg=cfg,
+            lang=lang,
+            model="pro",
+            pages=(1, 1),
+            workers=workers,
+            renderer=acq.Renderer(1),
+            backend=acq.Backend({}),
+        )
+
+    assert not ws.root.exists()
 
 
 def test_resume_skips_completed_pages(tmp_path, monkeypatch, acq):

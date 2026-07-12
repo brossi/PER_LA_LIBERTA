@@ -17,10 +17,10 @@ proves it** (S2.1's matcher, #37) — this module fixes only the raw material an
   page-locate consumes per-page token bags and the matcher canonicalizes box order itself, so no
   consumer depends on backend emission order; a consumer wanting reading order goes through
   ``segmentation.reading_order`` (#39), never backend order.
-- :class:`GeometryError` — the axis's fail-loud carrier (exit 13). Deliberately **not** a reuse of
-  ``ocr``'s :class:`~engine.errors.BackendError` (exit 5): that class degrades a per-page failure
-  to an ``[OCR_ERROR]`` sentinel, the *opposite* posture — a geometry/OCR-integrity fault raises,
-  it never degrades to wrong coordinates.
+- :class:`GeometryError` — the axis's immediate fail-loud carrier (exit 13). Deliberately **not** a
+  reuse of ``ocr``'s :class:`~engine.errors.BackendError` (exit 5): OCR retains a per-page error
+  checkpoint for retry and raises at its pre-publication completeness gate, while geometry cannot
+  emit or retain coordinates it does not trust.
 
 Pure core: no language, dpi, or book literal lives here — OCR language and dpi are the backend's
 required constructor parameters (#36), supplied from book config (the S0.2 neutrality guard scans
@@ -47,10 +47,10 @@ class GeometryError(EngineError):
     volume-bound breach). One human action — the geometry is
     untrustworthy, stop — so one exit code.
 
-    Distinct from :class:`~engine.errors.BackendError` (exit 5) by design: ``ocr``'s backend
-    degrades a *per-page* render failure to an ``[OCR_ERROR]`` sentinel and keeps going, whereas
-    this axis must never emit coordinates it does not trust. Reusing exit 5 would put two
-    contradictory failure contracts under one code, so geometry carries its own (the next free code
+    Distinct from :class:`~engine.errors.BackendError` (exit 5) by design: ``ocr`` retains a
+    per-page ``[OCR_ERROR]`` checkpoint and fails its publication gate after the page batch, whereas
+    this axis raises immediately and must never emit coordinates it does not trust. Geometry carries
+    its own code (the next free code
     after ``StructureValidationError`` 11 and ``EvidenceGateError`` 12). The sidecar/worklist *load*
     boundaries do NOT use this type — they join the shared loader taxonomy (absent →
     :class:`~engine.errors.MissingInputError`, present-but-unloadable/stale →

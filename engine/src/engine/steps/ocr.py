@@ -36,7 +36,7 @@ from ..contracts.markers import (
     SENTINEL_BLANK,
     SENTINEL_OCR_ERROR_PREFIX,
 )
-from ..errors import BackendError, MissingInputError
+from ..errors import BackendError, InvalidInvocationError, MissingInputError
 from ..lang.base import LanguagePlugin
 from ..paths import BookWorkspace
 from ..prompts.templating import PromptTemplate, build_prompt_context
@@ -53,6 +53,7 @@ _JPEG_QUALITY = 85
 # from live ocr. Module constants so tests can drop them to zero for speed.
 _RETRY_BACKOFF = (2, 8, 16)
 _PAGE_DELAY = 0.2
+_MAX_WORKERS = 32
 
 
 # --- injectable seams (D1/BR-009) ------------------------------------------------------ #
@@ -160,14 +161,13 @@ def _ocr_single_page(
     """Render + transcribe one page, persisting the result for resume. Returns ``page``.
 
     A present progress file short-circuits (resume). A **render** failure is non-transient, so it
-    gets no retry — the page becomes an ``[OCR_ERROR: render failed: …]`` sentinel and the run
-    continues. A **transcription** failure is retried with ``_RETRY_BACKOFF``, then falls back to an
-    ``[OCR_ERROR: …]`` sentinel. Either sentinel lets stitching drop the body without losing the
-    page marker. (Extends live ``_ocr_single_page``, which left a render failure unguarded; the
-    transcription path is unchanged.)
+    gets no retry — the page becomes an ``[OCR_ERROR: render failed: …]`` checkpoint. A
+    **transcription** failure is retried with ``_RETRY_BACKOFF``, then becomes an ``[OCR_ERROR: …]``
+    checkpoint. The run audits those records before stitching: an error is retained for diagnosis
+    and retry but blocks canonical publication.
     """
     page_file = progress_dir / f"page_{page:04d}.json"
-    if page_file.exists():
+    if _completed_page_text(page_file, page) is not None:
         return page
 
     try:
@@ -193,6 +193,50 @@ def _ocr_single_page(
 
     atomic_write_json(page_file, {"page": page, "text": text or ""})
     return page
+
+
+def _completed_page_text(page_file: Path, expected_page: int) -> str | None:
+    """Return a reusable checkpoint body, or ``None`` when it must be regenerated.
+
+    Presence alone is not completion: malformed records, records for another page, non-string
+    bodies, and persisted ``[OCR_ERROR...]`` sentinels are incomplete.  ``[BLANK]`` is a valid
+    completed transcription and remains resumable.
+    """
+    if not page_file.is_file():
+        return None
+    try:
+        record = read_json(page_file)
+    except (OSError, UnicodeError, ValueError, RecursionError):
+        return None
+    if not isinstance(record, dict):
+        return None
+    if type(record.get("page")) is not int or record["page"] != expected_page:
+        return None
+    text = record.get("text")
+    if not isinstance(text, str) or text.startswith(SENTINEL_OCR_ERROR_PREFIX):
+        return None
+    return text
+
+
+def _validate_run_options(*, pages: tuple[int, int] | None, workers: int) -> None:
+    """Reject unsafe caller options before the workspace can be initialized or mutated."""
+    if type(workers) is not int or not 1 <= workers <= _MAX_WORKERS:
+        raise InvalidInvocationError(
+            f"workers must be an integer in [1, {_MAX_WORKERS}], got {workers!r}"
+        )
+    if pages is None:
+        return
+    if (
+        not isinstance(pages, tuple)
+        or len(pages) != 2
+        or any(type(value) is not int for value in pages)
+    ):
+        raise InvalidInvocationError("pages must be a two-integer tuple (START, END)")
+    start, end = pages
+    if start < 1 or end < start:
+        raise InvalidInvocationError(
+            f"pages must be an inclusive 1-based range with START <= END, got {pages!r}"
+        )
 
 
 def _process_pages(
@@ -285,16 +329,17 @@ def run(
     tests run offline. ``lang`` is unused (OCR is language-neutral) but kept for the uniform
     signature. Returns a summary dict.
     """
+    _validate_run_options(pages=pages, workers=workers)
+
     ws = workspace
-    ws.ensure()
 
     if model not in cfg.manifest.ocr.models:
-        raise ValueError(
+        raise InvalidInvocationError(
             f"unknown ocr model role {model!r}; manifest declares "
             f"{sorted(cfg.manifest.ocr.models)}"
         )
     if model not in _OUTPUT_NAMES:
-        raise ValueError(f"ocr model role {model!r} has no output-filename mapping")
+        raise InvalidInvocationError(f"ocr model role {model!r} has no output-filename mapping")
 
     pdf_path = ws.scans / cfg.manifest.scan.pdf
 
@@ -305,25 +350,40 @@ def run(
     if using_default_renderer and not pdf_path.is_file():
         raise MissingInputError(f"source scan PDF not found: {pdf_path}")
 
+    try:
+        total_pages = renderer.page_count(pdf_path)
+    except Exception as exc:  # a present-but-unreadable PDF is a whole-document backend failure
+        raise BackendError(f"could not read the source scan PDF {pdf_path}: {exc}") from exc
+    if type(total_pages) is not int or total_pages < 1:
+        raise BackendError(
+            f"source scan PDF {pdf_path} reported an invalid page count: {total_pages!r}"
+        )
+
+    start, end = 1, total_pages
+    if pages:
+        start, end = pages
+        if end > total_pages:
+            raise InvalidInvocationError(
+                f"pages range {pages!r} exceeds the source scan's {total_pages} pages"
+            )
+    page_count = end - start + 1
+
     if backend is None:
         backend = GeminiOcrBackend(model_id=cfg.manifest.ocr.models[model], api_key=api_key)
 
     prompt = _render_ocr_prompt(cfg)
 
-    try:
-        total_pages = renderer.page_count(pdf_path)
-    except Exception as exc:  # a present-but-unreadable PDF is a whole-document backend failure
-        raise BackendError(f"could not read the source scan PDF {pdf_path}: {exc}") from exc
-    start, end = 1, total_pages
-    if pages:
-        start, end = pages
-        end = min(end, total_pages)
-    page_count = end - start + 1
+    # Invalid caller options and an invalid document range have all failed before this point.
+    ws.ensure()
 
     progress_dir = ws.resolve("state", f"ocr_{model}_pages")
     progress_dir.mkdir(parents=True, exist_ok=True)
 
-    completed = {int(f.stem.split("_")[1]) for f in progress_dir.glob("page_*.json")}
+    completed = {
+        page
+        for page in range(start, end + 1)
+        if _completed_page_text(progress_dir / f"page_{page:04d}.json", page) is not None
+    }
     todo = [p for p in range(start, end + 1) if p not in completed]
     if completed:
         print(f"  OCR [{model}]: resuming — {len(completed)} done, {len(todo)} remaining")
@@ -335,6 +395,19 @@ def run(
     if todo:
         _process_pages(
             renderer, backend, pdf_path, todo, prompt, progress_dir, _DEFAULT_DPI, workers
+        )
+
+    incomplete = [
+        page
+        for page in range(start, end + 1)
+        if _completed_page_text(progress_dir / f"page_{page:04d}.json", page) is None
+    ]
+    if incomplete:
+        preview = ", ".join(str(page) for page in incomplete[:10])
+        suffix = "" if len(incomplete) <= 10 else f", … ({len(incomplete)} total)"
+        raise BackendError(
+            f"OCR incomplete for page(s) {preview}{suffix}; retained resumable page state and "
+            "did not publish canonical OCR output"
         )
 
     full_text, page_map = _stitch_pages(progress_dir, start, end)

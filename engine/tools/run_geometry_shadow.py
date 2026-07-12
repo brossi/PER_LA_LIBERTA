@@ -1,4 +1,4 @@
-"""Restartable Ninnoli geometry + observation-only layout assessment spike."""
+"""Restartable per-book geometry + observation-only layout assessment runner."""
 
 from __future__ import annotations
 
@@ -20,9 +20,8 @@ from engine.structure.layout_assessment_shadow import (
 )
 from engine.util.jsonio import atomic_write_json, read_json
 
-ENGINE_ROOT = Path(__file__).resolve().parents[2]
+ENGINE_ROOT = Path(__file__).resolve().parents[1]
 BOOKS_DIR = ENGINE_ROOT / "books"
-BOOK_ID = "ninnoli"
 GEOMETRY_SCHEMA_VERSION = 1
 GEOMETRY_STALE_CLASS = "layout-shadow-page-geometry"
 REPORT_SCHEMA_VERSION = 1
@@ -121,6 +120,7 @@ def _load_checkpoint(path: Path, expected: dict[str, object]) -> tuple[PageGeome
 
 def _write_report(
     *,
+    book_id: str,
     workspace: BookWorkspace,
     witness_id: str,
     status: str,
@@ -138,7 +138,7 @@ def _write_report(
         "schema_version": REPORT_SCHEMA_VERSION,
         "stale_class": REPORT_STALE_CLASS,
         "status": status,
-        "book_id": BOOK_ID,
+        "book_id": book_id,
         "witness_id": witness_id,
         "source": source,
         "geometry": {
@@ -180,12 +180,12 @@ def _write_report(
 
 
 def run(args: argparse.Namespace) -> Path:
-    cfg = load_book(BOOK_ID, books_dir=BOOKS_DIR)
-    workspace = BookWorkspace.for_book(BOOK_ID, BOOKS_DIR).ensure()
-    book_dir = BOOKS_DIR / BOOK_ID
+    cfg = load_book(args.book, books_dir=BOOKS_DIR)
+    workspace = BookWorkspace.for_book(args.book, BOOKS_DIR).ensure()
+    book_dir = BOOKS_DIR / args.book
     pdf_path = workspace.scans / cfg.manifest.scan.pdf
     source_relative = f"scans/{cfg.manifest.scan.pdf}"
-    source_ref = f"scan:{BOOK_ID}/{cfg.manifest.scan.pdf}"
+    source_ref = f"scan:{args.book}/{cfg.manifest.scan.pdf}"
     actual_sha256 = _sha256_file(pdf_path)
     pinned_sha256 = _pinned_digest(book_dir, source_relative)
     if actual_sha256 != pinned_sha256:
@@ -302,6 +302,7 @@ def run(args: argparse.Namespace) -> Path:
             )
         except Exception as exc:
             _write_report(
+                book_id=args.book,
                 workspace=workspace,
                 witness_id=args.witness_id,
                 status="geometry_failed",
@@ -318,6 +319,7 @@ def run(args: argparse.Namespace) -> Path:
             raise
 
     return _write_report(
+        book_id=args.book,
         workspace=workspace,
         witness_id=args.witness_id,
         status=("complete_with_unavailable" if unavailable_pages else "complete"),
@@ -333,6 +335,7 @@ def run(args: argparse.Namespace) -> Path:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser()
+    parser.add_argument("--book", required=True)
     parser.add_argument("--tesseract-language", required=True)
     parser.add_argument("--dpi", required=True, type=int)
     parser.add_argument("--witness-id", required=True)

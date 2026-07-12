@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "id": "pinocchio",
+  "title": "Le avventure di Pinocchio",
+  "language": "it",
+  "profiles": {
+    "language": "italian_1900_1922",
+    "source_noise": "bodoni_didone",
+    "typeface": "spectral_fraunces"
+  },
+  "sources": [
+    {
+      "role": "copy1",
+      "label": "1899 sixteenth edition / Harvard-Google scan / Internet Archive OCR",
+      "ia_item_id": "leavventuredipi00collgoog",
+      "url": "https://archive.org/download/leavventuredipi00collgoog/leavventuredipi00collgoog_djvu.txt"
+    }
+  ],
+  "scan": {
+    "pdf": "leavventuredipi00collgoog.pdf",
+    "page_image_template": "page_{n:04d}.png",
+    "leaf_offset": 0,
+    "last_scan_page_default": 266
+  },
+  "ocr": {
+    "models": {
+      "flash": "gemini-2.5-flash",
+      "pro": "gemini-3.1-pro-preview"
+    }
+  },
+  "structure": {
+    "h2_min": 36,
+    "h3_count": 0,
+    "parts": [],
+    "content_units": 36,
+    "retention_min": 0.60,
+    "foreign_char_max": 0.005,
+    "word_quality_high_severity_max": 0,
+    "running_heads": []
+  },
+  "edition": {
+    "title_it": "Le avventure di Pinocchio",
+    "title_en": "The Adventures of Pinocchio",
+    "subtitle_it": "Storia di un burattino",
+    "subtitle_en": "The Story of a Puppet",
+    "author": "Carlo Collodi",
+    "year": 1899,
+    "colophon": "Sixteenth edition, R. Bemporad & Figlio, Florence, 1899; illustrated by E. Mazzanti and G. Magni.",
+    "ia_item_id": "leavventuredipi00collgoog",
+    "site_base": ""
+  },
+  "prompt_context": {
+    "book_title": "Le avventure di Pinocchio",
+    "author": "Carlo Collodi",
+    "year": 1899,
+    "subject": "an illustrated Italian children's novel in thirty-six numbered chapters",
+    "entities": ["Pinocchio", "Geppetto"]
+  }
+}

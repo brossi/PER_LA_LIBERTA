@@ -22,7 +22,7 @@ error or certifying the 1883 witness as production-equivalent.
 2. Split both IA witnesses through manifest-declared ordered flat sections. Require five nonempty
    stories in manifest order; front contents, repeated title heads, and back matter are furniture.
 3. Run all 110 primary-scan pages through PyMuPDF/Tesseract with explicit `ita`, 300 DPI. Persist
-   source-bound page geometry checkpoints and invoke `book-layout-sidecar` `v0.1.0` in shadow mode.
+   source-bound page geometry checkpoints and invoke `book-layout-sidecar` `v0.1.1` in shadow mode.
    No density or column policy is supplied.
 4. Acquire/admit the two IA witnesses into the workspace.
 5. OCR the primary scan with the configured Gemini flash role. Require every page complete before

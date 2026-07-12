@@ -124,7 +124,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "anthropic", specifier = ">=0.86.0" },
-    { name = "book-layout-sidecar", marker = "extra == 'assessment'", git = "ssh://git@github.com/brossi/book-layout-sidecar.git?rev=v0.1.0" },
+    { name = "book-layout-sidecar", marker = "extra == 'assessment'", git = "ssh://git@github.com/brossi/book-layout-sidecar.git?rev=v0.1.1" },
     { name = "click", specifier = ">=8.4.1" },
     { name = "google-genai", specifier = ">=1.69.0" },
     { name = "it-core-news-lg", marker = "extra == 'it'", url = "https://github.com/explosion/spacy-models/releases/download/it_core_news_lg-3.8.0/it_core_news_lg-3.8.0-py3-none-any.whl" },
@@ -149,8 +149,8 @@ dev = [{ name = "pytest", specifier = ">=8.0" }]
 
 [[package]]
 name = "book-layout-sidecar"
-version = "0.1.0"
-source = { git = "ssh://git@github.com/brossi/book-layout-sidecar.git?rev=v0.1.0#043217786d16a81041f3098f52f0932282daca4d" }
+version = "0.1.1"
+source = { git = "ssh://git@github.com/brossi/book-layout-sidecar.git?rev=v0.1.1#67645648b998c618e204cb47ddaf66ea8cef8624" }
 
 [[package]]
 name = "catalogue"

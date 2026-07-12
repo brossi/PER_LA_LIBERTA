@@ -79,4 +79,4 @@ markers = [
 ]
 
 [tool.uv.sources]
-book-layout-sidecar = { git = "ssh://git@github.com/brossi/book-layout-sidecar.git", rev = "v0.1.0" }
+book-layout-sidecar = { git = "ssh://git@github.com/brossi/book-layout-sidecar.git", rev = "v0.1.1" }

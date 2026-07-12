@@ -1,7 +1,7 @@
 # Layout assessment shadow boundary
 
 The engine consumes `book-layout-sidecar` only through its versioned `core` provider API. The
-dependency is optional and pinned to `v0.1.0`; install it with:
+dependency is optional and pinned to `v0.1.1`; install it with:
 
 ```sh
 uv sync --extra assessment

@@ -32,8 +32,8 @@ jobs:
           td="$(find /usr/share -name eng.traineddata 2>/dev/null | head -1)"
           if [ -n "$td" ]; then echo "TESSDATA_PREFIX=$(dirname "$td")" >> "$GITHUB_ENV"; fi
 
-      - name: Sync (with the `it` extra — the suite's binding + integration tests load the real model)
-        run: uv sync --extra it
+      - name: Sync (with language and assessment integration extras)
+        run: uv sync --extra it --extra assessment
 
       - name: Tests (full suite — unit + golden + integration, mirrors local)
         run: uv run pytest -q

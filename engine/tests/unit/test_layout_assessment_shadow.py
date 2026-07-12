@@ -33,6 +33,10 @@ def _page(page: int = 1, *, two_columns: bool = False) -> PageGeometry:
     return PageGeometry(page=page, width=500.0, height=700.0, words=tuple(words))
 
 
+def _empty_page(page: int = 1) -> PageGeometry:
+    return PageGeometry(page=page, width=500.0, height=700.0, words=())
+
+
 def _observe(ws, **overrides):
     values = {
         "workspace": ws,
@@ -90,7 +94,7 @@ def test_valid_shadow_observation_persists_and_revalidates_exact_request(tmp_pat
     assert envelope["request"]["subject"]["source_sha256"] == "a" * 64
     assert envelope["provider"] == {
         "provider_id": "book_layout_sidecar",
-        "provider_version": "0.1.0",
+        "provider_version": "0.1.1",
     }
 
     request = assessment_request_from_dict(envelope["request"])
@@ -122,6 +126,38 @@ def test_fresh_observation_is_reused_only_after_full_revalidation(tmp_path):
     assert first.status == second.status == shadow.STATUS_AVAILABLE
     assert second.cached is True
     assert first.bundle.to_dict() == second.bundle.to_dict()
+
+
+@requires_sidecar
+def test_previous_provider_version_invalidates_cache_without_refresh(tmp_path):
+    from book_layout_sidecar.core import CoreAssessmentProvider, ProviderIdentity
+
+    ws = BookWorkspace.for_book("synthetic", tmp_path).ensure()
+    previous = CoreAssessmentProvider(
+        identity=ProviderIdentity("book_layout_sidecar", "0.1.0")
+    )
+    first = _observe(ws, provider_factory=lambda: previous, refresh=True)
+    current = CoreAssessmentProvider()
+
+    class _CountingProvider:
+        identity = current.identity
+
+        def __init__(self):
+            self.calls = 0
+
+        def assess(self, request):
+            self.calls += 1
+            return current.assess(request)
+
+    provider = _CountingProvider()
+    second = _observe(ws, provider_factory=lambda: provider)
+
+    assert first.bundle.provider.provider_version == "0.1.0"
+    assert second.status == shadow.STATUS_AVAILABLE
+    assert second.cached is False
+    assert provider.calls == 1
+    assert second.bundle.provider.provider_version == "0.1.1"
+    assert read_json(second.path)["provider"]["provider_version"] == "0.1.1"
 
 
 @requires_sidecar
@@ -211,6 +247,22 @@ def test_column_capability_is_requested_only_with_ratified_policy(tmp_path):
 
 
 @requires_sidecar
+def test_zero_boxes_without_pixel_evidence_never_support_content(tmp_path):
+    ws = BookWorkspace.for_book("synthetic", tmp_path).ensure()
+
+    result = _observe(ws, page_geometry=_empty_page())
+    near_blank = next(
+        item for item in result.bundle.results if item.module_id == "near_blank_hallucinated_boxes"
+    )
+
+    assert near_blank.execution_status == "not_applicable"
+    assert near_blank.assessment is None
+    assert near_blank.confidence is None
+    assert near_blank.reasons == ("zero_ocr_boxes_without_affirmative_content_evidence",)
+    assert near_blank.module_version == "2.1.0"
+
+
+@requires_sidecar
 def test_identical_refresh_is_byte_deterministic(tmp_path):
     ws = BookWorkspace.for_book("synthetic", tmp_path).ensure()
 
@@ -227,9 +279,9 @@ def test_installed_provider_conformance_packet_passes():
     from book_layout_sidecar.contracts.conformance import run_conformance_matrix
 
     assert run_conformance_matrix() == {
-        "matrix_version": 1,
-        "cases": 29,
-        "boundary_valid": 14,
+        "matrix_version": 2,
+        "cases": 32,
+        "boundary_valid": 17,
         "boundary_unavailable": 15,
         "status": "ok",
     }

@@ -1,4 +1,4 @@
-"""Repair Gemini recitation-filter pages with an explicit local Tesseract fallback."""
+"""Repair per-book Gemini recitation-filter pages with an explicit Tesseract fallback."""
 
 from __future__ import annotations
 
@@ -13,9 +13,8 @@ from engine.paths import BookWorkspace
 from engine.steps.ocr import FitzPageRenderer
 from engine.util.jsonio import atomic_write_json, read_json
 
-ENGINE_ROOT = Path(__file__).resolve().parents[2]
+ENGINE_ROOT = Path(__file__).resolve().parents[1]
 BOOKS_DIR = ENGINE_ROOT / "books"
-BOOK_ID = "ninnoli"
 
 
 def _sha256_bytes(value: bytes) -> str:
@@ -27,8 +26,8 @@ def _sha256_file(path: Path) -> str:
 
 
 def run(args: argparse.Namespace) -> Path:
-    cfg = load_book(BOOK_ID, books_dir=BOOKS_DIR)
-    workspace = BookWorkspace.for_book(BOOK_ID, BOOKS_DIR).ensure()
+    cfg = load_book(args.book, books_dir=BOOKS_DIR)
+    workspace = BookWorkspace.for_book(args.book, BOOKS_DIR).ensure()
     pdf_path = workspace.scans / cfg.manifest.scan.pdf
     source_sha256 = _sha256_file(pdf_path)
     renderer = FitzPageRenderer()
@@ -51,16 +50,19 @@ def run(args: argparse.Namespace) -> Path:
             )
 
         image = renderer.render(pdf_path, page, dpi=args.dpi)
+        command = [
+            "tesseract",
+            "stdin",
+            "stdout",
+            "-l",
+            args.tesseract_language,
+            "--psm",
+            "3",
+        ]
+        if args.thresholding_method is not None:
+            command.extend(["-c", f"thresholding_method={args.thresholding_method}"])
         process = subprocess.run(
-            [
-                "tesseract",
-                "stdin",
-                "stdout",
-                "-l",
-                args.tesseract_language,
-                "--psm",
-                "3",
-            ],
+            command,
             input=image,
             capture_output=True,
             check=True,
@@ -75,6 +77,7 @@ def run(args: argparse.Namespace) -> Path:
             "language": args.tesseract_language,
             "dpi": args.dpi,
             "psm": 3,
+            "thresholding_method": args.thresholding_method,
             "image_sha256": _sha256_bytes(image),
             "text_sha256": _sha256_bytes(text.encode("utf-8")),
         }
@@ -88,7 +91,7 @@ def run(args: argparse.Namespace) -> Path:
     report = {
         "schema_version": 1,
         "stale_class": "ocr-recitation-fallbacks",
-        "book_id": BOOK_ID,
+        "book_id": args.book,
         "model_role": args.model_role,
         "source_sha256": source_sha256,
         "pages": records,
@@ -100,10 +103,12 @@ def run(args: argparse.Namespace) -> Path:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser()
+    parser.add_argument("--book", required=True)
     parser.add_argument("--model-role", choices=("flash", "pro"), required=True)
     parser.add_argument("--pages", nargs="+", type=int, required=True)
     parser.add_argument("--tesseract-language", required=True)
     parser.add_argument("--dpi", type=int, required=True)
+    parser.add_argument("--thresholding-method", type=int, choices=(0, 1, 2))
     parser.add_argument("--force", action="store_true")
     return parser
 

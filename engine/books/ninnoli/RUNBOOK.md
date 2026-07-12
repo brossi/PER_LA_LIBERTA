@@ -37,8 +37,8 @@ Commands run from `engine/`:
 
 ```sh
 shasum -a 256 -c books/ninnoli/resources.sha256
-uv run --extra assessment python tools/run_geometry_shadow.py \
-  --book ninnoli --tesseract-language ita --dpi 300 --witness-id copy1
+engine --book ninnoli --step layout_shadow \
+  --tesseract-language ita --dpi 300 --witness-id copy1
 engine --book ninnoli --step download
 engine --book ninnoli --step ocr --model flash --workers 4
 engine --book ninnoli --step reconcile

@@ -85,3 +85,44 @@ def test_lifecycle_failure_overrides_old_success_artifact(tmp_path):
     validate = next(entry for entry in snapshot["steps"] if entry["step"] == "validate")
     assert validate["status"] == "failed"
     assert validate["detail"] == "new validation failed"
+
+
+def test_layout_shadow_reports_exact_in_progress_page_count(tmp_path):
+    cfg = load_book("synthetic")
+    ws = BookWorkspace.for_book("synthetic", tmp_path).ensure()
+    _write(ws.data / "layout_assessment/old/run_report.json", {
+        "status": "complete",
+        "geometry": {"page_count": 4, "word_count": 90, "oob_box_count": 0},
+    })
+    _write(ws.state / "layout_shadow_progress.json", {
+        "status": "running",
+        "witness_id": "copy2",
+        "completed_pages": 2,
+        "total_pages": 4,
+    })
+    PipelineTracker(ws).start_step("layout_shadow")
+
+    snapshot = pipeline_snapshot(ws, cfg)
+    layout = next(entry for entry in snapshot["steps"] if entry["step"] == "layout_shadow")
+    assert layout == {
+        "step": "layout_shadow",
+        "status": "running",
+        "progress": "2/4 pages",
+        "detail": "copy2",
+    }
+
+
+def test_layout_shadow_complete_with_unavailable_is_complete(tmp_path):
+    cfg = load_book("synthetic")
+    ws = BookWorkspace.for_book("synthetic", tmp_path).ensure()
+    _write(ws.data / "layout_assessment/copy1/run_report.json", {
+        "status": "complete_with_unavailable",
+        "geometry": {"page_count": 4, "word_count": 80, "oob_box_count": 2},
+        "assessment": {"unavailable_pages": [3]},
+    })
+
+    snapshot = pipeline_snapshot(ws, cfg)
+    layout = next(entry for entry in snapshot["steps"] if entry["step"] == "layout_shadow")
+    assert layout["status"] == "complete"
+    assert layout["progress"] == "4/4 pages"
+    assert layout["detail"] == "80 boxes; 2 OOB; 1 unavailable"

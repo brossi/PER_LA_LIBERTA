@@ -22,6 +22,7 @@ def test_package_imports_and_has_version():
     assert engine.STEPS[0] == "download"
     assert "validate" in engine.STEPS
     assert engine.STEPS[-1] == "typeset"
+    assert engine.OPTIONAL_STEPS == ("layout_shadow",)
 
 
 # Steps ported to a real run(); the rest are still scaffold stubs. As each lands in its
@@ -56,6 +57,14 @@ def test_cli_parser_builds_and_lists_steps():
     assert ns.book == "per_la_liberta"
     status = parser.parse_args(["--status", "--book", "synthetic", "--watch", "0.5", "--json"])
     assert status.status is True and status.watch == 0.5 and status.json_output is True
+    shadow = parser.parse_args([
+        "--step", "layout_shadow", "--book", "synthetic",
+        "--tesseract-language", "ita", "--dpi", "300", "--witness-id", "copy1",
+        "--refresh-geometry", "--refresh-shadow",
+    ])
+    assert shadow.step == "layout_shadow"
+    assert shadow.tesseract_language == "ita" and shadow.dpi == 300
+    assert shadow.refresh_geometry is True and shadow.refresh_shadow is True
 
 
 def test_cli_main_with_no_step_is_a_noop_error():
@@ -117,6 +126,18 @@ def test_collect_step_opts_includes_only_set_options():
     # an unset option (--api-key) is omitted, so the step default stands
     assert "api_key" not in cli._collect_step_opts(ns)
 
+    shadow = cli.build_parser().parse_args([
+        "--step", "layout_shadow", "--tesseract-language", "ita", "--dpi", "300",
+        "--witness-id", "copy1", "--refresh-geometry", "--refresh-shadow",
+    ])
+    assert cli._collect_step_opts(shadow) == {
+        "tesseract_language": "ita",
+        "dpi": 300,
+        "witness_id": "copy1",
+        "refresh_geometry": True,
+        "refresh_shadow": True,
+    }
+
 
 def test_collect_step_opts_empty_when_none_set():
     ns = cli.build_parser().parse_args(["--step", "validate"])
@@ -124,12 +145,14 @@ def test_collect_step_opts_empty_when_none_set():
 
 
 def test_accepted_opts_filters_by_step_signature():
-    from engine.steps import download, ocr, reconcile
+    from engine.steps import download, layout_shadow, ocr, reconcile
 
     opts = {"model": "pro", "workers": 2, "pages": (1, 2), "api_key": "k"}
     assert cli._accepted_opts(ocr.run, opts) == opts          # ocr declares all four
     assert cli._accepted_opts(download.run, opts) == {}        # download declares none of them
     assert cli._accepted_opts(reconcile.run, opts) == {}       # reconcile declares none
+    shadow_opts = {"tesseract_language": "ita", "dpi": 300, "witness_id": "copy1"}
+    assert cli._accepted_opts(layout_shadow.run, shadow_opts) == shadow_opts
 
 
 def test_cli_engine_error_maps_to_its_exit_code(monkeypatch):

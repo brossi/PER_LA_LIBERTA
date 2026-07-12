@@ -21,7 +21,7 @@ import sys
 import time
 from pathlib import Path
 
-from engine import STEPS
+from engine import OPTIONAL_STEPS, STEPS
 from engine.config.loader import ConfigError, load_book
 from engine.errors import EngineError
 from engine.lang.registry import UnknownLanguageError, get_language_plugin
@@ -59,7 +59,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--step",
-        choices=(*STEPS, "all"),
+        choices=(*OPTIONAL_STEPS, *STEPS, "all"),
         help="Pipeline step to run (or 'all' for the full build subset).",
     )
     parser.add_argument(
@@ -106,6 +106,26 @@ def build_parser() -> argparse.ArgumentParser:
         "--api-key", default=None,
         help="Backend API key (ocr); falls back to the backend's env var.",
     )
+    parser.add_argument(
+        "--tesseract-language", default=None,
+        help="Tesseract language code (layout_shadow; for example: ita).",
+    )
+    parser.add_argument(
+        "--dpi", type=int, default=None,
+        help="Positive geometry render DPI (layout_shadow).",
+    )
+    parser.add_argument(
+        "--witness-id", default=None,
+        help="Witness id for geometry/layout artifacts (layout_shadow; default: copy1).",
+    )
+    parser.add_argument(
+        "--refresh-geometry", action="store_true",
+        help="Regenerate geometry checkpoints even when their provenance is current.",
+    )
+    parser.add_argument(
+        "--refresh-shadow", action="store_true",
+        help="Regenerate layout assessments even when their requests are current.",
+    )
     return parser
 
 
@@ -120,6 +140,16 @@ def _collect_step_opts(args: argparse.Namespace) -> dict:
         opts["pages"] = tuple(args.pages)
     if args.api_key is not None:
         opts["api_key"] = args.api_key
+    if args.tesseract_language is not None:
+        opts["tesseract_language"] = args.tesseract_language
+    if args.dpi is not None:
+        opts["dpi"] = args.dpi
+    if args.witness_id is not None:
+        opts["witness_id"] = args.witness_id
+    if args.refresh_geometry:
+        opts["refresh_geometry"] = True
+    if args.refresh_shadow:
+        opts["refresh_shadow"] = True
     return opts
 
 

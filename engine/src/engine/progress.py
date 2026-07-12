@@ -100,16 +100,54 @@ def pipeline_snapshot(workspace: BookWorkspace, cfg: ResolvedConfig) -> dict:
     lifecycle_steps = lifecycle.get("steps", {}) if isinstance(lifecycle, dict) else {}
     entries: list[dict] = []
 
-    layout = _load(ws.data / "layout_assessment" / "copy1" / "run_report.json")
-    if layout.get("status") == "complete":
-        geometry = layout.get("geometry", {})
+    layout_root = ws.data / "layout_assessment"
+    layout_candidates = []
+    if layout_root.is_dir():
+        for witness_dir in sorted(path for path in layout_root.iterdir() if path.is_dir()):
+            report = _load(witness_dir / "run_report.json")
+            observed = sum(1 for path in witness_dir.glob("page_*.json") if path.is_file())
+            complete = report.get("status") in {"complete", "complete_with_unavailable"}
+            layout_candidates.append((complete, observed, witness_dir.name, report))
+
+    total_layout_pages = cfg.manifest.scan.last_scan_page_default
+    layout_progress = _load(ws.state / "layout_shadow_progress.json")
+    if active == "layout_shadow" and layout_progress.get("status") == "running":
+        observed = int(layout_progress.get("completed_pages", 0))
+        total = int(layout_progress.get("total_pages", total_layout_pages))
         entries.append(_entry(
-            "layout_shadow", "complete",
-            f"{geometry.get('page_count', 0)}/{cfg.manifest.scan.last_scan_page_default} pages",
-            f"{geometry.get('word_count', 0):,} boxes; {geometry.get('oob_box_count', 0)} OOB",
+            "layout_shadow",
+            "running",
+            f"{min(observed, total)}/{total} pages",
+            str(layout_progress.get("witness_id", "")),
+        ))
+    elif layout_candidates:
+        complete, observed, witness_id, layout = max(
+            layout_candidates, key=lambda item: (item[0], item[1], item[2])
+        )
+        geometry = layout.get("geometry", {}) if isinstance(layout, dict) else {}
+        observed = int(geometry.get("page_count", observed)) if complete else observed
+        unavailable = (
+            len(layout.get("assessment", {}).get("unavailable_pages", [])) if complete else 0
+        )
+        detail = (
+            f"{geometry.get('word_count', 0):,} boxes; {geometry.get('oob_box_count', 0)} OOB"
+            + (f"; {unavailable} unavailable" if unavailable else "")
+            if complete
+            else witness_id
+        )
+        entries.append(_entry(
+            "layout_shadow",
+            "complete" if complete else ("running" if active == "layout_shadow" else "pending"),
+            f"{min(observed, total_layout_pages)}/{total_layout_pages} pages",
+            detail,
         ))
     else:
-        entries.append(_entry("layout_shadow", "pending", "0 pages", "optional shadow preflight"))
+        entries.append(_entry(
+            "layout_shadow",
+            "running" if active == "layout_shadow" else "pending",
+            f"0/{total_layout_pages} pages",
+            "optional shadow preflight",
+        ))
 
     declared = list(cfg.manifest.sources)
     downloaded = sum((ws.data / f"{source.role}_raw.txt").is_file() for source in declared)

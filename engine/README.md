@@ -59,6 +59,11 @@ uv sync --extra it          # installs the engine + Italian spaCy model
 uv run pytest tests/unit    # focused unit checks
 uv run pytest tests/golden  # golden reproduction checks
 
+# Optional observation-only scan geometry/layout preflight (not part of --step all)
+uv sync --extra it --extra assessment
+uv run engine --book ninnoli --step layout_shadow \
+  --tesseract-language ita --dpi 300 --witness-id copy1
+
 # One-shot or live pipeline progress for a book
 uv run engine --book ninnoli --status
 uv run engine --book ninnoli --status --watch 2

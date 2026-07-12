@@ -40,6 +40,18 @@ jobs:
           td="$(find /usr/share -name eng.traineddata 2>/dev/null | head -1)"
           if [ -n "$td" ]; then echo "TESSDATA_PREFIX=$(dirname "$td")" >> "$GITHUB_ENV"; fi
 
+      - name: Configure read-only sidecar deploy key
+        env:
+          SIDECAR_DEPLOY_KEY: ${{ secrets.BOOK_LAYOUT_SIDECAR_DEPLOY_KEY }}
+        run: |
+          test -n "$SIDECAR_DEPLOY_KEY"
+          install -d -m 700 "$HOME/.ssh"
+          printf '%s\n' "$SIDECAR_DEPLOY_KEY" > "$HOME/.ssh/id_ed25519"
+          chmod 600 "$HOME/.ssh/id_ed25519"
+          printf '%s\n' \
+            'github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl' \
+            > "$HOME/.ssh/known_hosts"
+
       - name: Sync (with language and assessment integration extras)
         run: uv sync --extra it --extra assessment
 

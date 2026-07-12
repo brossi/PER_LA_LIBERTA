@@ -50,3 +50,8 @@ observation = observe_page_geometry(
 The caller owns scan hashing once per run and supplies the same bare lowercase SHA-256 for every
 page. The adapter never reads a manifest, opens the scan, shells out to the sidecar CLI, or imports
 `book_layout_sidecar.adapters`/`book_layout_sidecar.lab`.
+
+The assessment-enabled CI job fetches the private pinned dependency with the
+`BOOK_LAYOUT_SIDECAR_DEPLOY_KEY` Actions secret. Its public half is a read-only deploy key on the
+sidecar repository; the workflow pins GitHub's published Ed25519 host key and grants no sidecar
+write access.

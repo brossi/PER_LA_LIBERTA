@@ -27,6 +27,9 @@ minimal per-step seam, the same "siblings, not a premature unification" choice M
 
 from __future__ import annotations
 
+import hashlib
+import json
+import math
 import time
 from typing import Protocol
 
@@ -96,6 +99,8 @@ _BATCH_DELAY = 1.0
 
 # The two resolution methods reconcile leaves unsettled — the items triage exists to classify.
 _NEEDS_TRIAGE_METHODS = ("all_differ", "score_heuristic")
+TRIAGE_PROGRESS_FILE = "triage_progress.json"
+TRIAGE_PARTIAL_FILE = "triage_review_partial.json"
 
 
 # --- injectable chat seam (BR-014) ------------------------------------------------------ #
@@ -369,33 +374,106 @@ def run(
     needs = [it for it in all_items if it.get("resolution_method") in _NEEDS_TRIAGE_METHODS]
     print(f"  triage: {len(all_items)} flagged, {len(needs)} need triage")
     if not needs:
-        return {"flagged": len(all_items), "triaged": 0, "auto_accepted": 0, "applied": 0}
-
-    if chat is None:
-        chat = AnthropicChat(api_key=api_key)
+        summary = {"flagged": len(all_items), "triaged": 0, "auto_accepted": 0, "applied": 0}
+        atomic_write_json(ws.resolve("state", TRIAGE_PROGRESS_FILE), {
+            "schema_version": 1,
+            "status": "complete",
+            "total_items": 0,
+            "completed_items": 0,
+            "total_batches": 0,
+            "completed_batches": 0,
+            "summary": summary,
+        })
+        return summary
 
     size = batch_size or _DEFAULT_BATCH_SIZE
     system = render_system_prompt(cfg)
+    fingerprint_payload = json.dumps(
+        {"items": needs, "system": system, "batch_size": size},
+        sort_keys=True,
+        ensure_ascii=False,
+    )
+    fingerprint = hashlib.sha256(fingerprint_payload.encode("utf-8")).hexdigest()
+    progress_path = ws.resolve("state", TRIAGE_PROGRESS_FILE)
+    partial_path = ws.resolve("state", TRIAGE_PARTIAL_FILE)
+    prior = read_json(progress_path) if progress_path.is_file() else {}
+    resolved_path = ws.resolve("data", "triage_resolved.json")
+    if (
+        prior.get("status") == "complete"
+        and prior.get("fingerprint") == fingerprint
+        and resolved_path.is_file()
+    ):
+        summary = prior.get("summary", {})
+        print(f"  triage: already complete ({len(needs)}/{len(needs)} items)")
+        return summary
+
     reviewed: list[dict] = []
-    for start in range(0, len(needs), size):
+    if prior.get("fingerprint") == fingerprint and partial_path.is_file():
+        candidate = read_json(partial_path)
+        if isinstance(candidate, list) and len(candidate) <= len(needs):
+            reviewed = candidate
+    if len(reviewed) % size and len(reviewed) != len(needs):
+        reviewed = []  # only complete batch boundaries are restartable
+    if chat is None and len(reviewed) < len(needs):
+        chat = AnthropicChat(api_key=api_key)
+
+    total_batches = math.ceil(len(needs) / size)
+    atomic_write_json(progress_path, {
+        "schema_version": 1,
+        "status": "running",
+        "fingerprint": fingerprint,
+        "total_items": len(needs),
+        "completed_items": len(reviewed),
+        "total_batches": total_batches,
+        "completed_batches": math.ceil(len(reviewed) / size),
+    })
+    for start in range(len(reviewed), len(needs), size):
+        assert chat is not None
         reviewed.extend(_classify_batch(chat, system, needs[start:start + size]))
+        atomic_write_json(partial_path, reviewed)
+        completed_batches = math.ceil(len(reviewed) / size)
+        atomic_write_json(progress_path, {
+            "schema_version": 1,
+            "status": "running",
+            "fingerprint": fingerprint,
+            "total_items": len(needs),
+            "completed_items": len(reviewed),
+            "total_batches": total_batches,
+            "completed_batches": completed_batches,
+        })
+        print(
+            f"    triage batch {completed_batches}/{total_batches}: "
+            f"{len(reviewed)}/{len(needs)} items",
+            flush=True,
+        )
         if _BATCH_DELAY:
             time.sleep(_BATCH_DELAY)
 
     resolved, stats = apply_resolution_passes(reviewed)
 
     atomic_write_json(ws.resolve("data", "triage_review.json"), reviewed)
-    atomic_write_json(ws.resolve("data", "triage_resolved.json"), resolved)
+    atomic_write_json(resolved_path, resolved)
     applied = apply_resolutions(ws, resolved)
 
     print(
         f"  triage: auto-accepted {stats['auto_accepted']}, "
         f"needs-human {stats['needs_human']}, applied {applied}"
     )
-    return {
+    summary = {
         "flagged": len(all_items),
         "triaged": len(needs),
         "auto_accepted": stats["auto_accepted"],
         "applied": applied,
         "by_category": stats["by_category"],
     }
+    atomic_write_json(progress_path, {
+        "schema_version": 1,
+        "status": "complete",
+        "fingerprint": fingerprint,
+        "total_items": len(needs),
+        "completed_items": len(needs),
+        "total_batches": total_batches,
+        "completed_batches": total_batches,
+        "summary": summary,
+    })
+    return summary

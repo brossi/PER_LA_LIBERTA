@@ -208,12 +208,20 @@ def test_synthetic_triage_resolves_and_mutates(tmp_path, monkeypatch):
     assert result["auto_accepted"] == 1 and result["applied"] == 1
     assert (ws.data / "triage_review.json").is_file()
     assert (ws.data / "triage_resolved.json").is_file()
+    progress = read_json(ws.state / triage.TRIAGE_PROGRESS_FILE)
+    assert progress["status"] == "complete"
+    assert progress["completed_items"] == progress["total_items"] == 2
 
     chapters = read_json(ws.data / "reconciled_chapters.json")
     primo = next(c for c in chapters if c["id"] == "p1_capitolo_primo")["text"]
     assert "sono comune e ben note" in primo
     # the rendered system the seam saw carries synthetic identity, not PLL.
     assert "Libro di Prova" in chat.calls[0][0]
+
+    # A completed, fingerprint-matching rerun is a zero-call resume.
+    second_chat = _FakeChat([])
+    assert triage.run(workspace=ws, cfg=cfg, lang=lang, chat=second_chat) == result
+    assert second_chat.calls == []
 
 
 def test_triage_with_no_needs_items_is_a_clean_noop(tmp_path, monkeypatch):

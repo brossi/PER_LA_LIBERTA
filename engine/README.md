@@ -9,10 +9,9 @@ of the core into a **per-book manifest** + **shared profiles**, so the same mach
 can build future books in other languages without touching — or risking — the live
 *Per la Libertà!* edition.
 
-> **Status: M2.** The config model + Italian `LanguagePlugin` (M1) and the first ported
-> step, `validate` (M2, reproducing the live `data/validation_report.json`), are done. The
-> remaining step modules are stubs that raise `NotImplementedError` until ported. See
-> `../ENGINE_FRAMEWORK_PLAN.md` for the staged build (M0–M7) and the design rationale.
+> **Status:** the single-model path through translation is executable; multi-translation,
+> refinement, and typesetting remain scaffolded. See `../ENGINE_FRAMEWORK_PLAN.md` for the staged
+> build and `books/ninnoli/SPIKE_REPORT.md` for the first full specimen result.
 
 ## Governance
 
@@ -59,6 +58,10 @@ cd engine
 uv sync --extra it          # installs the engine + Italian spaCy model
 uv run pytest tests/unit    # focused unit checks
 uv run pytest tests/golden  # golden reproduction checks
+
+# One-shot or live pipeline progress for a book
+uv run engine --book ninnoli --status
+uv run engine --book ninnoli --status --watch 2
 ```
 
 The framework **never writes outside `books/<id>/work/`**. `paths.BookWorkspace`

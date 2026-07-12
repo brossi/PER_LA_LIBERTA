@@ -16,7 +16,9 @@ from __future__ import annotations
 import argparse
 import importlib
 import inspect
+import json
 import sys
+import time
 from pathlib import Path
 
 from engine import STEPS
@@ -24,6 +26,7 @@ from engine.config.loader import ConfigError, load_book
 from engine.errors import EngineError
 from engine.lang.registry import UnknownLanguageError, get_language_plugin
 from engine.paths import BookWorkspace
+from engine.progress import PipelineTracker, pipeline_snapshot, render_snapshot
 
 PACKAGE_ROOT = Path(__file__).resolve().parent
 ENGINE_ROOT = PACKAGE_ROOT.parents[1]  # engine/ (src/engine/cli.py -> engine/)
@@ -63,6 +66,26 @@ def build_parser() -> argparse.ArgumentParser:
         "--list-books",
         action="store_true",
         help="List the configured books and exit.",
+    )
+    parser.add_argument(
+        "--status",
+        action="store_true",
+        help="Show persisted and artifact-derived progress for a book without running a step.",
+    )
+    parser.add_argument(
+        "--watch",
+        nargs="?",
+        type=float,
+        const=2.0,
+        default=None,
+        metavar="SECONDS",
+        help="Refresh --status continuously (default interval: 2 seconds).",
+    )
+    parser.add_argument(
+        "--json",
+        action="store_true",
+        dest="json_output",
+        help="Emit --status as JSON.",
     )
     # Step options (F7) — threaded into each step's run() filtered by signature, so a step that
     # does not declare an option simply never receives it. Defaults are None: an unset option is
@@ -125,18 +148,48 @@ def _run_step(step: str, book: str, opts: dict | None = None) -> int:
         return 1
 
     workspace = BookWorkspace.for_book(book, BOOKS_DIR)
+    tracker = PipelineTracker(workspace)
 
     module = importlib.import_module(f"engine.steps.{step}")
     accepted = _accepted_opts(module.run, opts or {})
+    tracker.start_step(step)
     try:
-        module.run(workspace=workspace, cfg=cfg, lang=lang, **accepted)
+        summary = module.run(workspace=workspace, cfg=cfg, lang=lang, **accepted)
     except NotImplementedError as exc:
+        tracker.fail_step(step, str(exc))
         print(f"engine: {exc}", file=sys.stderr)
         return 2
     except EngineError as exc:
+        tracker.fail_step(step, str(exc))
         print(f"engine: {exc}", file=sys.stderr)
         return exc.exit_code
+    except Exception as exc:
+        tracker.fail_step(step, f"{type(exc).__name__}: {exc}")
+        raise
+    tracker.complete_step(step, summary if isinstance(summary, dict) else {})
     return 0
+
+
+def _show_status(book: str, *, watch: float | None, json_output: bool) -> int:
+    try:
+        cfg = load_book(book, books_dir=BOOKS_DIR)
+    except ConfigError as exc:
+        print(f"engine: {exc}", file=sys.stderr)
+        return 1
+    workspace = BookWorkspace.for_book(book, BOOKS_DIR)
+    interval = max(watch or 0, 0.2)
+    try:
+        while True:
+            snapshot = pipeline_snapshot(workspace, cfg)
+            output = json.dumps(snapshot, indent=2, ensure_ascii=False) if json_output else render_snapshot(snapshot)
+            if watch is not None and not json_output:
+                print("\033[2J\033[H", end="")
+            print(output, flush=True)
+            if watch is None:
+                return 0
+            time.sleep(interval)
+    except KeyboardInterrupt:
+        return 0
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -146,6 +199,16 @@ def main(argv: list[str] | None = None) -> int:
         for book in _available_books():
             print(book)
         return 0
+
+    if args.status:
+        if not args.book:
+            print("engine: --book is required with --status.", file=sys.stderr)
+            return 1
+        return _show_status(args.book, watch=args.watch, json_output=args.json_output)
+
+    if args.watch is not None or args.json_output:
+        print("engine: --watch/--json require --status.", file=sys.stderr)
+        return 1
 
     if not args.step:
         print("engine: nothing to do (pass --step or --list-books).", file=sys.stderr)

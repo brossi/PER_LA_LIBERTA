@@ -54,6 +54,8 @@ def test_cli_parser_builds_and_lists_steps():
     ns = parser.parse_args(["--step", "validate", "--book", "per_la_liberta"])
     assert ns.step == "validate"
     assert ns.book == "per_la_liberta"
+    status = parser.parse_args(["--status", "--book", "synthetic", "--watch", "0.5", "--json"])
+    assert status.status is True and status.watch == 0.5 and status.json_output is True
 
 
 def test_cli_main_with_no_step_is_a_noop_error():
@@ -69,6 +71,11 @@ def test_cli_step_without_book_is_an_error():
 def test_cli_list_books_needs_no_book():
     # --list-books is the discovery path — it must work without --book (else you couldn't find ids).
     assert cli.main(["--list-books"]) == 0
+
+
+def test_cli_status_requires_book_and_watch_requires_status():
+    assert cli.main(["--status"]) == 1
+    assert cli.main(["--watch"]) == 1
 
 
 def test_cli_resolves_real_book_then_hits_stub():

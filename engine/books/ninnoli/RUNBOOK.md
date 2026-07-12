@@ -46,6 +46,9 @@ engine --book ninnoli --step triage
 engine --book ninnoli --step cleanup
 engine --book ninnoli --step validate
 engine --book ninnoli --step translate --workers 2
+
+# In another terminal: persisted lifecycle + per-step checkpoint counts
+engine --book ninnoli --status --watch 2
 ```
 
 Provider credentials are loaded from the ignored root `.env` only for the relevant command; no

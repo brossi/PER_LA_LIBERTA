@@ -12,6 +12,7 @@ the mutant that reds it (the mechanical red-proof is `tests/hunts/hunt_regate.py
 from __future__ import annotations
 
 import json
+from dataclasses import FrozenInstanceError
 from pathlib import Path
 
 import pytest
@@ -131,9 +132,11 @@ def test_missing_n_pages_fails_loud_as_breadth():
 
 
 def test_verdict_is_frozen():
+    # FrozenInstanceError specifically, not bare Exception — any incidental raise passed the old
+    # form (#55). RED (mutant): frozen=True removed -> assignment succeeds, nothing raises.
     v = regate_verdict(AS_BUILT)
     assert isinstance(v, RegateVerdict)
-    with pytest.raises(Exception):
+    with pytest.raises(FrozenInstanceError):
         v.mode = MODE_PRIMARY  # type: ignore[misc]
 
 

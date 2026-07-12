@@ -56,8 +56,14 @@ def test_real_ledger_is_coherent():
 
 
 def test_format_template_lines_are_not_counted_as_entries():
-    # The doc shows the entry shape with "DL-NNN"; that must not be read as an entry-with-no-cite.
-    assert _validate_ledger(LEDGER.read_text(encoding="utf-8")) == []
+    # The doc shows the entry shape with "DL-NNN"/"RF-NNN" (letters, not digits); those lines must
+    # not be read as entries-with-no-cite. Validated in isolation, not via `== []` on the full doc,
+    # so this stays green when a first legitimate DL/RF entry lands (#55); the non-vacuity guard
+    # keeps the fixture bound to the templates the doc actually carries.
+    doc = LEDGER.read_text(encoding="utf-8")
+    templates = [line for line in doc.splitlines() if "DL-NNN" in line or "RF-NNN" in line]
+    assert templates, f"format templates (DL-NNN/RF-NNN) missing from {LEDGER}"
+    assert _validate_ledger("\n".join(templates) + "\n") == []
 
 
 def test_validator_accepts_a_well_formed_dl_entry():

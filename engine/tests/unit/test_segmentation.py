@@ -806,8 +806,11 @@ def test_hysteresis_margin_boundary_is_inclusive():
 
 
 def test_column_detector_version_is_pinned():
-    assert _det().version == COLUMN_DETECTOR_VERSION
-    assert isinstance(COLUMN_DETECTOR_VERSION, str) and COLUMN_DETECTOR_VERSION
+    # Pin the literal, not the constant against itself — the property returns the constant, so the
+    # old `_det().version == COLUMN_DETECTOR_VERSION` passed under any drift (#55). Matches the
+    # density twin's posture (test_version_and_params_are_pinned_for_the_sidecar_fingerprint).
+    assert COLUMN_DETECTOR_VERSION == "columns-v1"
+    assert _det().version == "columns-v1"
 
 
 # --- ColumnEvidence / ColumnVerdict / PageColumnVerdict record validity ------------------------- #

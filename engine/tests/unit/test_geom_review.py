@@ -253,11 +253,18 @@ def test_worklist_round_trips_through_json(workspace):
 
 
 def test_worklist_to_json_is_byte_stable(workspace):
-    # Idempotent replay (G-22) rests on canonical serialization.
-    wl = build([route(47, stage="columns", value=0.55, threshold=0.5), route(6)])
-    assert json.dumps(worklist_to_json(wl), sort_keys=True) == json.dumps(worklist_to_json(wl), sort_keys=True)
-    assert worklist_to_json(wl)["schema_version"] == WORKLIST_SCHEMA_VERSION
-    assert worklist_to_json(wl)["stale_class"] == WORKLIST_STALE_CLASS
+    # Idempotent replay (G-22) rests on canonical serialization — `_canonical_json` key-sorting the
+    # nested payloads is the SUT, so dump WITHOUT sort_keys (the old test's sort_keys=True re-sorted
+    # at dump time and masked exactly the drift this guards, #55) and feed content-equal payloads
+    # built in different insertion orders so a dropped sort shows up as a byte diff.
+    # RED (mutant): _canonical_json sorted(value) -> value (insertion order) breaks the equality.
+    tentative_ab = {"box_count": 658, "token_count": 7}
+    tentative_ba = {"token_count": 7, "box_count": 658}
+    wl_ab = build([route(47, stage="columns", value=0.55, threshold=0.5, tentative=tentative_ab), route(6)])
+    wl_ba = build([route(47, stage="columns", value=0.55, threshold=0.5, tentative=tentative_ba), route(6)])
+    assert json.dumps(worklist_to_json(wl_ab)) == json.dumps(worklist_to_json(wl_ba))
+    assert worklist_to_json(wl_ab)["schema_version"] == WORKLIST_SCHEMA_VERSION
+    assert worklist_to_json(wl_ab)["stale_class"] == WORKLIST_STALE_CLASS
 
 
 def test_load_absent_worklist_is_missing_input(workspace):

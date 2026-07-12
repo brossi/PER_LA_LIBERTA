@@ -107,6 +107,14 @@ def build_parser() -> argparse.ArgumentParser:
         help="Backend API key (ocr); falls back to the backend's env var.",
     )
     parser.add_argument(
+        "--fallback-tesseract-language", default=None,
+        help="Enable RECITATION-only local fallback with this Tesseract language (ocr).",
+    )
+    parser.add_argument(
+        "--fallback-thresholding-method", type=int, choices=(0, 1, 2), default=None,
+        help="Optional Tesseract thresholding method for the RECITATION fallback (ocr).",
+    )
+    parser.add_argument(
         "--tesseract-language", default=None,
         help="Tesseract language code (layout_shadow; for example: ita).",
     )
@@ -140,6 +148,10 @@ def _collect_step_opts(args: argparse.Namespace) -> dict:
         opts["pages"] = tuple(args.pages)
     if args.api_key is not None:
         opts["api_key"] = args.api_key
+    if args.fallback_tesseract_language is not None:
+        opts["fallback_tesseract_language"] = args.fallback_tesseract_language
+    if args.fallback_thresholding_method is not None:
+        opts["fallback_thresholding_method"] = args.fallback_thresholding_method
     if args.tesseract_language is not None:
         opts["tesseract_language"] = args.tesseract_language
     if args.dpi is not None:

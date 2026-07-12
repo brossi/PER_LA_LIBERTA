@@ -18,6 +18,7 @@ from engine.contracts.markers import (
     SENTINEL_BLANK,
     SENTINEL_OCR_ERROR_PREFIX,
 )
+from engine.errors import BackendError, InvalidInvocationError
 from engine.lang.registry import get_language_plugin
 from engine.paths import BookWorkspace
 from engine.steps import ocr, reconcile
@@ -378,15 +379,265 @@ def test_default_gemini_backend_without_key_is_a_backend_error(monkeypatch):
 
 
 def test_gemini_no_text_preserves_finish_reason_as_backend_error():
-    from engine.errors import BackendError
-
     response = SimpleNamespace(
         text=None,
         candidates=[SimpleNamespace(finish_reason="RECITATION")],
     )
 
-    with pytest.raises(BackendError, match="finish_reason=RECITATION"):
+    with pytest.raises(ocr.OcrProviderRefusal, match="finish_reason=RECITATION"):
         ocr._gemini_response_text(response)
+
+
+class _Fallback:
+    def __init__(self, text="fallback text", *, language="ita", thresholding_method=2):
+        self.text = text
+        self.calls = 0
+        self._identity = {
+            "backend": "fake-tesseract 1",
+            "language": language,
+            "psm": 3,
+            "thresholding_method": thresholding_method,
+        }
+
+    @property
+    def identity(self):
+        return dict(self._identity)
+
+    def transcribe(self, image_bytes):
+        self.calls += 1
+        return ocr.FallbackTranscription(text=self.text, provenance=self.identity)
+
+
+def test_recitation_refusal_uses_only_configured_fallback_and_publishes_provenance(
+    tmp_path, monkeypatch
+):
+    monkeypatch.setattr(ocr, "_PAGE_DELAY", 0)
+    cfg, lang = _cfg_lang()
+    ws = BookWorkspace.for_book("synthetic", tmp_path).ensure()
+
+    class _Renderer:
+        def page_count(self, pdf_path):
+            return 1
+
+        def render(self, pdf_path, page, *, dpi):
+            return b"stable rendered page"
+
+    class _Refusal:
+        calls = 0
+
+        def transcribe(self, image_bytes, prompt):
+            self.calls += 1
+            raise ocr.OcrProviderRefusal("RECITATION")
+
+    backend = _Refusal()
+    fallback = _Fallback()
+    result = ocr.run(
+        workspace=ws, cfg=cfg, lang=lang, model="flash", pages=(1, 1),
+        renderer=_Renderer(), backend=backend, fallback=fallback,
+    )
+
+    assert backend.calls == 1, "a typed refusal is non-transient and must not be retried"
+    assert fallback.calls == 1
+    assert result["fallback_pages"] == 1
+    checkpoint = read_json(ws.state / "ocr_flash_pages/page_0001.json")
+    provenance = checkpoint["provenance"]
+    assert provenance["kind"] == "provider_refusal_fallback"
+    assert provenance["primary"]["detail"] == "RECITATION"
+    assert provenance["fallback"] == fallback.identity
+    assert provenance["render"]["image_sha256"]
+    assert provenance["text_sha256"]
+    page_map = read_json(ws.data / "copy3_flash_page_map.json")
+    assert page_map[0]["provenance"] == provenance
+    report = read_json(ws.state / "ocr_flash_fallbacks.json")
+    assert report["pages"] == [{"page": 1, "provenance": provenance}]
+
+
+def test_backend_outage_retries_and_never_enters_recitation_fallback(
+    tmp_path, monkeypatch, acq
+):
+    monkeypatch.setattr(ocr, "_RETRY_BACKOFF", (0, 0, 0))
+    cfg, lang = _cfg_lang()
+    ws = BookWorkspace.for_book("synthetic", tmp_path).ensure()
+
+    class _Outage:
+        calls = 0
+
+        def transcribe(self, image_bytes, prompt):
+            self.calls += 1
+            raise RuntimeError("transport down")
+
+    backend = _Outage()
+    fallback = _Fallback()
+    with pytest.raises(BackendError, match="OCR incomplete"):
+        ocr.run(
+            workspace=ws, cfg=cfg, lang=lang, model="flash", pages=(1, 1),
+            renderer=acq.Renderer(1), backend=backend, fallback=fallback,
+        )
+
+    assert backend.calls == 3
+    assert fallback.calls == 0
+    failure = read_json(ws.state / "ocr_flash_pages/page_0001.json")["failure"]
+    assert failure["class"] == "backend_error"
+    assert failure["retryable"] is True
+
+
+def test_render_failure_never_enters_recitation_fallback(tmp_path, acq):
+    cfg, lang = _cfg_lang()
+    ws = BookWorkspace.for_book("synthetic", tmp_path).ensure()
+
+    class _RenderFailure:
+        def page_count(self, pdf_path):
+            return 1
+
+        def render(self, pdf_path, page, *, dpi):
+            raise RuntimeError("cannot render")
+
+    fallback = _Fallback()
+    with pytest.raises(BackendError, match="OCR incomplete"):
+        ocr.run(
+            workspace=ws, cfg=cfg, lang=lang, model="flash", pages=(1, 1),
+            renderer=_RenderFailure(), backend=acq.Backend({}), fallback=fallback,
+        )
+    assert fallback.calls == 0
+    failure = read_json(ws.state / "ocr_flash_pages/page_0001.json")["failure"]
+    assert failure["class"] == "render_error"
+
+
+def test_valid_fallback_checkpoint_resumes_without_primary_or_fallback_call(tmp_path):
+    cfg, lang = _cfg_lang()
+    ws = BookWorkspace.for_book("synthetic", tmp_path).ensure()
+
+    class _Renderer:
+        def page_count(self, pdf_path):
+            return 1
+
+        def render(self, pdf_path, page, *, dpi):
+            return b"same image"
+
+    class _Refusal:
+        calls = 0
+
+        def transcribe(self, image_bytes, prompt):
+            self.calls += 1
+            raise ocr.OcrProviderRefusal("RECITATION")
+
+    renderer = _Renderer()
+    backend = _Refusal()
+    fallback = _Fallback()
+    values = dict(
+        workspace=ws, cfg=cfg, lang=lang, model="flash", pages=(1, 1),
+        renderer=renderer, backend=backend, fallback=fallback,
+    )
+    ocr.run(**values)
+    ocr.run(**values)
+    assert backend.calls == 1
+    assert fallback.calls == 1
+
+
+def test_fallback_checkpoint_image_or_configuration_drift_is_not_reused(tmp_path):
+    cfg, lang = _cfg_lang()
+    ws = BookWorkspace.for_book("synthetic", tmp_path).ensure()
+
+    class _Renderer:
+        def __init__(self, image):
+            self.image = image
+
+        def page_count(self, pdf_path):
+            return 1
+
+        def render(self, pdf_path, page, *, dpi):
+            return self.image
+
+    class _Refusal:
+        calls = 0
+
+        def transcribe(self, image_bytes, prompt):
+            self.calls += 1
+            raise ocr.OcrProviderRefusal("RECITATION")
+
+    backend = _Refusal()
+    first = _Fallback(language="ita")
+    ocr.run(
+        workspace=ws, cfg=cfg, lang=lang, model="flash", pages=(1, 1),
+        renderer=_Renderer(b"image one"), backend=backend, fallback=first,
+    )
+    second = _Fallback(language="eng")
+    ocr.run(
+        workspace=ws, cfg=cfg, lang=lang, model="flash", pages=(1, 1),
+        renderer=_Renderer(b"image two"), backend=backend, fallback=second,
+    )
+    assert backend.calls == 2
+    assert second.calls == 1
+
+
+def test_fallback_checkpoint_source_drift_is_not_reused(tmp_path):
+    cfg, lang = _cfg_lang()
+    ws = BookWorkspace.for_book("synthetic", tmp_path).ensure()
+    ws.scans.mkdir(parents=True, exist_ok=True)
+    source = ws.scans / cfg.manifest.scan.pdf
+    source.write_bytes(b"source version one")
+
+    class _Renderer:
+        def page_count(self, pdf_path):
+            return 1
+
+        def render(self, pdf_path, page, *, dpi):
+            return b"same rendered image"
+
+    class _Refusal:
+        calls = 0
+
+        def transcribe(self, image_bytes, prompt):
+            self.calls += 1
+            raise ocr.OcrProviderRefusal("RECITATION")
+
+    backend = _Refusal()
+    fallback = _Fallback()
+    values = dict(
+        workspace=ws, cfg=cfg, lang=lang, model="flash", pages=(1, 1),
+        renderer=_Renderer(), backend=backend, fallback=fallback,
+    )
+    ocr.run(**values)
+    source.write_bytes(b"source version two")
+    ocr.run(**values)
+    assert backend.calls == 2
+    assert fallback.calls == 2
+
+
+def test_invalid_provider_response_never_enters_recitation_fallback(tmp_path, acq):
+    cfg, lang = _cfg_lang()
+    ws = BookWorkspace.for_book("synthetic", tmp_path).ensure()
+
+    class _Invalid:
+        calls = 0
+
+        def transcribe(self, image_bytes, prompt):
+            self.calls += 1
+            raise ocr.OcrInvalidResponse("empty response")
+
+    backend = _Invalid()
+    fallback = _Fallback()
+    with pytest.raises(BackendError, match="OCR incomplete"):
+        ocr.run(
+            workspace=ws, cfg=cfg, lang=lang, model="flash", pages=(1, 1),
+            renderer=acq.Renderer(1), backend=backend, fallback=fallback,
+        )
+    assert backend.calls == 1
+    assert fallback.calls == 0
+    failure = read_json(ws.state / "ocr_flash_pages/page_0001.json")["failure"]
+    assert failure["class"] == "invalid_response"
+
+
+def test_fallback_threshold_option_without_language_is_invalid_and_write_free(tmp_path, acq):
+    cfg, lang = _cfg_lang()
+    ws = BookWorkspace.for_book("synthetic", tmp_path)
+    with pytest.raises(InvalidInvocationError, match="requires --fallback-tesseract-language"):
+        ocr.run(
+            workspace=ws, cfg=cfg, lang=lang, model="flash", pages=(1, 1),
+            renderer=acq.Renderer(1), backend=acq.Backend({}),
+            fallback_thresholding_method=2,
+        )
+    assert not ws.root.exists()
 
 
 def test_missing_scan_pdf_is_a_clean_error_with_default_renderer(tmp_path):

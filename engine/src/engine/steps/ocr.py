@@ -14,7 +14,8 @@ The book/language opinions leave the code:
 
 Three seams are injectable (D1/BR-009), defaulting to the real backends so the property /
 separability tiers run offline: ``PageRenderer`` (PyMuPDF render + page count), ``OcrBackend`` (the
-vision call). The ``⟨PAGE:N⟩`` / ``[BLANK]`` / ``[OCR_ERROR]`` protocol constants are single-sourced
+vision call), and the explicit RECITATION-only ``OcrFallback``. The ``⟨PAGE:N⟩`` / ``[BLANK]`` /
+``[OCR_ERROR]`` protocol constants are single-sourced
 in ``contracts.markers`` so the prompt template, the stitcher, and ``reconcile`` cannot drift (F6).
 
 Resume scaffolding (the per-page progress dir) is transient state → ``ws.state``; the final
@@ -25,8 +26,11 @@ two-way door).
 
 from __future__ import annotations
 
+import hashlib
+import subprocess
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Protocol
 
@@ -72,6 +76,79 @@ class OcrBackend(Protocol):
     page text; the default calls the configured model."""
 
     def transcribe(self, image_bytes: bytes, prompt: str) -> str: ...
+
+
+class OcrFallback(Protocol):
+    """Page-local fallback eligible only for a typed provider refusal."""
+
+    @property
+    def identity(self) -> dict: ...
+
+    def transcribe(self, image_bytes: bytes) -> "FallbackTranscription": ...
+
+
+class OcrProviderRefusal(BackendError):
+    """The provider deliberately returned no transcription for a named reason."""
+
+    def __init__(self, reason: str) -> None:
+        self.reason = reason
+        super().__init__(f"Gemini returned no text (finish_reason={reason})")
+
+
+class OcrInvalidResponse(BackendError):
+    """The provider response was structurally successful but contained no usable text."""
+
+
+@dataclass(frozen=True, slots=True)
+class FallbackTranscription:
+    text: str
+    provenance: dict
+
+
+class TesseractRecitationFallback:
+    """Explicit local fallback for a Gemini RECITATION refusal — and no other outcome."""
+
+    def __init__(self, *, language: str, thresholding_method: int | None = None) -> None:
+        if not isinstance(language, str) or not language.strip():
+            raise InvalidInvocationError("fallback Tesseract language must be non-empty")
+        if thresholding_method not in {None, 0, 1, 2}:
+            raise InvalidInvocationError("fallback thresholding method must be 0, 1, or 2")
+        try:
+            result = subprocess.run(
+                ["tesseract", "--version"], capture_output=True, text=True, check=True
+            )
+        except (OSError, subprocess.SubprocessError) as exc:
+            raise BackendError(f"could not read fallback Tesseract version: {exc}") from exc
+        banner = result.stdout.splitlines()
+        self._backend = banner[0] if banner else "tesseract unknown"
+        self._language = language
+        self._thresholding_method = thresholding_method
+
+    @property
+    def identity(self) -> dict:
+        return {
+            "backend": self._backend,
+            "language": self._language,
+            "psm": 3,
+            "thresholding_method": self._thresholding_method,
+        }
+
+    def transcribe(self, image_bytes: bytes) -> FallbackTranscription:
+        command = [
+            "tesseract", "stdin", "stdout", "-l", self._language, "--psm", "3",
+        ]
+        if self._thresholding_method is not None:
+            command.extend(["-c", f"thresholding_method={self._thresholding_method}"])
+        try:
+            result = subprocess.run(
+                command, input=image_bytes, capture_output=True, check=True
+            )
+        except (OSError, subprocess.SubprocessError) as exc:
+            raise BackendError(f"Tesseract fallback failed: {exc}") from exc
+        text = result.stdout.decode("utf-8").strip()
+        if not text:
+            raise BackendError("Tesseract fallback returned empty text")
+        return FallbackTranscription(text=text, provenance=self.identity)
 
 
 class FitzPageRenderer:
@@ -152,8 +229,21 @@ def _gemini_response_text(response) -> str:
             }
         )
         detail = ", ".join(reasons) if reasons else "unknown"
-        raise BackendError(f"Gemini returned no text (finish_reason={detail})")
-    return text.strip()
+        if "RECITATION" in reasons:
+            raise OcrProviderRefusal("RECITATION")
+        raise OcrInvalidResponse(f"Gemini returned no text (finish_reason={detail})")
+    text = text.strip()
+    if not text:
+        raise OcrInvalidResponse("Gemini returned an empty text response")
+    return text
+
+
+def _sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
 
 
 # --- pure mechanics ---------------------------------------------------------------------- #
@@ -173,6 +263,10 @@ def _ocr_single_page(
     prompt: str,
     progress_dir: Path,
     dpi: int,
+    *,
+    fallback: OcrFallback | None,
+    source_sha256: str,
+    primary_model_id: str,
 ) -> int:
     """Render + transcribe one page, persisting the result for resume. Returns ``page``.
 
@@ -182,36 +276,119 @@ def _ocr_single_page(
     checkpoint. The run audits those records before stitching: an error is retained for diagnosis
     and retry but blocks canonical publication.
     """
+    # ``run`` has already provenance-validated the checkpoint set and passes only pages that need
+    # work. Do not reintroduce the old presence-only shortcut here: it would resurrect a fallback
+    # checkpoint that the caller rejected for source/image/configuration drift.
     page_file = progress_dir / f"page_{page:04d}.json"
-    if _completed_page_text(page_file, page) is not None:
-        return page
 
     try:
         img_bytes = renderer.render(pdf_path, page, dpi=dpi)
     except Exception as exc:  # non-transient → no retry (a corrupt page renders the same each time)
         atomic_write_json(
             page_file,
-            {"page": page, "text": f"{SENTINEL_OCR_ERROR_PREFIX}: render failed: {exc}]"},
+            {
+                "page": page,
+                "text": f"{SENTINEL_OCR_ERROR_PREFIX}: render failed: {exc}]",
+                "failure": {
+                    "class": "render_error",
+                    "retryable": False,
+                    "detail": f"{type(exc).__name__}: {exc}",
+                    "attempts": 1,
+                },
+            },
         )
         return page
 
     text: str | None = None
+    failure: dict | None = None
     for attempt in range(len(_RETRY_BACKOFF)):
         try:
             text = backend.transcribe(img_bytes, prompt)
+            if not isinstance(text, str) or not text.strip():
+                raise OcrInvalidResponse("OCR backend returned empty or non-text output")
+            break
+        except OcrProviderRefusal as exc:
+            failure = {
+                "class": "provider_refusal",
+                "retryable": False,
+                "detail": exc.reason,
+                "attempts": attempt + 1,
+            }
+            break
+        except OcrInvalidResponse as exc:
+            failure = {
+                "class": "invalid_response",
+                "retryable": False,
+                "detail": str(exc),
+                "attempts": attempt + 1,
+            }
             break
         except Exception as exc:  # backend transient failure → retry, then sentinel
             if attempt < len(_RETRY_BACKOFF) - 1:
                 if _RETRY_BACKOFF[attempt]:
                     time.sleep(_RETRY_BACKOFF[attempt])
             else:
-                text = f"{SENTINEL_OCR_ERROR_PREFIX}: {exc}]"
+                failure = {
+                    "class": "backend_error",
+                    "retryable": True,
+                    "detail": f"{type(exc).__name__}: {exc}",
+                    "attempts": attempt + 1,
+                }
+
+    if failure and failure["class"] == "provider_refusal" and failure["detail"] == "RECITATION":
+        if fallback is not None:
+            try:
+                recovered = fallback.transcribe(img_bytes)
+                text_sha256 = hashlib.sha256(recovered.text.encode("utf-8")).hexdigest()
+                atomic_write_json(page_file, {
+                    "page": page,
+                    "text": recovered.text,
+                    "provenance": {
+                        "kind": "provider_refusal_fallback",
+                        "source_sha256": source_sha256,
+                        "render": {
+                            "dpi": dpi,
+                            "jpeg_quality": _JPEG_QUALITY,
+                            "image_sha256": hashlib.sha256(img_bytes).hexdigest(),
+                        },
+                        "primary": {
+                            "backend": type(backend).__name__,
+                            "model_id": primary_model_id,
+                            "outcome_class": failure["class"],
+                            "detail": failure["detail"],
+                            "attempts": failure["attempts"],
+                        },
+                        "fallback": recovered.provenance,
+                        "text_sha256": text_sha256,
+                    },
+                })
+                return page
+            except Exception as exc:
+                failure["fallback_error"] = f"{type(exc).__name__}: {exc}"
+
+    if failure is not None:
+        detail = failure["detail"]
+        atomic_write_json(page_file, {
+            "page": page,
+            "text": f"{SENTINEL_OCR_ERROR_PREFIX}: {detail}]",
+            "failure": failure,
+        })
+        return page
 
     atomic_write_json(page_file, {"page": page, "text": text or ""})
     return page
 
 
-def _completed_page_text(page_file: Path, expected_page: int) -> str | None:
+def _completed_page_text(
+    page_file: Path,
+    expected_page: int,
+    *,
+    source_sha256: str | None = None,
+    renderer: PageRenderer | None = None,
+    pdf_path: Path | None = None,
+    dpi: int = _DEFAULT_DPI,
+    fallback_identity: dict | None = None,
+) -> str | None:
     """Return a reusable checkpoint body, or ``None`` when it must be regenerated.
 
     Presence alone is not completion: malformed records, records for another page, non-string
@@ -231,6 +408,25 @@ def _completed_page_text(page_file: Path, expected_page: int) -> str | None:
     text = record.get("text")
     if not isinstance(text, str) or text.startswith(SENTINEL_OCR_ERROR_PREFIX):
         return None
+    provenance = record.get("provenance")
+    if isinstance(provenance, dict) and provenance.get("kind") in {
+        "provider_refusal_fallback", "explicit_recitation_fallback",
+    }:
+        if source_sha256 is not None and provenance.get("source_sha256") != source_sha256:
+            return None
+        if fallback_identity is not None:
+            stored_identity = provenance.get("fallback", provenance)
+            if any(stored_identity.get(key) != value for key, value in fallback_identity.items()):
+                return None
+        render = provenance.get("render", provenance)
+        stored_image_sha256 = render.get("image_sha256")
+        if renderer is not None and pdf_path is not None and isinstance(stored_image_sha256, str):
+            try:
+                image = renderer.render(pdf_path, expected_page, dpi=dpi)
+            except Exception:
+                return None
+            if hashlib.sha256(image).hexdigest() != stored_image_sha256:
+                return None
     return text
 
 
@@ -264,13 +460,21 @@ def _process_pages(
     progress_dir: Path,
     dpi: int,
     workers: int,
+    *,
+    fallback: OcrFallback | None,
+    source_sha256: str,
+    primary_model_id: str,
 ) -> None:
     """Transcribe every ``todo`` page, sequentially or via a thread pool. (Collapses the live
     ``_ocr_pages_sequential`` / ``_ocr_pages_parallel`` pair, whose only difference was a cosmetic
     progress bar, into one behaviour-equivalent loop.)"""
     if workers <= 1:
         for page in todo:
-            _ocr_single_page(renderer, backend, pdf_path, page, prompt, progress_dir, dpi)
+            _ocr_single_page(
+                renderer, backend, pdf_path, page, prompt, progress_dir, dpi,
+                fallback=fallback, source_sha256=source_sha256,
+                primary_model_id=primary_model_id,
+            )
             if _PAGE_DELAY:
                 time.sleep(_PAGE_DELAY)
         return
@@ -278,7 +482,9 @@ def _process_pages(
     with ThreadPoolExecutor(max_workers=workers) as executor:
         futures = {
             executor.submit(
-                _ocr_single_page, renderer, backend, pdf_path, p, prompt, progress_dir, dpi
+                _ocr_single_page, renderer, backend, pdf_path, p, prompt, progress_dir, dpi,
+                fallback=fallback, source_sha256=source_sha256,
+                primary_model_id=primary_model_id,
             ): p
             for p in todo
         }
@@ -318,7 +524,10 @@ def _stitch_pages(
         parts.append("\n")
         pos += 1
 
-        page_map.append({"page": page, "char_start": char_start, "char_end": pos - 1})
+        page_entry = {"page": page, "char_start": char_start, "char_end": pos - 1}
+        if isinstance(page_data.get("provenance"), dict):
+            page_entry["provenance"] = page_data["provenance"]
+        page_map.append(page_entry)
 
     return "".join(parts), page_map
 
@@ -334,8 +543,11 @@ def run(
     pages: tuple[int, int] | None = None,
     workers: int = 1,
     api_key: str | None = None,
+    fallback_tesseract_language: str | None = None,
+    fallback_thresholding_method: int | None = None,
     renderer: PageRenderer | None = None,
     backend: OcrBackend | None = None,
+    fallback: OcrFallback | None = None,
 ) -> dict:
     """OCR the source scan in ``workspace`` → ``copy3`` text + page map in ``ws.data``.
 
@@ -346,6 +558,14 @@ def run(
     signature. Returns a summary dict.
     """
     _validate_run_options(pages=pages, workers=workers)
+    if fallback_thresholding_method is not None and fallback_tesseract_language is None:
+        raise InvalidInvocationError(
+            "--fallback-thresholding-method requires --fallback-tesseract-language"
+        )
+    if fallback is not None and fallback_tesseract_language is not None:
+        raise InvalidInvocationError(
+            "pass either an injected fallback or --fallback-tesseract-language, not both"
+        )
 
     ws = workspace
 
@@ -365,6 +585,11 @@ def run(
     # the path is merely *resolved* there (D7). A real run with a missing scan is a clean error.
     if using_default_renderer and not pdf_path.is_file():
         raise MissingInputError(f"source scan PDF not found: {pdf_path}")
+    source_sha256 = (
+        _sha256_file(pdf_path)
+        if pdf_path.is_file()
+        else hashlib.sha256(f"injected-renderer:{pdf_path}".encode("utf-8")).hexdigest()
+    )
 
     try:
         total_pages = renderer.page_count(pdf_path)
@@ -386,6 +611,12 @@ def run(
 
     if backend is None:
         backend = GeminiOcrBackend(model_id=cfg.manifest.ocr.models[model], api_key=api_key)
+    if fallback is None and fallback_tesseract_language is not None:
+        fallback = TesseractRecitationFallback(
+            language=fallback_tesseract_language,
+            thresholding_method=fallback_thresholding_method,
+        )
+    fallback_identity = fallback.identity if fallback is not None else None
 
     prompt = _render_ocr_prompt(cfg)
 
@@ -398,7 +629,14 @@ def run(
     completed = {
         page
         for page in range(start, end + 1)
-        if _completed_page_text(progress_dir / f"page_{page:04d}.json", page) is not None
+        if _completed_page_text(
+            progress_dir / f"page_{page:04d}.json",
+            page,
+            source_sha256=source_sha256,
+            renderer=renderer,
+            pdf_path=pdf_path,
+            fallback_identity=fallback_identity,
+        ) is not None
     }
     todo = [p for p in range(start, end + 1) if p not in completed]
     if completed:
@@ -410,13 +648,23 @@ def run(
 
     if todo:
         _process_pages(
-            renderer, backend, pdf_path, todo, prompt, progress_dir, _DEFAULT_DPI, workers
+            renderer, backend, pdf_path, todo, prompt, progress_dir, _DEFAULT_DPI, workers,
+            fallback=fallback,
+            source_sha256=source_sha256,
+            primary_model_id=cfg.manifest.ocr.models[model],
         )
 
     incomplete = [
         page
         for page in range(start, end + 1)
-        if _completed_page_text(progress_dir / f"page_{page:04d}.json", page) is None
+        if _completed_page_text(
+            progress_dir / f"page_{page:04d}.json",
+            page,
+            source_sha256=source_sha256,
+            renderer=renderer,
+            pdf_path=pdf_path,
+            fallback_identity=fallback_identity,
+        ) is None
     ]
     if incomplete:
         preview = ", ".join(str(page) for page in incomplete[:10])
@@ -432,6 +680,25 @@ def run(
     page_map_path = ws.resolve("data", f"copy3_{model}_page_map.json")
     atomic_write_text(output_path, full_text)
     atomic_write_json(page_map_path, page_map)
+    fallback_pages = [
+        {"page": entry["page"], "provenance": entry["provenance"]}
+        for entry in page_map
+        if isinstance(entry.get("provenance"), dict)
+        and entry["provenance"].get("kind") in {
+            "provider_refusal_fallback", "explicit_recitation_fallback",
+        }
+    ]
+    fallback_report_path = None
+    if fallback_pages:
+        fallback_report_path = ws.resolve("state", f"ocr_{model}_fallbacks.json")
+        atomic_write_json(fallback_report_path, {
+            "schema_version": 2,
+            "stale_class": "ocr-provider-fallbacks",
+            "book_id": cfg.book_id,
+            "model_role": model,
+            "source_sha256": source_sha256,
+            "pages": fallback_pages,
+        })
     print(f"  OCR text: {output_path.name} ({len(full_text):,} chars); "
           f"page map: {page_map_path.name} ({len(page_map)} pages)")
 
@@ -441,4 +708,6 @@ def run(
         "chars": len(full_text),
         "output": str(output_path),
         "page_map": str(page_map_path),
+        "fallback_pages": len(fallback_pages),
+        "fallback_report": str(fallback_report_path) if fallback_report_path else None,
     }

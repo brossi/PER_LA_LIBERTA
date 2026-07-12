@@ -64,6 +64,10 @@ uv sync --extra it --extra assessment
 uv run engine --book ninnoli --step layout_shadow \
   --tesseract-language ita --dpi 300 --witness-id copy1
 
+# Vision OCR with an explicit page-local fallback for typed RECITATION refusals only
+uv run engine --book ninnoli --step ocr --model flash --workers 4 \
+  --fallback-tesseract-language ita
+
 # One-shot or live pipeline progress for a book
 uv run engine --book ninnoli --status
 uv run engine --book ninnoli --status --watch 2

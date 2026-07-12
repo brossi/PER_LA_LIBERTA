@@ -65,6 +65,12 @@ def test_cli_parser_builds_and_lists_steps():
     assert shadow.step == "layout_shadow"
     assert shadow.tesseract_language == "ita" and shadow.dpi == 300
     assert shadow.refresh_geometry is True and shadow.refresh_shadow is True
+    fallback = parser.parse_args([
+        "--step", "ocr", "--book", "synthetic",
+        "--fallback-tesseract-language", "ita", "--fallback-thresholding-method", "2",
+    ])
+    assert fallback.fallback_tesseract_language == "ita"
+    assert fallback.fallback_thresholding_method == 2
 
 
 def test_cli_main_with_no_step_is_a_noop_error():
@@ -136,6 +142,14 @@ def test_collect_step_opts_includes_only_set_options():
         "witness_id": "copy1",
         "refresh_geometry": True,
         "refresh_shadow": True,
+    }
+    fallback = cli.build_parser().parse_args([
+        "--step", "ocr", "--fallback-tesseract-language", "ita",
+        "--fallback-thresholding-method", "2",
+    ])
+    assert cli._collect_step_opts(fallback) == {
+        "fallback_tesseract_language": "ita",
+        "fallback_thresholding_method": 2,
     }
 
 

@@ -74,7 +74,7 @@ post-restore `_sweep_clean` verify (`hunt.py`: "CRITICAL: restore is not byte-id
 interrupted-but-restored) — that *is* the isolated-copy safety I demanded, achieved by verified-restore, not
 by copy; (b) `conftest.py` already pins `sys.dont_write_bytecode=True` globally, and the child env pins
 `PYTHONDONTWRITEBYTECODE=1` + purges `__pycache__` (venv-aware); (c) it already emits the `--artifact` JSON
-recording `test_cmd`, per-mutant `{file, old→new}` (the diff), `scope` (test node id), `rc` (exit code),
+recording the invoked test command, per-mutant `{file, old→new}` (the diff), `scope` (test node id), `rc` (exit code),
 `purge`, `restore_verified`. **One honest correction to the third-pass framing (not a disagreement):** the
 manifest is *mostly* there — the fields still missing for the **property-based** INV-1…4 are **seed,
 pre/post source-hash, env identity, module path**, a small artifact extension, not a tool swap. And the

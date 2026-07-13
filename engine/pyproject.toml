@@ -1,6 +1,6 @@
 [project]
 name = "book-engine"
-version = "0.0.1"
+version = "0.0.2"
 description = "Book/language-agnostic OCR → reconcile → clean → translate → typeset framework, forked from the Per la Libertà! pipeline."
 readme = "README.md"
 requires-python = ">=3.13"

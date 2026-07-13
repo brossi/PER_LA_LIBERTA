@@ -12,7 +12,7 @@ ports it.
 
 from __future__ import annotations
 
-__version__ = "0.0.1"
+__version__ = "0.0.2"
 
 # The ordered build subset the framework reproduces (through typeset). `refine` is
 # manual-only and never part of `--step all`; `companion` is intentionally excluded

@@ -232,13 +232,24 @@ MUTANTS = [
       "        if not (math.isfinite(self.mean_token_length) and self.mean_token_length >= 0.0):",
       "        if False:",
       "test_features_reject_bad_mean_token_length[-1.0]"),
+    # These two guards now have ColumnVerdict/PageColumnVerdict twins with byte-identical condition
+    # lines, so each patch carries its DensityVerdict-specific raise message as the unique anchor
+    # (the runner requires exactly one match; the scoped tests construct DensityVerdict).
     m("verdict-confidence-guard-dropped",
-      "        if not (math.isfinite(self.confidence) and self.confidence >= 0.0):",
-      "        if False:",
+      "        if not (math.isfinite(self.confidence) and self.confidence >= 0.0):\n"
+      "            raise ValueError(\n"
+      "                f\"DensityVerdict.confidence must be a non-negative margin, got {self.confidence!r}\"\n"
+      "            )",
+      "        if False:\n"
+      "            raise ValueError(\n"
+      "                f\"DensityVerdict.confidence must be a non-negative margin, got {self.confidence!r}\"\n"
+      "            )",
       "test_verdict_rejects_negative_or_nonfinite_confidence[-0.1]"),
     m("verdict-signal-guard-dropped",
-      "        if not self.signal:",
-      "        if False:",
+      "        if not self.signal:\n"
+      "            raise ValueError(\"DensityVerdict.signal must name the deciding/routing basis\")",
+      "        if False:\n"
+      "            raise ValueError(\"DensityVerdict.signal must name the deciding/routing basis\")",
       "test_verdict_rejects_empty_signal"),
     # --- constructor band guards (fail-loud config integrity) -----------------------------------
     m("ctor-yield-guard-dropped",

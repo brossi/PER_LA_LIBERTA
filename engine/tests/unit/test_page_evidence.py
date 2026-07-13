@@ -5,7 +5,7 @@ import hashlib
 import pytest
 
 from engine.config.loader import load_book
-from engine.errors import ReconciliationAdmissionError
+from engine.errors import ReconciliationAdmissionError, StaleArtifactError
 from engine.lang.registry import get_language_plugin
 from engine.paths import BookWorkspace
 from engine.steps import reconcile
@@ -14,6 +14,7 @@ from engine.structure.page_evidence import (
     VERDICTS_STALE_CLASS,
     assert_reconciliation_admission,
     build_page_evidence,
+    record_page_verdict,
     verdicts_path,
 )
 from engine.util.jsonio import atomic_write_json, read_json
@@ -159,6 +160,45 @@ def test_review_volume_exceeding_named_bound_fails_after_writing_packet(tmp_path
 
     review = read_json(ws.data / "page_evidence/copy1/review.json")
     assert review["review_count"] == 2
+
+
+def test_record_page_verdict_writes_tracked_decision_and_rejects_stale_submission(tmp_path):
+    cfg, ws = _setup(tmp_path)
+    first = build_page_evidence(workspace=ws, cfg=cfg, max_review_pages=2)
+    item = read_json(first["review"])["pages"][0]
+
+    with pytest.raises(StaleArtifactError, match="review evidence changed"):
+        record_page_verdict(
+            workspace=ws,
+            cfg=cfg,
+            witness_id="copy1",
+            model="flash",
+            page=item["page"],
+            disposition="blank",
+            evidence_sha256="0" * 64,
+            reviewer="fixture-reviewer",
+            max_review_pages=2,
+        )
+    assert not verdicts_path(ws, witness_id="copy1").exists()
+
+    result = record_page_verdict(
+        workspace=ws,
+        cfg=cfg,
+        witness_id="copy1",
+        model="flash",
+        page=item["page"],
+        disposition="blank",
+        evidence_sha256=item["evidence_sha256"],
+        reviewer="fixture-reviewer",
+        note="visual inspection",
+        decided_at="2026-07-12T00:00:00Z",
+        max_review_pages=2,
+    )
+
+    path = verdicts_path(ws, witness_id="copy1")
+    assert path == ws.root.parent / "review/page_evidence/copy1/verdicts.json"
+    assert result["review_pages"] == 1
+    assert read_json(path)["verdicts"][0]["note"] == "visual inspection"
 
 
 def test_admission_detects_post_ledger_evidence_drift(tmp_path):

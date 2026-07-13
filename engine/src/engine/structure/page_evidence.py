@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 from collections import Counter
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -42,7 +43,8 @@ def review_path(workspace: BookWorkspace, *, witness_id: str) -> Path:
 
 
 def verdicts_path(workspace: BookWorkspace, *, witness_id: str) -> Path:
-    return workspace.resolve("state", "page_evidence", witness_id, "verdicts.json")
+    """Tracked human decisions, outside the regenerable ``work/`` tree."""
+    return workspace.root.parent / "review" / "page_evidence" / witness_id / "verdicts.json"
 
 
 def admission_path(workspace: BookWorkspace) -> Path:
@@ -217,7 +219,7 @@ def build_page_evidence(
         )
     counts = Counter(page["disposition"] for page in pages)
     reason_counts = Counter(reason for page in pages for reason in page["reasons"])
-    verdict_ref = str(verdict_path.relative_to(workspace.root))
+    verdict_ref = str(verdict_path.relative_to(workspace.root.parent))
     ledger = {
         "schema_version": LEDGER_SCHEMA_VERSION,
         "stale_class": LEDGER_STALE_CLASS,
@@ -234,7 +236,7 @@ def build_page_evidence(
             "path": str(report_path.relative_to(workspace.root)),
             "sha256": _sha256_file(report_path),
         },
-        "verdicts": {"path": verdict_ref, "sha256": verdict_sha256},
+        "verdicts": {"scope": "book", "path": verdict_ref, "sha256": verdict_sha256},
         "review_bound": max_review_pages,
         "status": "admitted" if not review_pages else "review_required",
         "counts": {key: counts.get(key, 0) for key in sorted(DISPOSITIONS)},
@@ -328,7 +330,9 @@ def assert_reconciliation_admission(
                     f"page {page['page']} evidence changed after admission: {evidence['path']}"
                 )
     verdict_meta = ledger["verdicts"]
-    verdict_file = _workspace_relative(workspace, verdict_meta["path"])
+    if verdict_meta.get("scope") != "book":
+        raise ReconciliationAdmissionError("page-evidence verdict location is not durable")
+    verdict_file = _book_relative(workspace, verdict_meta["path"])
     current_verdict_sha = _sha256_file(verdict_file) if verdict_file.is_file() else None
     if current_verdict_sha != verdict_meta.get("sha256"):
         raise ReconciliationAdmissionError("human verdicts changed after page-evidence admission")
@@ -432,6 +436,90 @@ def _load_verdicts(
     return document, verdicts
 
 
+def record_page_verdict(
+    *,
+    workspace: BookWorkspace,
+    cfg: ResolvedConfig,
+    witness_id: str,
+    model: str,
+    page: int,
+    disposition: str,
+    evidence_sha256: str,
+    reviewer: str,
+    note: str | None = None,
+    decided_at: str | None = None,
+    max_review_pages: int = DEFAULT_REVIEW_BOUND,
+) -> dict[str, Any]:
+    """Record one current-evidence human verdict and rebuild admission artifacts."""
+    if disposition not in HUMAN_DISPOSITIONS:
+        raise InvalidInvocationError(
+            f"page verdict disposition must be one of {sorted(HUMAN_DISPOSITIONS)}"
+        )
+    if type(page) is not int or page < 1:
+        raise InvalidInvocationError("page verdict requires a positive page number")
+    if not isinstance(evidence_sha256, str) or len(evidence_sha256) != 64:
+        raise InvalidInvocationError("page verdict requires a SHA-256 evidence fingerprint")
+    if not isinstance(reviewer, str) or not reviewer.strip():
+        raise InvalidInvocationError("page verdict requires a non-empty reviewer identity")
+    if note is not None and not isinstance(note, str):
+        raise InvalidInvocationError("page verdict note must be text")
+
+    # Refresh before accepting the browser's fingerprint. This closes the window where a stale
+    # generated review packet still exists after source evidence changes.
+    build_page_evidence(
+        workspace=workspace,
+        cfg=cfg,
+        witness_id=witness_id,
+        model=model,
+        max_review_pages=max_review_pages,
+    )
+    packet = _required_json(
+        review_path(workspace, witness_id=witness_id), kind="page-evidence review packet"
+    )
+    candidates = [item for item in packet.get("pages", []) if item.get("page") == page]
+    if len(candidates) != 1:
+        raise StaleArtifactError(f"page {page} is not in the current review packet")
+    current_evidence = candidates[0].get("evidence_sha256")
+    if current_evidence != evidence_sha256:
+        raise StaleArtifactError(
+            f"page {page} review evidence changed: {evidence_sha256} != {current_evidence}"
+        )
+
+    path = verdicts_path(workspace, witness_id=witness_id)
+    _, existing = _load_verdicts(
+        path,
+        book_id=cfg.book_id,
+        witness_id=witness_id,
+        total=cfg.manifest.scan.last_scan_page_default,
+    )
+    verdict: dict[str, Any] = {
+        "page": page,
+        "disposition": disposition,
+        "evidence_sha256": evidence_sha256,
+        "reviewer": reviewer.strip(),
+        "decided_at": decided_at or datetime.now(UTC).isoformat(),
+    }
+    if note is not None and note.strip():
+        verdict["note"] = note.strip()
+    existing[page] = verdict
+    path.parent.mkdir(parents=True, exist_ok=True)
+    atomic_write_json(path, {
+        "schema_version": VERDICTS_SCHEMA_VERSION,
+        "stale_class": VERDICTS_STALE_CLASS,
+        "book_id": cfg.book_id,
+        "witness_id": witness_id,
+        "verdicts": [existing[key] for key in sorted(existing)],
+    })
+    summary = build_page_evidence(
+        workspace=workspace,
+        cfg=cfg,
+        witness_id=witness_id,
+        model=model,
+        max_review_pages=max_review_pages,
+    )
+    return {**summary, "verdict": verdict, "verdicts_path": str(path)}
+
+
 def _evidence_file(
     workspace: BookWorkspace,
     artifact: dict[str, Any],
@@ -454,6 +542,16 @@ def _workspace_relative(workspace: BookWorkspace, relative: Any) -> Path:
     path = (workspace.root / relative).resolve()
     if not path.is_relative_to(workspace.root):
         raise StaleArtifactError(f"artifact path escapes workspace: {relative!r}")
+    return path
+
+
+def _book_relative(workspace: BookWorkspace, relative: Any) -> Path:
+    if not isinstance(relative, str) or not relative:
+        raise StaleArtifactError(f"invalid book artifact path: {relative!r}")
+    book_root = workspace.root.parent.resolve()
+    path = (book_root / relative).resolve()
+    if not path.is_relative_to(book_root):
+        raise StaleArtifactError(f"artifact path escapes book directory: {relative!r}")
     return path
 
 

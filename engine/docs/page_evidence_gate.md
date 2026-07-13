@@ -20,7 +20,7 @@ review volume exceeds `--max-review-pages`; it never relaxes disposition rules t
 Human decisions live separately under:
 
 ```text
-books/<id>/work/state/page_evidence/<witness>/verdicts.json
+books/<id>/review/page_evidence/<witness>/verdicts.json
 ```
 
 The document has this shape:
@@ -44,8 +44,10 @@ The document has this shape:
 }
 ```
 
-Only `content`, `blank`, and `non_text` are valid reviewed dispositions. Rerun `ingest_gate` after
-editing verdicts. A verdict whose evidence fingerprint no longer matches is reported as stale and
-returns to review automatically. Reconciliation checks the admitted ledger and every live evidence
-hash before reading its voting witnesses; an absent, partial, unresolved, or drifted ledger stops
-the step without creating canonical output.
+Only `content`, `blank`, and `non_text` are valid reviewed dispositions. The tracked `review/`
+location is deliberately outside regenerable `work/`, matching the engine's other durable human
+verdicts. Use the engine-owned verdict writer (directly or through a review frontend) rather than
+editing generated ledger files. A verdict whose evidence fingerprint no longer matches is reported
+as stale and returns to review automatically. Reconciliation checks the admitted ledger and every
+live evidence hash before reading its voting witnesses; an absent, partial, unresolved, or drifted
+ledger stops the step without creating canonical output.

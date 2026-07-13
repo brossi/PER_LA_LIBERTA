@@ -200,6 +200,47 @@ def test_record_page_verdict_writes_tracked_decision_and_rejects_stale_submissio
     assert result["review_pages"] == 1
     assert read_json(path)["verdicts"][0]["note"] == "visual inspection"
 
+    corrected = record_page_verdict(
+        workspace=ws,
+        cfg=cfg,
+        witness_id="copy1",
+        model="flash",
+        page=item["page"],
+        disposition="content",
+        evidence_sha256=item["evidence_sha256"],
+        reviewer="fixture-reviewer",
+        note="corrected after a second look",
+        decided_at="2026-07-12T01:00:00Z",
+        max_review_pages=2,
+    )
+
+    corrected_verdict = read_json(path)["verdicts"][0]
+    assert corrected["review_pages"] == 1
+    assert corrected_verdict["disposition"] == "content"
+    assert corrected_verdict["note"] == "corrected after a second look"
+    assert corrected_verdict["decided_at"] == "2026-07-12T01:00:00Z"
+
+
+def test_record_page_verdict_rejects_automatically_admitted_page(tmp_path):
+    cfg, ws = _setup(tmp_path)
+    first = build_page_evidence(workspace=ws, cfg=cfg, max_review_pages=2)
+    ledger = read_json(first["ledger"])
+    admitted = next(page for page in ledger["pages"] if page["page"] == 1)
+
+    with pytest.raises(StaleArtifactError, match="neither pending review nor an existing reviewed"):
+        record_page_verdict(
+            workspace=ws,
+            cfg=cfg,
+            witness_id="copy1",
+            model="flash",
+            page=1,
+            disposition="blank",
+            evidence_sha256=admitted["evidence_sha256"],
+            reviewer="fixture-reviewer",
+            max_review_pages=2,
+        )
+    assert not verdicts_path(ws, witness_id="copy1").exists()
+
 
 def test_admission_detects_post_ledger_evidence_drift(tmp_path):
     cfg, ws = _setup(tmp_path)

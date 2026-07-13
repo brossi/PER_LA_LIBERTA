@@ -473,16 +473,41 @@ def record_page_verdict(
         model=model,
         max_review_pages=max_review_pages,
     )
-    packet = _required_json(
-        review_path(workspace, witness_id=witness_id), kind="page-evidence review packet"
+    ledger = _required_json(
+        ledger_path(workspace, witness_id=witness_id), kind="page-evidence ledger"
     )
-    candidates = [item for item in packet.get("pages", []) if item.get("page") == page]
-    if len(candidates) != 1:
-        raise StaleArtifactError(f"page {page} is not in the current review packet")
-    current_evidence = candidates[0].get("evidence_sha256")
+    ledger_pages = ledger.get("pages")
+    if not isinstance(ledger_pages, list):
+        raise StaleArtifactError("page-evidence ledger pages are malformed")
+    ledger_candidates = [
+        item for item in ledger_pages if isinstance(item, dict) and item.get("page") == page
+    ]
+    if len(ledger_candidates) != 1:
+        raise StaleArtifactError(f"page {page} is not unique in the current evidence ledger")
+    ledger_page = ledger_candidates[0]
+    current_evidence = ledger_page.get("evidence_sha256")
     if current_evidence != evidence_sha256:
         raise StaleArtifactError(
             f"page {page} review evidence changed: {evidence_sha256} != {current_evidence}"
+        )
+    packet = _required_json(
+        review_path(workspace, witness_id=witness_id), kind="page-evidence review packet"
+    )
+    packet_pages = packet.get("pages")
+    if not isinstance(packet_pages, list):
+        raise StaleArtifactError("page-evidence review packet pages are malformed")
+    pending_candidates = [
+        item for item in packet_pages if isinstance(item, dict) and item.get("page") == page
+    ]
+    if len(pending_candidates) > 1:
+        raise StaleArtifactError(f"page {page} is duplicated in the current review packet")
+    is_pending = len(pending_candidates) == 1
+    if is_pending and pending_candidates[0].get("evidence_sha256") != current_evidence:
+        raise StaleArtifactError(f"page {page} review packet disagrees with the evidence ledger")
+    is_reviewed = isinstance(ledger_page.get("human_verdict"), dict)
+    if not is_pending and not is_reviewed:
+        raise StaleArtifactError(
+            f"page {page} is neither pending review nor an existing reviewed page"
         )
 
     path = verdicts_path(workspace, witness_id=witness_id)

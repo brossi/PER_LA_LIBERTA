@@ -84,6 +84,22 @@ def _observer(**kwargs):
     )
 
 
+def _retry_observer(**kwargs):
+    geometry = kwargs["page_geometry"]
+    return SimpleNamespace(
+        status="not_applicable",
+        selected_path="geometry_baseline",
+        gate_reason=None,
+        baseline_box_count=None,
+        retry_box_count=None,
+        retry_text_verdict=None,
+        probe_executed=False,
+        selected_geometry=geometry,
+        selected_geometry_engine_id="fake-selected-geometry",
+        path=None,
+    )
+
+
 def _run(cfg, lang, ws, **overrides):
     values = {
         "workspace": ws,
@@ -94,6 +110,7 @@ def _run(cfg, lang, ws, **overrides):
         "witness_id": "copy1",
         "backend_factory": _Backend,
         "observer": _observer,
+        "retry_observer": _retry_observer,
         "dependency_checker": lambda: None,
     }
     values.update(overrides)
@@ -122,6 +139,14 @@ def test_layout_shadow_runs_all_pages_and_publishes_report(tmp_path):
         "policy": None,
         "classified_pages": 0,
         "raw_only_pages": 4,
+    }
+    assert report["assessment"]["geometry_retry"] == {
+        "candidate_pages": 0,
+        "attempted_pages": 0,
+        "selected_pages": 0,
+        "unresolved_pages": [],
+        "selection_rule": "trusted-text-likeness-v1",
+        "transform": "adaptive_bw",
     }
     first_page = report["geometry"]["page_artifacts"][0]
     assert first_page["ink_fraction"] == 0.0

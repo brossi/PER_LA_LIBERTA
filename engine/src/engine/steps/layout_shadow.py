@@ -23,6 +23,7 @@ from engine.lang.base import LanguagePlugin
 from engine.paths import BookWorkspace
 from engine.structure.geometry import PageGeometry, WordBox
 from engine.structure.geometry_pymupdf import PyMuPDFTesseractBackend
+from engine.structure.geometry_retry import observe_geometry_retry
 from engine.structure.layout_assessment_shadow import (
     MODE_SHADOW,
     PageDensityEvidence,
@@ -39,7 +40,7 @@ from engine.util.jsonio import atomic_write_bytes, atomic_write_json, read_json
 
 GEOMETRY_SCHEMA_VERSION = 1
 GEOMETRY_STALE_CLASS = "layout-shadow-page-geometry"
-REPORT_SCHEMA_VERSION = 2
+REPORT_SCHEMA_VERSION = 3
 REPORT_STALE_CLASS = "layout-assessment-shadow-run"
 RASTER_SCHEMA_VERSION = 1
 RASTER_STALE_CLASS = "layout-shadow-page-raster"
@@ -339,6 +340,9 @@ def _write_report(
             "backend_params": backend_params,
             "page_count": len(page_records),
             "word_count": sum(item["word_count"] for item in page_records),
+            "effective_word_count": sum(
+                item["effective_word_count"] for item in page_records
+            ),
             "dropped_box_count": sum(item["dropped_boxes"] for item in page_records),
             "oob_box_count": sum(item["oob_boxes"] for item in page_records),
             "page_artifacts": page_records,
@@ -356,6 +360,24 @@ def _write_report(
                 "raw_only_pages": sum(
                     not item["density_policy_applied"] for item in page_records
                 ),
+            },
+            "geometry_retry": {
+                "candidate_pages": sum(
+                    item["retry_path"] is not None for item in page_records
+                ),
+                "attempted_pages": sum(
+                    item["retry_probe_executed"] for item in page_records
+                ),
+                "selected_pages": sum(
+                    item["retry_status"] == "selected" for item in page_records
+                ),
+                "unresolved_pages": sorted(
+                    item["page"]
+                    for item in page_records
+                    if item["retry_status"] in {"unresolved", "unavailable"}
+                ),
+                "selection_rule": "trusted-text-likeness-v1",
+                "transform": "adaptive_bw",
             },
             "available_pages": sorted(available_pages),
             "unavailable_pages": sorted(unavailable_pages),
@@ -438,6 +460,7 @@ def run(
     refresh_shadow: bool = False,
     backend_factory=PyMuPDFTesseractBackend,
     observer=observe_page_geometry,
+    retry_observer=observe_geometry_retry,
     dependency_checker=_require_sidecar_dependency,
 ) -> dict:
     """Observe every scan page without changing OCR text or downstream policy."""
@@ -570,6 +593,25 @@ def run(
                 geometry=page_geometry,
                 n_leaves=page_count,
             )
+            retry = retry_observer(
+                workspace=workspace,
+                witness_id=witness_id,
+                source_ref=source_ref,
+                source_sha256=actual_sha256,
+                raster_path=raster_path,
+                raster_evidence=raster,
+                density_evidence=density,
+                page_geometry=page_geometry,
+                geometry_engine_id=engine_id,
+                tesseract_language=tesseract_language,
+                refresh=refresh_geometry,
+            )
+            effective_density = _density_evidence(
+                classifier=density_classifier,
+                raster=raster,
+                geometry=retry.selected_geometry,
+                n_leaves=page_count,
+            )
 
             observation = observer(
                 workspace=workspace,
@@ -577,10 +619,10 @@ def run(
                 witness_id=witness_id,
                 source_ref=source_ref,
                 source_sha256=actual_sha256,
-                page_geometry=page_geometry,
-                geometry_engine_id=engine_id,
+                page_geometry=retry.selected_geometry,
+                geometry_engine_id=retry.selected_geometry_engine_id,
                 raster_evidence=raster,
-                density_evidence=density,
+                density_evidence=effective_density,
                 column_policy=None,
                 refresh=refresh_shadow,
             )
@@ -602,6 +644,8 @@ def run(
                 {
                     "page": page_number,
                     "word_count": len(page_geometry.words),
+                    "effective_word_count": len(retry.selected_geometry.words),
+                    "selected_geometry_engine_id": retry.selected_geometry_engine_id,
                     "dropped_boxes": dropped,
                     "oob_boxes": oob,
                     "raster_path": str(raster_path.relative_to(workspace.root)),
@@ -612,11 +656,26 @@ def run(
                     "raster_width_px": raster.width_px,
                     "raster_height_px": raster.height_px,
                     "ink_fraction": raster.ink_fraction,
-                    "density_label": density.label if density is not None else None,
-                    "density_confidence": density.confidence if density is not None else None,
-                    "density_signal": density.hint if density is not None else None,
+                    "density_label": effective_density.label,
+                    "density_confidence": effective_density.confidence,
+                    "density_signal": effective_density.hint,
                     "density_policy_applied": (
-                        density.policy_applied if density is not None else False
+                        effective_density.policy_applied
+                    ),
+                    "retry_status": retry.status,
+                    "retry_selected_path": retry.selected_path,
+                    "retry_gate_reason": retry.gate_reason,
+                    "retry_baseline_box_count": retry.baseline_box_count,
+                    "retry_box_count": retry.retry_box_count,
+                    "retry_text_verdict": retry.retry_text_verdict,
+                    "retry_probe_executed": retry.probe_executed,
+                    "retry_path": (
+                        str(retry.path.relative_to(workspace.root))
+                        if retry.path is not None
+                        else None
+                    ),
+                    "retry_sha256": (
+                        _sha256_file(retry.path) if retry.path is not None else None
                     ),
                     "geometry_path": str(checkpoint.relative_to(workspace.root)),
                     "geometry_sha256": _sha256_file(checkpoint),

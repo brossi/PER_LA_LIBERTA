@@ -42,7 +42,7 @@ it = [
     "it-core-news-lg @ https://github.com/explosion/spacy-models/releases/download/it_core_news_lg-3.8.0/it_core_news_lg-3.8.0-py3-none-any.whl",
 ]
 assessment = [
-    "book-layout-sidecar",
+    "book-layout-sidecar[adapters]",
 ]
 
 [dependency-groups]
@@ -79,4 +79,4 @@ markers = [
 ]
 
 [tool.uv.sources]
-book-layout-sidecar = { git = "ssh://git@github.com/brossi/book-layout-sidecar.git", rev = "v0.1.1" }
+book-layout-sidecar = { git = "ssh://git@github.com/brossi/book-layout-sidecar.git", rev = "v0.1.2" }

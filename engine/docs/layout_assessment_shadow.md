@@ -1,7 +1,7 @@
 # Layout assessment shadow boundary
 
 The engine consumes `book-layout-sidecar` only through its versioned `core` provider API. The
-dependency is optional and pinned to `v0.1.1`; install it with:
+dependency is optional and pinned to `v0.1.2`; install it with:
 
 ```sh
 uv sync --extra assessment
@@ -42,6 +42,16 @@ Every reusable observation is re-parsed and revalidated against a freshly rebuil
 current provider identity. Source hash, normalized OCR boxes, adapter version, provider version,
 module configuration, or evidence-binding drift invalidates reuse. Provider/import/response
 failures are persisted as `unavailable`; they are never interpreted as a blank-page finding.
+
+For pages with at most two PDF-geometry words, the engine also records a bounded geometry retry
+under `work/data/geometry/retry/<witness>/`. It first runs Tesseract on the exact persisted raster,
+because that surface is not interchangeable with the PDF OCR backend. If the released sidecar gate
+finds zero OCR boxes with unresolved visual activity, the engine runs one `adaptive_bw` pass. The
+engine selects either result only when sidecar text-likeness reports `trusted_text`; a larger box
+count alone remains `unresolved`. Decisively near-blank pages are recorded without creating a
+transformed raster. Reuse binds the source, raster and baseline geometry hashes, sidecar version,
+Tesseract executable hash, language, PSM, transform, transformed raster hash, and normalized OCR
+hashes. The run report distinguishes candidate, attempted, selected, and unresolved pages.
 
 Example after a geometry backend has produced a page:
 

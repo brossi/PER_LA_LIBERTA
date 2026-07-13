@@ -142,7 +142,7 @@ def test_valid_shadow_observation_persists_and_revalidates_exact_request(tmp_pat
     assert envelope["request"]["subject"]["source_sha256"] == "a" * 64
     assert envelope["provider"] == {
         "provider_id": "book_layout_sidecar",
-        "provider_version": "0.1.1",
+        "provider_version": "0.1.2",
     }
 
     request = assessment_request_from_dict(envelope["request"])
@@ -182,7 +182,7 @@ def test_previous_provider_version_invalidates_cache_without_refresh(tmp_path):
 
     ws = BookWorkspace.for_book("synthetic", tmp_path).ensure()
     previous = CoreAssessmentProvider(
-        identity=ProviderIdentity("book_layout_sidecar", "0.1.0")
+        identity=ProviderIdentity("book_layout_sidecar", "0.1.1")
     )
     first = _observe(ws, provider_factory=lambda: previous, refresh=True)
     current = CoreAssessmentProvider()
@@ -200,12 +200,12 @@ def test_previous_provider_version_invalidates_cache_without_refresh(tmp_path):
     provider = _CountingProvider()
     second = _observe(ws, provider_factory=lambda: provider)
 
-    assert first.bundle.provider.provider_version == "0.1.0"
+    assert first.bundle.provider.provider_version == "0.1.1"
     assert second.status == shadow.STATUS_AVAILABLE
     assert second.cached is False
     assert provider.calls == 1
-    assert second.bundle.provider.provider_version == "0.1.1"
-    assert read_json(second.path)["provider"]["provider_version"] == "0.1.1"
+    assert second.bundle.provider.provider_version == "0.1.2"
+    assert read_json(second.path)["provider"]["provider_version"] == "0.1.2"
 
 
 @requires_sidecar
@@ -511,3 +511,47 @@ def test_installed_provider_conformance_packet_passes():
         "boundary_unavailable": 15,
         "status": "ok",
     }
+
+
+@requires_sidecar
+def test_installed_ocr_null_gate_distinguishes_active_abstention_from_blank():
+    from book_layout_sidecar.core import should_run_perturbation_probe
+    from book_layout_sidecar.core.density import DensityFeature
+    from book_layout_sidecar.core.near_blank import score_near_blank_hallucinated_boxes
+    from book_layout_sidecar.core.ocr import OcrPage
+    from book_layout_sidecar.core.ocr_stats import compute_ocr_page_stats
+
+    page = OcrPage(
+        page=1,
+        width=500.0,
+        height=700.0,
+        boxes=(),
+        source_format="engine-consumer-fixture",
+        source_ref="fixture/page.png",
+        source_selector="page=1",
+    )
+    stats = compute_ocr_page_stats(page)
+    score = score_near_blank_hallucinated_boxes(stats)
+
+    def density(ink_fraction: float) -> DensityFeature:
+        return DensityFeature(
+            page=1,
+            hint="density_policy_absent",
+            ink_fraction=ink_fraction,
+            box_count=0,
+            token_yield=0.0,
+            mean_token_length=0.0,
+            label="abstain",
+            confidence=0.0,
+            source_ref="fixture/page.png",
+            source_selector="page=1",
+            producer="engine-consumer-fixture",
+        )
+
+    active = should_run_perturbation_probe(score, stats=stats, density=density(0.08))
+    blank = should_run_perturbation_probe(score, stats=stats, density=density(0.001))
+
+    assert active.should_probe is True
+    assert active.reason == "ocr_null_with_unresolved_visual_activity"
+    assert blank.should_probe is False
+    assert blank.reason == "ocr_null_with_decisive_near_blank_evidence"

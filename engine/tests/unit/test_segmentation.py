@@ -250,12 +250,8 @@ def test_mean_token_length_is_over_all_boxes_stripped():
     assert f.mean_token_length == pytest.approx(9 / 4)
 
 
-def test_ghost_leaf_signature_low_yield():
-    # p6's signature: many boxes, almost no real tokens. 20 single-char noise boxes + 1 word → yield
-    # 1/21 ≈ 0.048, the "boxes untrusted" tell.
-    boxes = [_box(".") for _ in range(20)] + [_box("parola")]
-    f = page_density_features(ink_fraction=0.5, boxes=boxes)
-    assert f.token_yield == pytest.approx(1 / 21)
+# (A p6 ghost-leaf-signature scenario was folded out (#56): it re-asserted the alpha/box formula on
+# the same non-empty path the hand-count test above binds — the mixture changed, not the path.)
 
 
 def test_zero_boxes_gives_zero_yield_and_mean_no_divide_error():
@@ -270,11 +266,8 @@ def test_zero_boxes_gives_zero_yield_and_mean_no_divide_error():
 # ------------------------------------------------------------------------------------------------ #
 
 
-def test_ink_fraction_counts_dark_pixels_grayscale():
-    # 4 gray pixels: two black (0 < 128 = ink), two white (255) → 0.5. RED: count light pixels → 0.5
-    # would flip on an asymmetric fixture, so use an asymmetric one below too.
-    pm = fitz.Pixmap(fitz.csGRAY, 2, 2, bytes([0, 0, 255, 255]), False)
-    assert ink_fraction_from_pixmap(pm) == pytest.approx(0.5)
+# (A symmetric 0.5 grayscale fixture was folded out (#56): its own comment conceded a symmetric
+# split cannot pin direction; the asymmetric test below subsumes it on the same code path.)
 
 
 def test_ink_fraction_asymmetric_pins_direction():
@@ -446,10 +439,8 @@ def test_near_blank_close_to_content_yield_abstains():
     assert v.confidence == pytest.approx(0.02)
 
 
-def test_classify_is_deterministic():
-    f = PageDensityFeatures(ink_fraction=0.90, box_count=400, token_yield=0.02, mean_token_length=1.1)
-    clf = _clf()
-    assert clf.classify(f, leaf_index=10, n_leaves=20) == clf.classify(f, leaf_index=10, n_leaves=20)
+# (A classify-is-deterministic f(x)==f(x) test was folded out (#56): stateless straight-line code
+# returning a frozen dataclass — it exercised dataclass equality, not the classifier.)
 
 
 # --- Positional COVER class (5th band; RULED by Ben 2026-07-06) --------------------------------- #
@@ -716,11 +707,9 @@ def test_detect_columns_rejects_nonpositive_width():
         detect_columns(_two_col_boxes(), 0.0)
 
 
-def test_detect_columns_reads_word_boxes_not_tuples():
-    # The promoted detector reads production WordBox records (.bbox), not the probe's raw tuples.
-    boxes = _two_col_boxes()
-    assert all(isinstance(b, WordBox) for b in boxes)
-    assert detect_columns(boxes, _W).col2_score > 0.0
+# (A reads-WordBox-not-tuples test was folded out (#56): its isinstance half asserted the fixture
+# helper's own construction, and its score>0 half is subsumed by the ==1.0 assertion the deep-
+# balanced-gutter test makes on the identical fixture.)
 
 
 # --- ColumnDetector: calibrated decision threshold + hysteresis margin --------------------------- #

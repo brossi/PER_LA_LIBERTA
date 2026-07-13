@@ -674,10 +674,9 @@ def test_phase2_policy_unresolved(tmp_path):
     assert EC.POLICY_UNRESOLVED in _load_codes(tmp_path, doc)
 
 
-def test_phase2_alias_collision(tmp_path):
-    doc = _fresh_doc()
-    doc["aliases"].append(dict(doc["aliases"][0]))  # duplicate the active alias
-    assert EC.ALIAS_COLLISION in _load_codes(tmp_path, doc)
+# (The phase-2 ALIAS_COLLISION perturbation was folded out (#56): the negative-fixture test above
+# fires the same code through the same load_structure_map path, and additionally asserts the Tier-1
+# pass — the one axis this battery row added nothing to.)
 
 
 def test_phase2_alias_dangling_target(tmp_path):

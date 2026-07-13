@@ -76,9 +76,8 @@ def test_hash_raw_is_sha256_utf8_with_prefix():
     assert len(hash_raw(text)) == len("sha256:") + 64  # sha256 hex digest is 64 chars
 
 
-def test_hash_raw_distinguishes_and_is_deterministic():
-    assert hash_raw("alpha") == hash_raw("alpha")            # deterministic
-    assert hash_raw("alpha") != hash_raw("alphb")            # one-char drift → different digest
+# (A determinism/sensitivity test was folded out (#56): both properties are stdlib sha256 facts
+# already implied by the exact-value pin above against an independent hashlib computation.)
 
 
 # --- tier (a): raw byte-exact reconstruction ---------------------------------------------- #
@@ -198,11 +197,13 @@ def test_verify_atom_roundtrip_with_reversible_transform():
 
 
 def test_verify_atom_roundtrip_raises_when_transforms_do_not_produce_text():
-    # Step 2: the declared transforms must actually produce the stored text. Here they don't.
+    # Step 2: the declared transforms must actually produce the stored text. Here they don't. Called
+    # WITHOUT the transforms arg so the default () is the form under test — this absorbed a separate
+    # norm_layer-label-does-not-fake-the-floor test that fired the same produced != text check (#56).
     source = "hello world"
     a = _raw_atom(source, 0, 5, text="HELLO")    # raw is "hello"; no transform makes "HELLO"
     with pytest.raises(RoundTripError, match="do not produce its stored text"):
-        verify_atom_roundtrip(a, source, [])     # forward([], raw) == "hello" != "HELLO"
+        verify_atom_roundtrip(a, source)         # forward((), raw) == "hello" != "HELLO"
 
 
 def test_verify_atom_roundtrip_raises_on_lossy_transform():
@@ -226,11 +227,6 @@ def test_verify_atom_roundtrip_gates_on_the_raw_tier_first():
         verify_atom_roundtrip(a, "HEAD\ntail end", [_ESCAPE_NL])
 
 
-def test_norm_layer_label_does_not_fake_the_floor():
-    # The whole point of S1.2 in one test: an atom *claims* its text is verbatim (norm_layer="raw",
-    # no transforms), but the stored text is not the raw bytes. The floor checks the bytes via the
-    # hash + transform identity, not the label, so it fails loud.
-    source = "the real raw bytes"
-    a = _raw_atom(source, 0, 8, text="THE REAL", norm_layer="raw")   # claims verbatim, lies
-    with pytest.raises(RoundTripError):
-        verify_atom_roundtrip(a, source)                            # transforms default to ()
+# (test_norm_layer_label_does_not_fake_the_floor was folded into
+# test_verify_atom_roundtrip_raises_when_transforms_do_not_produce_text above (#56): same raw-only
+# lying-text fixture, same check; the default-transforms call form it alone exercised moved there.)

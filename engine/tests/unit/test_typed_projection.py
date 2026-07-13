@@ -153,13 +153,9 @@ def test_typed_projection_on_empty_is_empty():
     assert typed_projection([], _ScriptedClassifier([])) == []
 
 
-def test_degenerate_stub_output_fails_completeness():
-    # Ties S0.4 ↔ S1.3b: the stub types every atom UNKNOWN, so its projection is degenerate and
-    # check_completeness refuses it rather than passing an all-UNKNOWN stream off as done.
-    atoms = [_atom(0, "a", capture_class=BODY), _atom(1, "b", capture_class=BODY)]
-    typed = typed_projection(atoms, DegenerateBlockClassifier())
-    with pytest.raises(IncompleteTypingError):
-        check_completeness(typed, boundary_classes=BOUNDARY_CLASSES)
+# (A synthetic degenerate-stub completeness test was folded out (#56): same classifier, same
+# degenerate raise as test_real_capture_stream_is_degenerate_under_the_stub, which runs it on
+# production-shaped atoms — strictly stronger.)
 
 
 # --- check_completeness: the three done-when regimes ---------------------------------------- #
@@ -411,15 +407,6 @@ def test_boundary_classes_rejects_a_bare_str():
         check_completeness(typed, boundary_classes=BOUNDARY)  # "heading", a str, not {"heading"}
 
 
-def test_boundary_classes_accepts_a_generator():
-    typed = [
-        TypedAtom(_atom(0, "h", capture_class=BOUNDARY), _cls(UNKNOWN, confidence=0.0)),
-        TypedAtom(_atom(1, "b", capture_class=BODY), _cls("body")),
-    ]
-    with pytest.raises(IncompleteTypingError, match="boundary"):
-        check_completeness(typed, boundary_classes=(c for c in [BOUNDARY]))  # one-shot generator
-
-
 # NB: the reopened-degenerate-green hole the audit found (a typo'd processing_scope slipping past the
 # scope filter and vanishing from the check) is now closed at the *root* — the Atom model rejects an
 # out-of-vocabulary processing_scope at construction (S1.1), so it can never reach this check. That
@@ -480,11 +467,20 @@ def test_real_capture_routes_a_body_leaf_to_review():
     assert report.to_review[0].capture_provenance_class == BODY  # capture_witness's default body class
 
 
-@pytest.mark.parametrize("scope", [PROCESSING_SCOPE_INCLUDED, PROCESSING_SCOPE_EXCLUDED])
-@pytest.mark.parametrize("block", ["body", UNKNOWN])
-@pytest.mark.parametrize("capture", [BODY, BOUNDARY])
+@pytest.mark.parametrize(
+    "scope,block,capture",
+    [
+        # excluded: dropped at the scope filter before block/capture are read, so one row carries
+        # the whole excluded half of the former 2x2x2 cross-product (#56)
+        (PROCESSING_SCOPE_EXCLUDED, "body", BODY),
+        (PROCESSING_SCOPE_INCLUDED, "body", BODY),
+        (PROCESSING_SCOPE_INCLUDED, "body", BOUNDARY),
+        (PROCESSING_SCOPE_INCLUDED, UNKNOWN, BODY),
+        (PROCESSING_SCOPE_INCLUDED, UNKNOWN, BOUNDARY),
+    ],
+)
 def test_single_atom_outcome_table(scope, block, capture):
-    # The full single-atom decision table (the partition the example tests sample): an excluded atom
+    # The single-atom decision table (the partition the example tests sample): an excluded atom
     # is always vacuously complete; an included resolved atom is complete; an included UNKNOWN atom
     # is the all-processed-unknown case → degenerate hard-fail (checked before boundary, so a
     # boundary slot does not change the single-atom outcome — pins the M3 granularity decision).

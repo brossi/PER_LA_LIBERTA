@@ -41,16 +41,9 @@ def test_each_layer_has_an_independent_positive_int_version(name):
     assert version >= 1
 
 
-def test_the_three_versions_are_independently_addressable():
-    # M3: each layer's schema version is its own module-level name, so bumping one never moves
-    # another. Their *values* coincide at v1 — a value-distinctness assertion would be hollow — so
-    # the real invariant is that all three are present, distinct names on the package's public
-    # surface, independently referenceable. That is what lets S1.5/S4.4/S7.1c bump one in isolation.
-    # Red-proof: drop any of these names from __init__'s re-export and both this and
-    # test_all_public_exports_… go red. No value-distinctness assertion — values coincide at v1,
-    # so that would test nothing; independence is that each is a separately-rebindable name.
-    assert set(VERSION_NAMES) <= set(structure.__all__)          # each is part of the exported API
-    assert all(hasattr(structure, n) for n in VERSION_NAMES)     # each resolves to its own binding
+# (A three-versions-independently-addressable test was folded out (#56): its ⊆-__all__ and hasattr
+# asserts are strictly subsumed by test_public_export_surface_is_bounded — exact __all__ equality
+# including VERSION_NAMES — plus test_all_public_exports_resolve_on_the_package.)
 
 
 def test_atoms_dir_is_under_the_data_area(tmp_path):
@@ -184,13 +177,9 @@ ALLOWED_RELATION_EXPORTS = {
 }
 
 
-@pytest.mark.parametrize("name", ("STRUCTURE_MAP_STALE_CLASS", "RELATION_STORE_STALE_CLASS"))
-def test_s4_stale_class_is_a_nonempty_exported_string(name):
-    # inv 12a: both new stale classes exist, are non-empty wire strings, and are on the public
-    # surface. A dropped re-export AttributeErrors here rather than passing green (validate_bindings).
-    assert name in structure.__all__, f"{name!r} not exported from engine.structure"
-    value = getattr(structure, name)
-    assert isinstance(value, str) and value.strip(), f"{name!r} is not a non-empty string"
+# (A per-name S4 stale-class exported-string test was folded out (#56): __all__ membership is held
+# by the bounded-surface equality — both names sit in EXPECTED_PUBLIC_SURFACE — and the nonempty-
+# string value check is repeated verbatim below, whose getattr hard-fails on a dropped binding.)
 
 
 def test_all_stale_classes_are_pairwise_distinct():

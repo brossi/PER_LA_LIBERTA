@@ -29,7 +29,6 @@ import pytest
 from engine.errors import BackendError, EngineError
 from engine.structure import (
     GeometryError,
-    GeometrySource,
     PageGeometry,
     WordBox,
 )
@@ -79,7 +78,7 @@ def test_wordbox_rejects_degenerate_y(bbox):
         WordBox(text="x", bbox=bbox)
 
 
-@pytest.mark.parametrize("text", ["", "   ", "\t\n"])
+@pytest.mark.parametrize("text", ["", "   "])  # a "\t\n" row shared the "   " .strip() path (#56)
 def test_wordbox_rejects_empty_or_whitespace_text(text):
     # A box with no token is not a word — the backend drops Tesseract's empty-text artifacts before
     # construction (DT-2 normalization), so an empty-text WordBox is a contract violation, not data.
@@ -163,15 +162,9 @@ def test_pagegeometry_is_frozen():
 
 
 # --- GeometrySource seam (DT-2) ------------------------------------------------------------------ #
-
-
-def test_fake_backend_satisfies_the_runtime_checkable_geometrysource_protocol(geom):
-    # NB: @runtime_checkable isinstance is PRESENCE-only — it verifies engine_id/read_pages exist,
-    # not their shape (a wrong-arity read_pages or a method-not-property engine_id would still pass).
-    # DT-2 frames this as a seam smoke test; the shape/behaviour guarantee lives in the two tests
-    # below (read_pages arity + inclusive range; engine_id str property).
-    src = geom.Source(pages=[])
-    assert isinstance(src, GeometrySource)
+# (Two presence-only seam smokes were folded out (#56): a @runtime_checkable isinstance on the
+# conftest double, and an engine_id sentinel echo that exercised no src code. The shape/behaviour
+# guarantees live in the read_pages test below and the real backend's engine_id tests.)
 
 
 def test_read_pages_yields_pagegeometry_over_the_inclusive_1_based_range(geom):
@@ -180,11 +173,6 @@ def test_read_pages_yields_pagegeometry_over_the_inclusive_1_based_range(geom):
     got = list(src.read_pages(5, 7))  # 1-based INCLUSIVE (matches copy3's ⟨PAGE:N⟩ / page_000N.png)
     assert [p.page for p in got] == [5, 6, 7]
     assert all(isinstance(p, PageGeometry) for p in got)
-
-
-def test_engine_id_is_a_string_property_the_matcher_writes_verbatim(geom):
-    src = geom.Source(pages=[], engine_id="engine-sentinel-77")
-    assert src.engine_id == "engine-sentinel-77"
 
 
 def test_fake_source_raises_on_an_unseeded_in_range_page(geom):
@@ -264,9 +252,8 @@ def test_backend_requires_language_no_default():
         PyMuPDFTesseractBackend("/some/scan.pdf", dpi=300)
 
 
-def test_backend_requires_both_when_only_path_is_given():
-    with pytest.raises(TypeError):
-        PyMuPDFTesseractBackend("/some/scan.pdf")
+# (A both-params-missing test was folded out (#56): any state failing it also fails one of the two
+# independent single-param reds above — it bound only Python's missing-kwarg TypeError.)
 
 
 # --- engine_id: encodes live versions + params (the string #37's matcher writes verbatim) -------- #
@@ -833,9 +820,8 @@ def test_out_of_range_or_inverted_page_request_raises_geometry_error(synth, firs
         list(be.read_pages(first, last))
 
 
-def test_backend_satisfies_the_geometrysource_protocol():
-    be = PyMuPDFTesseractBackend("/some/scan.pdf", language="eng", dpi=300)
-    assert isinstance(be, GeometrySource)
+# (A presence-only isinstance-GeometrySource smoke on the real backend was folded out (#56):
+# read_pages arity/behaviour and engine_id are hard-bound by the tests throughout this file.)
 
 
 # --- DT-11 tier 1: the fixtures are genuinely image-only (no native text layer) ------------------ #

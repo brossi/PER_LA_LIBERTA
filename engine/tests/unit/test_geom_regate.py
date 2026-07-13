@@ -77,8 +77,7 @@ def test_pass_rate_clears_but_mean_fails_demotes_the_median_control():
         (0.85, MODE_PRIMARY),        # exactly the bar → primary (>=), paired with a passing rate
         (0.8499, MODE_TIE_BREAK),    # just under → demote
         (0.50, MODE_TIE_BREAK),      # exactly the floor → tie-break (>=)
-        (0.4999, MODE_NO_GEOMETRY),  # just under the floor → no-geometry
-        (0.0, MODE_NO_GEOMETRY),
+        (0.4999, MODE_NO_GEOMETRY),  # just under the floor → no-geometry (a 0.0 row added no kill, #56)
     ],
 )
 def test_demotion_bands_are_value_pinned_at_the_boundaries(mean, expected):

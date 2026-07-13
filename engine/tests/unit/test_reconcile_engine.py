@@ -55,9 +55,9 @@ def test_score_word_exact_values_are_faithful_to_live():
 
 
 def test_score_word_prefers_the_cleaner_witness():
-    # The property the reconcilers rely on: a clean/accented form outranks its OCR-mangled twin.
-    assert reconcile.score_word("più", ACCENTS) > reconcile.score_word("piii", ACCENTS)
-    assert reconcile.score_word("casa", ACCENTS) > reconcile.score_word("ca*sa", ACCENTS)
+    # The property the reconcilers rely on: an accented form outranks its accent-stripped twin — the
+    # one ordering pair NOT arithmetically implied by the exact-value pins above (#56 dropped two
+    # pairs that were: più>piii and casa>ca*sa follow from 7>-1 and 2>-15).
     assert reconcile.score_word("libertà", ACCENTS) > reconcile.score_word("liberta", ACCENTS)
 
 

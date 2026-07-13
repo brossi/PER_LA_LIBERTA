@@ -924,15 +924,12 @@ def _set_entry(doc: dict, key: str, value) -> dict:
             "extent_payload",
             {"own": {"heading": [], "signature": []}, "beneath": [["a_1", "a_2", "a_3"]]},
         ),
-        lambda d: _set_entry(  # decode: endpoints must share a prefix
-            d,
+        lambda d: _set_entry(  # decode: endpoints must share a prefix — the ONE load-level decode
+            d,  # negative; it proves the loader's ValueError→StaleArtifactError wrap, and every
+            # other codec branch is bound at the unit layer by
+            # test_atom_run_decode_rejects_malformed_tokens (a descending-range twin dropped, #56)
             "extent_payload",
             {"own": {"heading": [], "signature": []}, "beneath": [["a_1", "b_9"]]},
-        ),
-        lambda d: _set_entry(  # decode: descending range
-            d,
-            "extent_payload",
-            {"own": {"heading": [], "signature": []}, "beneath": [["a_9", "a_1"]]},
         ),
         lambda d: _set_entry(  # decode: the run-expansion ceiling — a bomb is an error, not an OOM
             d,
@@ -985,7 +982,6 @@ def _set_entry(doc: dict, key: str, value) -> dict:
         "extent-own-bad-slot-shape",
         "extent-run-three-element",
         "extent-run-mismatched-prefixes",
-        "extent-run-descending",
         "extent-run-expansion-bomb",
         "extent-witness-lies-about-digest",
         "decision-witness-lies-about-digest",

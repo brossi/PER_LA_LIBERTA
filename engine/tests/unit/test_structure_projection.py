@@ -611,11 +611,11 @@ def test_leaf_minted_by_human_raises_split():
     assert EC.MINTED_BY_SPLIT in _codes(ei.value)
 
 
-@pytest.mark.parametrize("bad_value", ["", "robot", "Human", "MACHINE"])
+@pytest.mark.parametrize("bad_value", ["", "robot", "MACHINE"])
 def test_blank_or_out_of_vocab_minted_by_raises_split(bad_value):
-    # Presence + vocabulary: a blank minted_by ("not recorded"), an out-of-vocab value, and a
-    # wrong-case near-miss all fail the exact-token split. One comparison covers all of them (the node
-    # must carry its kind's exact authority token).
+    # Presence + vocabulary: a blank minted_by ("not recorded"), an out-of-vocab value, and the
+    # wrong-case near-miss of the leaf's own token (kills a casefolding mutant) all fail the exact-
+    # token split. (A second out-of-vocab string, "Human", shared "robot"'s kill-set — #56.)
     nodes = _base_nodes()
     bad = dataclasses.replace(nodes[2], minted_by=bad_value)  # a leaf → expected 'machine'
     with pytest.raises(StructureValidationError) as ei:
@@ -623,15 +623,9 @@ def test_blank_or_out_of_vocab_minted_by_raises_split(bad_value):
     assert EC.MINTED_BY_SPLIT in _codes(ei.value)
 
 
-def test_correct_split_validates_clean():
-    # The positive: containers minted_by 'human', leaves minted_by 'machine' — the base map's own
-    # split — validates with no MINTED_BY_SPLIT. (test_base_map_validates_clean also covers this; kept
-    # explicit so a mutation that fires the split on a CORRECT map reds a named test.)
-    m = _base_map()
-    validate_projection(m, _base_store())  # no raise
-    assert all(
-        n.minted_by == ("human" if isinstance(n, ContainerNode) else "machine") for n in m.nodes
-    )
+# (The explicit correct-split positive was folded out (#56; its own comment conceded the overlap):
+# a mutation that fires MINTED_BY_SPLIT on a correct map reds test_base_map_validates_clean — same
+# fixture, same no-raise path.)
 
 
 # --- inv 6 — node_id must not be DERIVED from designation / title / position (NODE_ID_DERIVED) --- #

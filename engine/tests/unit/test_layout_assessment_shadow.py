@@ -37,6 +37,54 @@ def _empty_page(page: int = 1) -> PageGeometry:
     return PageGeometry(page=page, width=500.0, height=700.0, words=())
 
 
+def _noise_page(page: int = 1) -> PageGeometry:
+    words = tuple(
+        WordBox(
+            text="x",
+            bbox=(10.0 + (index % 10) * 45.0, 10.0 + (index // 10) * 45.0,
+                  20.0 + (index % 10) * 45.0, 20.0 + (index // 10) * 45.0),
+        )
+        for index in range(140)
+    )
+    return PageGeometry(page=page, width=500.0, height=700.0, words=words)
+
+
+def _raster(page: int = 1, *, ink_fraction: float, sha256: str = "b" * 64):
+    return shadow.PageRasterEvidence(
+        page=page,
+        artifact_ref=f"scan:synthetic/source.pdf#page={page}:raster=test:dpi=300",
+        sha256=sha256,
+        source_selector=f"page={page}",
+        producer="test-raster-v1",
+        dpi=300,
+        width_px=2000,
+        height_px=3000,
+        ink_fraction=ink_fraction,
+    )
+
+
+def _density(
+    page: int = 1,
+    *,
+    label: str,
+    box_count: int = 0,
+    token_yield: float = 0.0,
+    mean_token_length: float = 0.0,
+    policy_applied: bool = True,
+):
+    return shadow.PageDensityEvidence(
+        page=page,
+        box_count=box_count,
+        token_yield=token_yield,
+        mean_token_length=mean_token_length,
+        label=label,
+        confidence=0.5,
+        hint=label,
+        producer="test-density-v1",
+        policy_applied=policy_applied,
+    )
+
+
 def _observe(ws, **overrides):
     values = {
         "workspace": ws,
@@ -260,6 +308,184 @@ def test_zero_boxes_without_pixel_evidence_never_support_content(tmp_path):
     assert near_blank.confidence is None
     assert near_blank.reasons == ("zero_ocr_boxes_without_affirmative_content_evidence",)
     assert near_blank.module_version == "2.1.0"
+
+
+@requires_sidecar
+def test_zero_boxes_with_calibrated_content_density_support_content(tmp_path):
+    ws = BookWorkspace.for_book("synthetic", tmp_path).ensure()
+    raster = _raster(ink_fraction=0.08)
+    result = _observe(
+        ws,
+        page_geometry=_empty_page(),
+        raster_evidence=raster,
+        density_evidence=_density(label="content"),
+    )
+    near_blank = next(
+        item for item in result.bundle.results if item.module_id == "near_blank_hallucinated_boxes"
+    )
+    request = read_json(result.path)["request"]
+
+    assert near_blank.assessment == "supported"
+    assert "density_supports_ocr_relevant_content" in near_blank.reasons
+    raster_artifact = next(
+        item for item in request["input_artifacts"] if item["kind"] == "source_raster"
+    )
+    assert raster_artifact["sha256"] == raster.sha256
+
+
+@requires_sidecar
+def test_clean_body_with_calibrated_content_density_is_supported(tmp_path):
+    ws = BookWorkspace.for_book("synthetic", tmp_path).ensure()
+    result = _observe(
+        ws,
+        page_geometry=_page(),
+        raster_evidence=_raster(ink_fraction=0.08),
+        density_evidence=_density(
+            label="content",
+            box_count=30,
+            token_yield=1.0,
+            mean_token_length=7.5,
+        ),
+    )
+    near_blank = next(
+        item for item in result.bundle.results if item.module_id == "near_blank_hallucinated_boxes"
+    )
+
+    assert near_blank.assessment == "supported"
+    assert near_blank.metrics["density_label"] == "content"
+
+
+@requires_sidecar
+def test_zero_boxes_with_calibrated_near_blank_density_are_unsupported(tmp_path):
+    ws = BookWorkspace.for_book("synthetic", tmp_path).ensure()
+    result = _observe(
+        ws,
+        page_geometry=_empty_page(),
+        raster_evidence=_raster(ink_fraction=0.001),
+        density_evidence=_density(label="near_blank"),
+    )
+    near_blank = next(
+        item for item in result.bundle.results if item.module_id == "near_blank_hallucinated_boxes"
+    )
+
+    assert near_blank.assessment == "unsupported"
+    assert "near_blank_empty_low_ocr_activity" in near_blank.reasons
+
+
+@requires_sidecar
+def test_raw_raster_without_policy_does_not_become_positive_density_evidence(tmp_path):
+    ws = BookWorkspace.for_book("synthetic", tmp_path).ensure()
+    result = _observe(
+        ws,
+        page_geometry=_empty_page(),
+        raster_evidence=_raster(ink_fraction=0.08),
+    )
+    near_blank = next(
+        item for item in result.bundle.results if item.module_id == "near_blank_hallucinated_boxes"
+    )
+    request = read_json(result.path)["request"]
+
+    assert near_blank.execution_status == "not_applicable"
+    assert "density" not in request["evidence"]
+    assert any(item["kind"] == "source_raster" for item in request["input_artifacts"])
+
+
+@requires_sidecar
+def test_zero_boxes_with_uncalibrated_visual_activity_abstain(tmp_path):
+    """The same raw signal can be readable faint text or mirrored show-through."""
+    ws = BookWorkspace.for_book("synthetic", tmp_path).ensure()
+    result = _observe(
+        ws,
+        page_geometry=_empty_page(),
+        raster_evidence=_raster(ink_fraction=0.08),
+        density_evidence=_density(
+            label="abstain",
+            policy_applied=False,
+        ),
+    )
+    near_blank = next(
+        item for item in result.bundle.results if item.module_id == "near_blank_hallucinated_boxes"
+    )
+
+    assert near_blank.execution_status == "not_applicable"
+    assert near_blank.assessment is None
+
+
+@requires_sidecar
+def test_high_box_blank_with_nondecisive_raw_density_remains_uncertain(tmp_path):
+    ws = BookWorkspace.for_book("synthetic", tmp_path).ensure()
+    result = _observe(
+        ws,
+        page_geometry=_noise_page(),
+        raster_evidence=_raster(ink_fraction=0.01),
+        density_evidence=_density(
+            label="abstain",
+            box_count=140,
+            token_yield=0.0,
+            mean_token_length=1.0,
+            policy_applied=False,
+        ),
+    )
+    near_blank = next(
+        item for item in result.bundle.results if item.module_id == "near_blank_hallucinated_boxes"
+    )
+
+    assert near_blank.assessment == "uncertain"
+    assert near_blank.confidence == 1.0
+    assert near_blank.metrics["hallucination_score"] == 0.75
+
+
+@requires_sidecar
+def test_high_box_blank_with_near_zero_raw_density_is_unsupported(tmp_path):
+    ws = BookWorkspace.for_book("synthetic", tmp_path).ensure()
+    result = _observe(
+        ws,
+        page_geometry=_noise_page(),
+        raster_evidence=_raster(ink_fraction=0.001),
+        density_evidence=_density(
+            label="abstain",
+            box_count=140,
+            token_yield=0.0,
+            mean_token_length=1.0,
+            policy_applied=False,
+        ),
+    )
+    near_blank = next(
+        item for item in result.bundle.results if item.module_id == "near_blank_hallucinated_boxes"
+    )
+
+    assert near_blank.assessment == "unsupported"
+    assert "near_blank_hallucinated_boxes_likely" in near_blank.reasons
+    assert "very_low_ink_fraction" in near_blank.reasons
+
+
+@requires_sidecar
+def test_changed_raster_hash_invalidates_cached_assessment(tmp_path):
+    from book_layout_sidecar.core import CoreAssessmentProvider
+
+    ws = BookWorkspace.for_book("synthetic", tmp_path).ensure()
+    _observe(ws, raster_evidence=_raster(ink_fraction=0.08))
+    core = CoreAssessmentProvider()
+
+    class _CountingProvider:
+        identity = core.identity
+
+        def __init__(self):
+            self.calls = 0
+
+        def assess(self, request):
+            self.calls += 1
+            return core.assess(request)
+
+    provider = _CountingProvider()
+    result = _observe(
+        ws,
+        raster_evidence=_raster(ink_fraction=0.08, sha256="c" * 64),
+        provider_factory=lambda: provider,
+    )
+
+    assert result.cached is False
+    assert provider.calls == 1
 
 
 @requires_sidecar

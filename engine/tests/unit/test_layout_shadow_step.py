@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+from dataclasses import replace
 from types import SimpleNamespace
 
 import fitz
@@ -38,9 +39,12 @@ def _setup(tmp_path):
 
 class _Backend:
     reads: list[int] = []
+    renders: list[int] = []
     fail_page: int | None = None
 
     def __init__(self, pdf_path, *, language, dpi):
+        self._pdf_path = pdf_path
+        self._dpi = dpi
         self.engine_id = f"fake:{language}:{dpi}"
         self.backend_params = {"language": language, "dpi": dpi, "backend": "fake"}
         self.dropped_boxes = {}
@@ -57,6 +61,13 @@ class _Backend:
             height=700.0,
             words=(WordBox(text="testo", bbox=(10.0, 20.0, 60.0, 35.0)),),
         )
+
+    def render_page(self, page):
+        self.renders.append(page)
+        with fitz.open(self._pdf_path) as document:
+            return document[page - 1].get_pixmap(
+                dpi=self._dpi, colorspace=fitz.csGRAY, alpha=False
+            )
 
 
 def _observer(**kwargs):
@@ -92,6 +103,7 @@ def _run(cfg, lang, ws, **overrides):
 def test_layout_shadow_runs_all_pages_and_publishes_report(tmp_path):
     cfg, lang, ws = _setup(tmp_path)
     _Backend.reads = []
+    _Backend.renders = []
 
     summary = _run(cfg, lang, ws)
 
@@ -99,10 +111,23 @@ def test_layout_shadow_runs_all_pages_and_publishes_report(tmp_path):
     assert summary["word_boxes"] == 4
     assert summary["available_pages"] == 4
     assert _Backend.reads == [1, 2, 3, 4]
+    assert _Backend.renders == [1, 2, 3, 4]
     report = read_json(ws.data / "layout_assessment/copy1/run_report.json")
     assert report["status"] == "complete"
     assert report["source"]["sha256"]
     assert report["geometry"]["page_count"] == 4
+    assert report["assessment"]["density_evidence"] == {
+        "raster_schema_version": 1,
+        "raster_producer": "engine-pymupdf-raster-v1",
+        "policy": None,
+        "classified_pages": 0,
+        "raw_only_pages": 4,
+    }
+    first_page = report["geometry"]["page_artifacts"][0]
+    assert first_page["ink_fraction"] == 0.0
+    assert first_page["density_label"] == "abstain"
+    assert first_page["density_policy_applied"] is False
+    assert (ws.root / first_page["raster_path"]).is_file()
     progress = read_json(ws.state / layout_shadow.PROGRESS_FILE)
     assert progress["status"] == "complete"
     assert progress["completed_pages"] == progress["total_pages"] == 4
@@ -111,9 +136,72 @@ def test_layout_shadow_runs_all_pages_and_publishes_report(tmp_path):
 def test_layout_shadow_resume_reuses_provenance_valid_geometry(tmp_path):
     cfg, lang, ws = _setup(tmp_path)
     _Backend.reads = []
+    _Backend.renders = []
     _run(cfg, lang, ws)
     _run(cfg, lang, ws)
     assert _Backend.reads == [1, 2, 3, 4]
+    assert _Backend.renders == [1, 2, 3, 4]
+
+
+def test_layout_shadow_tampered_raster_invalidates_only_that_raster(tmp_path):
+    cfg, lang, ws = _setup(tmp_path)
+    _Backend.reads = []
+    _Backend.renders = []
+    _run(cfg, lang, ws)
+    raster_path, _ = layout_shadow._raster_paths(ws, "copy1", 2)
+    raster_path.write_bytes(b"tampered")
+
+    _run(cfg, lang, ws)
+
+    assert _Backend.reads == [1, 2, 3, 4]
+    assert _Backend.renders == [1, 2, 3, 4, 2]
+
+
+def test_layout_shadow_tampered_density_metadata_invalidates_raster(tmp_path):
+    cfg, lang, ws = _setup(tmp_path)
+    _Backend.reads = []
+    _Backend.renders = []
+    _run(cfg, lang, ws)
+    _, record_path = layout_shadow._raster_paths(ws, "copy1", 3)
+    record = read_json(record_path)
+    record["ink_fraction"] = 0.5
+    atomic_write_json(record_path, record)
+
+    _run(cfg, lang, ws)
+
+    assert _Backend.reads == [1, 2, 3, 4]
+    assert _Backend.renders == [1, 2, 3, 4, 3]
+
+
+def test_layout_shadow_applies_only_manifest_density_policy(tmp_path):
+    cfg, lang, ws = _setup(tmp_path)
+    calibrated = load_book("per_la_liberta").manifest.segmentation
+    cfg = replace(cfg, manifest=replace(cfg.manifest, segmentation=calibrated))
+    _Backend.reads = []
+    _Backend.renders = []
+
+    _run(cfg, lang, ws)
+
+    report = read_json(ws.data / "layout_assessment/copy1/run_report.json")
+    density_summary = report["assessment"]["density_evidence"]
+    assert density_summary["policy"] == {
+        "classifier_version": "density-bands-v1",
+        "params": {
+            "yield_content_min": 0.7,
+            "box_content_min": 40,
+            "ink_blank_max": 0.15,
+            "ink_dark_min": 0.6,
+            "confidence_margin": 0.05,
+            "cover_edge_leaves": 7,
+            "ink_saturation_min": 0.9,
+        },
+    }
+    assert density_summary["classified_pages"] == 4
+    assert density_summary["raw_only_pages"] == 0
+    assert all(
+        page["density_policy_applied"] is True
+        for page in report["geometry"]["page_artifacts"]
+    )
 
 
 def test_layout_shadow_parameter_change_invalidates_geometry(tmp_path):

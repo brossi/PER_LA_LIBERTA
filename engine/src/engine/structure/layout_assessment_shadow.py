@@ -9,6 +9,7 @@ surface, and has no route into geometry, worklists, or structure-map mutation.
 from __future__ import annotations
 
 import hashlib
+import math
 import re
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -30,7 +31,7 @@ STATUS_UNAVAILABLE = "unavailable"
 OBSERVATION_SCHEMA_VERSION = 1
 OBSERVATION_STALE_CLASS = "layout-assessment-shadow"
 ADAPTER_ID = "engine-page-geometry"
-ADAPTER_VERSION = 1
+ADAPTER_VERSION = 2
 
 _WITNESS_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
 _SHA256 = re.compile(r"^[0-9a-f]{64}$")
@@ -60,6 +61,68 @@ class ColumnAssessmentPolicy:
 
     decision_threshold: float
     hysteresis_margin: float
+
+
+@dataclass(frozen=True, slots=True)
+class PageRasterEvidence:
+    """Hash-bound rendered page pixels and their raw, policy-free ink measurement."""
+
+    page: int
+    artifact_ref: str
+    sha256: str
+    source_selector: str
+    producer: str
+    dpi: int
+    width_px: int
+    height_px: int
+    ink_fraction: float
+
+    def __post_init__(self) -> None:
+        if type(self.page) is not int or self.page < 1:
+            raise ValueError("raster evidence page must be a positive integer")
+        if not self.artifact_ref or not self.source_selector or not self.producer:
+            raise ValueError("raster evidence references and producer must be non-empty")
+        if _SHA256.fullmatch(self.sha256) is None:
+            raise ValueError("raster evidence sha256 must be a bare lowercase SHA-256")
+        if type(self.dpi) is not int or self.dpi < 1:
+            raise ValueError("raster evidence dpi must be a positive integer")
+        if type(self.width_px) is not int or self.width_px < 1:
+            raise ValueError("raster evidence width_px must be a positive integer")
+        if type(self.height_px) is not int or self.height_px < 1:
+            raise ValueError("raster evidence height_px must be a positive integer")
+        if not (math.isfinite(self.ink_fraction) and 0.0 <= self.ink_fraction <= 1.0):
+            raise ValueError("raster evidence ink_fraction must be in [0, 1]")
+
+
+@dataclass(frozen=True, slots=True)
+class PageDensityEvidence:
+    """Engine-classified density evidence produced only by an explicit calibrated policy."""
+
+    page: int
+    box_count: int
+    token_yield: float
+    mean_token_length: float
+    label: str
+    confidence: float
+    hint: str
+    producer: str
+    policy_applied: bool = False
+
+    def __post_init__(self) -> None:
+        if type(self.page) is not int or self.page < 1:
+            raise ValueError("density evidence page must be a positive integer")
+        if type(self.box_count) is not int or self.box_count < 0:
+            raise ValueError("density evidence box_count must be a non-negative integer")
+        if not (math.isfinite(self.token_yield) and 0.0 <= self.token_yield <= 1.0):
+            raise ValueError("density evidence token_yield must be in [0, 1]")
+        if not (math.isfinite(self.mean_token_length) and self.mean_token_length >= 0.0):
+            raise ValueError("density evidence mean_token_length must be non-negative")
+        if not self.label or not self.hint or not self.producer:
+            raise ValueError("density evidence label, hint, and producer must be non-empty")
+        if type(self.policy_applied) is not bool:
+            raise ValueError("density evidence policy_applied must be boolean")
+        if not (math.isfinite(self.confidence) and 0.0 <= self.confidence <= 1.0):
+            raise ValueError("density evidence confidence must be in [0, 1]")
 
 
 @dataclass(frozen=True, slots=True)
@@ -95,6 +158,8 @@ def observe_page_geometry(
     source_sha256: str,
     page_geometry: PageGeometry,
     geometry_engine_id: str,
+    raster_evidence: PageRasterEvidence | None = None,
+    density_evidence: PageDensityEvidence | None = None,
     column_policy: ColumnAssessmentPolicy | None = None,
     provider_factory: Callable[[], Any] | None = None,
     refresh: bool = False,
@@ -125,6 +190,8 @@ def observe_page_geometry(
             source_sha256=source_sha256,
             page_geometry=page_geometry,
             geometry_engine_id=geometry_engine_id,
+            raster_evidence=raster_evidence,
+            density_evidence=density_evidence,
             column_policy=column_policy,
         )
         provider = (
@@ -221,7 +288,12 @@ def _load_sidecar_api() -> dict[str, Any]:
         CAPABILITY_PAGE_CONTAINS_OCR_RELEVANT_CONTENT,
     )
     from book_layout_sidecar.core.columns import compute_column_feature
-    from book_layout_sidecar.core.modules import INPUT_KIND_OCR_BOXES
+    from book_layout_sidecar.core.density import DensityFeature
+    from book_layout_sidecar.core.modules import (
+        INPUT_KIND_DENSITY_FEATURES,
+        INPUT_KIND_OCR_BOXES,
+        INPUT_KIND_SOURCE_RASTER,
+    )
     from book_layout_sidecar.core.near_blank import score_near_blank_hallucinated_boxes
     from book_layout_sidecar.core.ocr import ocr_page_sha256
     from book_layout_sidecar.core.ocr_stats import compute_ocr_page_stats
@@ -247,7 +319,10 @@ def _load_sidecar_api() -> dict[str, Any]:
             CAPABILITY_PAGE_CONTAINS_OCR_RELEVANT_CONTENT
         ),
         "compute_column_feature": compute_column_feature,
+        "DensityFeature": DensityFeature,
+        "INPUT_KIND_DENSITY_FEATURES": INPUT_KIND_DENSITY_FEATURES,
         "INPUT_KIND_OCR_BOXES": INPUT_KIND_OCR_BOXES,
+        "INPUT_KIND_SOURCE_RASTER": INPUT_KIND_SOURCE_RASTER,
         "score_near_blank_hallucinated_boxes": score_near_blank_hallucinated_boxes,
         "ocr_page_sha256": ocr_page_sha256,
         "compute_ocr_page_stats": compute_ocr_page_stats,
@@ -264,6 +339,8 @@ def _build_request(
     source_sha256: str,
     page_geometry: PageGeometry,
     geometry_engine_id: str,
+    raster_evidence: PageRasterEvidence | None,
+    density_evidence: PageDensityEvidence | None,
     column_policy: ColumnAssessmentPolicy | None,
 ) -> Any:
     artifact_ref = f"{source_ref}#page={page_geometry.page}:ocr-boxes={witness_id}"
@@ -291,7 +368,39 @@ def _build_request(
         producer=f"{geometry_engine_id};adapter={ADAPTER_ID}@{ADAPTER_VERSION}",
     )
     stats = api["compute_ocr_page_stats"](ocr_page)
-    near_blank = api["score_near_blank_hallucinated_boxes"](stats)
+    if raster_evidence is not None and raster_evidence.page != page_geometry.page:
+        raise ValueError("raster evidence page differs from geometry page")
+    if density_evidence is not None:
+        if raster_evidence is None:
+            raise ValueError("classified density evidence requires its source raster evidence")
+        if density_evidence.page != page_geometry.page:
+            raise ValueError("density evidence page differs from geometry page")
+        if density_evidence.box_count != stats.box_count:
+            raise ValueError("density evidence box_count differs from normalized OCR stats")
+
+    density = None
+    if density_evidence is not None:
+        density = api["DensityFeature"](
+            page=density_evidence.page,
+            hint=density_evidence.hint,
+            ink_fraction=raster_evidence.ink_fraction,
+            box_count=density_evidence.box_count,
+            token_yield=density_evidence.token_yield,
+            mean_token_length=density_evidence.mean_token_length,
+            label=density_evidence.label,
+            confidence=density_evidence.confidence,
+            source_ref=raster_evidence.artifact_ref,
+            source_selector=raster_evidence.source_selector,
+            producer=(
+                f"{density_evidence.producer};"
+                f"source_raster_sha256={raster_evidence.sha256}"
+            ),
+        )
+    near_blank = api["score_near_blank_hallucinated_boxes"](
+        stats,
+        ink_fraction=density.ink_fraction if density is not None else None,
+        density_label=density.label if density is not None else None,
+    )
     text_likeness = api["compute_ocr_text_likeness_from_stats"](
         page=ocr_page, stats=stats
     )
@@ -308,15 +417,44 @@ def _build_request(
         )
         capabilities.append(api["CAPABILITY_COLUMN_EVIDENCE_IS_STABLE"])
 
-    artifact = api["AssessmentInputArtifact"](
+    ocr_artifact = api["AssessmentInputArtifact"](
         kind=api["INPUT_KIND_OCR_BOXES"],
         ref=artifact_ref,
         sha256=api["ocr_page_sha256"](ocr_page),
         version=None,
     )
-    present_names = ["stats", "near_blank_score", "ocr_text_likeness"]
+    artifacts = [ocr_artifact]
+    if raster_evidence is not None:
+        artifacts.append(api["AssessmentInputArtifact"](
+            kind=api["INPUT_KIND_SOURCE_RASTER"],
+            ref=raster_evidence.artifact_ref,
+            sha256=raster_evidence.sha256,
+            version=None,
+        ))
+    density_artifact = None
+    if density is not None:
+        density_ref = f"{raster_evidence.artifact_ref}:density"
+        density_artifact = api["AssessmentInputArtifact"](
+            kind=api["INPUT_KIND_DENSITY_FEATURES"],
+            ref=density_ref,
+            sha256=_dict_sha256(density.to_dict()),
+            version=None,
+        )
+        artifacts.append(density_artifact)
+
+    refs_by_evidence = {
+        "stats": (artifact_ref,),
+        "near_blank_score": (
+            (artifact_ref, density_artifact.ref)
+            if density_artifact is not None
+            else (artifact_ref,)
+        ),
+        "ocr_text_likeness": (artifact_ref,),
+    }
     if column_feature is not None:
-        present_names.append("column_feature")
+        refs_by_evidence["column_feature"] = (artifact_ref,)
+    if density_artifact is not None:
+        refs_by_evidence["density"] = (density_artifact.ref,)
     evidence = api["AssessmentEvidence"](
         subject=api["AssessmentSubject"](
             book_id=workspace.book_id,
@@ -324,12 +462,13 @@ def _build_request(
             source_sha256=source_sha256,
             page=page_geometry.page,
         ),
-        input_artifacts=(artifact,),
+        input_artifacts=tuple(artifacts),
         stats=stats,
         near_blank_score=near_blank,
+        density=density,
         ocr_text_likeness=text_likeness,
         column_feature=column_feature,
-        artifact_refs_by_evidence={name: (artifact_ref,) for name in present_names},
+        artifact_refs_by_evidence=refs_by_evidence,
     )
     return api["build_assessment_request"](
         evidence=evidence, capabilities=tuple(capabilities)
@@ -459,3 +598,10 @@ def _validate_source(source_ref: str, source_sha256: str, geometry_engine_id: st
 
 def _text_sha256(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+def _dict_sha256(value: dict[str, Any]) -> str:
+    import json
+
+    canonical = json.dumps(value, ensure_ascii=False, allow_nan=False, sort_keys=True, separators=(",", ":"))
+    return _text_sha256(canonical)

@@ -172,6 +172,27 @@ class PyMuPDFTesseractBackend:
             )
         return found
 
+    def render_page(self, page: int) -> fitz.Pixmap:
+        """Render one source page at the backend's explicit DPI for pixel-backed evidence.
+
+        The returned raster is the same source leaf and render resolution used by the OCR backend,
+        but remains an engine-owned observation input.  It is not interpreted here.
+        """
+        doc = self._open()
+        if type(page) is not int or not 1 <= page <= doc.page_count:
+            raise GeometryError(
+                f"page {page!r} out of bounds for a {doc.page_count}-page PDF (1-based inclusive)"
+            )
+        source_page = doc[page - 1]
+        if source_page.rotation != 0:
+            raise GeometryError(
+                f"page {page} is rotated ({source_page.rotation}°) — refusing raster evidence"
+            )
+        try:
+            return source_page.get_pixmap(dpi=self._dpi, colorspace=fitz.csGRAY, alpha=False)
+        except Exception as exc:
+            raise GeometryError(f"raster render failed on page {page}: {exc}") from exc
+
     def read_pages(self, first_page: int, last_page: int) -> Iterator[PageGeometry]:
         """Yield :class:`PageGeometry` for each page in ``[first_page, last_page]`` (1-based,
         inclusive). Fail-loud on rotation, OCR failure, a systemic off-page fraction, or an

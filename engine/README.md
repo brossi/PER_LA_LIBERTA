@@ -73,6 +73,10 @@ uv run engine --book ninnoli --status
 uv run engine --book ninnoli --status --watch 2
 ```
 
+`layout_shadow` checkpoints a hash-bound PNG and raw ink fraction for every scan page. Books with
+calibrated `segmentation.density_bands` also emit density labels; books without that policy emit
+raw density as an explicit abstention, never an inferred blank/content claim.
+
 The framework **never writes outside `books/<id>/work/`**. `paths.BookWorkspace`
 asserts workspace containment, and `tests/unit/test_isolation.py` hashes the protected
 parent roots (`data/`, `output/`, `state/`, `docs/`, `static/`) before/after each step

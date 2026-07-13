@@ -58,3 +58,20 @@ def atomic_write_text(path: Path, text: str) -> None:
     truncated file on a mid-write crash that a later step reads as complete (invariant I8).
     """
     _atomic_write(path, lambda f: f.write(text))
+
+
+def atomic_write_bytes(path: Path, data: bytes) -> None:
+    """Write a binary artifact atomically.
+
+    Raster checkpoints use this sibling of :func:`atomic_write_text`; a PNG must never become
+    visible at its final path until every byte has been written successfully.
+    """
+    path = Path(path)
+    tmp_fd, tmp_path = tempfile.mkstemp(dir=path.parent, suffix=".tmp")
+    try:
+        with os.fdopen(tmp_fd, "wb") as handle:
+            handle.write(data)
+        os.replace(tmp_path, path)
+    except BaseException:
+        os.unlink(tmp_path)
+        raise

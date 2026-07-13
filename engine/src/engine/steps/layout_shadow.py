@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import importlib.util
+import json
 import re
 from collections import Counter
 from pathlib import Path
@@ -24,15 +25,25 @@ from engine.structure.geometry import PageGeometry, WordBox
 from engine.structure.geometry_pymupdf import PyMuPDFTesseractBackend
 from engine.structure.layout_assessment_shadow import (
     MODE_SHADOW,
+    PageDensityEvidence,
+    PageRasterEvidence,
     STATUS_AVAILABLE,
     observe_page_geometry,
 )
-from engine.util.jsonio import atomic_write_json, read_json
+from engine.structure.segmentation import (
+    DensityClassifier,
+    ink_fraction_from_pixmap,
+    page_density_features,
+)
+from engine.util.jsonio import atomic_write_bytes, atomic_write_json, read_json
 
 GEOMETRY_SCHEMA_VERSION = 1
 GEOMETRY_STALE_CLASS = "layout-shadow-page-geometry"
-REPORT_SCHEMA_VERSION = 1
+REPORT_SCHEMA_VERSION = 2
 REPORT_STALE_CLASS = "layout-assessment-shadow-run"
+RASTER_SCHEMA_VERSION = 1
+RASTER_STALE_CLASS = "layout-shadow-page-raster"
+RASTER_PRODUCER = "engine-pymupdf-raster-v1"
 PROGRESS_FILE = "layout_shadow_progress.json"
 
 
@@ -63,6 +74,174 @@ def _pinned_digest(book_dir: Path, relative_path: str) -> str:
 def _checkpoint_path(workspace: BookWorkspace, witness_id: str, page: int) -> Path:
     return workspace.resolve(
         "data", "geometry", "shadow", witness_id, f"page_{page:04d}.json"
+    )
+
+
+def _raster_paths(
+    workspace: BookWorkspace, witness_id: str, page: int
+) -> tuple[Path, Path]:
+    directory = workspace.resolve("data", "raster", "shadow", witness_id)
+    stem = f"page_{page:04d}"
+    return directory / f"{stem}.png", directory / f"{stem}.json"
+
+
+def _raster_artifact_ref(*, source_ref: str, witness_id: str, page: int, dpi: int) -> str:
+    return f"{source_ref}#page={page}:raster={witness_id}:dpi={dpi}"
+
+
+def _load_raster_checkpoint(
+    *,
+    workspace: BookWorkspace,
+    witness_id: str,
+    page: int,
+    source_ref: str,
+    source_sha256: str,
+    dpi: int,
+) -> tuple[PageRasterEvidence, Path, Path] | None:
+    png_path, record_path = _raster_paths(workspace, witness_id, page)
+    if not png_path.is_file() or not record_path.is_file():
+        return None
+    try:
+        record = read_json(record_path)
+        expected = {
+            "schema_version": RASTER_SCHEMA_VERSION,
+            "stale_class": RASTER_STALE_CLASS,
+            "source_ref": source_ref,
+            "source_sha256": source_sha256,
+            "page": page,
+            "dpi": dpi,
+            "producer": RASTER_PRODUCER,
+            "artifact_ref": _raster_artifact_ref(
+                source_ref=source_ref, witness_id=witness_id, page=page, dpi=dpi
+            ),
+            "source_selector": f"page={page}",
+        }
+        if not isinstance(record, dict) or any(record.get(key) != value for key, value in expected.items()):
+            return None
+        if record.get("raster_path") != str(png_path.relative_to(workspace.root)):
+            return None
+        actual_raster_sha256 = _sha256_file(png_path)
+        if record.get("raster_sha256") != actual_raster_sha256:
+            return None
+        decoded = fitz.Pixmap(str(png_path))
+        actual_ink_fraction = ink_fraction_from_pixmap(decoded)
+        if (
+            record.get("width_px") != decoded.width
+            or record.get("height_px") != decoded.height
+            or record.get("ink_fraction") != actual_ink_fraction
+        ):
+            return None
+        evidence = PageRasterEvidence(
+            page=page,
+            artifact_ref=record["artifact_ref"],
+            sha256=actual_raster_sha256,
+            source_selector=record["source_selector"],
+            producer=record["producer"],
+            dpi=dpi,
+            width_px=decoded.width,
+            height_px=decoded.height,
+            ink_fraction=actual_ink_fraction,
+        )
+        return evidence, png_path, record_path
+    except (OSError, UnicodeError, ValueError, TypeError, KeyError, RecursionError):
+        return None
+
+
+def _capture_page_raster(
+    *,
+    workspace: BookWorkspace,
+    backend,
+    witness_id: str,
+    page: int,
+    source_ref: str,
+    source_sha256: str,
+    dpi: int,
+) -> tuple[PageRasterEvidence, Path, Path]:
+    pixmap = backend.render_page(page)
+    png_bytes = pixmap.tobytes("png")
+    raster_sha256 = hashlib.sha256(png_bytes).hexdigest()
+    png_path, record_path = _raster_paths(workspace, witness_id, page)
+    png_path.parent.mkdir(parents=True, exist_ok=True)
+    atomic_write_bytes(png_path, png_bytes)
+    evidence = PageRasterEvidence(
+        page=page,
+        artifact_ref=_raster_artifact_ref(
+            source_ref=source_ref, witness_id=witness_id, page=page, dpi=dpi
+        ),
+        sha256=raster_sha256,
+        source_selector=f"page={page}",
+        producer=RASTER_PRODUCER,
+        dpi=dpi,
+        width_px=pixmap.width,
+        height_px=pixmap.height,
+        ink_fraction=ink_fraction_from_pixmap(pixmap),
+    )
+    atomic_write_json(record_path, {
+        "schema_version": RASTER_SCHEMA_VERSION,
+        "stale_class": RASTER_STALE_CLASS,
+        "source_ref": source_ref,
+        "source_sha256": source_sha256,
+        "page": page,
+        "dpi": dpi,
+        "producer": evidence.producer,
+        "artifact_ref": evidence.artifact_ref,
+        "source_selector": evidence.source_selector,
+        "raster_path": str(png_path.relative_to(workspace.root)),
+        "raster_sha256": evidence.sha256,
+        "width_px": evidence.width_px,
+        "height_px": evidence.height_px,
+        "ink_fraction": evidence.ink_fraction,
+    })
+    return evidence, png_path, record_path
+
+
+def _density_evidence(
+    *,
+    classifier: DensityClassifier | None,
+    raster: PageRasterEvidence,
+    geometry: PageGeometry,
+    n_leaves: int,
+) -> PageDensityEvidence:
+    features = page_density_features(
+        ink_fraction=raster.ink_fraction,
+        boxes=geometry.words,
+    )
+    if classifier is None:
+        return PageDensityEvidence(
+            page=geometry.page,
+            box_count=features.box_count,
+            token_yield=features.token_yield,
+            mean_token_length=features.mean_token_length,
+            label="abstain",
+            confidence=0.0,
+            hint="density_policy_absent",
+            producer="engine-density:density-bands-v1;policy=absent",
+            policy_applied=False,
+        )
+    verdict = classifier.classify(
+        features,
+        leaf_index=geometry.page,
+        n_leaves=n_leaves,
+    )
+    params_json = json.dumps(
+        classifier.params,
+        allow_nan=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    )
+    return PageDensityEvidence(
+        page=geometry.page,
+        box_count=features.box_count,
+        token_yield=features.token_yield,
+        mean_token_length=features.mean_token_length,
+        label=verdict.band.value,
+        confidence=verdict.confidence,
+        hint=verdict.signal,
+        producer=(
+            f"engine-density:{classifier.version};"
+            f"params_sha256={hashlib.sha256(params_json.encode('utf-8')).hexdigest()}"
+        ),
+        policy_applied=True,
     )
 
 
@@ -144,6 +323,7 @@ def _write_report(
     available_pages: list[int],
     unavailable_pages: list[int],
     result_counts: Counter,
+    density_policy: dict[str, object] | None,
     failed_page: int | None = None,
     failure_type: str | None = None,
 ) -> Path:
@@ -166,7 +346,17 @@ def _write_report(
         "assessment": {
             "mode": MODE_SHADOW,
             "column_policy": None,
-            "density_evidence": None,
+            "density_evidence": {
+                "raster_schema_version": RASTER_SCHEMA_VERSION,
+                "raster_producer": RASTER_PRODUCER,
+                "policy": density_policy,
+                "classified_pages": sum(
+                    item["density_policy_applied"] for item in page_records
+                ),
+                "raw_only_pages": sum(
+                    not item["density_policy_applied"] for item in page_records
+                ),
+            },
             "available_pages": sorted(available_pages),
             "unavailable_pages": sorted(unavailable_pages),
             "result_counts": [
@@ -289,6 +479,19 @@ def run(
     )
     engine_id = backend.engine_id
     backend_params = backend.backend_params
+    density_classifier = (
+        DensityClassifier.from_config(cfg.manifest.segmentation.density_bands)
+        if cfg.manifest.segmentation is not None
+        else None
+    )
+    density_policy = (
+        {
+            "classifier_version": density_classifier.version,
+            "params": density_classifier.params,
+        }
+        if density_classifier is not None
+        else None
+    )
     source = {
         "ref": source_ref,
         "sha256": actual_sha256,
@@ -341,6 +544,33 @@ def run(
             else:
                 page_geometry, dropped, oob = cached
 
+            raster_cached = None if refresh_geometry else _load_raster_checkpoint(
+                workspace=workspace,
+                witness_id=witness_id,
+                page=page_number,
+                source_ref=source_ref,
+                source_sha256=actual_sha256,
+                dpi=dpi,
+            )
+            if raster_cached is None:
+                raster, raster_path, raster_record_path = _capture_page_raster(
+                    workspace=workspace,
+                    backend=backend,
+                    witness_id=witness_id,
+                    page=page_number,
+                    source_ref=source_ref,
+                    source_sha256=actual_sha256,
+                    dpi=dpi,
+                )
+            else:
+                raster, raster_path, raster_record_path = raster_cached
+            density = _density_evidence(
+                classifier=density_classifier,
+                raster=raster,
+                geometry=page_geometry,
+                n_leaves=page_count,
+            )
+
             observation = observer(
                 workspace=workspace,
                 mode=MODE_SHADOW,
@@ -349,6 +579,8 @@ def run(
                 source_sha256=actual_sha256,
                 page_geometry=page_geometry,
                 geometry_engine_id=engine_id,
+                raster_evidence=raster,
+                density_evidence=density,
                 column_policy=None,
                 refresh=refresh_shadow,
             )
@@ -372,6 +604,20 @@ def run(
                     "word_count": len(page_geometry.words),
                     "dropped_boxes": dropped,
                     "oob_boxes": oob,
+                    "raster_path": str(raster_path.relative_to(workspace.root)),
+                    "raster_sha256": raster.sha256,
+                    "raster_record_path": str(raster_record_path.relative_to(workspace.root)),
+                    "raster_record_sha256": _sha256_file(raster_record_path),
+                    "raster_dpi": raster.dpi,
+                    "raster_width_px": raster.width_px,
+                    "raster_height_px": raster.height_px,
+                    "ink_fraction": raster.ink_fraction,
+                    "density_label": density.label if density is not None else None,
+                    "density_confidence": density.confidence if density is not None else None,
+                    "density_signal": density.hint if density is not None else None,
+                    "density_policy_applied": (
+                        density.policy_applied if density is not None else False
+                    ),
                     "geometry_path": str(checkpoint.relative_to(workspace.root)),
                     "geometry_sha256": _sha256_file(checkpoint),
                     "assessment_path": (
@@ -414,6 +660,7 @@ def run(
                 available_pages=available_pages,
                 unavailable_pages=unavailable_pages,
                 result_counts=result_counts,
+                density_policy=density_policy,
                 failed_page=page_number,
                 failure_type=type(exc).__name__,
             )
@@ -445,6 +692,7 @@ def run(
         available_pages=available_pages,
         unavailable_pages=unavailable_pages,
         result_counts=result_counts,
+        density_policy=density_policy,
     )
     _write_progress(
         workspace,

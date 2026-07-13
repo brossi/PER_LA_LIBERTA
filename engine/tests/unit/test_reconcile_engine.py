@@ -20,6 +20,7 @@ SequenceMatcher / pure string work.
 from __future__ import annotations
 
 import json
+import re
 from dataclasses import replace
 from pathlib import Path
 
@@ -336,6 +337,127 @@ def test_declared_flat_sections_fail_loud_on_missing_or_reordered_boundary():
         )
 
 
+def test_declared_section_shapes_cover_real_zero_section_ocr_specimens():
+    specimens = (
+        ("fenomeni_medianici", 0, "I FENOMENI MEDIANICI"),
+        ("fenomeni_medianici", 1, "IL QUESTIONARIO"),
+        ("fenomeni_medianici", 2, "LE RISPOSTE"),
+        (
+            "pinocchio",
+            3,
+            ">a sloria di Pinocchio co] (irli lo- pari a ni e, dove si vede come I ra-",
+        ),
+        ("pinocchio", 13, "erdRlo reità al liuonl consigli de"),
+        ("pinocchio", 17, "Come potete immagmarvelo, la Fata lasciò che"),
+        ("pinocchio", 27, "ilo corre pericolo di esser rritto In padella, come un pesce."),
+        (
+            "pinocchio",
+            32,
+            "Diventalo un elochino vero è portalo a vendere, e lo compri li 1",
+        ),
+        ("pinocchio", 34, "Finocchio ritrova in corpo a) Pesce-cane.... chi ritrova?"),
+    )
+
+    for book, section_index, line in specimens:
+        spec = load_book(book).structure.raw_segmentation
+        assert spec is not None
+        pattern = re.compile(
+            r"\s*(?:" + spec.sections[section_index].heading_pattern + r")\s*$"
+        )
+        assert pattern.fullmatch(line), (book, section_index + 1, line)
+
+
+def test_declared_block_headings_consume_synopsis_and_section_marker():
+    configured = load_book("pinocchio").structure.raw_segmentation
+    assert configured is not None
+    spec = replace(
+        configured,
+        body_start_after_pattern="START",
+        body_end_patterns=("END",),
+        sections=configured.sections[:2],
+    )
+    body = "testo narrativo sufficiente per superare il limite minimo della sezione " * 2
+    text = "\n".join(
+        [
+            "START",
+            "I.",
+            "Come andò che Maestro Ciliegia trovò un pezzo di legno",
+            "continuazione del sommario del capitolo primo",
+            "",
+            body + "uno",
+            "",
+            "II.",
+            "Maestro Ciliegia regala il pezzo di legno a Geppetto",
+            "continuazione del sommario del capitolo secondo",
+            "",
+            body + "due",
+            "END",
+        ]
+    )
+
+    chapters = reconcile.split_declared_raw_sections(text, spec)
+
+    assert [chapter["id"] for chapter in chapters] == ["chapter_01", "chapter_02"]
+    assert "continuazione del sommario" not in chapters[0]["text"]
+    assert "continuazione del sommario" not in chapters[1]["text"]
+    assert "I." not in chapters[0]["text"] and "II." not in chapters[1]["text"]
+    assert chapters[0]["text"].endswith("uno")
+    assert chapters[1]["text"].endswith("due")
+
+
+def test_declared_block_anchor_match_in_later_prose_is_preserved():
+    configured = load_book("pinocchio").structure.raw_segmentation
+    assert configured is not None
+    spec = replace(
+        configured,
+        body_start_after_pattern="START",
+        body_end_patterns=("END",),
+        sections=configured.sections[:1],
+    )
+    anchor = "Come andò che Maestro Ciliegia trovò un pezzo di legno"
+    later_prose = "Come andò che Maestro Ciliegia ricordò quel pezzo di legno"
+    text = "\n".join(
+        [
+            "START",
+            "I.",
+            anchor,
+            "continuazione del sommario del capitolo",
+            "",
+            "testo narrativo iniziale " * 8,
+            later_prose,
+            "testo narrativo finale " * 8,
+            "END",
+        ]
+    )
+
+    chapters = reconcile.split_declared_raw_sections(text, spec)
+
+    assert len(chapters) == 1
+    assert anchor not in chapters[0]["text"]
+    assert later_prose in chapters[0]["text"]
+
+
+def test_declared_body_boundary_retains_first_prose_line_when_heading_is_absent():
+    configured = load_book("pinocchio").structure.raw_segmentation
+    assert configured is not None
+    section = configured.sections[17]
+    assert section.boundary_line_role == "body"
+    spec = replace(
+        configured,
+        body_start_after_pattern="START",
+        body_end_patterns=("END",),
+        sections=(section,),
+        section_marker_patterns=(),
+    )
+    opening = "Come potete immagmarvelo, la Fata lasciò che il burattino piangesse."
+    text = "\n".join(["START", opening, "seguito narrativo " * 8, "END"])
+
+    chapters = reconcile.split_declared_raw_sections(text, spec)
+
+    assert len(chapters) == 1
+    assert chapters[0]["text"].startswith(opening)
+
+
 # --- separability: full reconcile.run on a synthetic, non-PLL book ---------------------- #
 
 def _seed_synthetic(tmp_path: Path) -> BookWorkspace:
@@ -375,6 +497,23 @@ def test_reconcile_runs_end_to_end_on_synthetic_book(tmp_path):
     assert pages, "expected the page map to map at least one chapter"
     for v in pages.values():
         assert v == sorted(set(v)) and all(isinstance(p, int) for p in v)
+
+
+def test_reconcile_rejects_nonempty_witness_with_zero_detected_sections(tmp_path):
+    cfg = load_book("synthetic")
+    lang = get_language_plugin(cfg.language_id)
+    ws = _seed_synthetic(tmp_path)
+    (ws.data / reconcile.COPY1_FILE).write_text(
+        "Testo narrativo non vuoto, ma privo di una forma di intestazione dichiarata.\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(MissingInputError, match="zero sections in non-empty Copy 1"):
+        reconcile.run(
+            workspace=ws, cfg=cfg, lang=lang, admission_checker=lambda **_: None
+        )
+
+    assert not (ws.data / reconcile.RECONCILED_FILE).exists()
 
 
 # --- 2-way mode: the --skip-ocr fallback (no Copy 3) -------------------------------------- #

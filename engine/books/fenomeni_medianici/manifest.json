@@ -36,7 +36,31 @@
     "retention_min": 0.60,
     "foreign_char_max": 0.005,
     "word_quality_high_severity_max": 0,
-    "running_heads": []
+    "running_heads": [],
+    "raw_segmentation": {
+      "kind": "declared_sections",
+      "body_start_after_pattern": "AFFETTUOSAMENTE",
+      "body_end_patterns": [
+        "INDICE"
+      ],
+      "sections": [
+        {
+          "id": "i_fenomeni_medianici",
+          "title": "I fenomeni medianici",
+          "heading_pattern": "I\\s+FENOMENI\\s+MEDIANICI"
+        },
+        {
+          "id": "il_questionario",
+          "title": "Il questionario",
+          "heading_pattern": "IL\\s+QUESTIONARIO"
+        },
+        {
+          "id": "le_risposte",
+          "title": "Le risposte",
+          "heading_pattern": "LE\\s+RISPOSTE"
+        }
+      ]
+    }
   },
   "edition": {
     "title_it": "I fenomeni medianici",

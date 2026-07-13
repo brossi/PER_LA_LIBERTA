@@ -102,14 +102,23 @@
         "word_quality_high_severity_max": {"type": "integer", "minimum": 0},
         "running_heads": {"type": "array", "items": {"type": "string"}},
         "raw_segmentation": {
-          "$comment": "Optional manifest-selected segmentation for a flat collection whose raw OCR does not use the language plugin's conventional part/chapter grammar. Boundary and heading patterns are book/edition evidence; the engine owns only ordered state-machine mechanics.",
+          "$comment": "Optional manifest-selected segmentation for ordered sections whose raw OCR does not use the language plugin's conventional part/chapter grammar. Each declared full-line heading regex is one supported book/edition shape; the engine owns only ordered state-machine mechanics.",
           "type": "object",
           "additionalProperties": false,
           "required": ["kind", "body_start_after_pattern", "sections"],
           "properties": {
-            "kind": {"const": "flat_sections"},
+            "kind": {"enum": ["declared_sections", "flat_sections"]},
             "body_start_after_pattern": {"type": "string", "minLength": 1},
             "body_end_patterns": {
+              "type": "array",
+              "items": {"type": "string", "minLength": 1}
+            },
+            "heading_span": {
+              "$comment": "Whether a matched heading consumes only its matching line or the complete nonblank OCR block containing the section synopsis.",
+              "enum": ["line", "block"]
+            },
+            "section_marker_patterns": {
+              "$comment": "Full-line section markers represented by the declared section title rather than body text, for example bare Roman numerals.",
               "type": "array",
               "items": {"type": "string", "minLength": 1}
             },
@@ -123,7 +132,11 @@
                 "properties": {
                   "id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"},
                   "title": {"type": "string", "minLength": 1},
-                  "heading_pattern": {"type": "string", "minLength": 1}
+                  "heading_pattern": {"type": "string", "minLength": 1},
+                  "boundary_line_role": {
+                    "$comment": "By default the matching line is a heading represented by section.title and is not copied into the body. Use body when OCR omitted the printed heading and the first retained prose line is the only stable boundary anchor.",
+                    "enum": ["heading", "body"]
+                  }
                 }
               }
             }

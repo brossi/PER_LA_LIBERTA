@@ -36,7 +36,202 @@
     "retention_min": 0.60,
     "foreign_char_max": 0.005,
     "word_quality_high_severity_max": 0,
-    "running_heads": []
+    "running_heads": [],
+    "raw_segmentation": {
+      "kind": "declared_sections",
+      "heading_span": "block",
+      "section_marker_patterns": [
+        "(?i:[IVXLCDM]{1,8}\\.)"
+      ],
+      "body_start_after_pattern": "PROPRI.T.\\s+LETTERARIA",
+      "body_end_patterns": [
+        "FINE",
+        "INDICE"
+      ],
+      "sections": [
+        {
+          "id": "chapter_01",
+          "title": "I. Come andò che Maestro Ciliegia, falegname, trovò un pezzo di legno, che piangeva e rideva come un bambino.",
+          "heading_pattern": "(?i:Come\\s+and\\S*\\s+che\\s+Maestro\\s+Ciliegia.*pezzo\\s+di\\s+legno.*)"
+        },
+        {
+          "id": "chapter_02",
+          "title": "II. Maestro Ciliegia regala il pezzo di legno al suo amico Geppetto, il quale lo prende per fabbricarsi un burattino maraviglioso, che sappia ballare, tirar di scherma e fare i salti mortali.",
+          "heading_pattern": "(?i:.*regala\\s+il\\s+pezzo\\s+di\\s+legno.*)"
+        },
+        {
+          "id": "chapter_03",
+          "title": "III. Geppetto, tornato a casa, comincia subito a fabbricarsi il burattino e gli mette il nome di Pinocchio. Prime monellerie del burattino.",
+          "heading_pattern": "(?i:Geppetto,?\\s+torna\\S*\\s+a\\s+casa,?\\s+comincia.*)"
+        },
+        {
+          "id": "chapter_04",
+          "title": "IV. La storia di Pinocchio col Grillo-parlante, dove si vede come i ragazzi cattivi hanno a noia di sentirsi correggere da chi ne sa più di loro.",
+          "heading_pattern": "(?i:.*dove\\s+si\\s+vede\\s+come.*)"
+        },
+        {
+          "id": "chapter_05",
+          "title": "V. Pinocchio ha fame e cerca un uovo per farsi una frittata; ma sul più bello, la frittata gli vola via dalla finestra.",
+          "heading_pattern": "(?i:.*fame\\s+e\\s+cerca\\s+un\\s+uovo.*)"
+        },
+        {
+          "id": "chapter_06",
+          "title": "VI. Pinocchio si addormenta coi piedi sul caldano e la mattina dopo si sveglia coi piedi tutti bruciati.",
+          "heading_pattern": "(?i:.*coi\\s+piedi\\s+sul.*)"
+        },
+        {
+          "id": "chapter_07",
+          "title": "VII. Geppetto torna a casa, e dà al burattino la colazione che il pover'uomo aveva portata per sé.",
+          "heading_pattern": "(?i:Geppetto\\s+torna\\s+a\\s+casa.*)"
+        },
+        {
+          "id": "chapter_08",
+          "title": "VIII. Geppetto rifà i piedi a Pinocchio e vende la propria casacca per comprargli l'Abbecedario.",
+          "heading_pattern": "(?i:.*piedi\\s+a\\s+Pinocchio.*vende.*)"
+        },
+        {
+          "id": "chapter_09",
+          "title": "IX. Pinocchio vende l'Abbecedario per andare a vedere il teatrino dei burattini.",
+          "heading_pattern": "(?i:.*Abbecedario\\s+per\\s+andare.*)"
+        },
+        {
+          "id": "chapter_10",
+          "title": "X. I burattini riconoscono il loro fratello Pinocchio e gli fanno una grandissima festa; ma sul più bello, esce fuori il burattinaio Mangiafoco, e Pinocchio corre il pericolo di fare una brutta fine.",
+          "heading_pattern": "(?i:.*loro\\s+\\S+.*una\\s+gran-?)"
+        },
+        {
+          "id": "chapter_11",
+          "title": "XI. Mangiafoco starnutisce e perdona a Pinocchio, il quale poi difende dalla morte il suo amico Arlecchino.",
+          "heading_pattern": "(?i:Mangiafoco\\s+starnutisce\\s+e\\s+perdona.*)"
+        },
+        {
+          "id": "chapter_12",
+          "title": "XII. Il burattinaio Mangiafoco regala cinque monete d'oro a Pinocchio, perché le porti al suo babbo Geppetto; e Pinocchio, invece, si lascia abbindolare dalla Volpe e dal Gatto e se ne va con loro.",
+          "heading_pattern": "(?i:Il\\s+\\S+\\s+\\S+\\s+regala\\s+cinque.*)"
+        },
+        {
+          "id": "chapter_13",
+          "title": "XIII. L'osteria del Gambero Rosso.",
+          "heading_pattern": "(?i:.*osteria\\s+del.*Gambero\\s+Rosso.*)"
+        },
+        {
+          "id": "chapter_14",
+          "title": "XIV. Pinocchio, per non aver dato retta ai buoni consigli del Grillo-parlante, s'imbatte negli assassini.",
+          "heading_pattern": "(?i:(?:Pinocchio,?\\s+per\\s+non\\s+aver\\s+dato\\s+retta.*|.*liuonl\\s+consigli\\s+de.*))"
+        },
+        {
+          "id": "chapter_15",
+          "title": "XV. Gli assassini inseguono Pinocchio; e dopo averlo raggiunto, lo impiccano a un ramo della Quercia grande.",
+          "heading_pattern": "(?i:.*assassini\\s+\\S+\\s+Pinocchio.*raggiunto.*)"
+        },
+        {
+          "id": "chapter_16",
+          "title": "XVI. La bella Bambina dai capelli turchini fa raccogliere il burattino, lo mette a letto e chiama tre medici per sapere se sia vivo o morto.",
+          "heading_pattern": "(?i:La\\s+bella\\s+Bambina.*raccogliere.*)"
+        },
+        {
+          "id": "chapter_17",
+          "title": "XVII. Pinocchio mangia lo zucchero, ma non vuol purgarsi; però quando vede i becchini che vengono a portarlo via, allora si purga. Poi dice una bugia e per gastigo gli cresce il naso.",
+          "heading_pattern": "(?i:Pinocchio\\s+mangia\\s+lo\\s+\\S+.*)"
+        },
+        {
+          "id": "chapter_18",
+          "title": "XVIII. Pinocchio ritrova la Volpe e il Gatto, e va con loro a seminare le quattro monete nel Campo dei miracoli.",
+          "heading_pattern": "(?i:Come\\s+potete\\s+immag\\S*,?\\s+la\\s+Fata\\s+lasci.*)",
+          "boundary_line_role": "body"
+        },
+        {
+          "id": "chapter_19",
+          "title": "XIX. Pinocchio è derubato delle sue monete d'oro e, per gastigo, si busca quattro mesi di prigione.",
+          "heading_pattern": "(?i:Pinocchio\\s+[èe]\\s+derubato.*monete.*)"
+        },
+        {
+          "id": "chapter_20",
+          "title": "XX. Liberato dalla prigione, si avvia per tornare a casa della Fata; ma lungo la strada trova un serpente orribile, e poi rimane preso alla tagliuola.",
+          "heading_pattern": "(?i:Libera\\S*\\s+dalla\\s+prigione.*)"
+        },
+        {
+          "id": "chapter_21",
+          "title": "XXI. Pinocchio è preso da un contadino, il quale lo costringe a far da can di guardia a un pollaio.",
+          "heading_pattern": "(?i:.*Pinocchio\\s+[èe]\\s+preso\\s+da\\s+un\\s+contadino.*)"
+        },
+        {
+          "id": "chapter_22",
+          "title": "XXII. Pinocchio scopre i ladri e in ricompensa di essere stato fedele vien posto in libertà.",
+          "heading_pattern": "(?i:Pinocchio\\s+scu?opre\\s+i\\s+ladri.*)"
+        },
+        {
+          "id": "chapter_23",
+          "title": "XXIII. Pinocchio piange la morte della bella Bambina dai capelli turchini; poi trova un Colombo, che lo porta sulla riva del mare, e lì si getta nell'acqua per andare in aiuto del suo babbo Geppetto.",
+          "heading_pattern": "(?i:Pinocchio\\s+piange\\s+la\\s+morte.*)"
+        },
+        {
+          "id": "chapter_24",
+          "title": "XXIV. Pinocchio arriva all'isola delle Api industriose e ritrova la Fata.",
+          "heading_pattern": "(?i:Pinocchio\\s+arriva\\s+all.isola.*)"
+        },
+        {
+          "id": "chapter_25",
+          "title": "XXV. Pinocchio promette alla Fata di esser buono e di studiare, perché è stufo di fare il burattino e vuol diventare un bravo ragazzo.",
+          "heading_pattern": "(?i:Pinocchio\\s+promette\\s+alla\\s+Fata.*)"
+        },
+        {
+          "id": "chapter_26",
+          "title": "XXVI. Pinocchio va coi suoi compagni di scuola in riva al mare, per vedere il terribile Pesce-cane.",
+          "heading_pattern": "(?i:.*Pinocchio\\s+va\\s+co.*compagni.*)"
+        },
+        {
+          "id": "chapter_27",
+          "title": "XXVII. Gran combattimento fra Pinocchio e i suoi compagni; uno dei quali, essendo rimasto ferito, Pinocchio viene arrestato dai Carabinieri.",
+          "heading_pattern": "(?i:Gran\\s+combattimento\\s+fra\\s+Pinocchio.*)"
+        },
+        {
+          "id": "chapter_28",
+          "title": "XXVIII. Pinocchio corre pericolo di esser fritto in padella, come un pesce.",
+          "heading_pattern": "(?i:.*corre\\s+pericolo.*[fr]ritto.*)"
+        },
+        {
+          "id": "chapter_29",
+          "title": "XXIX. Ritorna a casa della Fata, la quale gli promette che il giorno dopo non sarà più un burattino, ma diventerà un ragazzo. Gran colazione di caffè-e-latte per festeggiare questo grande avvenimento.",
+          "heading_pattern": "(?i:Ritorna\\s+a\\s+casa\\s+della\\s+Fata.*)"
+        },
+        {
+          "id": "chapter_30",
+          "title": "XXX. Pinocchio, invece di diventare un ragazzo, parte di nascosto col suo amico Lucignolo per il Paese dei balocchi.",
+          "heading_pattern": "(?i:Pinocchio,?\\s+invece\\s+di\\s+diventare.*)"
+        },
+        {
+          "id": "chapter_31",
+          "title": "XXXI. Dopo cinque mesi di cuccagna, Pinocchio, con sua gran maraviglia, sente spuntarsi un bel paio d'orecchie asinine e diventa un ciuchino, con la coda e tutto.",
+          "heading_pattern": "(?i:Dopo\\s+\\S+\\s+mesi\\s+di\\s+cuccagna.*)"
+        },
+        {
+          "id": "chapter_32",
+          "title": "XXXII. A Pinocchio vengono gli orecchi di ciuco, e poi diventa un ciuchino vero e comincia a ragliare.",
+          "heading_pattern": "(?i:.*Pinocchio\\s+gli\\s+vengono\\s+gli\\s+orecchi.*)"
+        },
+        {
+          "id": "chapter_33",
+          "title": "XXXIII. Diventato un ciuchino vero, è portato a vendere e lo compra il Direttore di una compagnia di pagliacci; ma una sera azzoppisce e allora lo ricompra un altro, per far con la sua pelle un tamburo.",
+          "heading_pattern": "(?i:Diventa\\S*\\s+un\\s+\\S+\\s+vero.*porta\\S*\\s+a\\s+vendere.*)"
+        },
+        {
+          "id": "chapter_34",
+          "title": "XXXIV. Pinocchio, gettato in mare, è mangiato dai pesci e ritorna a essere un burattino come prima; ma mentre nuota per salvarsi, è ingoiato dal terribile Pesce-cane.",
+          "heading_pattern": "(?i:Pinocchio\\s+gettato\\s+in\\s+mare.*mangiato.*)"
+        },
+        {
+          "id": "chapter_35",
+          "title": "XXXV. Pinocchio ritrova in corpo al Pesce-cane chi ritrova? Leggete questo capitolo e lo saprete.",
+          "heading_pattern": "(?i:[FP]inocchio\\s+ritrova\\s+in\\s+corpo.*Pesce-cane.*)"
+        },
+        {
+          "id": "chapter_36",
+          "title": "XXXVI. Finalmente Pinocchio cessa d'essere un burattino e diventa un ragazzo.",
+          "heading_pattern": "(?i:Finalmen\\S*\\s+Pinocchio\\s+cessa.*)"
+        }
+      ]
+    }
   },
   "edition": {
     "title_it": "Le avventure di Pinocchio",

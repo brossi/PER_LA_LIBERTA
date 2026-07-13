@@ -69,16 +69,24 @@ class RawSection:
     id: str
     title: str
     heading_pattern: str
+    boundary_line_role: str = "heading"
 
 
 @dataclass(frozen=True, slots=True)
 class RawSegmentation:
-    """Manifest-selected raw-OCR segmentation for an ordered flat collection."""
+    """Manifest-selected raw-OCR segmentation for ordered edition sections.
+
+    Each section supplies its own full-line heading shape.  This is the book/edition seam for
+    typography such as named essays, bare numerals plus synopses, or other forms that do not use
+    a language plugin's conventional heading grammar.
+    """
 
     kind: str
     body_start_after_pattern: str
     body_end_patterns: tuple[str, ...]
     sections: tuple[RawSection, ...]
+    heading_span: str = "line"
+    section_marker_patterns: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)

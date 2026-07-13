@@ -152,8 +152,19 @@ def _build_manifest(data: dict) -> BookManifest:
                             id=section["id"],
                             title=section["title"],
                             heading_pattern=section["heading_pattern"],
+                            boundary_line_role=section.get(
+                                "boundary_line_role", "heading"
+                            ),
                         )
                         for section in structure["raw_segmentation"]["sections"]
+                    ),
+                    heading_span=structure["raw_segmentation"].get(
+                        "heading_span", "line"
+                    ),
+                    section_marker_patterns=tuple(
+                        structure["raw_segmentation"].get(
+                            "section_marker_patterns", []
+                        )
                     ),
                 )
                 if "raw_segmentation" in structure

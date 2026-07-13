@@ -63,13 +63,14 @@ def split_declared_raw_sections(
     *,
     running_heads: tuple[str, ...] = (),
 ) -> list[dict]:
-    """Split an ordered flat collection from manifest-declared full-line boundaries.
+    """Split ordered edition sections from manifest-declared full-line heading shapes.
 
     The manifest owns every book/edition-specific pattern. The engine owns only the state machine:
-    trim front/back matter, open exactly the next declared section, treat repeats of the current or
-    prior heading as furniture, and fail loud on missing or out-of-order future boundaries.
+    trim front/back matter, open exactly the next declared section, discard repeated line-span
+    headings as furniture, preserve conservative block-anchor matches in later prose, and fail loud
+    on missing or out-of-order future boundaries.
     """
-    if spec.kind != "flat_sections":
+    if spec.kind not in {"declared_sections", "flat_sections"}:
         raise MissingInputError(f"unsupported raw segmentation kind: {spec.kind!r}")
     ids = tuple(section.id for section in spec.sections)
     if not ids or len(set(ids)) != len(ids):
@@ -87,6 +88,10 @@ def split_declared_raw_sections(
         )
         running_head_res = tuple(
             re.compile(r"\s*(?:" + pattern + r")\s*$") for pattern in running_heads
+        )
+        section_marker_res = tuple(
+            re.compile(r"\s*(?:" + pattern + r")\s*$")
+            for pattern in spec.section_marker_patterns
         )
     except re.error as exc:
         raise MissingInputError(f"invalid raw segmentation regex: {exc}") from exc
@@ -111,7 +116,13 @@ def split_declared_raw_sections(
 
     bodies: list[list[str]] = [[] for _ in spec.sections]
     current = -1
+    skipping_heading_block = False
     for line in lines[start + 1 : stop]:
+        if skipping_heading_block:
+            if line.strip():
+                continue
+            skipping_heading_block = False
+            continue
         matches = tuple(
             index for index, pattern in enumerate(section_res) if pattern.fullmatch(line)
         )
@@ -124,15 +135,26 @@ def split_declared_raw_sections(
             expected = current + 1
             if matched == expected:
                 current = matched
+                if spec.sections[matched].boundary_line_role == "body":
+                    bodies[current].append(line)
+                elif spec.heading_span == "block":
+                    skipping_heading_block = True
             elif matched <= current:
-                # Repeated current/prior title heads are page furniture, never new sections.
-                pass
+                # A repeated line-span title is page furniture. A block-span OCR recovery anchor
+                # may also match ordinary prose later in the book, so preserve that line.
+                if (
+                    spec.heading_span == "block"
+                    or spec.sections[matched].boundary_line_role == "body"
+                ):
+                    bodies[current].append(line)
             else:
                 missing = [section.id for section in spec.sections[expected:matched]]
                 raise MissingInputError(
                     f"raw section heading {spec.sections[matched].id!r} appeared before expected "
                     f"section(s) {missing}; refusing to reorder or merge content"
                 )
+            continue
+        if any(pattern.fullmatch(line) for pattern in section_marker_res):
             continue
         if any(pattern.fullmatch(line) for pattern in running_head_res):
             continue
@@ -698,6 +720,18 @@ def run(
 
     stripped1, chapters1 = split_witness(copy1_text)
     stripped2, chapters2 = split_witness(copy2_text) if copy2_declared else ("", [])
+    if cfg.structure.content_units > 0 and copy1_text.strip() and not chapters1:
+        raise MissingInputError(
+            "reconcile detected zero sections in non-empty Copy 1; declare the edition's "
+            "supported heading shapes in structure.raw_segmentation or correct its configured "
+            "content-unit contract"
+        )
+    if cfg.structure.content_units > 0 and copy2_declared and copy2_text.strip() and not chapters2:
+        raise MissingInputError(
+            "reconcile detected zero sections in non-empty Copy 2; declare the edition's "
+            "supported heading shapes in structure.raw_segmentation or correct its configured "
+            "content-unit contract"
+        )
     ch_map1 = {ch["id"]: ch for ch in chapters1}
     ch_map2 = {ch["id"]: ch for ch in chapters2}
 
@@ -706,6 +740,12 @@ def run(
     stripped3 = ""
     if has_copy3:
         stripped3, chapters3 = split_witness(copy3_text)  # same scan as Copy 1
+        if cfg.structure.content_units > 0 and copy3_text.strip() and not chapters3:
+            raise MissingInputError(
+                "reconcile detected zero sections in non-empty Copy 3; declare the edition's "
+                "supported heading shapes in structure.raw_segmentation or correct its "
+                "configured content-unit contract"
+            )
         ch_map3 = {ch["id"]: ch for ch in chapters3}
         print(f"  Copy 3 chapters: {len(chapters3)}")
 

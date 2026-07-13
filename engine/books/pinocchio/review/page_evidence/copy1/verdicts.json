@@ -1,0 +1,92 @@
+{
+  "schema_version": 1,
+  "stale_class": "page-evidence-human-verdicts",
+  "book_id": "pinocchio",
+  "witness_id": "copy1",
+  "verdicts": [
+    {
+      "page": 3,
+      "disposition": "blank",
+      "evidence_sha256": "f6d985ec4dcb53f2780bfc9ba53ff0fe59a87e6faf52f9e432deba711cd6fa23",
+      "reviewer": "Ben Rossi",
+      "decided_at": "2026-07-13T16:49:59.755154+00:00"
+    },
+    {
+      "page": 6,
+      "disposition": "blank",
+      "evidence_sha256": "8c596bb5a17c538c85decf9139049ae57992771b3a150dc85c1dc8219cab6e4b",
+      "reviewer": "Ben Rossi",
+      "decided_at": "2026-07-13T16:05:07.233819+00:00"
+    },
+    {
+      "page": 10,
+      "disposition": "blank",
+      "evidence_sha256": "edeff223de7b53bb6377e0c7310827e33cc94b8cd29819ead65ae1d452733f13",
+      "reviewer": "Ben Rossi",
+      "decided_at": "2026-07-13T16:05:12.007436+00:00"
+    },
+    {
+      "page": 16,
+      "disposition": "blank",
+      "evidence_sha256": "6ea213e7416d7960b33763d2216e5c1f2c3f047916d1cb14991838923ea87321",
+      "reviewer": "Ben Rossi",
+      "decided_at": "2026-07-13T16:05:16.012029+00:00"
+    },
+    {
+      "page": 49,
+      "disposition": "content",
+      "evidence_sha256": "fa812c0dbc626945ebba910be6c23c01e521b73d2968bc1d20295a451b96217c",
+      "reviewer": "Ben Rossi",
+      "decided_at": "2026-07-13T16:05:20.521422+00:00"
+    },
+    {
+      "page": 99,
+      "disposition": "content",
+      "evidence_sha256": "89b241cd252cec42e2846891b3515bd7be4c526b3c1a24a2549d79e74579c611",
+      "reviewer": "Ben Rossi",
+      "decided_at": "2026-07-13T16:05:24.576696+00:00"
+    },
+    {
+      "page": 246,
+      "disposition": "non_text",
+      "evidence_sha256": "70983af758b69eb8abfa5a0b08c1491b58f9d6f7520cad98062a8b393cc08a92",
+      "reviewer": "Ben Rossi",
+      "decided_at": "2026-07-13T16:50:07.974829+00:00"
+    },
+    {
+      "page": 259,
+      "disposition": "content",
+      "evidence_sha256": "4fb473905c085f813359e4d140b3583fdf58b8e9978dea71fc6d6c34e525dd69",
+      "reviewer": "Ben Rossi",
+      "decided_at": "2026-07-13T16:50:17.264662+00:00"
+    },
+    {
+      "page": 260,
+      "disposition": "content",
+      "evidence_sha256": "626cbd462ce37b0c4189428a2125e7cf78fb3846f2232432c02bf4cc15fab9d2",
+      "reviewer": "Ben Rossi",
+      "decided_at": "2026-07-13T16:50:21.928047+00:00"
+    },
+    {
+      "page": 263,
+      "disposition": "blank",
+      "evidence_sha256": "554558bf8cd3d1355e9526d4d92e00deb46a10e23ce12c232ec260459fa16d28",
+      "reviewer": "Ben Rossi",
+      "decided_at": "2026-07-13T16:50:26.231855+00:00"
+    },
+    {
+      "page": 264,
+      "disposition": "blank",
+      "evidence_sha256": "32edf6f0cc40c0b59a5fb64e9886b376d40db712a7f6c7683c6102708d95b929",
+      "reviewer": "Ben Rossi",
+      "decided_at": "2026-07-13T16:50:34.243812+00:00"
+    },
+    {
+      "page": 266,
+      "disposition": "blank",
+      "evidence_sha256": "52a355f2c9b8f73a60ce6a97e945b10ada73ce2783c5763802216c7c22ffc307",
+      "reviewer": "Ben Rossi",
+      "decided_at": "2026-07-13T16:50:38.739093+00:00"
+    }
+  ]
+}

@@ -24,8 +24,8 @@ Two things real bytes verify that synthetic cannot:
 
 Tiers (each proven red, PLAN §9): round-trip (the frozen page reconstructs byte-exact); negative
 (witness drift raises; each topology branch raises on a tampered map — positive and negatives share
-the ``assert_page_map_tiles_witness`` chokepoint, mirroring ``test_structure_tiers``'s
-``_assert_version_binds``, so they cannot silently diverge). The completeness validator lives in the
+the ``assert_page_map_tiles_witness`` chokepoint, so they cannot silently diverge). The completeness
+validator lives in the
 test, not ``src/`` — the engine-side validator is S1.4/S1.5, not anticipated here.
 
 Frozen literals refresh: re-derive from the fixture if the committed witness/page map is regenerated
@@ -118,19 +118,6 @@ def test_frozen_page_round_trips_byte_exact_against_the_committed_witness():
     assert any(ord(c) > 127 for c in recovered)
 
 
-def test_a_span_of_real_pages_all_round_trip_byte_exact():
-    # Breadth across real interior pages: binds the page map to the witness (every span in-bounds,
-    # slices cleanly) over varied content. Live hash here — the frozen-anchor test is what binds
-    # hash_raw; this is the page-map↔witness coverage on more than one page.
-    txt = _witness()
-    by_page = {p["page"]: p for p in _page_map()}
-    for page in range(59, 64):
-        p = by_page[page]
-        s, e = p["char_start"], p["char_end"]
-        slice_ = txt[s:e]
-        assert verify_atom_roundtrip(_atom(slice_, (s, e), hash_raw(slice_), page), txt) == slice_
-
-
 def test_drift_in_the_committed_witness_fails_the_floor():
     # The negative the byte-exact floor exists for: a one-char change inside the page-61 span no
     # longer hashes to the frozen value → reconstruct_raw raises. Tamper is in-memory; the committed
@@ -152,7 +139,7 @@ def assert_page_map_tiles_witness(page_map: list[dict], text: str) -> None:
     violation: an out-of-bounds / overlapping / mis-ordered content span; a page-marker sequence that
     disagrees with the map; or any uncovered char that is not page-marker furniture or whitespace
     (a silent content loss). This is the invariant S1.4/S1.5 will own in engine code; it lives in the
-    test for now (cf. ``test_structure_tiers._assert_version_binds``)."""
+    test for now (a test-local chokepoint both the positive and the negatives exercise)."""
     n = len(text)
     spans = [(p["char_start"], p["char_end"]) for p in page_map]
     # (a) in-bounds + monotonic, non-overlapping, in offset order

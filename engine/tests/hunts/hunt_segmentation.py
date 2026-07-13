@@ -95,7 +95,7 @@ MUTANTS = [
     m("cover-drops-at-extreme",
       "        if at_extreme and features.ink_fraction >= self._ink_saturation_min:",
       "        if features.ink_fraction >= self._ink_saturation_min:",
-      "test_interior_saturated_leaf_is_not_a_cover"),
+      "test_saturated_high_yield_interior_page_is_not_content_ink_gate"),
     m("cover-position-alone-no-saturation",
       "        if at_extreme and features.ink_fraction >= self._ink_saturation_min:",
       "        if at_extreme:",

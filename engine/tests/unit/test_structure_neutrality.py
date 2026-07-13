@@ -99,16 +99,10 @@ def test_no_language_or_structure_literal_in_structure_core(term):
 @pytest.mark.parametrize("term", FORBIDDEN)
 def test_guard_catches_a_planted_literal(tmp_path, term):
     # The non-vacuity proof: plant each forbidden term in a throwaway file and assert the scan flags
-    # it. Without this, an over-narrow regex could silently stop catching reintroductions.
+    # it. Without this, an over-narrow regex could silently stop catching reintroductions. One arm
+    # only: ``_hits`` is a plain text search with no extension- or context-dependent behavior, so a
+    # separate JSON-file planting exercised the identical path and was folded into this one (#56);
+    # the JSON files' presence in the scan is what test_structure_src_has_python_files guards.
     planted = tmp_path / "leak.py"
     planted.write_text(f'HEADING_MARKER = "{term} ..."\n', encoding="utf-8")
     assert _hits(term, [planted]), f"the guard failed to catch a planted {term!r} — scan is vacuous"
-
-
-@pytest.mark.parametrize("term", FORBIDDEN)
-def test_guard_catches_a_planted_literal_in_schema_json(tmp_path, term):
-    # The JSON arm's non-vacuity proof (inv 15/22): a book-shaped enum value planted in a schema
-    # file — e.g. `"enum": ["capitolo", …]` — is flagged by the same term scan.
-    planted = tmp_path / "leak.schema.json"
-    planted.write_text(f'{{"node_class": {{"enum": ["{term}"]}}}}\n', encoding="utf-8")
-    assert _hits(term, [planted]), f"the JSON arm failed to catch a planted {term!r} — scan is vacuous"

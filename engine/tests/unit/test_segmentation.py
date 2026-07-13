@@ -476,15 +476,6 @@ def test_cover_at_last_leaf_uses_the_near_end_window():
     assert v.band is DensityBand.COVER
 
 
-def test_interior_saturated_leaf_is_not_a_cover():
-    # Position × saturation: the SAME saturated features at an interior leaf are NOT a cover — an
-    # interior dark page is the NON_TEXT_DARK anomaly. RED (mutant): drop the at_extreme condition →
-    # every saturated page becomes a cover regardless of position.
-    f = PageDensityFeatures(ink_fraction=0.98, box_count=1189, token_yield=0.75, mean_token_length=2.9)
-    v = _clf().classify(f, leaf_index=10, n_leaves=20)
-    assert v.band is DensityBand.NON_TEXT_DARK
-
-
 def test_extreme_but_not_saturated_leaf_is_not_a_cover():
     # A dark-but-not-saturated leaf (ink 0.70, between ink_dark_min 0.60 and ink_saturation_min 0.90)
     # at the extreme is NON_TEXT_DARK, not a cover — the saturation gate, not position alone, makes a

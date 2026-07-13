@@ -61,11 +61,13 @@ def test_no_book_or_typeface_opinion_in_core(term):
     )
 
 
-@pytest.mark.parametrize("term", FORBIDDEN)
+@pytest.mark.parametrize("term", ["bodoni", "di rudio"])
 def test_guard_catches_a_planted_literal(tmp_path, term):
-    # The non-vacuity proof this guard lacked (its structure/cleanup siblings have one): plant each
+    # The non-vacuity proof this guard lacked (its structure/cleanup siblings have one): plant a
     # forbidden term and assert the SAME scan flags it. Without this, a regex/loop regression passes
     # green on a clean tree — exactly how "bodoni" survived in three docstrings before this control.
+    # Two representatives (#56): the historical leak term, and a space-containing entity — the only
+    # input shapes in FORBIDDEN (all-ASCII list); the full per-term sweep re-proved one code path.
     planted = tmp_path / "leak.py"
     planted.write_text(f'BOOK_OPINION = "{term} ..."\n', encoding="utf-8")
     assert _hits(term, [planted]), f"the guard failed to catch a planted {term!r} — scan is vacuous"

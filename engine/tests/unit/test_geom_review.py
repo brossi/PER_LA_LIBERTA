@@ -189,18 +189,8 @@ def test_build_worklist_rejects_duplicate_page_stage_routes():
 
 
 # --- volume bound (G-13): review_fraction_max per stage, hard-fail ------------------------- #
-
-
-def test_review_within_bound_passes_under_quota():
-    # 2 density routes / 100 pages = 0.02 ≤ 0.15 — fine.
-    assert_review_within_bound([route(6), route(7)], n_pages=100, review_fraction_max=0.15)
-
-
-def test_review_fraction_over_quota_hard_fails_naming_the_stage():
-    # 3 density routes / 10 pages = 0.30 > 0.15 → the automation premise failed.
-    routes = [route(1), route(2), route(3)]
-    with pytest.raises(GeometryError, match="density"):
-        assert_review_within_bound(routes, n_pages=10, review_fraction_max=0.15)
+# (The bare under-quota-pass and over-quota-raise tests were folded out (#56): the per-stage and
+# boundary tests below exercise the identical pass and raise branches with stronger assertions.)
 
 
 def test_volume_bound_is_per_stage_not_aggregate():

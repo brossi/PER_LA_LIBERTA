@@ -24,8 +24,10 @@ What real bytes verify that synthetic cannot:
    S7.1b, resolves), ids are unique, and each atom round-trips byte-exact against its primary witness's
    source.
 
-Tiers (each proven red, PLAN §9): completeness (``assert_capture_tiles`` over the real witness) +
-negatives (a tampered overlap / silent loss on real bytes share that chokepoint). Each frozen count is
+Tiers (each proven red, PLAN §9): completeness (``assert_capture_tiles`` over the real witness). The
+tampered negatives (overlap, dropped atom) live only in ``test_raw_capture.py``: ``assert_capture_tiles``
+delegates to byte-independent guard clauses, so the real-bytes copies exercised identical branches at
+real I/O cost and were pruned (#56) — the chokepoint-share the positives rely on is unchanged. Each frozen count is
 bound to an independent in-test oracle (S1.3a.3 — regex / blank-block split / opcode algebra) so a
 segmenter regression reds the binding; the ints stay as legible scale anchors — **refresh them if the
 witnesses/page map are regenerated.**
@@ -39,9 +41,7 @@ from collections.abc import Callable
 from difflib import SequenceMatcher
 from pathlib import Path
 
-import pytest
 
-from engine.errors import CaptureError
 from engine.structure import (
     PAGE_UNMAPPED,
     PROCESSING_SCOPE_EXCLUDED,
@@ -194,29 +194,6 @@ def test_copy1_copy2_tile_and_are_page_unmapped():
         assert all(a.page_range == PAGE_UNMAPPED for a in atoms)
         assert all(a.processing_scope == PROCESSING_SCOPE_INCLUDED for a in atoms)
         assert duplicate_atom_ids(atoms) == []
-
-
-# --- the negatives: real bytes, sharing the assert_capture_tiles chokepoint -------------- #
-
-def test_real_overlap_fails_capture_tiles():
-    text = _read(COPY1)
-    atoms = capture_witness(text, "copy1")
-    import dataclasses
-    bad = list(atoms)
-    # widen one atom's span to swallow into the next — an overlap on real offsets
-    s, _e = bad[5].raw_span
-    bad[5] = dataclasses.replace(bad[5], raw_span=(s, bad[7].raw_span[0] + 1))
-    with pytest.raises(CaptureError, match="overlaps or precedes"):
-        assert_capture_tiles(bad, text)
-
-
-def test_real_dropped_atom_is_silent_loss():
-    text = _read(COPY1)
-    atoms = capture_witness(text, "copy1")
-    # remove a body atom: its real-text bytes are now captured into nothing → silent loss
-    bad = atoms[:10] + atoms[11:]
-    with pytest.raises(CaptureError, match="silent loss"):
-        assert_capture_tiles(bad, text)
 
 
 # --- the canonical projection over real copy1/copy2 divergence --------------------------- #

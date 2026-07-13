@@ -692,14 +692,10 @@ def test_tripwire_leg_b_fires_on_prose_absent_rate():
         assert_auto_absent_tripwire(sidecar, counts)
 
 
-def test_tripwire_leg_b_under_the_rate_stays_quiet():
-    sidecar, counts = _prose_world(n_matched=20, n_absent=1)  # 1/21 = 4.8% <= 5%
-    stats = assert_auto_absent_tripwire(sidecar, counts)
-    assert stats["prose_absent_rate"] == pytest.approx(1 / 21)
-
-
 def test_tripwire_leg_b_boundary_does_not_fire_at_exactly_the_max():
     # 1 of 20 prose atoms = exactly 0.05: > is the rule (mirror of leg A's boundary control).
+    # (The 4.8%-under-the-rate quiet test was folded out (#56): any threshold mutant quiet at 4.8%
+    # is quiet at exactly 5.0%, so this boundary kills a strict superset.)
     sidecar, counts = _prose_world(n_matched=19, n_absent=1)
     stats = assert_auto_absent_tripwire(sidecar, counts)
     assert stats["prose_absent_rate"] == pytest.approx(0.05)

@@ -43,7 +43,6 @@ from engine.structure import (
     resolve,
 )
 from engine.structure.handles import (
-    HANDLE_RENDERER_VERSION,
     NodeClassSpec,
     validate_aliases,
     validate_block_vocabulary,
@@ -803,11 +802,8 @@ def test_node_class_spec_rejects_an_unknown_status():
         NodeClassSpec(name="section", kind="container", status="retired")
 
 
-def test_handle_renderer_version_is_a_positive_int():
-    # §3.D.6: the manifest stamps HANDLE_RENDERER_VERSION for S8.1 to compare; it must exist as a
-    # positive, non-bool int beside the renderer it versions.
-    assert isinstance(HANDLE_RENDERER_VERSION, int) and not isinstance(HANDLE_RENDERER_VERSION, bool)
-    assert HANDLE_RENDERER_VERSION >= 1
+# (A shape-only HANDLE_RENDERER_VERSION positivity pin was dropped (#56): the binding that matters —
+# the manifest stamps the constant — is hard-asserted in test_structure_map.py.)
 
 
 # --- CLASS_NOT_IN_VOCAB (post-B-7 audit disposition, user-ratified 2026-07-02) -------------------- #

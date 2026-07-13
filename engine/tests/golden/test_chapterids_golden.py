@@ -53,18 +53,12 @@ def test_chapterids_count_matches_structure():
 
 
 def test_chapterids_reproduce_frozen_fixture():
+    # (A separate short-ids test was folded out (#56): every assertion it made — first/last shorts
+    # per part, uniqueness — is implied by this per-chapter dict equality against the frozen
+    # fixture, and the count test above survives a bad fixture regeneration.)
     expected = json.loads(EXPECTED.read_text(encoding="utf-8"))
     produced = [ci.to_dict() for ci in _load_identities()]
     assert len(produced) == len(expected)
     # Compare per-chapter so a mismatch names the offending chapter, not a giant blob.
     for got, want in zip(produced, expected, strict=True):
         assert got == want, f"identity mismatch for {want['parse_md']}: {got} != {want}"
-
-
-def test_short_ids_match_chapter_pages_keys():
-    # The short-id namespace is the one that keys data/chapter_pages.json.
-    shorts = [ci.short for ci in _load_identities()]
-    assert shorts[0] == "prefazione"
-    assert "p1_ch01" in shorts and "p1_ch24" in shorts
-    assert "p2_ch01" in shorts and "p2_ch33" in shorts
-    assert len(set(shorts)) == len(shorts)  # unique

@@ -377,11 +377,11 @@ def _atom(text, start, end, *, witness="copy1", aid=None, hash_=None, geom=None,
 # --- D1: from_json / load_stream is a TOTAL contract (no raw TypeError / JSONDecodeError leak) ---- #
 
 
-@pytest.mark.parametrize("doc", [None, 5, 1.5, True])
-def test_from_json_rejects_non_object_document(doc):
+def test_from_json_rejects_non_object_document():
     # A valid-JSON-but-non-object document used to TypeError out of the first membership test.
+    # One value: every non-Mapping fails the same single isinstance gate (#56 de-parametrized).
     with pytest.raises(StaleArtifactError, match="must be a JSON object"):
-        from_json(doc)
+        from_json(None)
 
 
 @pytest.mark.parametrize("field,bad", [("raw_span", 5), ("derived_from", 7), ("page_range", 9)])
@@ -394,7 +394,7 @@ def test_from_json_wraps_wrong_typed_field_as_stale(field, bad):
         from_json(env)
 
 
-@pytest.mark.parametrize("garbage", ["", "   ", "not json {{{", "[1, 2,", "null"])
+@pytest.mark.parametrize("garbage", ["not json {{{", "null"])  # decode-error arm + parses-but-non-object arm
 def test_load_rejects_non_json_or_non_object_file(tmp_path, garbage):
     ws = _ws(tmp_path)
     save_stream(ws, _witness_stream("body\n"))           # create data/atoms/
@@ -499,11 +499,12 @@ def test_non_finite_geom_fails_loud_at_save(tmp_path, bad_conf):
 # --- J3: the read path rejects a non-flat stream_id (not only the constructor) ------------------- #
 
 
-@pytest.mark.parametrize("bad", ["../evil", "a/b", "", "."])
-def test_load_stream_rejects_non_flat_id(tmp_path, bad):
+def test_load_stream_rejects_non_flat_id(tmp_path):
+    # One value: this binds the read path's compose into the shared _check_stream_id; the per-threat
+    # params (traversal / nested / empty / dot) live on the constructor-level test (#56).
     ws = _ws(tmp_path)
     with pytest.raises(ValueError, match="flat filename stem"):
-        load_stream(ws, bad)
+        load_stream(ws, "../evil")
 
 
 def test_stream_path_rejects_non_flat_id(tmp_path):

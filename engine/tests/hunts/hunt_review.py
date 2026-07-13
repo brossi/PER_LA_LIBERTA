@@ -43,7 +43,7 @@ MUTANTS = [
     m("volume-bound-check-dropped",
       "        if fraction > review_fraction_max:",
       "        if False:",
-      "test_review_fraction_over_quota_hard_fails_naming_the_stage"),
+      "test_volume_bound_is_per_stage_not_aggregate"),
     m("volume-bound-aggregate-not-per-stage",
       "        fraction = fractions[stage]",
       "        fraction = sum(fractions.values()) / len(fractions)",

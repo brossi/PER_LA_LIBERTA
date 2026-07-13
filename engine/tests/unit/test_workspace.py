@@ -49,7 +49,7 @@ def test_resolve_rejects_unknown_area(tmp_path):
         ws.resolve("nope", "x.json")
 
 
-@pytest.mark.parametrize("escape", ["../../../etc/passwd", "../../output/x", "a/../../../x"])
+@pytest.mark.parametrize("escape", ["../../../etc/passwd", "a/../../../x"])  # leading vs mid-path ..; a third variant shared their branch (#56)
 def test_resolve_rejects_traversal_escape(tmp_path, escape):
     ws = BookWorkspace.for_book("demo", tmp_path)
     with pytest.raises(ValueError, match="escapes workspace"):

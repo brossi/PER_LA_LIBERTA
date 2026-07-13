@@ -692,8 +692,7 @@ def test_duplicate_entries_for_one_node_are_rejected_at_construction():
 @pytest.mark.parametrize(
     "changes",
     [
-        {"node_id": ""},
-        {"node_id": "   "},
+        {"node_id": ""},  # blank and whitespace-only share one .strip() branch — one param (#56)
         {"node_id": 5},
         {"decision_digest": ""},
         {"decision_digest": "\u200b"},
@@ -721,7 +720,6 @@ def test_duplicate_entries_for_one_node_are_rejected_at_construction():
     ],
     ids=[
         "node_id-empty",
-        "node_id-whitespace",
         "node_id-nonstr",
         "decision-empty",
         "decision-zero-width",
@@ -763,7 +761,7 @@ def test_entry_model_rejects_degenerate_fields(changes):
 
 
 @pytest.mark.parametrize(
-    "book", ["", "   ", "\u200b", 5], ids=["empty", "whitespace", "zero-width", "nonstr"]
+    "book", ["", "\u200b", 5], ids=["empty", "zero-width", "nonstr"]  # whitespace \u2261 empty (#56)
 )
 def test_evidence_model_rejects_a_degenerate_book(book):
     with pytest.raises((ValueError, TypeError)):

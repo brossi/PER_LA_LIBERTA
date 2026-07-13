@@ -28,7 +28,7 @@ The synthetic RESOURCE lineage is hand-built (NOT ``ResourceLineage.build(cfg)``
 fixture must not hash live asset bytes, or every dictionary edit would invalidate it. Shape
 fidelity to the live class is still real — the fragment is emitted by the live ``to_json()``.
 
-Tests import this module (``importlib`` by path, the ``test_structure_tiers`` pattern) for
+Tests import this module (``importlib`` by path, the ``test_structure_map`` pattern) for
 ``build_fixture()`` / ``render()`` / ``conforming_streams()`` / ``conforming_atom_store()``.
 
 Refresh (after a deliberate schema/producer change):

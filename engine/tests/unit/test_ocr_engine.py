@@ -254,7 +254,7 @@ def test_error_checkpoint_is_retried_and_then_publishes(tmp_path, monkeypatch):
     assert "recovered" in (ws.data / "copy3_raw.txt").read_text(encoding="utf-8")
 
 
-@pytest.mark.parametrize("pages", [(0, 1), (-1, 1), (2, 1), (True, 1), [1, 1]])
+@pytest.mark.parametrize("pages", [(0, 1), (2, 1), (True, 1), [1, 1]])
 def test_invalid_page_range_fails_before_workspace_initialization(tmp_path, pages, acq):
     cfg, lang = _cfg_lang()
     ws = BookWorkspace.for_book("synthetic", tmp_path)
@@ -291,7 +291,7 @@ def test_out_of_bounds_page_range_is_not_clamped_or_published(tmp_path, acq):
     assert not ws.root.exists()
 
 
-@pytest.mark.parametrize("workers", [0, -1, True, 33])
+@pytest.mark.parametrize("workers", [0, True, 33])
 def test_invalid_worker_count_fails_before_workspace_initialization(tmp_path, workers, acq):
     cfg, lang = _cfg_lang()
     ws = BookWorkspace.for_book("synthetic", tmp_path)

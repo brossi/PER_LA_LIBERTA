@@ -210,6 +210,30 @@ def test_bumped_document_version_fails_tier1(tmp_path):
         _load(tmp_path, doc)
 
 
+# --- fixture ↔ generator binding (folded from the S0.3 spine, test_structure_tiers, #56) --------- #
+
+
+def test_committed_fixture_is_byte_exact_to_the_generator_output():
+    # Two bindings: content (dict) AND byte format — a hand-edit to one without the other, a constant
+    # bump without a refresh, OR a reformat of the committed file all fail here. Without the byte
+    # check, format-only drift slips through.
+    assert _fresh_doc() == GEN.build_fixture()                       # content binding
+    assert FIXTURE.read_text(encoding="utf-8") == GEN.render()       # byte-exact: no format drift
+
+
+def test_artifact_locations_are_distinct_and_contained(tmp_path):
+    # The three artifact locations never collide and never escape the work tree. One book id: the
+    # accessors are pure path joins with no book-id-dependent branch (#56 de-parametrized this).
+    ws = BookWorkspace.for_book("per_la_liberta", tmp_path)
+    locations = [
+        structure.atoms_dir(ws),
+        structure.structure_map_path(ws),
+        structure.relations_path(ws),
+    ]
+    assert len(set(locations)) == 3
+    assert all(p.is_relative_to(ws.root) for p in locations)
+
+
 # --- inv 2 (Tier-1 oneOf) — container-xor-leaf ---------------------------------------------------- #
 
 

@@ -550,7 +550,7 @@ unreachable" yet had no test); the red-proof catches the *weak-test* class (taut
 exercise stdlib not the code). The mechanical form of (2) is **mutation testing** — a surviving
 mutant is a line no test discriminates; adopt scoped where cost permits. Worked examples:
 the S0.1–S0.3 module docstrings (`test_workspace`, `test_structure_artifacts`,
-`test_structure_tiers`, `test_structure_neutrality`).
+`test_structure_neutrality`; the S0.3 tiers spine was folded into `test_structure_map`, #56).
 
 **Adversarial-audit gate — the review method, sibling to red-first.** Red-first governs the *tests*;
 this governs the *review* a `BUILD`/`GATE` task passes before commit. Run a pre-commit adversarial

@@ -7,7 +7,7 @@ calls for. The crux S1.4 adds over the S1.2 per-atom floor and the S1.3a tiling 
 1. **Whole-artifact byte-exactness.** Each whole witness (~520K–790K codepoints) is reconstructed
    byte-for-byte from its S1.3a atom stream + the explicit gap records — coverage the per-atom hashes
    never pin (they re-slice the source, so they cannot see an ``atom.text`` drifted off its span;
-   ``test_real_text_drift_*`` proves exactly that on real bytes).
+   ``test_roundtrip_gate.py::test_text_drift_passes_per_atom_but_fails_whole_artifact`` proves that).
 2. **The wholesale-exclusion seam** (deferred from S1.3b): on copy3's real page-marker furniture the
    processed atoms clear the floor with room to spare, yet a capture that mis-tags every atom excluded
    raises — the failure no tiling/round-trip/completeness tier otherwise sees.
@@ -16,13 +16,15 @@ The copy3 ``⟨PAGE:N⟩`` furniture grammar is a per-book source-noise conventi
 in ``structure/`` core (the S0.2 neutrality guard scans the core, not this PLL-bound test). The gate is
 page-agnostic, so ``page_of`` is left default — only the furniture ``classify_line`` matters.
 
-Tiers (each proven red): round-trip (whole witness reconstructs byte-exact) + negative (real overlap,
-real text-drift, real implicit gap, real all-excluded each fail loud).
+Tiers (each proven red): round-trip (whole witness reconstructs byte-exact) + negative (real implicit
+gap — the one negative that is data-dependent: it plants nothing, it drops a gap the real witness
+actually has). The planted-mutation negatives (overlap, dropped atom, text drift, all-excluded) live
+only in ``test_roundtrip_gate.py``: the guard clauses they exercise are byte-independent, so the real
+copies added no mutant-killing power at real I/O cost (#56).
 """
 
 from __future__ import annotations
 
-import dataclasses
 import re
 from pathlib import Path
 
@@ -36,7 +38,6 @@ from engine.structure import (
     build_canonical,
     capture_witness,
     gap_records,
-    reconstruct_raw,
     reconstruct_source,
 )
 
@@ -93,39 +94,7 @@ def test_copy3_real_furniture_round_trips_and_clears_exclusion_floor():
     assert included_nonws / total_nonws > 0.9
 
 
-# --- negative tier: real bytes, each failure mode fails loud --------------------------------- #
-
-def test_real_overlap_fails_the_gate():
-    text = _read(COPY1)
-    atoms = capture_witness(text, "copy1")
-    bad = list(atoms)
-    s, _e = bad[5].raw_span
-    bad[5] = dataclasses.replace(bad[5], raw_span=(s, bad[7].raw_span[0] + 1))  # swallow into next
-    with pytest.raises(CaptureError, match="overlaps or precedes"):
-        assert_production_roundtrip(bad, text)
-
-
-def test_real_dropped_atom_is_silent_loss():
-    text = _read(COPY1)
-    atoms = capture_witness(text, "copy1")
-    bad = atoms[:10] + atoms[11:]  # a body atom's real-text bytes now fall in no atom
-    with pytest.raises(CaptureError, match="silent loss"):
-        assert_production_roundtrip(bad, text)
-
-
-def test_real_text_drift_passes_per_atom_but_fails_whole_artifact():
-    # The whole-artifact value-add on real bytes: drift one atom's text off its span without touching
-    # raw_span/raw_source_hash. The per-atom floor re-slices the source and still passes; only the
-    # whole-artifact reconstruction, which reads atom.text, catches it.
-    text = _read(COPY1)
-    atoms = capture_witness(text, "copy1")
-    original = atoms[20].text
-    drifted = list(atoms)
-    drifted[20] = dataclasses.replace(atoms[20], text=original + "X")  # span unchanged → hash re-slices
-    assert reconstruct_raw(drifted[20], text) == original              # per-atom: still green
-    with pytest.raises(RoundTripError, match="whole-artifact"):
-        assert_production_roundtrip(drifted, text)
-
+# --- negative tier: the one data-dependent negative (drops a gap the real witness has) ------- #
 
 def test_real_implicit_gap_fails_reconstruction():
     text = _read(COPY1)
@@ -152,13 +121,3 @@ def test_canonical_stream_is_out_of_whole_artifact_scope_until_s1_5():
     assert canon, "canonical projection is empty"
     with pytest.raises(CaptureError):
         assert_production_roundtrip(canon, t1)  # copy1 source cannot tile copy2-addressed atoms
-
-
-def test_real_wholesale_exclusion_raises_when_all_atoms_excluded():
-    # A capture that mis-tagged every body atom as furniture: tiling + per-atom round-trip still pass,
-    # but the gate's exclusion guard fires on the real witness.
-    text = _read(COPY1)
-    atoms = capture_witness(text, "copy1")
-    all_excluded = [dataclasses.replace(a, processing_scope=PROCESSING_SCOPE_EXCLUDED) for a in atoms]
-    with pytest.raises(CaptureError, match="wholesale exclusion"):
-        assert_production_roundtrip(all_excluded, text)

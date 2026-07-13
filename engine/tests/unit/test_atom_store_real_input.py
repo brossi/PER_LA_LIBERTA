@@ -6,9 +6,11 @@ store, so the three tiers hold on real data:
 
 1. **serialization-invariance** at scale — each whole witness stream (thousands of atoms + real
    inter-atom gaps) survives JSON + disk byte-for-byte (``load(save(s)) == s``);
-2. **anchored round-trip** on real bytes — a persisted ``atom.text`` drifted off its span fails load;
-3. **reference-integrity** — every ``derived_from`` back-link of the real canonical projection resolves
+2. **reference-integrity** — every ``derived_from`` back-link of the real canonical projection resolves
    to a real atom in the real witness streams.
+
+The planted negatives (persisted text drift, dangling back-link) live only in ``test_atom_store.py``:
+those guard paths are byte-independent, so real-bytes copies added no mutant-killing power (#56).
 
 The copy3 ``⟨PAGE:N⟩`` furniture grammar is the per-book source-noise binding, supplied here, never in
 ``structure/`` core (the S0.2 neutrality guard scans the core, not this PLL-bound test).
@@ -16,25 +18,21 @@ The copy3 ``⟨PAGE:N⟩`` furniture grammar is the per-book source-noise bindin
 
 from __future__ import annotations
 
-import dataclasses
 import re
 from pathlib import Path
 
 import pytest
 
-from engine.errors import CaptureError, RoundTripError
 from engine.paths import BookWorkspace
 from engine.structure.atom_store import (
     AtomStream,
     assert_reference_integrity,
     load_stream,
     save_stream,
-    stream_path,
 )
-from engine.structure.atoms import AtomDerivation, PROCESSING_SCOPE_EXCLUDED
+from engine.structure.atoms import PROCESSING_SCOPE_EXCLUDED
 from engine.structure.capture import build_canonical, capture_witness
 from engine.structure.roundtrip_gate import gap_records
-from engine.util.jsonio import atomic_write_json, read_json
 
 INPUTS = Path(__file__).resolve().parents[2] / "books" / "per_la_liberta" / "inputs"
 COPY1 = INPUTS / "copy1_raw.txt"
@@ -88,21 +86,6 @@ def test_real_copy3_furniture_stream_round_trips(tmp_path):
     assert load_stream(ws, "copy3") == stream
 
 
-# --- anchored round-trip on real bytes ------------------------------------------------------- #
-
-
-def test_real_persisted_text_drift_fails_load(tmp_path):
-    ws = _ws(tmp_path)
-    stream, _text = _witness_stream(COPY1, "copy1")
-    save_stream(ws, stream)
-    path = stream_path(ws, "copy1")
-    env = read_json(path)
-    env["atoms"][20]["text"] = env["atoms"][20]["text"] + "X"   # drift off span; raw_span untouched
-    atomic_write_json(path, env)
-    with pytest.raises(RoundTripError, match="round-trip failed"):
-        load_stream(ws, "copy1")
-
-
 # --- reference-integrity over the real canonical projection ---------------------------------- #
 
 
@@ -127,9 +110,3 @@ def test_real_canonical_reference_integrity_resolves(tmp_path):
     assert load_stream(ws, "canonical") == canon
 
 
-def test_real_canonical_dangling_backlink_fails(tmp_path):
-    canon, witnesses = _real_canon_and_witnesses(tmp_path)
-    bad = dataclasses.replace(canon.atoms[0], derived_from=(AtomDerivation("copy1", "copy1_99999"),))
-    broken = AtomStream.canonical((bad,) + canon.atoms[1:])
-    with pytest.raises(CaptureError, match="resolves to no atom"):
-        assert_reference_integrity(broken, witnesses)

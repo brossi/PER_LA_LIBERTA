@@ -94,10 +94,13 @@ def test_no_resource_literal_in_the_s3_0_modules(term):
     )
 
 
-@pytest.mark.parametrize("term", FORBIDDEN)
+@pytest.mark.parametrize("term", ["zingarelli", "à"])
 def test_guard_catches_a_planted_literal(tmp_path, term):
-    # The non-vacuity proof: plant each forbidden term in a throwaway file and assert the SAME scan
+    # The non-vacuity proof: plant a forbidden term in a throwaway file and assert the SAME scan
     # flags it. Without this, an over-narrow regex could silently stop catching reintroductions.
+    # Two representatives, one per input axis ``_hits`` actually distinguishes (#56): a plain-ASCII
+    # stem, and an accented char (Unicode case-insensitive matching is a distinct failure mode —
+    # IGNORECASE must also catch À). The full per-term sweep re-proved one code path 12 times.
     planted = tmp_path / "leak.py"
     planted.write_text(f'RESOURCE_DIR = "{term} ..."\n', encoding="utf-8")
     assert _hits(term, [planted]), f"the guard failed to catch a planted {term!r} — scan is vacuous"

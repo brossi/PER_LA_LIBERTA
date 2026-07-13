@@ -52,7 +52,9 @@ def test_reconcile_reproduces_frozen_outputs(tmp_path):
     lang = get_language_plugin(cfg.language_id)
     ws = _seed_workspace(tmp_path)
 
-    summary = reconcile.run(workspace=ws, cfg=cfg, lang=lang)
+    summary = reconcile.run(
+        workspace=ws, cfg=cfg, lang=lang, admission_checker=lambda **_: None
+    )
 
     # reconciled_chapters.json — compare per-chapter so a divergence names the chapter.
     got_ch = json.loads((ws.data / reconcile.RECONCILED_FILE).read_text(encoding="utf-8"))

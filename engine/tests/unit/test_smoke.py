@@ -22,7 +22,7 @@ def test_package_imports_and_has_version():
     assert engine.STEPS[0] == "download"
     assert "validate" in engine.STEPS
     assert engine.STEPS[-1] == "typeset"
-    assert engine.OPTIONAL_STEPS == ("layout_shadow",)
+    assert engine.OPTIONAL_STEPS == ("layout_shadow", "ingest_gate")
 
 
 # Steps ported to a real run(); the rest are still scaffold stubs. As each lands in its

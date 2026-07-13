@@ -42,6 +42,8 @@ engine --book ninnoli --step layout_shadow \
 engine --book ninnoli --step download
 engine --book ninnoli --step ocr --model flash --workers 4 \
   --fallback-tesseract-language ita
+engine --book ninnoli --step ingest_gate \
+  --model flash --witness-id copy1 --max-review-pages 25
 engine --book ninnoli --step reconcile
 engine --book ninnoli --step triage
 engine --book ninnoli --step cleanup

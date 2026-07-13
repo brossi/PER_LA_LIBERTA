@@ -352,7 +352,9 @@ def test_reconcile_runs_end_to_end_on_synthetic_book(tmp_path):
     lang = get_language_plugin(cfg.language_id)
     ws = _seed_synthetic(tmp_path)
 
-    summary = reconcile.run(workspace=ws, cfg=cfg, lang=lang)
+    summary = reconcile.run(
+        workspace=ws, cfg=cfg, lang=lang, admission_checker=lambda **_: None
+    )
 
     # 3 content units (prefazione + 2 chapters), not PLL's 58 — nothing assumes PLL's structure.
     assert summary["mode"] == "3-way"
@@ -390,7 +392,9 @@ def test_reconcile_two_way_mode_without_copy3(tmp_path):
             (SYNTH_INPUTS / name).read_text(encoding="utf-8"), encoding="utf-8"
         )
 
-    summary = reconcile.run(workspace=ws, cfg=cfg, lang=lang)
+    summary = reconcile.run(
+        workspace=ws, cfg=cfg, lang=lang, admission_checker=lambda **_: None
+    )
 
     assert summary["mode"] == "2-way"
     assert summary["chapters"] == 3
@@ -415,7 +419,9 @@ def test_reconcile_two_way_copy1_and_copy3_ignores_undeclared_stale_copy2(tmp_pa
     ws = _seed_synthetic(tmp_path)
     # _seed_synthetic includes a copy2_raw file. Once its manifest role is diagnostic, that stale
     # filename must not make it back into the voting set.
-    summary = reconcile.run(workspace=ws, cfg=cfg, lang=lang)
+    summary = reconcile.run(
+        workspace=ws, cfg=cfg, lang=lang, admission_checker=lambda **_: None
+    )
 
     assert summary["mode"] == "2-way"
     source_chapters = {
@@ -444,7 +450,9 @@ def test_reconcile_output_satisfies_validate_word_count_contract(tmp_path):
     cfg = load_book("synthetic")
     lang = get_language_plugin(cfg.language_id)
     ws = _seed_synthetic(tmp_path)
-    reconcile.run(workspace=ws, cfg=cfg, lang=lang)
+    reconcile.run(
+        workspace=ws, cfg=cfg, lang=lang, admission_checker=lambda **_: None
+    )
 
     # validate's word_count_preservation reads reconciled_chapters.json as its denominator.
     # Feeding it the engine-produced file proves the producer→consumer contract holds on real

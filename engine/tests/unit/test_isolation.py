@@ -114,7 +114,9 @@ def test_reconcile_leaves_live_tree_untouched(tmp_path):
         )
 
     before = _snapshot(REPO_ROOT)
-    reconcile.run(workspace=ws, cfg=cfg, lang=lang)
+    reconcile.run(
+        workspace=ws, cfg=cfg, lang=lang, admission_checker=lambda **_: None
+    )
     after = _snapshot(REPO_ROOT)
 
     assert before == after, "reconcile wrote into a live PLL tree"

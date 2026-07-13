@@ -68,6 +68,10 @@ uv run engine --book ninnoli --step layout_shadow \
 uv run engine --book ninnoli --step ocr --model flash --workers 4 \
   --fallback-tesseract-language ita
 
+# Derive the total page ledger; reconciliation remains blocked while review pages exist
+uv run engine --book ninnoli --step ingest_gate \
+  --model flash --witness-id copy1 --max-review-pages 25
+
 # One-shot or live pipeline progress for a book
 uv run engine --book ninnoli --status
 uv run engine --book ninnoli --status --watch 2
@@ -76,6 +80,8 @@ uv run engine --book ninnoli --status --watch 2
 `layout_shadow` checkpoints a hash-bound PNG and raw ink fraction for every scan page. Books with
 calibrated `segmentation.density_bands` also emit density labels; books without that policy emit
 raw density as an explicit abstention, never an inferred blank/content claim.
+`ingest_gate` binds the scan, raster, geometry/retry, provider assessment, OCR checkpoint, and any
+human verdict for every page. See `docs/page_evidence_gate.md` for the review/admission workflow.
 
 The framework **never writes outside `books/<id>/work/`**. `paths.BookWorkspace`
 asserts workspace containment, and `tests/unit/test_isolation.py` hashes the protected

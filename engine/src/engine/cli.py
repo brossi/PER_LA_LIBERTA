@@ -124,7 +124,11 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--witness-id", default=None,
-        help="Witness id for geometry/layout artifacts (layout_shadow; default: copy1).",
+        help="Witness id for layout/page-evidence artifacts (default: copy1).",
+    )
+    parser.add_argument(
+        "--max-review-pages", type=int, default=None,
+        help="Maximum unresolved pages allowed in the ingest review packet (default: 25).",
     )
     parser.add_argument(
         "--refresh-geometry", action="store_true",
@@ -158,6 +162,8 @@ def _collect_step_opts(args: argparse.Namespace) -> dict:
         opts["dpi"] = args.dpi
     if args.witness_id is not None:
         opts["witness_id"] = args.witness_id
+    if args.max_review_pages is not None:
+        opts["max_review_pages"] = args.max_review_pages
     if args.refresh_geometry:
         opts["refresh_geometry"] = True
     if args.refresh_shadow:

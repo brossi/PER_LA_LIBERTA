@@ -47,7 +47,9 @@ def test_synthetic_acquisition_feeds_reconcile(tmp_path, monkeypatch, acq):
     for name in ("copy1_raw.txt", "copy2_raw.txt", "copy3_raw.txt", "copy3_pro_page_map.json"):
         assert (ws.data / name).is_file(), name
 
-    result = reconcile.run(workspace=ws, cfg=cfg, lang=lang)
+    result = reconcile.run(
+        workspace=ws, cfg=cfg, lang=lang, admission_checker=lambda **_: None
+    )
     assert result["mode"] == "3-way"           # copy3 was produced and picked up
     assert result["chapters"] >= 2
     assert (ws.data / "reconciled_chapters.json").is_file()
@@ -68,7 +70,9 @@ def test_download_then_reconcile_without_ocr_is_two_way(tmp_path, acq):
     }
     download.run(workspace=ws, cfg=cfg, lang=lang, fetcher=acq.Fetcher(url_map))
 
-    result = reconcile.run(workspace=ws, cfg=cfg, lang=lang)
+    result = reconcile.run(
+        workspace=ws, cfg=cfg, lang=lang, admission_checker=lambda **_: None
+    )
     assert result["mode"] == "2-way"
 
 
@@ -79,6 +83,8 @@ def test_reconcile_without_copies_is_a_typed_missing_input_error(tmp_path):
     lang = get_language_plugin(cfg.language_id)
     ws = BookWorkspace.for_book("synthetic", tmp_path).ensure()
     with pytest.raises(MissingInputError) as ei:
-        reconcile.run(workspace=ws, cfg=cfg, lang=lang)
+        reconcile.run(
+            workspace=ws, cfg=cfg, lang=lang, admission_checker=lambda **_: None
+        )
     assert ei.value.exit_code == 3
     assert "copy1_raw.txt" in str(ei.value)

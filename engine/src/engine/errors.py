@@ -14,7 +14,7 @@ authoring-evidence gate's typed ``(kind, message)`` findings), and ``GeometryErr
 ``structure/geometry.py`` — the immediate fail-loud geometry/OCR-backend + geometry-integrity
 carrier). OCR page failures retain resumable state but now fail at the pre-publication completeness
 gate. The CLI maps every :class:`EngineError` generically via ``exc.exit_code``, so
-subclassing elsewhere costs nothing here; a new code must stay unique across all four files (pinned
+subclassing elsewhere costs nothing here; a new code must stay unique across all owner files (pinned
 by ``test_authoring_evidence.py``'s uniqueness sweep).
 
 The shared load-boundary taxonomy of the persisted structure-*document* loaders (structure maps,
@@ -163,3 +163,13 @@ class InvalidInvocationError(EngineError, ValueError):
     """
 
     exit_code = 15
+
+
+class ReconciliationAdmissionError(EngineError):
+    """Page evidence is incomplete, stale, contradictory, or awaiting bounded review.
+
+    Exit code 16 follows the invocation boundary's 15 and remains covered by the global
+    EngineError uniqueness sweep.
+    """
+
+    exit_code = 16

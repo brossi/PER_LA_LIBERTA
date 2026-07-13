@@ -631,7 +631,7 @@ def test_evidence_gate_error_is_an_engine_error_at_exit_code_12():
 
 
 def test_engine_error_exit_codes_are_globally_unique_across_the_owner_modules():
-    # DT-1 owned ripple: the exit-code sweep now spans FIVE files — engine.errors (3–10),
+    # DT-1 owned ripple: the exit-code sweep spans FIVE files — engine.errors (3–10, 15–16),
     # structure.errors (11, StructureValidationError), structure.evidence (12, EvidenceGateError),
     # structure.geometry (13, GeometryError), and structure.rebind (14, RebindError). Collect every
     # EngineError subclass across all five (a set, deduped by class identity since each module imports

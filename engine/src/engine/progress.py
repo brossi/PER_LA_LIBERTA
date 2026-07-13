@@ -169,6 +169,33 @@ def pipeline_snapshot(workspace: BookWorkspace, cfg: ResolvedConfig) -> dict:
     else:
         entries.append(_entry("ocr", "running" if active == "ocr" else "pending", "0 pages"))
 
+    ledger = _load(ws.data / "page_evidence" / "copy1" / "ledger.json")
+    ledger_counts = ledger.get("counts", {}) if isinstance(ledger, dict) else {}
+    ledger_reasons = ledger.get("reason_counts", {}) if isinstance(ledger, dict) else {}
+    ledger_pages = ledger.get("pages", []) if isinstance(ledger, dict) else []
+    ledger_status = ledger.get("status") if isinstance(ledger, dict) else None
+    entries.append(_entry(
+        "ingest_gate",
+        "complete" if ledger_status == "admitted" else (
+            "running" if active == "ingest_gate" else "failed" if ledger_status else "pending"
+        ),
+        f"{len(ledger_pages)}/{cfg.manifest.scan.last_scan_page_default} pages",
+        (
+            f"{ledger_counts.get('review_required', 0)} require review"
+            + (
+                "; " + ", ".join(
+                    f"{reason}={count}"
+                    for reason, count in sorted(
+                        ledger_reasons.items(), key=lambda item: (-item[1], item[0])
+                    )[:3]
+                )
+                if ledger_reasons else ""
+            )
+            if ledger_status
+            else "page-evidence admission"
+        ),
+    ))
+
     reconciled = _load(ws.data / "reconciled_chapters.json", [])
     flags = _load(ws.data / "flagged_segments.json", [])
     entries.append(_entry(

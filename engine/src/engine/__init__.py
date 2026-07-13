@@ -33,6 +33,6 @@ STEPS = (
 
 # Explicitly selectable observation/preflight stages. They are not part of ``--step all`` because
 # their providers are optional and they do not produce the canonical build subset above.
-OPTIONAL_STEPS = ("layout_shadow",)
+OPTIONAL_STEPS = ("layout_shadow", "ingest_gate")
 
 __all__ = ["__version__", "OPTIONAL_STEPS", "STEPS"]

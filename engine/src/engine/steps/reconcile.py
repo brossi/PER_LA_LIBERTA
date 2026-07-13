@@ -33,6 +33,7 @@ from ..contracts.markers import PAGE_MARKER_RE
 from ..errors import MissingInputError
 from ..lang.base import LanguagePlugin
 from ..paths import BookWorkspace
+from ..structure.page_evidence import assert_reconciliation_admission
 from ..util.jsonio import atomic_write_json, atomic_write_text
 from ..util.text import collapse_spaces, normalize_for_comparison, rejoin_lines
 
@@ -618,6 +619,7 @@ def run(
     workspace: BookWorkspace,
     cfg: ResolvedConfig,
     lang: LanguagePlugin,
+    admission_checker=assert_reconciliation_admission,
 ) -> dict:
     """Reconcile the OCR copies in ``workspace`` and write the four artifacts.
 
@@ -630,6 +632,7 @@ def run(
     ``reconciled_raw.txt`` into ``ws.data``. Returns a summary dict.
     """
     ws = workspace
+    admission_checker(workspace=ws, cfg=cfg)
     accents = cfg.language.word_score_accents
 
     declared_roles = {source.role for source in cfg.manifest.sources}

@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Output-edition typeface profile",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["name", "display_family", "body_family", "css_filename"],
+  "properties": {
+    "name": {"type": "string", "minLength": 1},
+    "display_family": {"type": "string", "minLength": 1},
+    "body_family": {"type": "string", "minLength": 1},
+    "css_filename": {"type": "string", "minLength": 1}
+  }
+}

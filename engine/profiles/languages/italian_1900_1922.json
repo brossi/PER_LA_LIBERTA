@@ -1,0 +1,39 @@
+{
+  "language_id": "it",
+  "display_name": "Italian",
+  "spacy_model": "it_core_news_lg",
+  "frequency_dictionary": "frequency/it_combined.txt",
+  "english_markers": [
+    "the", "and", "this", "that", "with", "from", "have", "will",
+    "correct", "errors", "chapter", "text", "following", "here",
+    "carefully", "preserve", "original", "artifacts"
+  ],
+  "skip_words": [
+    "a", "e", "i", "o", "è", "il", "la", "le", "lo", "li", "un",
+    "di", "da", "in", "su", "ma", "se", "no", "sì", "ci", "vi",
+    "ne", "al", "ai", "ha", "ho", "fu", "fa", "va", "oh", "ah"
+  ],
+  "consonant_alphabet": "bcdfghjklmnpqrstvwxyz",
+  "word_score_accents": "àèìòùéÀÈÌÒÙ",
+  "accent_inventory": ["à", "è", "ì", "ò", "ù", "é"],
+  "coverage": {
+    "ascii_letters": true,
+    "digits": true,
+    "letters": "àèìòùéÀÈÌÒÙÉ",
+    "punctuation": ".,;:!?-—–'’‘\"«»“”()[]/…"
+  },
+  "accent_optional": true,
+  "case_fold": "lower",
+  "accent_fold": {
+    "from": "àáâèéêìíîòóôùúûÀÁÂÈÉÊÌÍÎÒÓÔÙÚÛ",
+    "to": "aaaeeeiiiooouuuAAAEEEIIIOOOUUU"
+  },
+  "accented_letters": "àèìòùéÀÈÌÒÙÉ",
+  "word_letter_class": "a-zA-ZÀ-ÿ",
+  "period_dictionaries": [
+    {"name": "Zingarelli 1922", "kind": "monolingual", "dir": "dictionary/zingarelli_1922"},
+    {"name": "Edgren 1901", "kind": "bilingual", "dir": "dictionary/edgren_1901"},
+    {"name": "Hoare 1915", "kind": "bilingual", "dir": "dictionary/hoare_1915"}
+  ],
+  "oracle_min": 2
+}

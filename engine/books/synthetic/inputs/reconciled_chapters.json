@@ -1,0 +1,20 @@
+[
+  {
+    "id": "prefazione",
+    "title": "Prefazione",
+    "part": 0,
+    "text": "Questa breve prefazione introduce un libro di prova creato soltanto per validare il motore generico di elaborazione del testo. Il contenuto non possiede alcun valore storico o letterario, e serve unicamente a fornire alcune frasi italiane pulite e corrette su cui eseguire i controlli automatici. Ogni paragrafo è composto da parole comuni della lingua italiana, scelte con cura per evitare errori di trascrizione, rumore di scansione o caratteri estranei al normale alfabeto. In questo modo la validazione dovrebbe concludersi senza segnalazioni gravi, dimostrando che il motore legge correttamente la configurazione del libro e applica le soglie dichiarate nella struttura. Il lettore non troverà alcuna narrazione vera e propria, ma soltanto testo neutro e ripetitivo, adatto a un campione di dimensioni ridotte. Le frasi seguenti continuano nello stesso registro semplice e regolare, in modo da non sorprendere mai i controlli di qualità."
+  },
+  {
+    "id": "p1_capitolo_primo",
+    "title": "Capitolo Primo",
+    "part": 1,
+    "text": "Il primo capitolo prosegue con altre frasi semplici e chiare, scritte nella medesima lingua italiana del resto del libro di prova. Le parole impiegate sono comuni e ben note al dizionario di frequenza, cosicché il controllo di qualità delle parole non dovrebbe produrre alcuna segnalazione grave. Il testo descrive in modo astratto il funzionamento di un capitolo di prova, senza introdurre nomi propri insoliti né termini tecnici complicati. Ogni frase è costruita con attenzione, affinché la copertura dei caratteri rimanga ampiamente entro la soglia consentita e la conservazione del numero di parole risulti elevata rispetto al testo riconciliato di partenza. Il capitolo non racconta avvenimenti, ma elenca con calma le proprietà desiderate del campione di prova. Anche quando le frasi si allungano, le parole restano ordinarie e facilmente riconoscibili dal motore."
+  },
+  {
+    "id": "p1_capitolo_secondo",
+    "title": "Capitolo Secondo",
+    "part": 1,
+    "text": "Il secondo capitolo conclude il piccolo libro di prova con un ultimo gruppo di frasi italiane corrette e ordinate. Anche qui le parole sono comuni e prive di rumore, e la struttura del capitolo rispetta fedelmente le convenzioni dichiarate nella configurazione del libro. Lo scopo di questo paragrafo finale è offrire materiale sufficiente affinché tutti i controlli automatici dispongano di un campione adeguato e rappresentativo. Con questo capitolo il motore di validazione può verificare la struttura complessiva, la coerenza delle parentesi, la copertura dei caratteri e la qualità delle parole, restituendo un esito favorevole per il libro di prova. Il testo conserva fino alla fine lo stesso stile piano e privo di ornamenti, così da non introdurre eccezioni difficili da interpretare. In questo modo la prova si chiude in maniera ordinata e prevedibile, come si conviene a un semplice esempio di validazione."
+  }
+]

@@ -1,0 +1,82 @@
+[project]
+name = "book-engine"
+version = "0.0.2"
+description = "Book/language-agnostic OCR → reconcile → clean → translate → typeset framework, forked from the Per la Libertà! pipeline."
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    # Config + templating — the two pieces of new machinery the framework adds
+    # on top of the ported pipeline (see ENGINE_FRAMEWORK_PLAN.md "Config model").
+    "jsonschema>=4.21",
+    "jinja2>=3.1",
+    # Runtime ports of the pipeline steps. spaCy *models* are per-language extras
+    # (see [project.optional-dependencies]); spaCy itself is core because the
+    # LanguagePlugin loads a model lazily and every language needs the library.
+    "anthropic>=0.86.0",
+    "google-genai>=1.69.0",
+    "markdown-it-py>=4.0.0",
+    "openai>=2.30.0",
+    "pillow>=12.1.1",
+    "pymupdf>=1.27.2.2",
+    "python-dotenv>=1.2.2",
+    "rapidfuzz>=3.14.3",
+    "requests>=2.33.0",
+    "sacrebleu>=2.6.0",
+    "segno>=1.6.6",
+    "spacy>=3.8.14",
+    "symspellpy>=6.9.0",
+    # spaCy's __init__ imports spacy.cli, which does `from click import ...`, but spaCy
+    # declares only typer — and this typer resolution doesn't pull click transitively, so
+    # `import spacy` fails without it. Pin click directly so the env is importable.
+    "click>=8.4.1",
+]
+
+[project.scripts]
+engine = "engine.cli:main"
+
+[project.optional-dependencies]
+# Per-language spaCy model wheels. `uv sync --extra it` installs only what an
+# Italian book needs. The distribution name (it-core-news-lg) is distinct from
+# the spaCy model name (it_core_news_lg) the LanguagePlugin loads at runtime.
+it = [
+    "it-core-news-lg @ https://github.com/explosion/spacy-models/releases/download/it_core_news_lg-3.8.0/it_core_news_lg-3.8.0-py3-none-any.whl",
+]
+assessment = [
+    "book-layout-sidecar[adapters]",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.metadata]
+# The Italian spaCy model (optional `it` extra) is pinned by release-wheel URL — a
+# direct reference, which hatchling rejects unless explicitly allowed.
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+# True src layout: the importable package is src/engine, installed editable by
+# `uv sync` so `import engine.*` always resolves here, never to a top-level twin
+# (download.py, validate.py, …) at the parent-repo root.
+packages = ["src/engine"]
+
+[tool.pytest.ini_options]
+# pythonpath = src is belt-and-suspenders alongside the editable install: it keeps
+# `import engine.*` resolving to this package even if the install is stale. testpaths
+# is scoped to engine/tests so a run launched from the parent repo never collects
+# top-level pipeline tests. Golden/integration tests are marked by purpose and scope
+# so CI and local runs can choose the right suite explicitly.
+pythonpath = ["src"]
+testpaths = ["tests"]
+markers = [
+    "golden: reproduces a committed live PLL artifact from frozen inputs",
+    "integration: exercises a full step end-to-end",
+]
+
+[tool.uv.sources]
+book-layout-sidecar = { git = "ssh://git@github.com/brossi/book-layout-sidecar.git", rev = "v0.1.4" }

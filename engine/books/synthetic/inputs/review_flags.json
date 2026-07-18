@@ -1,0 +1,10 @@
+{
+  "p1_ch01": [
+    {"token": "ben-essere", "left": "ben", "right": "essere", "reason": "dehyphenation_unresolved"},
+    {"token": "Lombardo-Veneto", "left": "Lombardo", "right": "Veneto", "reason": "ner_candidate"},
+    {"token": "##", "left": "#", "right": "#", "reason": "dehyphenation_unresolved"}
+  ],
+  "p1_ch02": [
+    {"token": "giustizi-a", "left": "giustizi", "right": "a", "reason": "dehyphenation_unresolved"}
+  ]
+}

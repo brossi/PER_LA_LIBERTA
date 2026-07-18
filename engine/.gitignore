@@ -1,0 +1,23 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Engine's own virtual environment (separate from the parent repo's .venv)
+.venv
+
+# Per-book generated artifacts. work/ is the isolated, disposable output tree
+# every step writes to (paths.BookWorkspace asserts containment). Regenerable,
+# so never committed — but the directory skeleton is kept via .gitkeep files.
+books/*/work/data/*
+books/*/work/output/*
+books/*/work/state/*
+!books/*/work/data/.gitkeep
+!books/*/work/output/.gitkeep
+!books/*/work/state/.gitkeep
+
+# Heavy assets are symlinked into assets/ during development (real copies land
+# only at extraction). The symlinks themselves are tracked; their targets are not.

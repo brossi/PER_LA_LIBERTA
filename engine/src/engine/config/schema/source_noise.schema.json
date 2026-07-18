@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Source-noise (source-typeface OCR-noise) profile",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "name", "substitution_rules", "boundary_substitutions",
+    "ligature_substitutions", "noise_line_patterns", "page_marker_line_pattern",
+    "char_substitutions", "inline_page_marker_patterns",
+    "page_marker_artifact_pattern", "page_marker_format"
+  ],
+  "properties": {
+    "name": {"type": "string", "minLength": 1},
+    "substitution_rules": {
+      "type": "array",
+      "items": {
+        "type": "array",
+        "items": {"type": "string"},
+        "minItems": 2,
+        "maxItems": 2
+      }
+    },
+    "boundary_substitutions": {
+      "type": "object",
+      "additionalProperties": {"type": "array", "items": {"type": "string"}}
+    },
+    "ligature_substitutions": {
+      "$comment": "Typeface fi/fl/ff ligature confusions cleanup flags (D3). Required-and-explicit (BR-004): a profile without them declares [], never omits the key.",
+      "type": "array",
+      "items": {
+        "type": "array",
+        "items": {"type": "string"},
+        "minItems": 2,
+        "maxItems": 2
+      }
+    },
+    "noise_line_patterns": {
+      "$comment": "Full-line OCR-decoration regexes cleanup drops (a line matching ANY of them is noise). The committed singular noise_line_pattern folded into this list at M4b, joined by the separator + Disp.-furniture patterns (cleanup.py is_noise_line :234/:248/:251). Per-pattern flags via inline groups, e.g. (?i).",
+      "type": "array",
+      "items": {"type": "string", "minLength": 1}
+    },
+    "page_marker_line_pattern": {
+      "$comment": "The compound page-marker noise class (cleanup.py is_noise_line :241); the len/real-word/has-digit guard around it stays in code.",
+      "type": "string", "minLength": 1
+    },
+    "char_substitutions": {
+      "$comment": "[regex, replacement] confusions whose REPLACEMENT is typeface/language opinion (e.g. £→E, a Bodoni misread of a capital E). Distinct from inline_page_marker_patterns, which delete noise (neutral space).",
+      "type": "array",
+      "items": {
+        "type": "array",
+        "items": {"type": "string"},
+        "minItems": 2,
+        "maxItems": 2
+      }
+    },
+    "inline_page_marker_patterns": {
+      "$comment": "Mid-text page-marker artifact regexes cleanup removes (cleanup.py :601-603); each match is replaced by a neutral space in code.",
+      "type": "array",
+      "items": {"type": "string", "minLength": 1}
+    },
+    "page_marker_artifact_pattern": {"type": "string", "minLength": 1},
+    "page_marker_format": {"type": "string", "minLength": 1}
+  }
+}

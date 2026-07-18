@@ -1,0 +1,29 @@
+[
+  {
+    "chapter": "p1_capitolo_primo",
+    "paragraph": 0,
+    "word_copy1": "comuni",
+    "word_copy2": "comimi",
+    "word_copy3": "comuni",
+    "context": "Le parole impiegate sono comuni e ben note",
+    "chosen": "comuni",
+    "resolution_method": "all_differ"
+  },
+  {
+    "chapter": "prefazione",
+    "paragraph": 0,
+    "word_copy1": "breve",
+    "word_copy2": "breve",
+    "chosen": "breve",
+    "resolution_method": "majority_vote"
+  },
+  {
+    "chapter": "p1_capitolo_secondo",
+    "paragraph": 0,
+    "word_copy1": "ordinate",
+    "word_copy2": "ordmate",
+    "context": "frasi italiane corrette e ordinate",
+    "chosen": "ordinate",
+    "resolution_method": "score_heuristic"
+  }
+]

@@ -1,0 +1,3343 @@
+{
+  "overall": "pass",
+  "input_sha256": "5f6dbd8e46fe5fe54829e19de5514d4d992452e11aa1a3d1335001b6cfb94718",
+  "issues": [],
+  "checks": [
+    {
+      "name": "chapter_count",
+      "passed": true,
+      "h2_count": 3,
+      "h3_count": 57,
+      "issues": []
+    },
+    {
+      "name": "no_empty_chapters",
+      "passed": true,
+      "issues": []
+    },
+    {
+      "name": "quote_balance",
+      "passed": true,
+      "issues": []
+    },
+    {
+      "name": "char_coverage",
+      "passed": true,
+      "foreign_char_ratio": 0.047,
+      "issues": []
+    },
+    {
+      "name": "no_ascii_remnants",
+      "passed": true,
+      "issues": []
+    },
+    {
+      "name": "word_quality",
+      "passed": true,
+      "total_flagged": 452,
+      "high_severity": 0,
+      "by_chapter": {
+        "Prefazione": [
+          {
+            "word": "insinuatasi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "e qualche impronta eterogenea insinuatasi nel volume per l'influenza de"
+          }
+        ],
+        "Capitolo Primo": [
+          {
+            "word": "agglomeramento",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "asformazione! Dove trovare un agglomeramento d'uomini di maggior slancio,"
+          },
+          {
+            "word": "privativa",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "vo sino a quel punto, creduto privativa delle menti virili, della gen"
+          },
+          {
+            "word": "denunciatrici",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "aveva conservate, quasi mute denunciatrici di un crimine inaudito."
+          },
+          {
+            "word": "Aggiungasi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "Aggiungasi che egli si faceva pagare per"
+          },
+          {
+            "word": "traguardanti",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "Incontreremmo piedi traguardanti tra suola e tomaia, attestant"
+          },
+          {
+            "word": "mosaicista",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "alvolta, assieme, con arte da mosaicista, impastando i giornali raccol"
+          },
+          {
+            "word": "figurinaio",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "en, in casa di un Mancherini, figurinaio lucchese. Il Fumagalli e cert"
+          },
+          {
+            "word": "tirannelli",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "L'Austria e i tirannelli d'Italia, che dagli esuli ave"
+          },
+          {
+            "word": "aizzatore",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "n Bonacina milanese, spavaldo aizzatore che, spalleggiato dai suoi e"
+          },
+          {
+            "word": "imbaldanzito",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "che, spalleggiato dai suoi e imbaldanzito dal carattere floscio dell'os"
+          },
+          {
+            "word": "pieghevolezza",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "essa non mancava di una certa pieghevolezza di carattere e d'ingegno; ma"
+          },
+          {
+            "word": "rifiutarvisi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "e di mamma Mancherini. Perché rifiutarvisi? Studiare la nostra lingua di"
+          },
+          {
+            "word": "fibrille",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "mento, vennero ricamate sulle fibrille di quell'anime, tanto più net"
+          },
+          {
+            "word": "italianamente",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "offrirono, sperarono, vollero italianamente."
+          },
+          {
+            "word": "sbirciatolo",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "e con qualche facezia. Altri, sbirciatolo appena, gli grugniva il lacon"
+          }
+        ],
+        "Capitolo Secondo": [
+          {
+            "word": "quintogenito",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "quattordici figli. Io fui il quintogenito."
+          },
+          {
+            "word": "biricchinate",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "credo lo fossi più per le mie biricchinate che per le mie virtù. Il mio"
+          },
+          {
+            "word": "salmodie",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "cosso, ne' suoi bei tempi, le salmodie dei frati; poi nel forte di P"
+          },
+          {
+            "word": "addensatasi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "lgermi, la fiera tempesta che addensatasi nel Settentrione, passò l'Alp"
+          },
+          {
+            "word": "riescito",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "o di Napoleone il Grande, era riescito a saltargli alla gola e ad af"
+          },
+          {
+            "word": "dappoi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "rettarne la rovina. Figurarsi dappoi!"
+          },
+          {
+            "word": "precipitarlo",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "dirsi! — minarne la potenza e precipitarlo nel baratro di Lipsia."
+          },
+          {
+            "word": "tirannelli",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "tanto o quanto, il giuoco dei tirannelli non fossero sorte, in buon pu"
+          },
+          {
+            "word": "intempestivamente",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "ncese, che volle atteggiarsi, intempestivamente, a campione degli Italiani, t"
+          },
+          {
+            "word": "cosmeticati",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "uniformi bianche e dai baffi cosmeticati; né dal barbarico diluvio and"
+          },
+          {
+            "word": "raffigurarli",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "possono servire all'arte per raffigurarli. Il simbolo dell'Italia di qu"
+          },
+          {
+            "word": "riprincipiava",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": ", ma a strazio maggiore. Essa riprincipiava non appena un gemito, un moto"
+          },
+          {
+            "word": "pertinacia",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "e la strage era cercato colla pertinacia di chi spinge la smania di do"
+          },
+          {
+            "word": "armaiuoli",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "oggia, arrugginiti; a cui gli armaiuoli, vuotando le loro botteghe, a"
+          },
+          {
+            "word": "loquela",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "enzio valeva, concentrata, la loquela di parecchi volumi."
+          },
+          {
+            "word": "eccitamenti",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "vevano sparso pel contado gli eccitamenti alla riscossa; che le città d"
+          },
+          {
+            "word": "cortinaggio",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "ano della finestra, dietro il cortinaggio, risoluto a rimanere appostat"
+          },
+          {
+            "word": "serrandolo",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "norina Sara. Ella sorreggeva, serrandolo al seno, un gran vaso di rose"
+          },
+          {
+            "word": "scambievolmente",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "o, degli uomini che si rodono scambievolmente, della insaziabile cupidigia,"
+          }
+        ],
+        "Capitolo Terzo": [
+          {
+            "word": "ritrattolo",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "l bimbo, abbassò il fucile e, ritrattolo a maggior slancio, vibrò una"
+          },
+          {
+            "word": "distinguendola",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "ecchio una frase che, pur non distinguendola, compresi. Allora alzai istin"
+          },
+          {
+            "word": "improvocate",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "oci e codarde, spesso affatto improvocate e l'ira repressa, tanto più r"
+          },
+          {
+            "word": "austriacante",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "ioni politiche. Era lo zio un austriacante arrabbiato ed io non lo ignor"
+          },
+          {
+            "word": "sobbarcarvisi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "e il pungolo che sospingeva a sobbarcarvisi."
+          },
+          {
+            "word": "invendicate",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "telnuovo non rimasero a lungo invendicate!"
+          },
+          {
+            "word": "azzurrognole",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "li verdi su ogni petto; spire azzurrognole di sigarette, quasi da ogni b"
+          },
+          {
+            "word": "cacciandoselo",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "apovolse il grande poeta; poi cacciandoselo rabbiosamente in fondo alla t"
+          },
+          {
+            "word": "ringagliardirla",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "la, dovevano più e più sempre ringagliardirla!"
+          }
+        ],
+        "Capitolo Quarto": [
+          {
+            "word": "neghittosamente",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "di non far fuoco. Assistevamo neghittosamente al febbrile lavoro degli Aust"
+          },
+          {
+            "word": "irremissibilmente",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "quando la guerra regia parve irremissibilmente perduta. L'alta borghesia che"
+          },
+          {
+            "word": "ritempratevi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "i? \"Tornate alle vostre case, ritempratevi alle carezze della madre, del"
+          },
+          {
+            "word": "organizzatici",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "tori, rifiutò di arruolarci e organizzatici in manipolo, ci fece scortare"
+          },
+          {
+            "word": "soverchiamente",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "sivo ed allegro. Il Rossi era soverchiamente corrivo in fatto di relazioni"
+          }
+        ],
+        "Capitolo Quinto": [
+          {
+            "word": "trucemente",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "to politico. Cavaignac emerge trucemente dalla carneficina e aspira al"
+          },
+          {
+            "word": "contesagli",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "Presidenza della Repubblica, contesagli dai vinti che gli oppongono,"
+          },
+          {
+            "word": "sgoverno",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "più odiato dei Governi... lo sgoverno del Papa!"
+          },
+          {
+            "word": "soldatesche",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "I Francesi, le soldatesche del Re Bomba, gli Spagnuoli,"
+          },
+          {
+            "word": "rinnovellarsi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "rtù di eroismo e di martirio, rinnovellarsi il diritto, scaturire la vita"
+          },
+          {
+            "word": "trovavasi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "à, venne a farmi visita. Egli trovavasi in circostanze molto più crit"
+          },
+          {
+            "word": "dappoi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "ali erano i suoi piani per il dappoi?"
+          },
+          {
+            "word": "riescito",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "pubblicani e monarchici è già riescito fatale al Popolo italiano; la"
+          },
+          {
+            "word": "strame",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "tene la nostra Patria; che fa strame d'ogni nobile aspirazione del"
+          },
+          {
+            "word": "spruzzandone",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "batteva l'acqua colle manine, spruzzandone il tavolo. A quella vista, Si"
+          },
+          {
+            "word": "apersi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "ente venne. Sin da quando gli apersi, notai che l'espressione dell"
+          }
+        ],
+        "Capitolo Sesto": [
+          {
+            "word": "vistili",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "lmontone. Giuseppe Garibaldi, vistili appena, sprona il suo bianco"
+          },
+          {
+            "word": "persuadersene",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "a San Pancrazio e più dovette persuadersene l'ufficiale che non sempre mi"
+          },
+          {
+            "word": "sitibondi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "gliavano l'un contro l'altro, sitibondi di vendetta, in nel cantuccio"
+          },
+          {
+            "word": "trascinantisi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "nte dei feriti trasportati, o trascinantisi, alla chiesa di San Pietro in"
+          },
+          {
+            "word": "Montorio",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "alla chiesa di San Pietro in Montorio, trasformata in ospedale da c"
+          },
+          {
+            "word": "rassegnarvisi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "abile la sconfitta, non volle rassegnarvisi senza spingere la sua tenacia"
+          },
+          {
+            "word": "piantandosi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "mminente la notte quand'egli, piantandosi di fronte al Reggimento Union"
+          },
+          {
+            "word": "scilinguagnolo",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "imon Bernard e sciolto il suo scilinguagnolo. Seppi che Felice Orsini già"
+          },
+          {
+            "word": "coadiuarlo",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "ontanarlo da quanti potessero coadiuarlo efficacemente in qualche sua"
+          },
+          {
+            "word": "dicevasi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "ontessa Sommariva per motivi, dicevasi, più noti a lui che ai congiu"
+          },
+          {
+            "word": "insinuatosi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "lle cure d'un intimo suo che, insinuatosi nel cuore dell'avvenente prot"
+          },
+          {
+            "word": "soverchiamente",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "dei doganieri con un involto soverchiamente voluminoso. Felice Orsini ave"
+          },
+          {
+            "word": "facetamente",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "Ed allungò il braccio. Ma io facetamente: \"Sta in guardia! la tigre è"
+          },
+          {
+            "word": "mormorandomi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "mi gettò le braccia al collo, mormorandomi dolcemente all'orecchio: \"Car"
+          },
+          {
+            "word": "tristamente",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "amente una data nota. Sorrise tristamente e, con un filo di voce, che p"
+          },
+          {
+            "word": "alzatasi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "'orologio... Ella comprese e, alzatasi, corse nell'altra nostra came"
+          }
+        ],
+        "Capitolo Settimo": [
+          {
+            "word": "divisamento",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "dinot a mutare quel suo primo divisamento. Egli girò la difficoltà este"
+          },
+          {
+            "word": "pontificie",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "quasi di sorpresa, delle mura pontificie.... la nostra difesa è ridott"
+          },
+          {
+            "word": "scambievolmente",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "a volta e ce ne congratuliamo scambievolmente stringendoci la destra con gr"
+          },
+          {
+            "word": "ripuntellato",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "dita dai secoli... tanto che, ripuntellato il duplice trono, vi avrebbe"
+          },
+          {
+            "word": "dedicandoli",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "ificati altrettanto splendidi dedicandoli non più alla menzogna, ma all"
+          },
+          {
+            "word": "cattolicismo",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "a che ad essa si conviene. Il cattolicismo, sopravvissuto a tanta luce d"
+          },
+          {
+            "word": "rigeneratrice",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "iesce ormai vuoto d'ogni idea rigeneratrice e, per reggersi, ha bisogno d"
+          },
+          {
+            "word": "esaltamento",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "d'ogni intorno, a me dava un esaltamento che mi raddoppiava la coscien"
+          },
+          {
+            "word": "quietismo",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "ienza della vita. Da tempo il quietismo tentava come di sovrapporsi a"
+          },
+          {
+            "word": "pallidezza",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "coll'occhio intelligente; la pallidezza del volto rendeva straordinar"
+          },
+          {
+            "word": "riserbarsi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "eterminazione dell'Orsini, di riserbarsi la conoscenza esclusiva dei p"
+          },
+          {
+            "word": "loquela",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "piega, interruppe la rumorosa loquela del Pieri: \"A proposito! — mi"
+          }
+        ],
+        "Capitolo Ottavo": [
+          {
+            "word": "commendatizia",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "e lo seppe, scrisse una calda commendatizia ad Alessandro Lamarmora ed im"
+          },
+          {
+            "word": "Aggiungasi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "are fedeltà ad una Monarchia. Aggiungasi che i Bersaglieri erano, allo"
+          },
+          {
+            "word": "dipresso",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "pirazione. Egli mi disse a un dipresso:"
+          },
+          {
+            "word": "trattosi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "E, trattosi il cappello, fece il giro del"
+          },
+          {
+            "word": "ricontata",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "fu da noi palpata, contata e ricontata appunto a Perpignano, ci avev"
+          },
+          {
+            "word": "odiandosi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "to più se, un giorno, pur non odiandosi, si sono trovati di fronte."
+          },
+          {
+            "word": "internarci",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "esammo il nostro proposito di internarci nel territorio della Repubbli"
+          },
+          {
+            "word": "memorando",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "iorno in quest'ultima città è memorando per me, perchè ivi appunto pr"
+          },
+          {
+            "word": "acuivansi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "la data fatale si avvicinava, acuivansi le sue speranze, i suoi timor"
+          },
+          {
+            "word": "cupidigie",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": ", i suoi timori, gli odii, le cupidigie. Ma nel dissimulare il suo la"
+          },
+          {
+            "word": "sorvegliarsi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "rivano la propria energia nel sorvegliarsi a vicenda e non si curavano g"
+          },
+          {
+            "word": "ingolfarsi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "reno di sotto ai suoi nemici; ingolfarsi in un crimine codardo e trova"
+          },
+          {
+            "word": "loquela",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "esciare il torrente della sua loquela, più che toscana, prettamente"
+          },
+          {
+            "word": "frammischiandovi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "l fraseggiare poco castigato, frammischiandovi fiori di filosofia pratica ch"
+          },
+          {
+            "word": "tumultuosamente",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "l'ingegno bizzarro e la vita tumultuosamente vissuta."
+          },
+          {
+            "word": "birbettone",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "gno di lode. Ma vorresti, dio birbettone! che la più bella, la più nob"
+          },
+          {
+            "word": "patriotti",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "o alla via Rossini, troverà i patriotti che sapranno inviargli il sal"
+          },
+          {
+            "word": "sodezza",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "d amalgama tanto complesso di sodezza e di vanità."
+          },
+          {
+            "word": "piantarmisi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "lzavano, come lampi. Finì per piantarmisi dinanzi.... prese e gettò nuo"
+          }
+        ],
+        "Capitolo Nono": [
+          {
+            "word": "riprincipiò",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "Non appena il fumo diradò, si riprincipiò a sparare, con schioppettìo d"
+          },
+          {
+            "word": "schioppettìo",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "si riprincipiò a sparare, con schioppettìo disordinato."
+          },
+          {
+            "word": "riputandosene",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "L'ufficiale che li comandava, riputandosene schernito, se ne vendicò affe"
+          },
+          {
+            "word": "abbracciamenti",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": ", consanguinei pei misteriosi abbracciamenti dell'adulterio, avevano raffo"
+          },
+          {
+            "word": "affratellandosi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "forzato i vincoli del sangue, affratellandosi anche nel delitto."
+          },
+          {
+            "word": "adunatasi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "disperdere la Corte Suprema, adunatasi per protestare, in omaggio al"
+          },
+          {
+            "word": "sfolgorio",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "erenamente il martirio... uno sfolgorio d'eroismo! ma non seppero, ma"
+          },
+          {
+            "word": "fanciullaggine",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "omito, sublime abnegazione... fanciullaggine senile!"
+          },
+          {
+            "word": "disdegnosa",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "\". Mattia dalla posa altera e disdegnosa, ma pur sempre mattia. Forse"
+          },
+          {
+            "word": "Aggiuntasi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "zare, per libidine di strage. Aggiuntasi presto, all'ubriacatura dell'"
+          },
+          {
+            "word": "trafugarli",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "cadaveri e pone ogni cura nel trafugarli ai propri occhi, non meno che"
+          },
+          {
+            "word": "soprarrivano",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "Come far posto alle torme che soprarrivano? La risposta, che giunse dall"
+          },
+          {
+            "word": "scorrendovi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "fogna perchè il sangue umano, scorrendovi, lasci scarse tracce e non ri"
+          },
+          {
+            "word": "lasciatogli",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "i gettare sul letto il danaro lasciatogli dall'Orsini, come se lo avess"
+          },
+          {
+            "word": "porgendomela",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "mente introdotta in Europa) e porgendomela diceva: \"Piglia! contiene sei"
+          },
+          {
+            "word": "liquoreria",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "iberarsene, magari in qualche liquoreria, per trovarsi poi al suo post"
+          }
+        ],
+        "Capitolo Decimo": [
+          {
+            "word": "ricongiungendosi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": ", la località, ove le maglie, ricongiungendosi, formavano il nodo successivo"
+          },
+          {
+            "word": "commendatizia",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "e dell'Ufficiale Postale. Una commendatizia, pochi segni convenzionali ed"
+          },
+          {
+            "word": "inquisitiva",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "esse del limone. Ella divenne inquisitiva: Una lettera? da parte di chi"
+          },
+          {
+            "word": "toltane",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "pacatamente il portafoglio e, toltane la commendatizia, feci osserv"
+          },
+          {
+            "word": "sgangheratamente",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "potuto trattenersi dal ridere sgangheratamente. Dovetti protestare con tutta"
+          },
+          {
+            "word": "sgambietto",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "e, involontariamente, dava lo sgambietto ad una guardia che vi transit"
+          },
+          {
+            "word": "gambuccie",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "era diede un gemito, voltò le gambuccie all'aria e rimase stecchita."
+          },
+          {
+            "word": "convalli",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": ", su quelle balze, tra quelle convalli, vivono in pace popoli divers"
+          },
+          {
+            "word": "gagliardemente",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "a, nei secoli andati, batteva gagliardemente tra le Alpi; ma invano! Come"
+          },
+          {
+            "word": "giogaie",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "e Alpi; ma invano! Come dalle giogaie candide precipitano l'acque c"
+          },
+          {
+            "word": "arruolatore",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "avo, con grandi gesti, il mio arruolatore."
+          },
+          {
+            "word": "udivasi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "E già udivasi, in lontananza, il clamore co"
+          },
+          {
+            "word": "ripulsive",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "dalle vibrazioni estremamente ripulsive. E sentii — oh si creda al ve"
+          }
+        ],
+        "Capitolo Undicesimo": [
+          {
+            "word": "inalzare",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "i, dei Gracchi avrebbe valuto inalzare l'intera nostra razza. Durant"
+          },
+          {
+            "word": "soppannava",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "do e senza darsene l'aria, mi soppannava il cervello di episodi eroici"
+          },
+          {
+            "word": "inoltratomi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "bbandiere, l'azzurro Ticino e inoltratomi appena nei domini dell'Austri"
+          },
+          {
+            "word": "affidatagli",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "uaso di compiere una missione affidatagli da Dio, Francesco Giuseppe no"
+          },
+          {
+            "word": "patriotti",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "ia ad ammucchiare cadaveri di patriotti. Tutto questo par cancellato,"
+          },
+          {
+            "word": "vituperevole",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "strade gli evviva al vecchio vituperevole. Eppure non si cessa mai dall"
+          },
+          {
+            "word": "pertinacia",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "no difesa. Vessati con feroce pertinacia, avevano, ciò nulla meno, il"
+          },
+          {
+            "word": "fecondatrice",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "la stessa tirannide la grande fecondatrice d'ogni libertà!"
+          },
+          {
+            "word": "sottrattole",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "grado le disfatte e il sangue sottrattole e le persecuzioni, la vita pu"
+          },
+          {
+            "word": "porgendomeli",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "in un cassetto e mi domandò, porgendomeli, se non mi servirebbero quatt"
+          },
+          {
+            "word": "compiacentemente",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "che ora salutava, chinandosi compiacentemente, a destra e a sinistra."
+          }
+        ],
+        "Capitolo Dodicesimo": [
+          {
+            "word": "condiscepolo",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "ccademia Militare di Milano e condiscepolo mio: i legami della prima gio"
+          },
+          {
+            "word": "acconsentitami",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "e di quel tanto di ginnastica acconsentitami dalle membra indolenzite, per"
+          },
+          {
+            "word": "irritatissimo",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "Comitato Rivoluzionario che, irritatissimo, in quei giorni, per le pessi"
+          },
+          {
+            "word": "giuntegli",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "iorni, per le pessime notizie giuntegli da Mantova, approvò la mia de"
+          },
+          {
+            "word": "patriotti",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "ia determinazione. E tra quei patriotti, trovai anche chi, spontaneo,"
+          },
+          {
+            "word": "obiadìtt",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "stie che i Milanesi chiamano \"obiadìtt\". Eravamo diretti verso il Du"
+          },
+          {
+            "word": "avanzandosi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "etti. \"Ah, ah! — disse alfine avanzandosi verso i personaggi con e senz"
+          }
+        ],
+        "Capitolo Tredicesimo": [
+          {
+            "word": "propriia",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "est'altra: \"Per acquistare la propriia indipendenza, per rivendicare"
+          },
+          {
+            "word": "maestrevolmente",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "on ha mai mentito, le saltano maestrevolmente di piè pari e continuano ad e"
+          },
+          {
+            "word": "armaiuoli",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "ia, dodici mila fucili. I due armaiuoli che, giornalmente li ispezion"
+          },
+          {
+            "word": "Aggiungasi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "Aggiungasi che gli studenti di Pavia, se"
+          },
+          {
+            "word": "patriotti",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "o aver battuto alla porta dei patriotti più facoltosi — in tale occas"
+          },
+          {
+            "word": "rinsanguamento",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": ", all'Alpi, dalla sua base di rinsanguamento. Bastava, per dare animo e te"
+          },
+          {
+            "word": "intralciandoli",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "erti i piani del Calvi o che, intralciandoli, richiedesse la loro modifica"
+          },
+          {
+            "word": "rimorchiatele",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "ssessarsene di sorpresa. Poi, rimorchiatele al largo, rivolgere le bocche"
+          },
+          {
+            "word": "attanagliandosi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "o paradiso, se lo guastassero attanagliandosi perpetuamente, come se nel lo"
+          },
+          {
+            "word": "cosmeticati",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "a quell'antro oscuro, i baffi cosmeticati di un \"kaiserlich\". Fedeli al"
+          },
+          {
+            "word": "adombrarsi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "ioni, tanto mistero? C'era da adombrarsi anche per meno.\""
+          },
+          {
+            "word": "riescisse",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "agire in modo che la vittoria riescisse certa e come inevitabile."
+          },
+          {
+            "word": "diacciato",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "Dalle Alpi soffiava un vento diacciato che aveva come spazzata via l"
+          },
+          {
+            "word": "imbaccuccata",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "Trovai sull'Arno gente imbaccuccata, dall'aria egoisticamente pen"
+          },
+          {
+            "word": "fenomenalmente",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": ", un uomo ossuto, dalla testa fenomenalmente grossa. Era assorto nella let"
+          },
+          {
+            "word": "loquela",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "Pieri e la sua troppo facile loquela immediatamente dopo l'arresto"
+          },
+          {
+            "word": "denegazione",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "avrebbero smentito... la mia denegazione diventava insostenibile!"
+          }
+        ],
+        "Capitolo Quattordicesimo": [
+          {
+            "word": "ungariche",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "rsuasi che le autorità austro-ungariche, insospettite, avessero sobil"
+          },
+          {
+            "word": "stridettero",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "Mezz'ora dopo, i catenacci stridettero ed il pesante uscio girò sui"
+          },
+          {
+            "word": "cazzottarlo",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "to, mascalzone!\" Feci atto di cazzottarlo e l'uno e l'altro sloggiarono"
+          },
+          {
+            "word": "dipresso",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "ova villeggiatura aveva, a un dipresso, una superficie di dieci pied"
+          },
+          {
+            "word": "spremutane",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "fficiale di marina. Lo Stato, spremutane la giovinezza, l'aveva tolto"
+          },
+          {
+            "word": "laudatori",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "pecialmente espliciti e quasi laudatori."
+          },
+          {
+            "word": "vedasi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "io, all'occhio circolare. Ora vedasi quanto sia capace di rodere l"
+          },
+          {
+            "word": "rivoltomi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "atto dinanzi al mio giudice e rivoltomi alla mia accusatrice: \"Lei te"
+          },
+          {
+            "word": "celeramente",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "Poi corsi via, tanto celeramente che le guardie, venendomi app"
+          }
+        ],
+        "Capitolo Decimo Quinto": [
+          {
+            "word": "disdegnosa",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "... sia che stimasse l'onestà disdegnosa di lode; sia che i gravi pens"
+          }
+        ],
+        "Capitolo Decimo Sesto": [
+          {
+            "word": "armaiuoli",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "stello e si abboccava coi due armaiuoli. Li trovò saldi alla data par"
+          },
+          {
+            "word": "blouses",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "ra di far causa comune colle \"blouses\"? Non arrischiavano i figli d"
+          },
+          {
+            "word": "sospingerci",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "difendeva dicendo: \"Volevano sospingerci soli al macello per poterci s"
+          },
+          {
+            "word": "balordaggine",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "itare, vennero dichiarati una balordaggine più che puerile. E non si ebb"
+          },
+          {
+            "word": "proprii",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "e altrui rinnegando persino i proprii martiri. A questo si giunse:"
+          }
+        ],
+        "Capitolo Decimo Settimo": [
+          {
+            "word": "rimodificando",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "dell'intelletto modificando e rimodificando il giardino della sua villa.."
+          },
+          {
+            "word": "ammanuense",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "noi. Fummo presentati al suo ammanuense, certo Bardini padovano, stud"
+          },
+          {
+            "word": "accordandogli",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "ficazioni al giovine Varisco, accordandogli ampia facoltà di valersi dell"
+          },
+          {
+            "word": "patriotti",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "eamente, un altro manipolo di patriotti doveva appiattirsi presso la"
+          },
+          {
+            "word": "ammanettatori",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "i irrompa nel covo e i trenta ammanettatori che vi dormono passino, forza"
+          },
+          {
+            "word": "biricchini",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "vo favorito di bambinaie e di biricchini. Regola generale, quando suon"
+          },
+          {
+            "word": "vibratamente",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "tesse frasi, si animò e disse vibratamente: \"Ci avviciniamo alla fortezz"
+          },
+          {
+            "word": "iscacco",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "riglia sulle Alpi, teniamo in iscacco le truppe che vorrebbero cala"
+          }
+        ],
+        "Capitolo Decimo Ottavo": [
+          {
+            "word": "trovavasi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "Coirà, ove dal Clementi, che trovavasi allora sotto processo come im"
+          },
+          {
+            "word": "tondetta",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "tica di don Bastiano, bella e tondetta dai fianchi procaci e dalle p"
+          },
+          {
+            "word": "apertone",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "n punta di piedi, all'uscio e apertone l'occhio, vi avevo piantato l"
+          },
+          {
+            "word": "annoverarmi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "miei primi anni, disse: \"Non annoverarmi tra i codardi. Il mio caratte"
+          },
+          {
+            "word": "riprincipiò",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "i la luna tramontò e il vento riprincipiò la sua corsa sfrenata. Mi alz"
+          }
+        ],
+        "Capitolo Decimo Nono": [
+          {
+            "word": "annusandomi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "e peste, allungando il muso e annusandomi ansiosamente i polpacci."
+          },
+          {
+            "word": "sconnessure",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "nel vano, e finalmente dalle sconnessure del vecchio uscio, trapelò la"
+          },
+          {
+            "word": "mangiacandele",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "miglia di vantaggio, non c'è mangiacandele che batta gambe d'Italiano; l"
+          },
+          {
+            "word": "mandorli",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "castigo, quando mi rovinava i mandorli! Ad un salto dalla casa, l'en"
+          },
+          {
+            "word": "dundolo",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "me sospeso, poi aggiunse: \"Io dundolo e Lei ha bisogno di riposo. C"
+          },
+          {
+            "word": "pizzicatore",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "la chitarra del babbo... gran pizzicatore di corde, il babbo! E i perqu"
+          },
+          {
+            "word": "perquisitori",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "atore di corde, il babbo! E i perquisitori, che pure avevano frugato ogn"
+          },
+          {
+            "word": "cantuecio",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "che pure avevano frugato ogni cantuecio della casa ed ogni angolo, no"
+          },
+          {
+            "word": "inappuntabilmente",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "nto, perché mi salutò in modo inappuntabilmente cortese e mi narrò d'esser pa"
+          },
+          {
+            "word": "annoiarvisi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "ri? Ci vuol del genio per non annoiarvisi!\" Prima che io potessi rispon"
+          },
+          {
+            "word": "messogli",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "spavento della realtà, quello messogli in corpo dall'immaginazione."
+          },
+          {
+            "word": "accortosi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "iverberò la luce all'ingiro e accortosi di Caterina che, lasciata cad"
+          },
+          {
+            "word": "strassi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "n falò de la tua casa e di to strassi. — La segreta, el baston sul."
+          },
+          {
+            "word": "tormentandone",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "to di accendere uno sigaro e, tormentandone la posta tra le dita e soffia"
+          },
+          {
+            "word": "irremmissibilmente",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "solo quando la partita fosse irremmissibilmente perduta. Il mio dolore per la"
+          },
+          {
+            "word": "sopraccolta",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "Vergine ed i santi. E quando, sopraccolta da repentino furore, fece att"
+          },
+          {
+            "word": "riprincipiò",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "lare, la corona del rosario e riprincipiò a sgranarlo... questa volta i"
+          },
+          {
+            "word": "sgranarlo",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "a del rosario e riprincipiò a sgranarlo... questa volta in ginocchio."
+          },
+          {
+            "word": "incisogli",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "cia e di additarmi il cerchio incisogli dal capestro. Lo strinsi tra"
+          },
+          {
+            "word": "scrittemi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "narrare ricavai dalle lettere scrittemi da Giustiniano. Io le ho impr"
+          },
+          {
+            "word": "stemperandovi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "le tratteggiava la situazione stemperandovi buona dose d'ottimismo. Luisa"
+          },
+          {
+            "word": "malcauta",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "giungesse alla mamma da bocca malcauta. La trovò coricata. Svegliarl"
+          },
+          {
+            "word": "spillaccherava",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "abbiosamente la spazzola e lo spillaccherava. Quattro ufficiali, disposti"
+          },
+          {
+            "word": "strettagli",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "E strettagli la mano, voltai le spalle e l"
+          }
+        ],
+        "Capitolo Ventesimo": [
+          {
+            "word": "scrittemi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "narrare ricavai dalle lettere scrittemi da Giustiniano. Io le ho impr"
+          },
+          {
+            "word": "stemperandovi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "le tratteggiava la situazione stemperandovi buona dose d'ottimismo. Luisa"
+          },
+          {
+            "word": "malcauta",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "giungesse alla mamma da bocca malcauta. La trovò coricata. Svegliarl"
+          },
+          {
+            "word": "spillaccherava",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "abbiosamente la spazzola e lo spillaccherava. Quattro ufficiali, disposti"
+          },
+          {
+            "word": "fattisi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "I quattro ufficiali fattisi improvvisamente smorti, ebber"
+          },
+          {
+            "word": "suscettività",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "che non si volesse urtare la suscettività di un popolo, ammettendo impl"
+          },
+          {
+            "word": "accorartene",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "\"Non accorartene, gli dissi. Errori ne abbiamo"
+          },
+          {
+            "word": "esortandomi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "anti. La lettera incominciava esortandomi a leggere sino alla fine prim"
+          },
+          {
+            "word": "convertitasi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "ng, una scozzese protestante, convertitasi alla religione cattolica e di"
+          },
+          {
+            "word": "osservandogli",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "lettera al marchese Lassalle osservandogli, ironicamente, che se certe c"
+          },
+          {
+            "word": "patriotti",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "o presa alcuna sull'animo dei patriotti italiani. Il marchese Lassall"
+          },
+          {
+            "word": "malcerti",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "el carcere i suoi primi passi malcerti. Svincolatomi dalle braccia d"
+          },
+          {
+            "word": "riprincipiarono",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "abbracciammo e le sue lagrime riprincipiarono.... ma io ben m'accorsi che e"
+          },
+          {
+            "word": "rincalzai",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "ssa. A maggiore suo conforto, rincalzai: \"Sì, mi rivedrai libero... f"
+          },
+          {
+            "word": "porgendolo",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "cattolo. Il guardiano stesso, porgendolo al mio abbraccio, osservò la"
+          }
+        ],
+        "Capitolo Ventesimo Primo": [
+          {
+            "word": "vedasi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "Ora vedasi sino a qual punto il sogno e"
+          },
+          {
+            "word": "ricercarvi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "le carni del caduto, quasi a ricercarvi un rimasuglio di vita... Un c"
+          },
+          {
+            "word": "chellerina",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "ai a faccia a faccia con una \"chellerina\" dal visetto roseo e dal grem"
+          },
+          {
+            "word": "impazientito",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "lio e lo spiegavo, quand'egli impazientito, me lo strappò di mano. Lo sc"
+          },
+          {
+            "word": "tiraborse",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "evo essere — bontà loro! — un tiraborse. La Polizia aveva teso buone"
+          },
+          {
+            "word": "udivansi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "à, oltre l'uscio di sinistra, udivansi voci alternantisi in brevi di"
+          },
+          {
+            "word": "alternantisi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "io di sinistra, udivansi voci alternantisi in brevi dialoghi indistinti"
+          },
+          {
+            "word": "riescito",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "ttorie avessi girato, non ero riescito a trovar letto, anche offrend"
+          },
+          {
+            "word": "serrarlo",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "o era socchiuso; avrei potuto serrarlo dall'interno, col catenaccio."
+          },
+          {
+            "word": "candellieri",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "ino tanto energicamente che i candellieri ne traballarono."
+          },
+          {
+            "word": "chiesuola",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "laggio si era riversata nella chiesuola che ne doveva esser zeppa, pe"
+          },
+          {
+            "word": "trovavasi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "za e l'albergo del paese, che trovavasi così sotto due giurisdizioni."
+          },
+          {
+            "word": "proffersero",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "miliazione di Sebastopoli. Si proffersero di elargirmi una somma di dan"
+          },
+          {
+            "word": "Uggiato",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "to non mi avrebbero respinto. Uggiato a morte, le avevo scritto, po"
+          },
+          {
+            "word": "paltoniere",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "ano mentito come quelle di un paltoniere."
+          },
+          {
+            "word": "pertinacia",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "stra intesa, con astuzia, con pertinacia tutta anglosassone. Aveva ass"
+          },
+          {
+            "word": "ruvidamente",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "— Come vi piace! ribatté ruvidamente il Comandante e diede ordine"
+          },
+          {
+            "word": "orleanista",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "Ma il Comandante, che era un orleanista e non doveva nutrire soverchi"
+          },
+          {
+            "word": "squadrandomi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "riguardava. Egli la lesse e, squadrandomi dal capo ai piedi: \"Ah siete"
+          },
+          {
+            "word": "industriarmi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "la pianta del piede. Dovetti industriarmi a percorrere tre miglia zoppi"
+          },
+          {
+            "word": "scritturale",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "porto, dovette ricorrere allo scritturale dell'Ingegnere soprintendente"
+          },
+          {
+            "word": "traguardava",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "ed aromi, dalle quali il Sole traguardava placidamente, signorilmente,"
+          },
+          {
+            "word": "signorilmente",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "ole traguardava placidamente, signorilmente, quasi vegliando che ogni fil"
+          },
+          {
+            "word": "stecconato",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "randi sferzate, sin entro uno stecconato, nel penitenziario."
+          },
+          {
+            "word": "decurie",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "gne d'Argent, si mangiava per decurie. Il capo riceveva in consegna"
+          },
+          {
+            "word": "compartiva",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "lazione degli ufficiali, e le compartiva, su una specie di tavola, nel"
+          },
+          {
+            "word": "informatosi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "iano, certo Cosson, accorre e informatosi della faccenda, mi domanda br"
+          },
+          {
+            "word": "affaticandosi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "o. A me pareva che i muscoli, affaticandosi, esalassero da ogni loro fibr"
+          },
+          {
+            "word": "siffattamente",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "vergine foresta. E diventammo siffattamente parte omogenea dell'ambiente"
+          },
+          {
+            "word": "rallegrandola",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "lare e quasi ad incoraggiare, rallegrandola, l'opera nostra."
+          },
+          {
+            "word": "riescimmo",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "un paio di mesi, o poco più, riescimmo a trascinare in una sinuosità"
+          },
+          {
+            "word": "riescita",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "quanto si sforzasse, non era riescita a spander una sola goccia d'a"
+          }
+        ],
+        "Capitolo Ventesimo Secondo": [
+          {
+            "word": "soverchiamente",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "a fatale leggerezza di alzare soverchiamente il gomito e di attaccar briga"
+          },
+          {
+            "word": "storpiandosi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "e calandosi colle lenzuola e storpiandosi un piede, riacquistare la lib"
+          },
+          {
+            "word": "patriotti",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "N. 9, ove con parecchi altri patriotti, era mio padre. Egli mi narra"
+          },
+          {
+            "word": "concaptivi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "ciplina carceraria, aiutava i concaptivi a sopportare le amarezze dell"
+          },
+          {
+            "word": "tirandoseli",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "arezze della lunga prigionia, tirandoseli d'attorno e canterellando le"
+          },
+          {
+            "word": "pàtriotta",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "toglievano ogni prestigio al pàtriotta malcauto.... vivere fisiologi"
+          },
+          {
+            "word": "malcauto",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "o ogni prestigio al pàtriotta malcauto.... vivere fisiologicamente,"
+          },
+          {
+            "word": "lasciatogli",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "e egli, malgrado lo strascico lasciatogli nell'animo da scuole sinistra"
+          },
+          {
+            "word": "ellenicamente",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "narie, si era sempre figurato ellenicamente sereno."
+          },
+          {
+            "word": "cortigianeria",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "La cortigianeria sbocciata dopo l'ora del trio"
+          },
+          {
+            "word": "consortesche",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "to: il lividore delle cricche consortesche, che non risparmiò avversario"
+          },
+          {
+            "word": "delittuosamente",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "sione di diventarlo gli venne delittuosamente rapita!"
+          },
+          {
+            "word": "orleanista",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "Ma il Comandante, che era un orleanista e non doveva nutrire soverchi"
+          },
+          {
+            "word": "bagatella",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "Regolamenti prescrivevano la bagatella di cinquanta colpi di corda a"
+          },
+          {
+            "word": "squadrandomi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "riguardava. Egli la lesse e, squadrandomi dal capo ai piedi: \"Ah siete"
+          },
+          {
+            "word": "industriarmi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "la pianta del piede. Dovetti industriarmi a percorrere tre miglia zoppi"
+          },
+          {
+            "word": "traguardava",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "ed aromi, dalle quali il Sole traguardava placidamente, signorilmente,"
+          },
+          {
+            "word": "signorilmente",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "ole traguardava placidamente, signorilmente, quasi vegliando che ogni fil"
+          },
+          {
+            "word": "stecconato",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "randi sferzate, sin entro uno stecconato, nel penitenziario."
+          },
+          {
+            "word": "decurie",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "gne d'Argent, si mangiava per decurie. Il capo riceveva in consegna"
+          },
+          {
+            "word": "compartiva",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "lazione degli ufficiali, e le compartiva, su una specie di tavola, nel"
+          },
+          {
+            "word": "affaticandosi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "o. A me pareva che i muscoli, affaticandosi, esalassero da ogni loro fibr"
+          },
+          {
+            "word": "siffattamente",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "vergine foresta. E diventammo siffattamente parte omogenea dell'ambiente"
+          },
+          {
+            "word": "rallegrandola",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "lare e quasi ad incoraggiare, rallegrandola, l'opera nostra."
+          }
+        ],
+        "Capitolo Ventesimoterzo": [
+          {
+            "word": "sottrattisi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "ovai un nucleo di compatrioti sottrattisi, coll'esilio, alla bufera rea"
+          },
+          {
+            "word": "porzioncella",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "loro pane e di sottrarne una porzioncella?"
+          },
+          {
+            "word": "angolosità",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "ale, ma perchè?... Sparite le angolosità, mi davano del tu; mi batteva"
+          },
+          {
+            "word": "aspettarsene",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "a riconoscerne l'avvento, ad aspettarsene di grandi cose."
+          },
+          {
+            "word": "inalzare",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "gitava di braccia disposte ad inalzare le barricate. Non potendo inc"
+          },
+          {
+            "word": "accaparrarsele",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "con sagace precipitazione, ad accaparrarsele. Per impulso partito da Parig"
+          },
+          {
+            "word": "Aggiungasi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "gravarono su quelli di lusso. Aggiungasi la larghezza dei prestiti agr"
+          },
+          {
+            "word": "abboniva",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "gi Napoleone, a dargli retta, abboniva la guerra. Egli si proponeva"
+          },
+          {
+            "word": "antiveggente",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "pettarsi un culto dell'ideale antiveggente e pertinace. L'anima popolare"
+          },
+          {
+            "word": "duecentocinquantatremila",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "Sì... un'esigua minoranza di duecentocinquantatremila No."
+          },
+          {
+            "word": "siffattamente",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "grossolani raggiri irritarono siffattamente la fine diplomazia britannica"
+          },
+          {
+            "word": "irremissibilmente",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "re, uscì dalla lotta cruenta, irremissibilmente sconfitto."
+          },
+          {
+            "word": "risospingerla",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "vituperare Roma risorta; per risospingerla nelle braccia del papato; per"
+          },
+          {
+            "word": "prostituirla",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "nelle braccia del papato; per prostituirla a viva forza, a quanto di più"
+          },
+          {
+            "word": "tirannelli",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "incipe francese sostituito ai tirannelli che infestavano l'Italia; ma"
+          },
+          {
+            "word": "preconizzarla",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "a Patria e proclamarla viva e preconizzarla grande, quando tutti la crede"
+          },
+          {
+            "word": "trovavasi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "Egli trovavasi allora a Londra. Gli comunica"
+          },
+          {
+            "word": "commendatizia",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "... mi avrebbe consegnato una commendatizia pel Conte Grillanzoni che vi"
+          }
+        ],
+        "Capitolo Ventesimoquarto": [
+          {
+            "word": "patriotti",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "ersamente stavano le cose pei patriotti italiani costretti ad imperni"
+          },
+          {
+            "word": "attanagliarti",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "i sotto il capo; che vorrebbe attanagliarti, stroncarti il collo col pret"
+          },
+          {
+            "word": "palpandone",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "simo fucile ed esaminandolo e palpandone le varie parti, mi parve così"
+          },
+          {
+            "word": "sonagliera",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "ta, udimmo il tintinnio della sonagliera e lo schioccare della frusta"
+          },
+          {
+            "word": "monturati",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "n semicerchio, erano parecchi monturati... le canne dei loro fucili c"
+          },
+          {
+            "word": "soverchiamente",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "Non ebbi bisogno di aguzzare soverchiamente gli occhi. Con caratteri dive"
+          },
+          {
+            "word": "riprincipiava",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "vigliavo; il Fumagalli invece riprincipiava rabbiosamente i suoi giri e r"
+          },
+          {
+            "word": "osservargli",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "iano, additandogliele ebbe ad osservargli, tra il serio ed il faceto: \""
+          }
+        ],
+        "Capitolo Quindicesimo": [
+          {
+            "word": "soffersero",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "ecchi genitori, che già tanto soffersero, un colpo disperatamente senz"
+          },
+          {
+            "word": "commendatizia",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "trionfalmente sott'occhio una commendatizia rilasciatagli dal Pieri, dire"
+          },
+          {
+            "word": "rilasciatagli",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "sott'occhio una commendatizia rilasciatagli dal Pieri, diretta all'Orsini"
+          },
+          {
+            "word": "promessogli",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "sollecitando la conferma del promessogli incarico, affermava di voler"
+          },
+          {
+            "word": "spalmarsene",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "occio della dabbenaggine ed a spalmarsene il viso. Egli, che pure fu so"
+          },
+          {
+            "word": "sfuggitegli",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "del soprabito, le millanterie sfuggitegli dopo l'arresto... poteva dars"
+          },
+          {
+            "word": "ornamentare",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "d'aggiungere. Tentò invece di ornamentare i fatti con fandonie fantasti"
+          }
+        ],
+        "Capitolo Sedicesimo": [
+          {
+            "word": "soverchiamente",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "depressioni profonde. Natura soverchiamente nervosa e sensitiva, oscillav"
+          },
+          {
+            "word": "ingolfarsi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "di lasciare l'Inghilterra, di ingolfarsi in un'impresa di tanto calibr"
+          },
+          {
+            "word": "pregustarlo",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "itenerlo come inevitabile, da pregustarlo prima che fosse."
+          },
+          {
+            "word": "dappocaggine",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "è principalmente dovuta alla dappocaggine dei propri compagni d'azione."
+          },
+          {
+            "word": "riaddossarsi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "gica contro dichiarazione, di riaddossarsi ogni responsabilità; ma in fo"
+          },
+          {
+            "word": "giogaie",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "Avrebbe riveduto le giogaie candide, le verdi pianure ole"
+          },
+          {
+            "word": "imparagonabile",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "i pianure olezzanti, il cielo imparagonabile d'Italia; avrebbe cospirato e"
+          },
+          {
+            "word": "lusingarsi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "ttato ancora per essa; poteva lusingarsi di assistere al suo terzo rin"
+          }
+        ],
+        "Capitolo Decimosettimo": [
+          {
+            "word": "ciurmadore",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "egli impresse il marchio del ciurmadore sulla moritura virtù."
+          },
+          {
+            "word": "infamarlo",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "che aveva tratto pretesto, ad infamarlo, da una burletta tra scapigli"
+          },
+          {
+            "word": "tratteggiandolo",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "cerca del vero, prorompendo e tratteggiandolo come un mentitore a cui prend"
+          },
+          {
+            "word": "sottrattosi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "iurati come un ladro volgare, sottrattosi poi, colla fuga, alle delizie"
+          },
+          {
+            "word": "incorretti",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "rapporti di famiglia riputati incorretti, né appropriazioni indebite v"
+          },
+          {
+            "word": "ciurmadori",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "Se i ciurmadori dell'Impero non avessero sent"
+          },
+          {
+            "word": "soppannarle",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "arla come una baldracca, o il soppannarle la veste con qualche menzogne"
+          },
+          {
+            "word": "facetamente",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "rria del destino, conversando facetamente e brindando, finii la notte i"
+          }
+        ],
+        "Capitolo Decimottavo": [
+          {
+            "word": "suicidandomi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "enzione alcuna di anticipare, suicidandomi, la mia fine."
+          },
+          {
+            "word": "celeramente",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "no di melanconia. Passeggiava celeramente ed io, allevato a disciplina"
+          },
+          {
+            "word": "cavaturaccioli",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "role tratte dal profondo, col cavaturaccioli."
+          },
+          {
+            "word": "sottostrati",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "apparire, anzi predominare, i sottostrati saturi di fole assorbite nell"
+          },
+          {
+            "word": "superlativamente",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "oteva, grazie alla sua natura superlativamente sensitiva, contro un pensiero"
+          },
+          {
+            "word": "rilegatala",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": ", più o meno, la destra; poi, rilegatala, portava lo scritto al Dirett"
+          },
+          {
+            "word": "paternamente",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "lia, perchè il Pietri mi mise paternamente una mano sulla spalla e abbas"
+          },
+          {
+            "word": "codardie",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "i Stato dissimulate ben altre codardie?"
+          }
+        ],
+        "Capitolo Decimonono": [
+          {
+            "word": "balordaggine",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "ro ficcata nella mente simile balordaggine? Respinto l'appello, restava"
+          },
+          {
+            "word": "memorando",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "zione fu causata, quel giorno memorando, dal pallore estremo del suo"
+          },
+          {
+            "word": "narrargli",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": ", lo vedrò, se esiste, ma per narrargli da che razza di ministri ha l"
+          },
+          {
+            "word": "loquela",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "ecco rifiuto, la sua irruente loquela. Gli astanti si guardarono in"
+          },
+          {
+            "word": "contemplandomi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "dì di festa mi abbigliava, e contemplandomi, se ne compiaceva. Quale cont"
+          },
+          {
+            "word": "disseccarla",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "ricacciarla nel profondo e di disseccarla."
+          },
+          {
+            "word": "dappoi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "fice prima, del vecchio prete dappoi ed entrambi, lenti e silenzio"
+          },
+          {
+            "word": "volgendosi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "osi si allontanarono. Allora, volgendosi di bel nuovo a me, che l'inte"
+          },
+          {
+            "word": "apersi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "a guardia fidata, Saturno. Mi apersi l'adito sin là e, mentre una"
+          },
+          {
+            "word": "scopersero",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "oveggenze... gli ufficiali si scopersero il capo. In quel momento, la"
+          },
+          {
+            "word": "sbocconcellarla",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "tentezza nell'animo e volesse sbocconcellarla e darcene parte. Scoperse la"
+          },
+          {
+            "word": "californiese",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "Torsi il capo... il sole californiese, vicino al tramonto, spiava a"
+          }
+        ],
+        "Capitolo Ventesimo Terzo": [
+          {
+            "word": "scheggioni",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "iva difficile, saltando sugli scheggioni rimasti scoperti, il passare"
+          },
+          {
+            "word": "fegataccio",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "non vi siano state barbe col fegataccio sano da arrischiarvi si? Ma a"
+          },
+          {
+            "word": "azzurriccola",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "una \"vase\"? Un banco di terra azzurriccola che fa presa come il cemento."
+          },
+          {
+            "word": "soverchiamente",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "non dovesse riescire impresa soverchiamente difficile ad uomini di tempra"
+          },
+          {
+            "word": "provvisioni",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "il maneggio e difettavano di provvisioni... bisognava dunque accaparra"
+          }
+        ],
+        "Capitolo Ventesimo Quarto": [
+          {
+            "word": "tragittavano",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "te sull'isola del Diavolo; ma tragittavano di frequente, a marea bassa,"
+          },
+          {
+            "word": "orleanista",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "ale della marina francese, un orleanista arrabbiato, uomo tutto ardire"
+          },
+          {
+            "word": "indaro",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "del pezzo che mi mancava; che indaro, nelle mie lunghe meditazioni"
+          },
+          {
+            "word": "placidezza",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "lla quale lustrava, con tutta placidezza, gli ottoni. Le cannoniere er"
+          },
+          {
+            "word": "cannottiere",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "Il Morbioli, cannottiere a Roma, era addetto alla loro"
+          },
+          {
+            "word": "strofinamenti",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "el mio animo, quei suoi molli strofinamenti, che mi sapevano di carezza,"
+          }
+        ],
+        "Capitolo Ventesimo Quinto": [
+          {
+            "word": "tirannelli",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "gli Austriaci e spazzar via i tirannelli che ingombrano la Penisola; a"
+          },
+          {
+            "word": "impiegarvi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "ò con tanta circospezione, da impiegarvi un paio di mesi. Al 1 Dicembr"
+          },
+          {
+            "word": "canonnières",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "comando di un ufficiale: \"Aux canonnières!\" Una striscia di uomini esce"
+          },
+          {
+            "word": "serpeggiamenti",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "io e si allunga, con sinistri serpeggiamenti, verso il molo."
+          },
+          {
+            "word": "rifornirsene",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "l mare... ora sgambettano per rifornirsene all'officina! E la chiglia, s"
+          },
+          {
+            "word": "riescivano",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "tesi, terribilmente tesi, non riescivano a comprenderlo... Ora ci spin"
+          },
+          {
+            "word": "succhiamento",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "da un poderoso, irresistibile succhiamento. Unico affidamento, la marmor"
+          }
+        ],
+        "Capitolo Ventesimo Sesto": [
+          {
+            "word": "pertinacia",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "quali ci martellavano con una pertinacia che quasi rivelava un intendi"
+          },
+          {
+            "word": "affaticantisi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "supola, parecchi uomini quali affaticantisi a rimuovere cesti e barili; q"
+          },
+          {
+            "word": "essiccarli",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "addetti a pigliar pesci e ad essiccarli, lavorando sotto la sferza de"
+          },
+          {
+            "word": "celeramente",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "nostro canotto scorreva tanto celeramente che il ritenere prossima la f"
+          }
+        ],
+        "Capitolo Ventesimo Settimo": [
+          {
+            "word": "narrargli",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "A bordo, ebbi campo di narrargli le nostre peripezie minutamen"
+          },
+          {
+            "word": "sgangheratamente",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "urale alla sua razza: ridendo sgangheratamente. Quando tacqui, incominciò: \""
+          },
+          {
+            "word": "scorgendoci",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "no del Governatore. Il quale, scorgendoci così dilapidati, su un'imbarc"
+          },
+          {
+            "word": "apparecchiarci",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "a guardia e, dato l'ordine di apparecchiarci una refezione sostanziale, al"
+          },
+          {
+            "word": "avvoltolato",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "ato, sudicio come se mi fossi avvoltolato in un porcile, non destava ri"
+          },
+          {
+            "word": "disparizione",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "da quella rapida, fenomenale disparizione."
+          },
+          {
+            "word": "mallevadore",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "tui in casa mia. Mi rendo suo mallevadore.\""
+          },
+          {
+            "word": "fremava",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "a mala pena spezzata; l'anima fremava ancora per le sevizie patite."
+          },
+          {
+            "word": "lagrimato",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "Credo d'averne lagrimato, non ho a mente quante. Senti"
+          },
+          {
+            "word": "riassaggerai",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "ombe! Tra poco sarai qui su e riassaggerai la tua medicina!\" Tale schern"
+          },
+          {
+            "word": "concernendomi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "L'altra novità, pur non concernendomi direttamente, mi fece maggior"
+          }
+        ],
+        "Capitolo Ventesimo Ottavo": [
+          {
+            "word": "rigeneratrice",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "à del lavoro e sull'influenza rigeneratrice della parsimonia; la sua fede"
+          },
+          {
+            "word": "trovavasi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "a, sia pur lieve, fatta a chi trovavasi in condizioni sociali tanto i"
+          },
+          {
+            "word": "chiestane",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "ciai il mio ospite cortese e, chiestane licenza, baciai la mano della"
+          },
+          {
+            "word": "suscitandomi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "aveva calmato le mie febbri, suscitandomi nel petto larga onda di poesi"
+          },
+          {
+            "word": "alberature",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "rgemmo traccie indubbie nelle alberature uscenti, in più di una locali"
+          },
+          {
+            "word": "inonorati",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "vicissitudini della materia, inonorati sotterra, due martiri col cap"
+          },
+          {
+            "word": "provvedermene",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "nsabile qualche sterlina. Per provvedermene, facevo assegnamento sul dott"
+          },
+          {
+            "word": "invetriate",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "lice curiosità, attraverso le invetriate, tra le tendine verdi, mi ave"
+          },
+          {
+            "word": "faraggine",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "e riconosciuto. Incalzante la faraggine delle domande che mi rivolse;"
+          },
+          {
+            "word": "squadratomi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "La padrona a cui ne domandai, squadratomi dal capo ai piedi, non mi con"
+          },
+          {
+            "word": "rifioritura",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "io gli ebbi risposto, con una rifioritura di insolenze, che non avevo a"
+          },
+          {
+            "word": "patriotti",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "ondra tanti amici miei, tanti patriotti, li aveva ormai, come voragin"
+          },
+          {
+            "word": "tirannicamente",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "lia il cuore con mano ruvida, tirannicamente, producendo sensazioni che as"
+          }
+        ],
+        "Capitolo Ventesimo Nono": [
+          {
+            "word": "capitaletto",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "accogliendo, a suo favore, un capitaletto di mille e cento sterline. Da"
+          },
+          {
+            "word": "fissatole",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "ità e dalla specie di assegno fissatole, alla vigilia della mia parte"
+          },
+          {
+            "word": "trovavasi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "io? Mi calunniava egli perchè trovavasi nell'impossibilità di difende"
+          },
+          {
+            "word": "abboccatosi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "Il direttore del \"Reasoner\", abboccatosi con lui, mi scrisse e stampò"
+          },
+          {
+            "word": "exposita",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "ori, impazzì e, \"si vera sunt exposita\", morì in un manicomio. La re"
+          },
+          {
+            "word": "fron",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": ", dei muscoli di un Egassy di fron-"
+          },
+          {
+            "word": "pecoraggine",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "do, con frasi piene d'ira, la pecoraggine di quei politicanti che tanto"
+          }
+        ],
+        "Capitolo Trentesimo": [
+          {
+            "word": "offertale",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "biamente sdegnata l'agiatezza offertale a prezzo della mia onestà. Ch"
+          },
+          {
+            "word": "troncandogli",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "l suo primo apparire. Ond'io, troncandogli a mezzo le frasi dell'esordio"
+          },
+          {
+            "word": "soverchiamente",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "rupedi a cui, con licenza non soverchiamente di buon genere, avrebbe potut"
+          },
+          {
+            "word": "disserrarmi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "a chiave che possa serrarmi e disserrarmi il cuore. Ma quand'anche... s"
+          },
+          {
+            "word": "dipartirsene",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "senza stessa del vero, perchè dipartirsene, perchè chiudere ostinatament"
+          },
+          {
+            "word": "scrutarli",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "e; né a mente umana è dato lo scrutarli..."
+          },
+          {
+            "word": "decifrargli",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "gine, mi lasciai trascinare a decifrargli l'essenza delle leggende bram"
+          },
+          {
+            "word": "braminiche",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "rgli l'essenza delle leggende braminiche, la matrice feconda da cui sc"
+          }
+        ],
+        "Capitolo Trentesimo Primo": [
+          {
+            "word": "occorsemi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "monte e Napoleone III, benché occorsemi alla mente a tanta distanza d"
+          },
+          {
+            "word": "tirannelli",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": ", avevano licenziato i propri tirannelli, non per inchinarsi a sovrani"
+          },
+          {
+            "word": "soverchiamente",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "strane; fidando d'altra parte soverchiamente nelle arti subdole della sua"
+          },
+          {
+            "word": "lusignrarsi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "enti esaltate) non poteva più lusignrarsi di tentare novità, di muover"
+          },
+          {
+            "word": "pieghevolezza",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "quella politica di fenomenale pieghevolezza ai capricci dell'uomo fatale;"
+          },
+          {
+            "word": "italofobe",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "centuò sempre più le sue mire italofobe e Vittorio Emanuele II apparv"
+          },
+          {
+            "word": "patriotti",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "dell'armi e dell'arresto dei patriotti. Brescia, non rimarginate anc"
+          },
+          {
+            "word": "inflittele",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "ate ancora le orribili ferite inflittele dalla belva Haynau, dovette s"
+          },
+          {
+            "word": "apertele",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "dovette spasimare per quelle apertele dal piombo piemontese. Alla s"
+          }
+        ],
+        "Capitolo Trentesimo Secondo": [
+          {
+            "word": "gonfiezza",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "à, dimostravano la loro vacua gonfiezza, la loro inferiorità di front"
+          },
+          {
+            "word": "praticismo",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "va e le succedeva un bastardo praticismo distillato da quanto odora di"
+          },
+          {
+            "word": "barbassori",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "no ad averne la voce rauca, i barbassori d'Italia che assistevano, col"
+          },
+          {
+            "word": "ricappare",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "artato una serie di dogmi per ricappare in un'altra che la equivale;"
+          },
+          {
+            "word": "patriotti",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "iarlo; appresta le manette ai patriotti che non si rassegnano a consi"
+          },
+          {
+            "word": "antecessore",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "ie vanno di preferenza al suo antecessore. Carlo Alberto è abbellito ai"
+          },
+          {
+            "word": "avviantesi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "a politicamente e civilmente; avviantesi, con passo sicuro, verso la m"
+          },
+          {
+            "word": "intravvista",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "isione di un'Italia quale era intravvista da Giuseppe Mazzini; quale l'"
+          },
+          {
+            "word": "quarantottate",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "ventata una parola speciale — quarantottate! — a significare, deridendolo"
+          },
+          {
+            "word": "spettacolosità",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "regale umanesimo più che alla spettacolosità teatrale ed effimera, mirano"
+          },
+          {
+            "word": "discernendolo",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "discernere l'avvenire o che, discernendolo, a torto lo paventi. Io vi sc"
+          },
+          {
+            "word": "angolosità",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "llo spazio, hanno smussato le angolosità, hanno soffocato molte passio"
+          },
+          {
+            "word": "movetegli",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "tendo. Fidate nell'avvenire e movetegli audacemente incontro. È in ta"
+          },
+          {
+            "word": "appropriandosene",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "ro diritto di successione se, appropriandosene i privilegi e gli onori, se n"
+          }
+        ],
+        "Capitolo Trentesimo Terzo": [
+          {
+            "word": "faraggine",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "nche lontanamente... Ma nella faraggine d'impegni.... Che vuoi? C'è u"
+          },
+          {
+            "word": "distogliermene",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "ndenza della Polonia. Era per distogliermene che mi aveva scritto."
+          },
+          {
+            "word": "solidarità",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "sua ricchezza. L'appello alla solidarità nazionale, lanciato nel momen"
+          },
+          {
+            "word": "sbocconcellandomi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "stizia di un addio. Mi porse, sbocconcellandomi qualche istruzione, parecchie"
+          },
+          {
+            "word": "staccatomi",
+            "reasons": [
+              "not in dictionary"
+            ],
+            "context": "nze a Giuseppe Garibaldi, io, staccatomi un'altra volta dall'Elisa e d"
+          }
+        ]
+      },
+      "chapter_summary": [
+        "Capitolo Decimo: 13 flagged",
+        "Capitolo Decimo Nono: 24 flagged",
+        "Capitolo Decimo Ottavo: 5 flagged",
+        "Capitolo Decimo Quinto: 1 flagged",
+        "Capitolo Decimo Sesto: 5 flagged",
+        "Capitolo Decimo Settimo: 8 flagged",
+        "Capitolo Decimonono: 12 flagged",
+        "Capitolo Decimosettimo: 8 flagged",
+        "Capitolo Decimottavo: 8 flagged",
+        "Capitolo Dodicesimo: 7 flagged",
+        "Capitolo Nono: 16 flagged",
+        "Capitolo Ottavo: 19 flagged",
+        "Capitolo Primo: 15 flagged",
+        "Capitolo Quarto: 5 flagged",
+        "Capitolo Quattordicesimo: 9 flagged",
+        "Capitolo Quindicesimo: 7 flagged",
+        "Capitolo Quinto: 11 flagged",
+        "Capitolo Secondo: 19 flagged",
+        "Capitolo Sedicesimo: 8 flagged",
+        "Capitolo Sesto: 16 flagged",
+        "Capitolo Settimo: 12 flagged",
+        "Capitolo Terzo: 9 flagged",
+        "Capitolo Tredicesimo: 17 flagged",
+        "Capitolo Trentesimo: 8 flagged",
+        "Capitolo Trentesimo Primo: 9 flagged",
+        "Capitolo Trentesimo Secondo: 14 flagged",
+        "Capitolo Trentesimo Terzo: 5 flagged",
+        "Capitolo Undicesimo: 11 flagged",
+        "Capitolo Ventesimo: 15 flagged",
+        "Capitolo Ventesimo Nono: 7 flagged",
+        "Capitolo Ventesimo Ottavo: 13 flagged",
+        "Capitolo Ventesimo Primo: 32 flagged",
+        "Capitolo Ventesimo Quarto: 6 flagged",
+        "Capitolo Ventesimo Quinto: 7 flagged",
+        "Capitolo Ventesimo Secondo: 24 flagged",
+        "Capitolo Ventesimo Sesto: 4 flagged",
+        "Capitolo Ventesimo Settimo: 11 flagged",
+        "Capitolo Ventesimo Terzo: 5 flagged",
+        "Capitolo Ventesimoquarto: 8 flagged",
+        "Capitolo Ventesimoterzo: 18 flagged",
+        "Prefazione: 1 flagged"
+      ],
+      "issues": [
+        "452 total unique flagged words across 41 chapters"
+      ]
+    },
+    {
+      "name": "word_count_preservation",
+      "passed": true,
+      "reconciled_words": 136452,
+      "cleaned_words": 119971,
+      "retention_pct": 87.9,
+      "issues": []
+    }
+  ]
+}

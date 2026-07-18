@@ -1,0 +1,321 @@
+{
+  "_comment": "Chapter start pages (scan/PDF page numbers). Book page = scan page - 6. Edit start_scan to correct chapter boundaries; typeset.py derives end pages automatically.",
+  "_pdf_page_offset": 6,
+  "_last_scan_page": 278,
+  "chapters": [
+    {
+      "id": "front_matter",
+      "label": "Front matter",
+      "start_scan": 1,
+      "book_page": -5
+    },
+    {
+      "id": "cover_page",
+      "label": "Cover page",
+      "start_scan": 5,
+      "book_page": -1
+    },
+    {
+      "id": "prefazione",
+      "start_scan": 7,
+      "book_page": 1
+    },
+    {
+      "id": "p1_capitolo_primo",
+      "start_scan": 9,
+      "book_page": 3
+    },
+    {
+      "id": "p1_capitolo_secondo",
+      "start_scan": 15,
+      "book_page": 9
+    },
+    {
+      "id": "p1_capitolo_terzo",
+      "start_scan": 23,
+      "book_page": 17
+    },
+    {
+      "id": "p1_capitolo_quarto",
+      "start_scan": 26,
+      "book_page": 20
+    },
+    {
+      "id": "p1_capitolo_quinto",
+      "start_scan": 31,
+      "book_page": 25
+    },
+    {
+      "id": "p1_capitolo_sesto",
+      "start_scan": 34,
+      "book_page": 28
+    },
+    {
+      "id": "p1_capitolo_settimo",
+      "start_scan": 39,
+      "book_page": 33
+    },
+    {
+      "id": "p1_capitolo_ottavo",
+      "start_scan": 43,
+      "book_page": 37
+    },
+    {
+      "id": "p1_capitolo_nono",
+      "start_scan": 48,
+      "book_page": 42
+    },
+    {
+      "id": "p1_capitolo_decimo",
+      "start_scan": 53,
+      "book_page": 47
+    },
+    {
+      "id": "p1_capitolo_undicesimo",
+      "start_scan": 59,
+      "book_page": 53
+    },
+    {
+      "id": "p1_capitolo_dodicesimo",
+      "start_scan": 63,
+      "book_page": 57
+    },
+    {
+      "id": "p1_capitolo_tredicesimo",
+      "start_scan": 67,
+      "book_page": 61
+    },
+    {
+      "id": "p1_capitolo_quattordicesimo",
+      "start_scan": 74,
+      "book_page": 68
+    },
+    {
+      "id": "p1_capitolo_decimo_quinto",
+      "start_scan": 76,
+      "book_page": 70
+    },
+    {
+      "id": "p1_capitolo_decimo_sesto",
+      "start_scan": 80,
+      "book_page": 74
+    },
+    {
+      "id": "p1_capitolo_decimo_settimo",
+      "start_scan": 83,
+      "book_page": 77
+    },
+    {
+      "id": "p1_capitolo_decimo_ottavo",
+      "start_scan": 88,
+      "book_page": 82
+    },
+    {
+      "id": "p1_capitolo_decimo_nono",
+      "start_scan": 92,
+      "book_page": 86
+    },
+    {
+      "id": "p1_capitolo_ventesimo",
+      "start_scan": 99,
+      "book_page": 93
+    },
+    {
+      "id": "p1_capitolo_ventesimo_primo",
+      "start_scan": 101,
+      "book_page": 95
+    },
+    {
+      "id": "p1_capitolo_ventesimo_secondo",
+      "start_scan": 108,
+      "book_page": 102
+    },
+    {
+      "id": "p1_capitolo_ventesimoterzo",
+      "start_scan": 112,
+      "book_page": 106
+    },
+    {
+      "id": "p1_capitolo_ventesimoquarto",
+      "start_scan": 120,
+      "book_page": 114
+    },
+    {
+      "id": "p2_capitolo_primo",
+      "start_scan": 127,
+      "book_page": 121
+    },
+    {
+      "id": "p2_capitolo_secondo",
+      "start_scan": 134,
+      "book_page": 128
+    },
+    {
+      "id": "p2_capitolo_terzo",
+      "start_scan": 136,
+      "book_page": 130
+    },
+    {
+      "id": "p2_capitolo_quarto",
+      "start_scan": 142,
+      "book_page": 136
+    },
+    {
+      "id": "p2_capitolo_quinto",
+      "start_scan": 144,
+      "book_page": 138
+    },
+    {
+      "id": "p2_capitolo_sesto",
+      "start_scan": 149,
+      "book_page": 143
+    },
+    {
+      "id": "p2_capitolo_settimo",
+      "start_scan": 154,
+      "book_page": 148
+    },
+    {
+      "id": "p2_capitolo_ottavo",
+      "start_scan": 157,
+      "book_page": 151
+    },
+    {
+      "id": "p2_capitolo_nono",
+      "start_scan": 161,
+      "book_page": 155
+    },
+    {
+      "id": "p2_capitolo_decimo",
+      "start_scan": 163,
+      "book_page": 157
+    },
+    {
+      "id": "p2_capitolo_undicesimo",
+      "start_scan": 166,
+      "book_page": 160
+    },
+    {
+      "id": "p2_capitolo_dodicesimo",
+      "start_scan": 169,
+      "book_page": 163
+    },
+    {
+      "id": "p2_capitolo_tredicesimo",
+      "start_scan": 173,
+      "book_page": 167
+    },
+    {
+      "id": "p2_capitolo_quattordicesimo",
+      "start_scan": 178,
+      "book_page": 172
+    },
+    {
+      "id": "p2_capitolo_quindicesimo",
+      "start_scan": 184,
+      "book_page": 178
+    },
+    {
+      "id": "p2_capitolo_sedicesimo",
+      "start_scan": 187,
+      "book_page": 181
+    },
+    {
+      "id": "p2_capitolo_decimosettimo",
+      "start_scan": 191,
+      "book_page": 185
+    },
+    {
+      "id": "p2_capitolo_decimottavo",
+      "start_scan": 196,
+      "book_page": 190
+    },
+    {
+      "id": "p2_capitolo_decimonono",
+      "start_scan": 202,
+      "book_page": 196
+    },
+    {
+      "id": "p2_capitolo_ventesimo",
+      "start_scan": 207,
+      "book_page": 201
+    },
+    {
+      "id": "p2_capitolo_ventesimo_primo",
+      "start_scan": 212,
+      "book_page": 206
+    },
+    {
+      "id": "p2_capitolo_ventesimo_secondo",
+      "start_scan": 216,
+      "book_page": 210
+    },
+    {
+      "id": "p2_capitolo_ventesimo_terzo",
+      "start_scan": 222,
+      "book_page": 216
+    },
+    {
+      "id": "p2_capitolo_ventesimo_quarto",
+      "start_scan": 225,
+      "book_page": 219
+    },
+    {
+      "id": "p2_capitolo_ventesimo_quinto",
+      "start_scan": 228,
+      "book_page": 222
+    },
+    {
+      "id": "p2_capitolo_ventesimo_sesto",
+      "start_scan": 232,
+      "book_page": 226
+    },
+    {
+      "id": "p2_capitolo_ventesimo_settimo",
+      "start_scan": 235,
+      "book_page": 229
+    },
+    {
+      "id": "p2_capitolo_ventesimo_ottavo",
+      "start_scan": 240,
+      "book_page": 234
+    },
+    {
+      "id": "p2_capitolo_ventesimo_nono",
+      "start_scan": 245,
+      "book_page": 239
+    },
+    {
+      "id": "p2_capitolo_trentesimo",
+      "start_scan": 249,
+      "book_page": 243
+    },
+    {
+      "id": "p2_capitolo_trentesimo_primo",
+      "start_scan": 253,
+      "book_page": 247
+    },
+    {
+      "id": "p2_capitolo_trentesimo_secondo",
+      "start_scan": 259,
+      "book_page": 253
+    },
+    {
+      "id": "p2_capitolo_trentesimo_terzo",
+      "start_scan": 264,
+      "book_page": 258
+    },
+    {
+      "id": "indice",
+      "label": "Index",
+      "start_scan": 269,
+      "book_page": 263
+    },
+    {
+      "id": "back_matter",
+      "label": "Back matter",
+      "start_scan": 270,
+      "book_page": 264
+    }
+  ]
+}

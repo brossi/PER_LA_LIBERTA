@@ -1,0 +1,8 @@
+Transcribe all the text on this page exactly as printed. This is a page from a {{ book.year }} {{ language.display_name }} book titled '{{ book.book_title }}' by {{ book.author }}. Rules:
+- Output only the text content, no commentary
+- Preserve line breaks as they appear on the page
+- Preserve all accented characters ({{ language.accent_inventory | join(", ") }})
+- Preserve punctuation exactly
+- If the page has a page number, include it on its own line
+- If the page is blank or has only decorative elements, output {{ blank_sentinel }}
+- Do not translate — output the {{ language.display_name }} text as printed

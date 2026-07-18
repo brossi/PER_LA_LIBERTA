@@ -1,0 +1,6 @@
+/scans/*
+!/scans/.gitkeep
+/sources/*
+!/sources/.gitkeep
+/evaluation/*
+!/evaluation/.gitkeep

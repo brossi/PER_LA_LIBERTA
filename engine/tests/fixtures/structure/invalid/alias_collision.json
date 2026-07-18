@@ -1,0 +1,112 @@
+{
+  "schema_version": 2,
+  "root_id": "n-0",
+  "map_revision": 1,
+  "block_vocabulary": [
+    {
+      "name": "section",
+      "kind": "container",
+      "status": "active"
+    },
+    {
+      "name": "block",
+      "kind": "leaf",
+      "status": "active"
+    }
+  ],
+  "handle_policies": {
+    "section": "position-path",
+    "block": "position-path"
+  },
+  "furniture_atoms": [],
+  "aliases": [
+    {
+      "handle_type": "html_slug",
+      "value": "intro",
+      "scope": "global",
+      "locale_or_witness": "default",
+      "target_node_id": "n-1",
+      "valid_from": 0,
+      "valid_to": null,
+      "status": "active"
+    },
+    {
+      "handle_type": "html_slug",
+      "value": "intro",
+      "scope": "global",
+      "locale_or_witness": "default",
+      "target_node_id": "n-1",
+      "valid_from": 0,
+      "valid_to": null,
+      "status": "active"
+    }
+  ],
+  "manifest": {
+    "source_artifacts": [
+      {
+        "witness": "w1",
+        "hash": "sha256:fixture"
+      }
+    ],
+    "atom_streams": [
+      {
+        "id": "canonical",
+        "hash": "sha256:fixture"
+      }
+    ],
+    "canonical_stream_id": "canonical",
+    "canonical_content_hash": "sha256:fixture",
+    "canonical_geometry_hash": "sha256:fixture",
+    "layers": {
+      "atom_store": {
+        "schema_version": 1,
+        "stale_class": "atom-stream",
+        "present": true
+      },
+      "structure_map": {
+        "schema_version": 1,
+        "stale_class": "structure-map",
+        "present": true
+      },
+      "relation_store": {
+        "schema_version": 1,
+        "stale_class": "relation-store",
+        "present": false
+      }
+    },
+    "resource_lineage": {
+      "schema_version": 1,
+      "resource": {
+        "version": "sha256:fixture",
+        "stale_class": "resource-set",
+        "descriptor": {}
+      },
+      "normalizer": {
+        "version": "sha256:fixture",
+        "stale_class": "normalization-policy",
+        "descriptor": {}
+      }
+    },
+    "profile_version": "fixture-profile-1",
+    "recognizer_version": "fixture-recognizer-1",
+    "handle_renderer_version": 1
+  },
+  "nodes": [
+    {
+      "node_id": "n-0",
+      "node_class": "section",
+      "minted_by": "human",
+      "children": [
+        "n-1"
+      ]
+    },
+    {
+      "node_id": "n-1",
+      "node_class": "block",
+      "minted_by": "machine",
+      "body_atoms": [
+        "i0"
+      ]
+    }
+  ]
+}

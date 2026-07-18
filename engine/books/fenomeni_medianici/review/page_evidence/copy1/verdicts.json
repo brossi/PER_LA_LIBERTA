@@ -1,0 +1,72 @@
+{
+  "schema_version": 2,
+  "stale_class": "page-evidence-human-verdicts",
+  "book_id": "fenomeni_medianici",
+  "witness_id": "copy1",
+  "evidence_fingerprint_scheme": "source-raster-ocr-text-v1",
+  "verdicts": [
+    {
+      "page": 4,
+      "disposition": "blank",
+      "evidence_sha256": "6dfbe7ebc9f5bc9189786c4912a96569e6c0ab7b7ccd2cc81aee5b126b649de0",
+      "reviewer": "Ben Rossi",
+      "decided_at": "2026-07-13T17:15:34.399010+00:00"
+    },
+    {
+      "page": 6,
+      "disposition": "blank",
+      "evidence_sha256": "86c9d8f657a379292a28c354f7bd5f699632350abe8348f715702cbac2e551c1",
+      "reviewer": "Ben Rossi",
+      "decided_at": "2026-07-13T17:15:37.831090+00:00"
+    },
+    {
+      "page": 53,
+      "disposition": "content",
+      "evidence_sha256": "346cd6ffb608bdcb8879d5e71ca539b7c7bc0bf58a0f183b24f412e3c9ee9e1a",
+      "reviewer": "Ben Rossi",
+      "decided_at": "2026-07-13T17:15:41.033036+00:00"
+    },
+    {
+      "page": 54,
+      "disposition": "blank",
+      "evidence_sha256": "ea9e1411eed544288b6e6a0cd2bb4f5916e1ee36338c1d9fe58074b209061b61",
+      "reviewer": "Ben Rossi",
+      "decided_at": "2026-07-13T17:15:43.954626+00:00"
+    },
+    {
+      "page": 60,
+      "disposition": "blank",
+      "evidence_sha256": "15882b183d5443f1f717939b0f3661aa9b4497590f621c8ff99ad9903f0f5a06",
+      "reviewer": "Ben Rossi",
+      "decided_at": "2026-07-13T17:15:46.486511+00:00"
+    },
+    {
+      "page": 199,
+      "disposition": "blank",
+      "evidence_sha256": "2c6ab9d1319fe619fccb5f541839234579fc86b0f73d26c4f68292bdf6dd0110",
+      "reviewer": "Ben Rossi",
+      "decided_at": "2026-07-13T17:15:49.278031+00:00"
+    },
+    {
+      "page": 200,
+      "disposition": "blank",
+      "evidence_sha256": "8062da6ed16d69948c912ff197d9c270f52d3d597a726cab6c8758bf91c2b9a3",
+      "reviewer": "Ben Rossi",
+      "decided_at": "2026-07-13T17:15:51.580236+00:00"
+    },
+    {
+      "page": 201,
+      "disposition": "content",
+      "evidence_sha256": "a5af1349621bd1a6725cf62c6afab69821cf658eb1f997dfdd74adbfb89561c4",
+      "reviewer": "Ben Rossi",
+      "decided_at": "2026-07-13T17:15:54.186444+00:00"
+    },
+    {
+      "page": 202,
+      "disposition": "blank",
+      "evidence_sha256": "077e0ffc329347aa6727276f10667a635f1898cae996865fd4d9c472efc99dfd",
+      "reviewer": "Ben Rossi",
+      "decided_at": "2026-07-13T17:15:57.425191+00:00"
+    }
+  ]
+}

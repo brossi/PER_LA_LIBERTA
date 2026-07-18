@@ -1,0 +1,92 @@
+{
+  "schema_version": 1,
+  "id": "per_la_liberta",
+  "title": "Per la libertà!",
+  "language": "it",
+  "profiles": {
+    "language": "italian_1900_1922",
+    "source_noise": "bodoni_didone",
+    "typeface": "spectral_fraunces"
+  },
+  "sources": [
+    {
+      "role": "copy1",
+      "label": "LOC scan / Internet Archive Tesseract",
+      "ia_item_id": "perlalibertdal00cres",
+      "url": "https://archive.org/download/perlalibertdal00cres/perlalibertdal00cres_djvu.txt"
+    },
+    {
+      "role": "copy2",
+      "label": "Google / Harvard scan / Internet Archive OCR",
+      "ia_item_id": "perlalibertdall00cresgoog",
+      "url": "https://archive.org/download/perlalibertdall00cresgoog/perlalibertdall00cresgoog_djvu.txt"
+    }
+  ],
+  "scan": {
+    "pdf": "public-gdcmassbookdig-perlalibertdal00cres-perlalibertdal00cres.pdf",
+    "page_image_template": "page_{n:04d}.png",
+    "leaf_offset": 6,
+    "last_scan_page_default": 278
+  },
+  "ocr": {
+    "models": {
+      "flash": "gemini-2.5-flash",
+      "pro": "gemini-3.1-pro-preview"
+    }
+  },
+  "structure": {
+    "h2_min": 3,
+    "h3_count": 57,
+    "parts": [
+      {"name": "Parte Prima", "chapters": 24},
+      {"name": "Parte Seconda", "chapters": 33}
+    ],
+    "content_units": 58,
+    "retention_min": 0.60,
+    "foreign_char_max": 0.005,
+    "word_quality_high_severity_max": 0,
+    "running_heads": ["PER\\s+LA\\s+LIBERT[AÀ]!?"]
+  },
+  "edition": {
+    "title_it": "Per la libertà!",
+    "title_en": "For Freedom!",
+    "subtitle_it": "Dalle mie conversazioni col Conte Carlo di Rudio, complice di Felice Orsini",
+    "subtitle_en": "From my conversations with Count Carlo di Rudio, accomplice of Felice Orsini",
+    "author": "Cesare Crespi",
+    "year": 1913,
+    "colophon": "1913 first edition published by Canessa Printing Co., San Francisco.",
+    "ia_item_id": "perlalibertdal00cres",
+    "site_base": "https://brossi.github.io/PER_LA_LIBERTA"
+  },
+  "prompt_context": {
+    "book_title": "Per la libertà!",
+    "author": "Cesare Crespi",
+    "year": 1913,
+    "subject": "Italian unification, the Risorgimento, and the Orsini conspiracy against Napoleon III",
+    "entities": [
+      "Carlo di Rudio",
+      "Felice Orsini",
+      "Giuseppe Mazzini",
+      "Radetzky",
+      "Napoleon III"
+    ]
+  },
+  "segmentation": {
+    "order_source": "witness",
+    "geometry_mode": "geometry-tie-break",
+    "density_bands": {
+      "yield_content_min": 0.70,
+      "box_content_min": 40,
+      "ink_blank_max": 0.15,
+      "ink_dark_min": 0.60,
+      "confidence_margin": 0.05,
+      "cover_edge_leaves": 7,
+      "ink_saturation_min": 0.90
+    },
+    "column_detector": {
+      "decision_threshold": 0.50,
+      "hysteresis_margin": 0.15
+    },
+    "review_fraction_max": 0.15
+  }
+}

@@ -1,0 +1,68 @@
+# Parent-repo CI for the nested engine/ framework. Mirrors engine/.github/workflows/ci.yml
+# (which only becomes active after extraction). Scoped to engine/** so live-edition
+# work on the parent pipeline never triggers it.
+name: engine
+
+on:
+  push:
+    paths:
+      - "engine/**"
+      - ".github/workflows/engine.yml"
+  pull_request:
+    paths:
+      - "engine/**"
+      - ".github/workflows/engine.yml"
+
+defaults:
+  run:
+    working-directory: engine
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Install Tesseract OCR (real OCR path — S2.1 geometry backend, DT-11 tier 1)
+        # The PyMuPDF+Tesseract backend's OCR tests run hard-asserted here (no skipif, no
+        # skip-masking): missing tesseract must FAIL the suite, not silently skip. eng data is
+        # installed explicitly (the base package bundling it is not assumed). TESSDATA_PREFIX
+        # discovery is best-effort (an empty find leaves it unset); fitz.get_tessdata() is the
+        # fallback, and its failure surfaces fail-loud in the tests (GeometryError), never a skip.
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y tesseract-ocr tesseract-ocr-eng
+          td="$(find /usr/share -name eng.traineddata 2>/dev/null | head -1)"
+          if [ -n "$td" ]; then echo "TESSDATA_PREFIX=$(dirname "$td")" >> "$GITHUB_ENV"; fi
+
+      - name: Configure read-only sidecar deploy key
+        env:
+          SIDECAR_DEPLOY_KEY: ${{ secrets.BOOK_LAYOUT_SIDECAR_DEPLOY_KEY }}
+        run: |
+          test -n "$SIDECAR_DEPLOY_KEY"
+          install -d -m 700 "$HOME/.ssh"
+          printf '%s\n' "$SIDECAR_DEPLOY_KEY" > "$HOME/.ssh/id_ed25519"
+          chmod 600 "$HOME/.ssh/id_ed25519"
+          printf '%s\n' \
+            'github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl' \
+            > "$HOME/.ssh/known_hosts"
+
+      - name: Sync (with language and assessment integration extras)
+        run: uv sync --extra it --extra assessment
+
+      - name: Tests (full suite — unit + golden + integration, mirrors local)
+        run: uv run pytest -q
+
+      - name: No top-level pipeline imports leak into the package
+        # _generate_*.py are dev-time golden-fixture generators — the one sanctioned
+        # place that imports the live tree (read-only). They are never collected by
+        # pytest nor imported by the package, so they are excluded from the gate.
+        run: |
+          ! grep -rEn --exclude='_generate_*.py' \
+            'from (download|ocr|reconcile|triage|cleanup|adjudicate|validate|translate|multi_translate|refine|typeset|companion|pipeline|utils|providers|typography|edgren|hoare|vision_review) import|^[[:space:]]*import (pipeline|utils|providers)$' \
+            src tests

@@ -1,0 +1,756 @@
+[
+  {
+    "short": "prefazione",
+    "parse_md": "prefazione",
+    "html_slug": "prefazione",
+    "english_title": "Preface",
+    "part": 0,
+    "number": null,
+    "title": "Prefazione",
+    "page_range": [
+      7,
+      8
+    ]
+  },
+  {
+    "short": "p1_ch01",
+    "parse_md": "p1_capitolo_primo",
+    "html_slug": "parte-prima-capitolo-primo",
+    "english_title": "Chapter One",
+    "part": 1,
+    "number": 1,
+    "title": "Capitolo Primo",
+    "page_range": [
+      9,
+      14
+    ]
+  },
+  {
+    "short": "p1_ch02",
+    "parse_md": "p1_capitolo_secondo",
+    "html_slug": "parte-prima-capitolo-secondo",
+    "english_title": "Chapter Two",
+    "part": 1,
+    "number": 2,
+    "title": "Capitolo Secondo",
+    "page_range": [
+      15,
+      22
+    ]
+  },
+  {
+    "short": "p1_ch03",
+    "parse_md": "p1_capitolo_terzo",
+    "html_slug": "parte-prima-capitolo-terzo",
+    "english_title": "Chapter Three",
+    "part": 1,
+    "number": 3,
+    "title": "Capitolo Terzo",
+    "page_range": [
+      23,
+      25
+    ]
+  },
+  {
+    "short": "p1_ch04",
+    "parse_md": "p1_capitolo_quarto",
+    "html_slug": "parte-prima-capitolo-quarto",
+    "english_title": "Chapter Four",
+    "part": 1,
+    "number": 4,
+    "title": "Capitolo Quarto",
+    "page_range": [
+      26,
+      30
+    ]
+  },
+  {
+    "short": "p1_ch05",
+    "parse_md": "p1_capitolo_quinto",
+    "html_slug": "parte-prima-capitolo-quinto",
+    "english_title": "Chapter Five",
+    "part": 1,
+    "number": 5,
+    "title": "Capitolo Quinto",
+    "page_range": [
+      31,
+      33
+    ]
+  },
+  {
+    "short": "p1_ch06",
+    "parse_md": "p1_capitolo_sesto",
+    "html_slug": "parte-prima-capitolo-sesto",
+    "english_title": "Chapter Six",
+    "part": 1,
+    "number": 6,
+    "title": "Capitolo Sesto",
+    "page_range": [
+      34,
+      38
+    ]
+  },
+  {
+    "short": "p1_ch07",
+    "parse_md": "p1_capitolo_settimo",
+    "html_slug": "parte-prima-capitolo-settimo",
+    "english_title": "Chapter Seven",
+    "part": 1,
+    "number": 7,
+    "title": "Capitolo Settimo",
+    "page_range": [
+      39,
+      42
+    ]
+  },
+  {
+    "short": "p1_ch08",
+    "parse_md": "p1_capitolo_ottavo",
+    "html_slug": "parte-prima-capitolo-ottavo",
+    "english_title": "Chapter Eight",
+    "part": 1,
+    "number": 8,
+    "title": "Capitolo Ottavo",
+    "page_range": [
+      43,
+      47
+    ]
+  },
+  {
+    "short": "p1_ch09",
+    "parse_md": "p1_capitolo_nono",
+    "html_slug": "parte-prima-capitolo-nono",
+    "english_title": "Chapter Nine",
+    "part": 1,
+    "number": 9,
+    "title": "Capitolo Nono",
+    "page_range": [
+      48,
+      52
+    ]
+  },
+  {
+    "short": "p1_ch10",
+    "parse_md": "p1_capitolo_decimo",
+    "html_slug": "parte-prima-capitolo-decimo",
+    "english_title": "Chapter Ten",
+    "part": 1,
+    "number": 10,
+    "title": "Capitolo Decimo",
+    "page_range": [
+      53,
+      58
+    ]
+  },
+  {
+    "short": "p1_ch11",
+    "parse_md": "p1_capitolo_undicesimo",
+    "html_slug": "parte-prima-capitolo-undicesimo",
+    "english_title": "Chapter Eleven",
+    "part": 1,
+    "number": 11,
+    "title": "Capitolo Undicesimo",
+    "page_range": [
+      59,
+      62
+    ]
+  },
+  {
+    "short": "p1_ch12",
+    "parse_md": "p1_capitolo_dodicesimo",
+    "html_slug": "parte-prima-capitolo-dodicesimo",
+    "english_title": "Chapter Twelve",
+    "part": 1,
+    "number": 12,
+    "title": "Capitolo Dodicesimo",
+    "page_range": [
+      63,
+      66
+    ]
+  },
+  {
+    "short": "p1_ch13",
+    "parse_md": "p1_capitolo_tredicesimo",
+    "html_slug": "parte-prima-capitolo-tredicesimo",
+    "english_title": "Chapter Thirteen",
+    "part": 1,
+    "number": 13,
+    "title": "Capitolo Tredicesimo",
+    "page_range": [
+      67,
+      73
+    ]
+  },
+  {
+    "short": "p1_ch14",
+    "parse_md": "p1_capitolo_quattordicesimo",
+    "html_slug": "parte-prima-capitolo-quattordicesimo",
+    "english_title": "Chapter Fourteen",
+    "part": 1,
+    "number": 14,
+    "title": "Capitolo Quattordicesimo",
+    "page_range": [
+      74,
+      75
+    ]
+  },
+  {
+    "short": "p1_ch15",
+    "parse_md": "p1_capitolo_decimo_quinto",
+    "html_slug": "parte-prima-capitolo-decimo-quinto",
+    "english_title": "Chapter Fifteen",
+    "part": 1,
+    "number": 15,
+    "title": "Capitolo Decimo Quinto",
+    "page_range": [
+      76,
+      79
+    ]
+  },
+  {
+    "short": "p1_ch16",
+    "parse_md": "p1_capitolo_decimo_sesto",
+    "html_slug": "parte-prima-capitolo-decimo-sesto",
+    "english_title": "Chapter Sixteen",
+    "part": 1,
+    "number": 16,
+    "title": "Capitolo Decimo Sesto",
+    "page_range": [
+      80,
+      82
+    ]
+  },
+  {
+    "short": "p1_ch17",
+    "parse_md": "p1_capitolo_decimo_settimo",
+    "html_slug": "parte-prima-capitolo-decimo-settimo",
+    "english_title": "Chapter Seventeen",
+    "part": 1,
+    "number": 17,
+    "title": "Capitolo Decimo Settimo",
+    "page_range": [
+      83,
+      87
+    ]
+  },
+  {
+    "short": "p1_ch18",
+    "parse_md": "p1_capitolo_decimo_ottavo",
+    "html_slug": "parte-prima-capitolo-decimo-ottavo",
+    "english_title": "Chapter Eighteen",
+    "part": 1,
+    "number": 18,
+    "title": "Capitolo Decimo Ottavo",
+    "page_range": [
+      88,
+      91
+    ]
+  },
+  {
+    "short": "p1_ch19",
+    "parse_md": "p1_capitolo_decimo_nono",
+    "html_slug": "parte-prima-capitolo-decimo-nono",
+    "english_title": "Chapter Nineteen",
+    "part": 1,
+    "number": 19,
+    "title": "Capitolo Decimo Nono",
+    "page_range": [
+      92,
+      98
+    ]
+  },
+  {
+    "short": "p1_ch20",
+    "parse_md": "p1_capitolo_ventesimo",
+    "html_slug": "parte-prima-capitolo-ventesimo",
+    "english_title": "Chapter Twenty",
+    "part": 1,
+    "number": 20,
+    "title": "Capitolo Ventesimo",
+    "page_range": [
+      99,
+      100
+    ]
+  },
+  {
+    "short": "p1_ch21",
+    "parse_md": "p1_capitolo_ventesimo_primo",
+    "html_slug": "parte-prima-capitolo-ventesimo-primo",
+    "english_title": "Chapter Twenty-One",
+    "part": 1,
+    "number": 21,
+    "title": "Capitolo Ventesimo Primo",
+    "page_range": [
+      101,
+      107
+    ]
+  },
+  {
+    "short": "p1_ch22",
+    "parse_md": "p1_capitolo_ventesimo_secondo",
+    "html_slug": "parte-prima-capitolo-ventesimo-secondo",
+    "english_title": "Chapter Twenty-Two",
+    "part": 1,
+    "number": 22,
+    "title": "Capitolo Ventesimo Secondo",
+    "page_range": [
+      108,
+      111
+    ]
+  },
+  {
+    "short": "p1_ch23",
+    "parse_md": "p1_capitolo_ventesimoterzo",
+    "html_slug": "parte-prima-capitolo-ventesimoterzo",
+    "english_title": "Chapter Twenty-Three",
+    "part": 1,
+    "number": 23,
+    "title": "Capitolo Ventesimoterzo",
+    "page_range": [
+      112,
+      119
+    ]
+  },
+  {
+    "short": "p1_ch24",
+    "parse_md": "p1_capitolo_ventesimoquarto",
+    "html_slug": "parte-prima-capitolo-ventesimoquarto",
+    "english_title": "Chapter Twenty-Four",
+    "part": 1,
+    "number": 24,
+    "title": "Capitolo Ventesimoquarto",
+    "page_range": [
+      120,
+      126
+    ]
+  },
+  {
+    "short": "p2_ch01",
+    "parse_md": "p2_capitolo_primo",
+    "html_slug": "parte-seconda-capitolo-primo",
+    "english_title": "Chapter One",
+    "part": 2,
+    "number": 1,
+    "title": "Capitolo Primo",
+    "page_range": [
+      127,
+      133
+    ]
+  },
+  {
+    "short": "p2_ch02",
+    "parse_md": "p2_capitolo_secondo",
+    "html_slug": "parte-seconda-capitolo-secondo",
+    "english_title": "Chapter Two",
+    "part": 2,
+    "number": 2,
+    "title": "Capitolo Secondo",
+    "page_range": [
+      134,
+      135
+    ]
+  },
+  {
+    "short": "p2_ch03",
+    "parse_md": "p2_capitolo_terzo",
+    "html_slug": "parte-seconda-capitolo-terzo",
+    "english_title": "Chapter Three",
+    "part": 2,
+    "number": 3,
+    "title": "Capitolo Terzo",
+    "page_range": [
+      136,
+      141
+    ]
+  },
+  {
+    "short": "p2_ch04",
+    "parse_md": "p2_capitolo_quarto",
+    "html_slug": "parte-seconda-capitolo-quarto",
+    "english_title": "Chapter Four",
+    "part": 2,
+    "number": 4,
+    "title": "Capitolo Quarto",
+    "page_range": [
+      142,
+      143
+    ]
+  },
+  {
+    "short": "p2_ch05",
+    "parse_md": "p2_capitolo_quinto",
+    "html_slug": "parte-seconda-capitolo-quinto",
+    "english_title": "Chapter Five",
+    "part": 2,
+    "number": 5,
+    "title": "Capitolo Quinto",
+    "page_range": [
+      144,
+      148
+    ]
+  },
+  {
+    "short": "p2_ch06",
+    "parse_md": "p2_capitolo_sesto",
+    "html_slug": "parte-seconda-capitolo-sesto",
+    "english_title": "Chapter Six",
+    "part": 2,
+    "number": 6,
+    "title": "Capitolo Sesto",
+    "page_range": [
+      149,
+      153
+    ]
+  },
+  {
+    "short": "p2_ch07",
+    "parse_md": "p2_capitolo_settimo",
+    "html_slug": "parte-seconda-capitolo-settimo",
+    "english_title": "Chapter Seven",
+    "part": 2,
+    "number": 7,
+    "title": "Capitolo Settimo",
+    "page_range": [
+      154,
+      156
+    ]
+  },
+  {
+    "short": "p2_ch08",
+    "parse_md": "p2_capitolo_ottavo",
+    "html_slug": "parte-seconda-capitolo-ottavo",
+    "english_title": "Chapter Eight",
+    "part": 2,
+    "number": 8,
+    "title": "Capitolo Ottavo",
+    "page_range": [
+      157,
+      160
+    ]
+  },
+  {
+    "short": "p2_ch09",
+    "parse_md": "p2_capitolo_nono",
+    "html_slug": "parte-seconda-capitolo-nono",
+    "english_title": "Chapter Nine",
+    "part": 2,
+    "number": 9,
+    "title": "Capitolo Nono",
+    "page_range": [
+      161,
+      162
+    ]
+  },
+  {
+    "short": "p2_ch10",
+    "parse_md": "p2_capitolo_decimo",
+    "html_slug": "parte-seconda-capitolo-decimo",
+    "english_title": "Chapter Ten",
+    "part": 2,
+    "number": 10,
+    "title": "Capitolo Decimo",
+    "page_range": [
+      163,
+      165
+    ]
+  },
+  {
+    "short": "p2_ch11",
+    "parse_md": "p2_capitolo_undicesimo",
+    "html_slug": "parte-seconda-capitolo-undicesimo",
+    "english_title": "Chapter Eleven",
+    "part": 2,
+    "number": 11,
+    "title": "Capitolo Undicesimo",
+    "page_range": [
+      166,
+      168
+    ]
+  },
+  {
+    "short": "p2_ch12",
+    "parse_md": "p2_capitolo_dodicesimo",
+    "html_slug": "parte-seconda-capitolo-dodicesimo",
+    "english_title": "Chapter Twelve",
+    "part": 2,
+    "number": 12,
+    "title": "Capitolo Dodicesimo",
+    "page_range": [
+      169,
+      172
+    ]
+  },
+  {
+    "short": "p2_ch13",
+    "parse_md": "p2_capitolo_tredicesimo",
+    "html_slug": "parte-seconda-capitolo-tredicesimo",
+    "english_title": "Chapter Thirteen",
+    "part": 2,
+    "number": 13,
+    "title": "Capitolo Tredicesimo",
+    "page_range": [
+      173,
+      177
+    ]
+  },
+  {
+    "short": "p2_ch14",
+    "parse_md": "p2_capitolo_quattordicesimo",
+    "html_slug": "parte-seconda-capitolo-quattordicesimo",
+    "english_title": "Chapter Fourteen",
+    "part": 2,
+    "number": 14,
+    "title": "Capitolo Quattordicesimo",
+    "page_range": [
+      178,
+      183
+    ]
+  },
+  {
+    "short": "p2_ch15",
+    "parse_md": "p2_capitolo_quindicesimo",
+    "html_slug": "parte-seconda-capitolo-quindicesimo",
+    "english_title": "Chapter Fifteen",
+    "part": 2,
+    "number": 15,
+    "title": "Capitolo Quindicesimo",
+    "page_range": [
+      184,
+      186
+    ]
+  },
+  {
+    "short": "p2_ch16",
+    "parse_md": "p2_capitolo_sedicesimo",
+    "html_slug": "parte-seconda-capitolo-sedicesimo",
+    "english_title": "Chapter Sixteen",
+    "part": 2,
+    "number": 16,
+    "title": "Capitolo Sedicesimo",
+    "page_range": [
+      187,
+      190
+    ]
+  },
+  {
+    "short": "p2_ch17",
+    "parse_md": "p2_capitolo_decimosettimo",
+    "html_slug": "parte-seconda-capitolo-decimosettimo",
+    "english_title": "Chapter Decimosettimo",
+    "part": 2,
+    "number": 17,
+    "title": "Capitolo Decimosettimo",
+    "page_range": [
+      191,
+      195
+    ]
+  },
+  {
+    "short": "p2_ch18",
+    "parse_md": "p2_capitolo_decimottavo",
+    "html_slug": "parte-seconda-capitolo-decimottavo",
+    "english_title": "Chapter Decimottavo",
+    "part": 2,
+    "number": 18,
+    "title": "Capitolo Decimottavo",
+    "page_range": [
+      196,
+      201
+    ]
+  },
+  {
+    "short": "p2_ch19",
+    "parse_md": "p2_capitolo_decimonono",
+    "html_slug": "parte-seconda-capitolo-decimonono",
+    "english_title": "Chapter Nineteen",
+    "part": 2,
+    "number": 19,
+    "title": "Capitolo Decimonono",
+    "page_range": [
+      202,
+      206
+    ]
+  },
+  {
+    "short": "p2_ch20",
+    "parse_md": "p2_capitolo_ventesimo",
+    "html_slug": "parte-seconda-capitolo-ventesimo",
+    "english_title": "Chapter Twenty",
+    "part": 2,
+    "number": 20,
+    "title": "Capitolo Ventesimo",
+    "page_range": [
+      207,
+      211
+    ]
+  },
+  {
+    "short": "p2_ch21",
+    "parse_md": "p2_capitolo_ventesimo_primo",
+    "html_slug": "parte-seconda-capitolo-ventesimo-primo",
+    "english_title": "Chapter Twenty-One",
+    "part": 2,
+    "number": 21,
+    "title": "Capitolo Ventesimo Primo",
+    "page_range": [
+      212,
+      215
+    ]
+  },
+  {
+    "short": "p2_ch22",
+    "parse_md": "p2_capitolo_ventesimo_secondo",
+    "html_slug": "parte-seconda-capitolo-ventesimo-secondo",
+    "english_title": "Chapter Twenty-Two",
+    "part": 2,
+    "number": 22,
+    "title": "Capitolo Ventesimo Secondo",
+    "page_range": [
+      216,
+      221
+    ]
+  },
+  {
+    "short": "p2_ch23",
+    "parse_md": "p2_capitolo_ventesimo_terzo",
+    "html_slug": "parte-seconda-capitolo-ventesimo-terzo",
+    "english_title": "Chapter Twenty-Three",
+    "part": 2,
+    "number": 23,
+    "title": "Capitolo Ventesimo Terzo",
+    "page_range": [
+      222,
+      224
+    ]
+  },
+  {
+    "short": "p2_ch24",
+    "parse_md": "p2_capitolo_ventesimo_quarto",
+    "html_slug": "parte-seconda-capitolo-ventesimo-quarto",
+    "english_title": "Chapter Twenty-Four",
+    "part": 2,
+    "number": 24,
+    "title": "Capitolo Ventesimo Quarto",
+    "page_range": [
+      225,
+      227
+    ]
+  },
+  {
+    "short": "p2_ch25",
+    "parse_md": "p2_capitolo_ventesimo_quinto",
+    "html_slug": "parte-seconda-capitolo-ventesimo-quinto",
+    "english_title": "Chapter Twenty-Five",
+    "part": 2,
+    "number": 25,
+    "title": "Capitolo Ventesimo Quinto",
+    "page_range": [
+      228,
+      231
+    ]
+  },
+  {
+    "short": "p2_ch26",
+    "parse_md": "p2_capitolo_ventesimo_sesto",
+    "html_slug": "parte-seconda-capitolo-ventesimo-sesto",
+    "english_title": "Chapter Twenty-Six",
+    "part": 2,
+    "number": 26,
+    "title": "Capitolo Ventesimo Sesto",
+    "page_range": [
+      232,
+      234
+    ]
+  },
+  {
+    "short": "p2_ch27",
+    "parse_md": "p2_capitolo_ventesimo_settimo",
+    "html_slug": "parte-seconda-capitolo-ventesimo-settimo",
+    "english_title": "Chapter Twenty-Seven",
+    "part": 2,
+    "number": 27,
+    "title": "Capitolo Ventesimo Settimo",
+    "page_range": [
+      235,
+      239
+    ]
+  },
+  {
+    "short": "p2_ch28",
+    "parse_md": "p2_capitolo_ventesimo_ottavo",
+    "html_slug": "parte-seconda-capitolo-ventesimo-ottavo",
+    "english_title": "Chapter Twenty-Eight",
+    "part": 2,
+    "number": 28,
+    "title": "Capitolo Ventesimo Ottavo",
+    "page_range": [
+      240,
+      244
+    ]
+  },
+  {
+    "short": "p2_ch29",
+    "parse_md": "p2_capitolo_ventesimo_nono",
+    "html_slug": "parte-seconda-capitolo-ventesimo-nono",
+    "english_title": "Chapter Twenty-Nine",
+    "part": 2,
+    "number": 29,
+    "title": "Capitolo Ventesimo Nono",
+    "page_range": [
+      245,
+      248
+    ]
+  },
+  {
+    "short": "p2_ch30",
+    "parse_md": "p2_capitolo_trentesimo",
+    "html_slug": "parte-seconda-capitolo-trentesimo",
+    "english_title": "Chapter Thirty",
+    "part": 2,
+    "number": 30,
+    "title": "Capitolo Trentesimo",
+    "page_range": [
+      249,
+      252
+    ]
+  },
+  {
+    "short": "p2_ch31",
+    "parse_md": "p2_capitolo_trentesimo_primo",
+    "html_slug": "parte-seconda-capitolo-trentesimo-primo",
+    "english_title": "Chapter Thirty-One",
+    "part": 2,
+    "number": 31,
+    "title": "Capitolo Trentesimo Primo",
+    "page_range": [
+      253,
+      258
+    ]
+  },
+  {
+    "short": "p2_ch32",
+    "parse_md": "p2_capitolo_trentesimo_secondo",
+    "html_slug": "parte-seconda-capitolo-trentesimo-secondo",
+    "english_title": "Chapter Thirty-Two",
+    "part": 2,
+    "number": 32,
+    "title": "Capitolo Trentesimo Secondo",
+    "page_range": [
+      259,
+      263
+    ]
+  },
+  {
+    "short": "p2_ch33",
+    "parse_md": "p2_capitolo_trentesimo_terzo",
+    "html_slug": "parte-seconda-capitolo-trentesimo-terzo",
+    "english_title": "Chapter Thirty-Three",
+    "part": 2,
+    "number": 33,
+    "title": "Capitolo Trentesimo Terzo",
+    "page_range": [
+      264,
+      268
+    ]
+  }
+]

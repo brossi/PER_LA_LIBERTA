@@ -1,0 +1,441 @@
+"""``engine.structure`` — the document-structure substrate (concerns A/B/C, three layers).
+
+A book/language-agnostic model of document structure: L1 immutable addressed atoms → L2
+versioned block projections (the durable ``node_id`` catalogue) → L3 spans / relations /
+cross-language alignment (ENGINE_STRUCTURE_PLAN §2–§3). The core here carries **no** language,
+ordinal, or book-structure literal — heading grammar, matter labels, and numbering are data in
+the structure profile + the per-book structure map, never code (invariant I4; the S0.2 neutrality
+guard makes that a standing assertion). The atom/projection models, the recognizer, the persisted
+stores, and governance land milestone by milestone (ENGINE_STRUCTURE_TASKS S1–S11), and each
+concern's exports join the surface below as its milestone arrives — the re-export list is the
+authoritative public surface (pinned by ``test_structure_artifacts``' export registries), grown
+from the original S0.1 skeleton of schema-version constants and fixed artifact locations.
+"""
+
+from __future__ import annotations
+
+from engine.structure.artifacts import (
+    ATOM_STORE_SCHEMA_VERSION,
+    ATOM_STORE_STALE_CLASS,
+    ATOMS_AREA,
+    ATOMS_SUBDIR,
+    AUTHORING_EVIDENCE_FILENAME,
+    AUTHORING_EVIDENCE_SCHEMA_VERSION,
+    AUTHORING_EVIDENCE_STALE_CLASS,
+    NORMALIZER_STALE_CLASS,
+    RELATION_STORE_SCHEMA_VERSION,
+    RELATION_STORE_STALE_CLASS,
+    RELATIONS_FILENAME,
+    RESOURCE_LINEAGE_SCHEMA_VERSION,
+    RESOURCE_STALE_CLASS,
+    SCHEMA_STATUS_BORN,
+    SCHEMA_STATUS_PROVISIONAL,
+    STRUCTURE_MAP_FILENAME,
+    STRUCTURE_MAP_SCHEMA_STATUS,
+    STRUCTURE_MAP_SCHEMA_VERSION,
+    STRUCTURE_MAP_STALE_CLASS,
+    atoms_dir,
+    authoring_evidence_path,
+    relations_path,
+    structure_map_path,
+)
+from engine.structure.errors import EC, StructureValidationError
+from engine.structure.projection import (
+    FINGERPRINT_SLOTS,
+    ContainerNode,
+    FurnitureAtom,
+    LeafNode,
+    Node,
+    ProjectionMap,
+    RebindAnchors,
+    Region,
+    SlotFingerprint,
+    mint_node_id,
+    validate_projection,
+)
+from engine.structure.handles import (
+    Alias,
+    render_handle,
+    resolve,
+)
+from engine.structure.structure_map import (
+    StreamAtomReader,
+    StructureMap,
+    assert_schema_born,
+    build_manifest,
+    canonical_content_hash,
+    canonical_geometry_hash,
+    load_structure_map,
+    render_structure_map,
+    schema_version_const,
+    validate_structure_map,
+    workspace_reader,
+    write_structure_map,
+)
+from engine.structure.evidence import (
+    EVIDENCE_FINDING_KINDS,
+    AuthoringEvidence,
+    EvidenceEntry,
+    EvidenceGateError,
+    assert_evidence_gate,
+    build_evidence_entry,
+    decision_digest,
+    decision_payload,
+    evidence_findings,
+    evidence_schema_version_const,
+    extent_digest,
+    extent_payload,
+    load_authoring_evidence,
+    render_authoring_evidence,
+    write_authoring_evidence,
+)
+from engine.structure.authoring import (
+    assert_authoring_integrity,
+    authoring_status,
+    explain_evidence_drift,
+    stamp_evidence,
+    validate_authoring,
+)
+from engine.structure.atom_store import (
+    CANONICAL,
+    WITNESS,
+    AtomStream,
+    assert_atom_hashes,
+    assert_reference_integrity,
+    assert_stream_roundtrip,
+    load_stream,
+    load_workspace_streams,
+    save_stream,
+    stream_ids,
+    stream_path,
+)
+from engine.structure.atoms import (
+    PROCESSING_SCOPE_EXCLUDED,
+    PROCESSING_SCOPE_INCLUDED,
+    Atom,
+    AtomDerivation,
+    Geom,
+    duplicate_atom_ids,
+)
+from engine.structure.geometry import (
+    GeometryError,
+    GeometrySource,
+    PageGeometry,
+    WordBox,
+)
+from engine.structure.geom_match import (
+    AttachOutcome,
+    AttachResult,
+    MatchOutcome,
+    attach_geometry,
+    build_geom_sidecar,
+    locate_pages,
+    match_stream,
+    normalize_tokens,
+)
+from engine.structure.geom_sidecar import (
+    AtomPages,
+    AtomRecord,
+    GeomSidecar,
+    PageRecord,
+    SourceScan,
+    assert_auto_absent_tripwire,
+    assert_source_scan_matches,
+    geom_sidecar_path,
+    load_geom_sidecar,
+    save_geom_sidecar,
+)
+from engine.structure.segmentation import (
+    COLUMN_DETECTOR_VERSION,
+    SEGMENTATION_VERSION,
+    ColumnDetector,
+    ColumnEvidence,
+    ColumnVerdict,
+    DensityBand,
+    DensityClassifier,
+    DensityVerdict,
+    PageColumnInput,
+    PageColumnVerdict,
+    PageDensityFeatures,
+    detect_columns,
+    edge_strip,
+    ink_fraction_from_pixmap,
+    is_alpha_token,
+    ordered_coverage,
+    page_density_features,
+    reading_order,
+    resolve_reading_columns,
+)
+from engine.structure.capture import (
+    PAGE_UNMAPPED,
+    align_streams,
+    assert_capture_tiles,
+    build_canonical,
+    capture_witness,
+    marker_page_binding,
+)
+from engine.structure.freeze import (
+    assert_freeze_matches,
+    build_freeze_record,
+    load_freeze_record,
+    render_freeze_record,
+    write_freeze_record,
+)
+from engine.structure.classify import (
+    DEGENERATE_CLASSIFIER_NAME,
+    UNKNOWN,
+    BlockClassification,
+    BlockClassifier,
+    DegenerateBlockClassifier,
+)
+from engine.structure.roundtrip import (
+    ReversibleTransform,
+    apply_forward,
+    apply_inverse,
+    hash_raw,
+    is_reversible,
+    reconstruct_raw,
+    verify_atom_roundtrip,
+)
+from engine.structure.roundtrip_gate import (
+    DEFAULT_MIN_INCLUDED_FRACTION,
+    GapRecord,
+    assert_no_wholesale_exclusion,
+    assert_production_roundtrip,
+    gap_records,
+    reconstruct_source,
+)
+from engine.structure.typed import (
+    CompletenessReport,
+    ReviewItem,
+    TypedAtom,
+    check_completeness,
+    typed_projection,
+)
+# NB: the ``rebind()`` **function** is deliberately NOT re-exported here — binding it as a package
+# attribute would shadow the ``engine.structure.rebind`` **submodule** (same name), breaking
+# ``import engine.structure.rebind``. It stays public via ``from engine.structure.rebind import rebind``.
+from engine.structure.rebind import (
+    DEFAULT_FINGERPRINT_THRESHOLD,
+    REBIND_UNRESOLVED_REASONS,
+    ModeProvenance,
+    NodeOutcome,
+    RebindContext,
+    RebindError,
+    RebindPolicy,
+    RebindReport,
+    RebindResult,
+    SlotOutcome,
+    assert_all_bound,
+    fingerprint_slot,
+    resolve_mode,
+    slot_similarity,
+)
+
+__all__ = [
+    "ATOM_STORE_SCHEMA_VERSION",
+    "ATOM_STORE_STALE_CLASS",
+    "STRUCTURE_MAP_SCHEMA_VERSION",
+    "RELATION_STORE_SCHEMA_VERSION",
+    # S4.0 — structure-map + relation-store stale classes; schema birth-status map; EC code set
+    "STRUCTURE_MAP_STALE_CLASS",
+    "RELATION_STORE_STALE_CLASS",
+    "SCHEMA_STATUS_PROVISIONAL",
+    "SCHEMA_STATUS_BORN",
+    "STRUCTURE_MAP_SCHEMA_STATUS",
+    "EC",
+    # S4.1 — L2 projection model (concern B): nodes + flat map + per-module validator + carrier error
+    "Node",
+    "ContainerNode",
+    "LeafNode",
+    "FurnitureAtom",
+    "ProjectionMap",
+    "validate_projection",
+    "StructureValidationError",
+    # S5.1 — typed re-bind anchors (checkpoints R2, never identity): region seed + slot fingerprint
+    "RebindAnchors",
+    "Region",
+    "SlotFingerprint",
+    "FINGERPRINT_SLOTS",
+    # S5.1 — the store-and-rebind engine (context/policy/DP/re-stamp/outputs) + fingerprint producer
+    "RebindContext",
+    "RebindPolicy",
+    "RebindResult",
+    "RebindReport",
+    "RebindError",
+    "ModeProvenance",
+    "NodeOutcome",
+    "SlotOutcome",
+    "assert_all_bound",
+    "fingerprint_slot",
+    "slot_similarity",
+    "resolve_mode",
+    "DEFAULT_FINGERPRINT_THRESHOLD",
+    "REBIND_UNRESOLVED_REASONS",
+    # S4.2 — node_id identity + minting split (mint_node_id seam; minted_by/designation/title fields)
+    "mint_node_id",
+    # S4.3 — handle policy + rendered handles + alias records (render_handle/resolve; Alias record)
+    "Alias",
+    "render_handle",
+    "resolve",
+    # S4.4 — structure_map.json schema + loader + manifest + born-gate + regen-guarded writer
+    "StructureMap",
+    "StreamAtomReader",
+    "validate_structure_map",
+    "load_structure_map",
+    "write_structure_map",
+    "render_structure_map",
+    "build_manifest",
+    "canonical_content_hash",
+    "canonical_geometry_hash",
+    "schema_version_const",
+    "assert_schema_born",
+    # S3.0 — resource + normalization-policy lineage constants
+    "RESOURCE_LINEAGE_SCHEMA_VERSION",
+    "RESOURCE_STALE_CLASS",
+    "NORMALIZER_STALE_CLASS",
+    "ATOMS_AREA",
+    "ATOMS_SUBDIR",
+    "STRUCTURE_MAP_FILENAME",
+    "RELATIONS_FILENAME",
+    "atoms_dir",
+    "structure_map_path",
+    "relations_path",
+    # S1.1 — L1 atom model (concern A capture)
+    "Atom",
+    "Geom",
+    "AtomDerivation",
+    "duplicate_atom_ids",
+    "PROCESSING_SCOPE_INCLUDED",
+    "PROCESSING_SCOPE_EXCLUDED",
+    # S2.1 — geometry seam (concern A word-box layer)
+    "WordBox",
+    "PageGeometry",
+    "GeometrySource",
+    "GeometryError",
+    # S2.1.3 — matcher + monotone page-locate + attach overlay (geom_match)
+    "normalize_tokens",
+    "locate_pages",
+    "match_stream",
+    "MatchOutcome",
+    "build_geom_sidecar",
+    "attach_geometry",
+    "AttachResult",
+    "AttachOutcome",
+    # S2.1.3 — geometry sidecar (geom_sidecar)
+    "GeomSidecar",
+    "SourceScan",
+    "PageRecord",
+    "AtomRecord",
+    "AtomPages",
+    "geom_sidecar_path",
+    "save_geom_sidecar",
+    "load_geom_sidecar",
+    "assert_source_scan_matches",
+    "assert_auto_absent_tripwire",
+    # S2.1.4 — density band pre-check classifier (segmentation)
+    "SEGMENTATION_VERSION",
+    "DensityBand",
+    "DensityClassifier",
+    "DensityVerdict",
+    "PageDensityFeatures",
+    "edge_strip",
+    "ink_fraction_from_pixmap",
+    "is_alpha_token",
+    "page_density_features",
+    # S2.1.5 — column / reading-order detector (segmentation)
+    "COLUMN_DETECTOR_VERSION",
+    "ColumnDetector",
+    "ColumnEvidence",
+    "ColumnVerdict",
+    "PageColumnInput",
+    "PageColumnVerdict",
+    "detect_columns",
+    "ordered_coverage",
+    "reading_order",
+    "resolve_reading_columns",
+    # S0.4 — block-classifier seam (concern A typing)
+    "BlockClassifier",
+    "BlockClassification",
+    "DegenerateBlockClassifier",
+    "UNKNOWN",
+    "DEGENERATE_CLASSIFIER_NAME",
+    # S1.2 — raw/normalized round-trip floor (concern A capture)
+    "hash_raw",
+    "reconstruct_raw",
+    "ReversibleTransform",
+    "apply_forward",
+    "apply_inverse",
+    "is_reversible",
+    "verify_atom_roundtrip",
+    # S1.3a — raw addressed capture (per-witness streams + canonical projection)
+    "capture_witness",
+    "build_canonical",
+    "align_streams",
+    "assert_capture_tiles",
+    "PAGE_UNMAPPED",
+    "marker_page_binding",
+    # S1.4 — production round-trip gate (explicit gaps + whole-artifact byte-exactness)
+    "GapRecord",
+    "gap_records",
+    "reconstruct_source",
+    "assert_no_wholesale_exclusion",
+    "assert_production_roundtrip",
+    "DEFAULT_MIN_INCLUDED_FRACTION",
+    # S1.3b — typed projection over the raw atoms (concern A typing + completeness)
+    "TypedAtom",
+    "typed_projection",
+    "ReviewItem",
+    "CompletenessReport",
+    "check_completeness",
+    # S1.5 — persisted atom store (per-witness + canonical streams, versioned + integrity-checked)
+    "AtomStream",
+    "WITNESS",
+    "CANONICAL",
+    "save_stream",
+    "load_stream",
+    "stream_path",
+    "stream_ids",
+    "assert_stream_roundtrip",
+    "assert_atom_hashes",
+    "assert_reference_integrity",
+    # S4.6-pre — the committed stream-freeze pin (id-stability substrate for S4.6 authoring)
+    "build_freeze_record",
+    "render_freeze_record",
+    "load_freeze_record",
+    "write_freeze_record",
+    "assert_freeze_matches",
+    # S4.6a — authoring-evidence sidecar (engine half) + store-backed reader glue
+    "AUTHORING_EVIDENCE_SCHEMA_VERSION",
+    "AUTHORING_EVIDENCE_STALE_CLASS",
+    "AUTHORING_EVIDENCE_FILENAME",
+    "authoring_evidence_path",
+    "EvidenceEntry",
+    "AuthoringEvidence",
+    "decision_digest",
+    "extent_digest",
+    "load_authoring_evidence",
+    "assert_evidence_gate",
+    "evidence_schema_version_const",
+    "load_workspace_streams",
+    "workspace_reader",
+    # S4.6a post-audit remediation (user-ratified 2026-07-02): typed gate error + findings
+    # producer + the engine writer
+    "EvidenceGateError",
+    "EVIDENCE_FINDING_KINDS",
+    "evidence_findings",
+    "build_evidence_entry",
+    "render_authoring_evidence",
+    "write_authoring_evidence",
+    # S4.6b DT-4 (user-ratified 2026-07-02): the digest payload producers — one producer for
+    # digest and witness, consumed by the sidecar's payload witnesses and the digest-diff explainer
+    "decision_payload",
+    "extent_payload",
+    # S4.6b — the authoring-loop toolkit (composite gate, editor-loop validation, worklist
+    # status, single-node stamp, digest-diff explainer); plan §7's ratified five (issue #34)
+    "assert_authoring_integrity",
+    "authoring_status",
+    "explain_evidence_drift",
+    "stamp_evidence",
+    "validate_authoring",
+]

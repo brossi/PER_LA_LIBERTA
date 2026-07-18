@@ -1,0 +1,29 @@
+LIBRO DI PROVA
+
+PREFAZIONE
+
+Questa è una breve prefazione di prova, scritta soltanto
+per esercitare il motore di riconciliazione su un libro
+che non è Per la Libertà. Contiene alcune frasi semplici
+e una parola con accento, come libertà, così da provare
+anche il punteggio delle parole accentate.
+
+Capitolo Primo
+
+Nel primo capitolo il racconto comincia con parole piane
+e con qualche periodo un poco più lungo, in modo da
+fornire abbastanza testo per la prova del motore di
+riconciliazione e per la mappa delle pagine del libro.
+La segmentazione deve riconoscere il titolo del capitolo
+senza dipendere dalla struttura particolare di un libro.
+
+Capitolo Secondo
+
+Nel secondo capitolo la narrazione prosegue con altre
+frasi di esempio, sempre in lingua italiana, per
+dimostrare che la riconciliazione non assume mai un
+numero fisso di capitoli né una particolare parte.
+Queste righe servono solo a riempire la pagina con un
+testo plausibile e ripetibile per la verifica.
+
+INDICE

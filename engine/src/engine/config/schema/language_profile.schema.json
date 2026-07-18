@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Language profile",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "language_id", "display_name", "spacy_model", "frequency_dictionary",
+    "english_markers", "skip_words", "consonant_alphabet", "word_score_accents",
+    "accent_inventory", "coverage",
+    "accent_optional", "case_fold", "accent_fold", "accented_letters", "word_letter_class",
+    "period_dictionaries", "oracle_min"
+  ],
+  "properties": {
+    "language_id": {"type": "string", "minLength": 1},
+    "display_name": {"type": "string", "minLength": 1},
+    "spacy_model": {"type": "string", "minLength": 1},
+    "frequency_dictionary": {"type": "string", "minLength": 1},
+    "english_markers": {"type": "array", "items": {"type": "string"}},
+    "skip_words": {"type": "array", "items": {"type": "string"}},
+    "consonant_alphabet": {"type": "string", "minLength": 1},
+    "word_score_accents": {"type": "string", "minLength": 1},
+    "accent_inventory": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "coverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ascii_letters", "digits", "letters", "punctuation"],
+      "properties": {
+        "ascii_letters": {"type": "boolean"},
+        "digits": {"type": "boolean"},
+        "letters": {"type": "string"},
+        "punctuation": {"type": "string"}
+      }
+    },
+    "accent_optional": {"type": "boolean"},
+    "case_fold": {
+      "$comment": "Case axis of the S3.0 pre-lookup fold (was a baked .lower()). Enum-bound to the modes the normalization policy implements; a non-Latin/case-sensitive book uses 'none'/'casefold'.",
+      "type": "string",
+      "enum": ["lower", "casefold", "none"]
+    },
+    "accent_fold": {
+      "$comment": "Fixed accent->base fold table cleanup uses (M4b-D1). Parallel equal-length strings; NOT NFKD (byte-stable on non-folded glyphs).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["from", "to"],
+      "properties": {
+        "from": {"type": "string", "minLength": 1},
+        "to": {"type": "string", "minLength": 1}
+      }
+    },
+    "accented_letters": {"type": "string", "minLength": 1},
+    "word_letter_class": {"type": "string", "minLength": 1},
+    "period_dictionaries": {
+      "type": "array",
+      "$comment": "adjudicate._build_oracle binds the membership oracle to a monolingual member; enforce ≥1 here so a profile lacking one fails at config-load (ConfigError), not later as a bare ValueError traceback from adjudicate.",
+      "minItems": 1,
+      "contains": {"properties": {"kind": {"const": "monolingual"}}, "required": ["kind"]},
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "kind", "dir"],
+        "properties": {
+          "name": {"type": "string"},
+          "kind": {"type": "string", "enum": ["monolingual", "bilingual"]},
+          "dir": {"type": "string"}
+        }
+      }
+    },
+    "oracle_min": {"type": "integer", "minimum": 1}
+  }
+}

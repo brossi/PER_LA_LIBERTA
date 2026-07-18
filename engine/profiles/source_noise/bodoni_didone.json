@@ -1,0 +1,54 @@
+{
+  "name": "Bodoni / Didone (source typeface)",
+  "substitution_rules": [
+    ["piii", "più"],
+    ["pili", "più"],
+    ["piìi", "più"],
+    ["piiì", "più"],
+    ["cbe", "che"],
+    ["cbi", "chi"],
+    ["eolla", "colla"],
+    ["eol", "col"],
+    ["eome", "come"],
+    ["eosa", "cosa"],
+    ["eosì", "così"],
+    ["eosl", "così"],
+    ["eui", "cui"],
+    ["easa", "casa"],
+    ["earo", "caro"],
+    ["ealdo", "caldo"],
+    ["eentro", "centro"],
+    ["eontro", "contro"],
+    ["bo", "ho"],
+    ["salla", "sulla"],
+    ["5AN", "SAN"]
+  ],
+  "boundary_substitutions": {
+    "i": ["r", "e"]
+  },
+  "ligature_substitutions": [
+    ["u", "fi"],
+    ["n", "fi"],
+    ["ri", "fi"],
+    ["d", "fl"],
+    ["tl", "fl"],
+    ["tf", "ff"],
+    ["tt", "ff"]
+  ],
+  "noise_line_patterns": [
+    "^[\\s\\d\\^IElE\\-\\*\\(\\)fr»iiim3S5ZBP\\.,:;!?~`@#$%&=+<>{}|\\[\\]\\\\/'\\\"\\•\\·\\°]+$",
+    "^[-\\s\\dEeISsBa3Ì5:;\\(\\)\\^»«fr]+$",
+    "(?i)^Di[si]p\\.?\\s+[IVX0-9]+$"
+  ],
+  "page_marker_line_pattern": "^[\\s\\dA-Z\\-\\*\\(\\):;,.!?ÌÈàèìòùéE3S5asgioelIcruhknwm\\^]+$",
+  "char_substitutions": [
+    ["£(?!\\d)", "E"]
+  ],
+  "inline_page_marker_patterns": [
+    "\\s*\\d+\\s+[35][EI]:?\\s*",
+    "\\s*[dD]?[EeIi]{1,3}\\s+o?\\s*[35][EI]\\s*",
+    "\\s*[35][EI]\\d+[a-z]*[EI]\\s+\\d+\\s+[35][EI]:?\\s*"
+  ],
+  "page_marker_artifact_pattern": "\\d+\\s+[35][EI]:?",
+  "page_marker_format": "⟨PAGE:{}⟩"
+}

@@ -1,0 +1,5 @@
+# Raw reference texts: large, public-domain, regenerable from SOURCES.md URLs.
+# Only the manifest and this file are tracked.
+*.txt
+*.tex
+*.pdf

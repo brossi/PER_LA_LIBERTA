@@ -1,0 +1,33 @@
+{
+  "stream_freeze_schema_version": 1,
+  "book": "per_la_liberta",
+  "streams": [
+    {
+      "id": "canonical",
+      "kind": "canonical",
+      "atom_count": 4786,
+      "envelope_hash": "sha256:c6458296fa60e00a2e96b3b16a1aa12e367c0dcaed60aebbb1620b246bfdcf63"
+    },
+    {
+      "id": "copy1",
+      "kind": "witness",
+      "atom_count": 3621,
+      "envelope_hash": "sha256:9036b06c05de09c32a97f3920e1ccb536c89e623e578110dbd2d427810a46fde",
+      "source_hash": "sha256:6a08d2df6e80223dd6790d31a12de9745968a48b6103f25878d3aeb1ac51126f"
+    },
+    {
+      "id": "copy2",
+      "kind": "witness",
+      "atom_count": 3356,
+      "envelope_hash": "sha256:44ff379eea88648f2868130b44edc27fefec78d2a7ab1a150560b01401b4910f",
+      "source_hash": "sha256:dce1b27e07c8bcb2a55060cd3e9b6a03656be3e16b668b3bec60ff82ff5635b6"
+    },
+    {
+      "id": "copy3",
+      "kind": "witness",
+      "atom_count": 799,
+      "envelope_hash": "sha256:2f78b8c323c08e174121386e2d179d8167e9d7b308ef73e8af5cd672a8462917",
+      "source_hash": "sha256:d93776a9f669b359709be0530f3aa5a2460f7945ddccd07cff534061465421e2"
+    }
+  ]
+}

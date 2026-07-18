@@ -1,0 +1,189 @@
+{
+  "schema_version": 2,
+  "root_id": "n-0",
+  "map_revision": 2,
+  "block_vocabulary": [
+    {
+      "name": "volume",
+      "kind": "container",
+      "status": "active"
+    },
+    {
+      "name": "section",
+      "kind": "container",
+      "status": "active"
+    },
+    {
+      "name": "block",
+      "kind": "leaf",
+      "status": "active"
+    },
+    {
+      "name": "annex",
+      "kind": "either",
+      "status": "reserved"
+    }
+  ],
+  "handle_policies": {
+    "volume": "position-path",
+    "section": "position-path",
+    "block": "position-path"
+  },
+  "furniture_atoms": [
+    {
+      "atom_id": "w1_00000",
+      "capture_role": "page-number"
+    }
+  ],
+  "aliases": [
+    {
+      "handle_type": "html_slug",
+      "value": "intro",
+      "scope": "global",
+      "locale_or_witness": "default",
+      "target_node_id": "n-1",
+      "valid_from": 0,
+      "valid_to": null,
+      "status": "active"
+    },
+    {
+      "handle_type": "html_slug",
+      "value": "old-intro",
+      "scope": "global",
+      "locale_or_witness": "default",
+      "target_node_id": "n-1",
+      "valid_from": 0,
+      "valid_to": 1,
+      "status": "retired"
+    }
+  ],
+  "manifest": {
+    "source_artifacts": [
+      {
+        "witness": "w1",
+        "hash": "sha256:c5992f1ccf439bd9cd51194e897f79ed50205c75733cf0865d98d36ad4f56f04"
+      },
+      {
+        "witness": "w2",
+        "hash": "sha256:ff9c3c43162903e1c7143c76e1cef620c4ae0c87667a1a7d48a902663a372cf6"
+      }
+    ],
+    "atom_streams": [
+      {
+        "id": "canonical",
+        "hash": "sha256:d510386debb398fd7e2bcd0bb078a04a4c775953b41e5cdddd5c5ffdd630542d"
+      },
+      {
+        "id": "w1",
+        "hash": "sha256:bb49bff310316c51484dc7de01e7418dd32f5493d577c79c78111ef949a7fb68"
+      },
+      {
+        "id": "w2",
+        "hash": "sha256:de547cad50560ccd11389cab2642f4b45ea5660a45ac711ea03031280bb7e167"
+      }
+    ],
+    "canonical_stream_id": "canonical",
+    "canonical_content_hash": "sha256:104dec36204b4b344cc8bc2ee7cd7d39b810d6daef2a50e4f938faa2269b076b",
+    "canonical_geometry_hash": "sha256:ba3ba9ff8b60c140053c15451e27cc1cd59d81cfc576c87e689592227a23ffb6",
+    "layers": {
+      "atom_store": {
+        "schema_version": 1,
+        "stale_class": "atom-stream",
+        "present": true
+      },
+      "structure_map": {
+        "schema_version": 2,
+        "stale_class": "structure-map",
+        "present": true
+      },
+      "relation_store": {
+        "schema_version": 1,
+        "stale_class": "relation-store",
+        "present": false
+      }
+    },
+    "resource_lineage": {
+      "schema_version": 1,
+      "resource": {
+        "version": "sha256:453974996c6119e1b1773b287f360380620039f39e6749b35cbf4b26df6f0109",
+        "stale_class": "resource-set",
+        "descriptor": {
+          "frequency": "sha256:3c9209be3140ac3d0506a5c77ebde42de5d432e923d5aae756b2f7328213a848",
+          "members": [
+            {
+              "dir": "fixture/dictionary",
+              "hash": "sha256:f614dea75d94c8be015e13d23cb068f43596844fdfaa5ae9b056ea485fafb04c",
+              "kind": "monolingual",
+              "name": "fixture-dict"
+            }
+          ],
+          "oracle_min": 2
+        }
+      },
+      "normalizer": {
+        "version": "sha256:d9d30ce4c92e3a3ed494137375bc43a0594bb4507f585d92ad0ba75310185b8b",
+        "stale_class": "normalization-policy",
+        "descriptor": {
+          "accent_fold": {},
+          "case_fold": "casefold"
+        }
+      }
+    },
+    "profile_version": "fixture-profile-1",
+    "recognizer_version": "fixture-recognizer-1",
+    "handle_renderer_version": 1
+  },
+  "nodes": [
+    {
+      "node_id": "n-0",
+      "node_class": "volume",
+      "minted_by": "human",
+      "children": [
+        "n-1",
+        "0000000000000000000000000B"
+      ],
+      "designation": "Codex",
+      "title": "Synthetic Codex"
+    },
+    {
+      "node_id": "n-1",
+      "node_class": "section",
+      "minted_by": "human",
+      "children": [
+        "0000000000000000000000000A"
+      ],
+      "heading_atoms": [
+        "canonical_00000"
+      ],
+      "designation": "Section One",
+      "rebind_anchors": {
+        "region": {
+          "page": 3,
+          "bbox_region": [
+            10.0,
+            20.0,
+            400.0,
+            60.0
+          ]
+        }
+      },
+      "decision": "human-approved"
+    },
+    {
+      "node_id": "0000000000000000000000000A",
+      "node_class": "block",
+      "minted_by": "machine",
+      "body_atoms": [
+        "canonical_00001"
+      ]
+    },
+    {
+      "node_id": "0000000000000000000000000B",
+      "node_class": "block",
+      "minted_by": "machine",
+      "body_atoms": [
+        "canonical_00002"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "schema_version": 1,
+  "id": "synthetic",
+  "title": "Synthetic Test Book",
+  "language": "it",
+  "profiles": {
+    "language": "italian_1900_1922",
+    "source_noise": "bodoni_didone",
+    "typeface": "spectral_fraunces"
+  },
+  "overrides": {
+    "language": {
+      "display_name": "Sintetico",
+      "accent_inventory": ["ñ", "ç", "ø"]
+    }
+  },
+  "sources": [
+    {
+      "role": "copy1",
+      "label": "synthetic copy 1",
+      "ia_item_id": "synthetic_copy1",
+      "url": "https://example.org/download/synthetic_copy1/synthetic_copy1_djvu.txt"
+    },
+    {
+      "role": "copy2",
+      "label": "synthetic copy 2",
+      "ia_item_id": "synthetic_copy2"
+    }
+  ],
+  "scan": {
+    "pdf": "synthetic.pdf",
+    "page_image_template": "page_{n:04d}.png",
+    "leaf_offset": 0,
+    "last_scan_page_default": 4
+  },
+  "ocr": {
+    "models": {
+      "flash": "synthetic-flash",
+      "pro": "synthetic-pro"
+    }
+  },
+  "structure": {
+    "h2_min": 2,
+    "h3_count": 2,
+    "parts": [
+      {"name": "Parte Prima", "chapters": 2}
+    ],
+    "content_units": 3,
+    "retention_min": 0.60,
+    "foreign_char_max": 0.005,
+    "word_quality_high_severity_max": 0,
+    "running_heads": []
+  },
+  "edition": {
+    "title_it": "Libro di Prova",
+    "title_en": "Synthetic Test Book",
+    "subtitle_it": "Edizione sintetica per i test del motore",
+    "subtitle_en": "Synthetic edition for engine tests",
+    "author": "Autore Sintetico",
+    "year": 1901,
+    "colophon": "n/a",
+    "ia_item_id": "synthetic_book",
+    "site_base": "https://example.com/synthetic"
+  },
+  "prompt_context": {
+    "book_title": "Libro di Prova",
+    "author": "Autore Sintetico",
+    "year": 1901,
+    "subject": "una materia di prova per i test del motore",
+    "entities": ["Personaggio di Prova", "Luogo Immaginario"]
+  }
+}

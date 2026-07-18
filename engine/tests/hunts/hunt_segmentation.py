@@ -1,0 +1,324 @@
+"""Mutant table for the density band pre-check classifier (issue #38; S2.1.4).
+
+Run with the mutation-hunt runner:
+
+    python3 ~/.claude/skills/mutation-hunt/hunt.py \
+        --table tests/hunts/hunt_segmentation.py --artifact <scratch>/hunt38.json
+
+Covers the DT-6 semantics (five bands incl. the 2026-07-06 COVER class + ink gate, abstain-routing
+G-9, dark-untrusted G-11, the confidence-is-margin-not-ink Finding-B trap), the position validation
++ cover boundary comparators, the numberless-core band posture (G-1), the
+feature-assembly formulas (token_yield / mean_token_length / alpha-token rule), ink-fraction
+extraction across colorspaces, and every record/band guard. TEST_CMD uses the engine venv's
+python directly (segmentation tests import engine + fitz); the runner pins its own pyc hygiene.
+"""
+from pathlib import Path
+
+REPO = str(Path(__file__).resolve().parents[2])
+TEST_CMD = [str(Path(REPO) / ".venv" / "bin" / "python"), "-m", "pytest", "{scope}",
+            "-q", "--no-header", "-x", "-p", "no:cacheprovider"]
+TIMEOUT = 300
+
+S = "src/engine/structure/segmentation.py"
+T = "tests/unit/test_segmentation.py"
+
+
+def m(label, old, new, test_id):
+    return {"label": label, "file": S, "old": old, "new": new, "scope": f"{T}::{test_id}"}
+
+
+MUTANTS = [
+    # --- G-9: abstain routes, never guesses -----------------------------------------------------
+    m("g9-margin-override-removed",
+      "        if margin < self._confidence_margin:",
+      "        if False:",
+      "test_abstain_at_content_boundary_routes_never_guesses"),
+    m("g9-ink-ambiguous-to-nearblank",
+      'return DensityVerdict(DensityBand.ABSTAIN, confidence=0.0, signal="ink-ambiguous")',
+      'return DensityVerdict(DensityBand.NEAR_BLANK, confidence=0.0, signal="ink-ambiguous")',
+      "test_abstain_in_ink_midband_is_first_class"),
+    m("g9-band-margin-abstain-to-content",
+      'return DensityVerdict(DensityBand.ABSTAIN, confidence=margin, signal="band-margin")',
+      'return DensityVerdict(DensityBand.CONTENT, confidence=margin, signal="band-margin")',
+      "test_abstain_at_content_boundary_routes_never_guesses"),
+    # --- G-11 + ink gate: dark page untrusted, checked BEFORE content (Finding-B) ----------------
+    m("ink-gate-dark-comparator-flipped",
+      "        elif features.ink_fraction >= self._ink_dark_min:",
+      "        elif features.ink_fraction < self._ink_dark_min:",
+      "test_saturated_high_yield_interior_page_is_not_content_ink_gate"),
+    m("g11-confident-return-always-content",
+      "        return DensityVerdict(raw, confidence=margin, signal=raw.value)",
+      "        return DensityVerdict(DensityBand.CONTENT, confidence=margin, signal=raw.value)",
+      "test_dark_low_yield_is_non_text_dark_and_untrusted"),
+    m("g11-dark-ink-margin-sign",
+      "            margin = features.ink_fraction - self._ink_dark_min  # distance down to the ink mid-band",
+      "            margin = self._ink_dark_min - features.ink_fraction  # distance down to the ink mid-band",
+      "test_dark_low_yield_is_non_text_dark_and_untrusted"),
+    # --- the Finding-B trap: confidence is the edge margin, never the raw ink fraction -----------
+    m("confidence-is-raw-ink",
+      "        return DensityVerdict(raw, confidence=margin, signal=raw.value)",
+      "        return DensityVerdict(raw, confidence=features.ink_fraction, signal=raw.value)",
+      "test_confidence_is_edge_margin_not_raw_ink"),
+    # drops-yield-term: scoped to the boundary test where the yield term is the strict minimum (0),
+    # so replacing min(...) with the ink term (0.40) flips abstain -> content. (test_content_page's
+    # two terms are both 0.40, so it cannot see this drop.)
+    m("content-margin-drops-yield-term",
+      "            margin = min(features.token_yield - self._yield_content_min,\n                         self._ink_dark_min - features.ink_fraction)",
+      "            margin = self._ink_dark_min - features.ink_fraction",
+      "test_abstain_at_content_boundary_routes_never_guesses"),
+    m("content-margin-drops-ink-term",
+      "            margin = min(features.token_yield - self._yield_content_min,\n                         self._ink_dark_min - features.ink_fraction)",
+      "            margin = features.token_yield - self._yield_content_min",
+      "test_content_confidence_is_the_nearer_of_the_yield_and_ink_edges"),
+    m("content-margin-yield-flipped",
+      "            margin = min(features.token_yield - self._yield_content_min,\n                         self._ink_dark_min - features.ink_fraction)",
+      "            margin = min(self._yield_content_min - features.token_yield,\n                         self._ink_dark_min - features.ink_fraction)",
+      "test_content_page_is_trusted_and_confident"),
+    # --- box_content_min hard gate (divider is not content) -------------------------------------
+    m("content-drops-boxes-ok",
+      "        elif yield_ok and boxes_ok:",
+      "        elif yield_ok:",
+      "test_low_box_count_divider_is_not_content_even_with_clean_tokens"),
+    m("boxes-ok-comparator-flipped",
+      "        boxes_ok = features.box_count >= self._box_content_min",
+      "        boxes_ok = features.box_count <= self._box_content_min",
+      "test_content_page_is_trusted_and_confident"),
+    m("yield-ok-comparator-flipped",
+      "        yield_ok = features.token_yield >= self._yield_content_min",
+      "        yield_ok = features.token_yield <= self._yield_content_min",
+      "test_content_page_is_trusted_and_confident"),
+    # --- COVER: position x saturation (ruled 2026-07-06) ----------------------------------------
+    m("cover-branch-dropped",
+      "        if at_extreme and features.ink_fraction >= self._ink_saturation_min:",
+      "        if False and features.ink_fraction >= self._ink_saturation_min:",
+      "test_cover_at_first_leaf_is_untrusted_not_routed"),
+    m("cover-drops-at-extreme",
+      "        if at_extreme and features.ink_fraction >= self._ink_saturation_min:",
+      "        if features.ink_fraction >= self._ink_saturation_min:",
+      "test_saturated_high_yield_interior_page_is_not_content_ink_gate"),
+    m("cover-position-alone-no-saturation",
+      "        if at_extreme and features.ink_fraction >= self._ink_saturation_min:",
+      "        if at_extreme:",
+      "test_extreme_content_leaf_is_still_content"),
+    m("cover-saturation-weakened-to-dark",
+      "        if at_extreme and features.ink_fraction >= self._ink_saturation_min:",
+      "        if at_extreme and features.ink_fraction >= self._ink_dark_min:",
+      "test_extreme_but_not_saturated_leaf_is_not_a_cover"),
+    m("cover-extreme-near-start-clause-dropped",
+      "        at_extreme = leaf_index <= self._cover_edge_leaves or leaf_index > n_leaves - self._cover_edge_leaves",
+      "        at_extreme = leaf_index > n_leaves - self._cover_edge_leaves",
+      "test_cover_at_first_leaf_is_untrusted_not_routed"),
+    m("cover-extreme-near-end-clause-dropped",
+      "        at_extreme = leaf_index <= self._cover_edge_leaves or leaf_index > n_leaves - self._cover_edge_leaves",
+      "        at_extreme = leaf_index <= self._cover_edge_leaves",
+      "test_cover_at_last_leaf_uses_the_near_end_window"),
+    m("cover-margin-sign",
+      "            margin = features.ink_fraction - self._ink_saturation_min",
+      "            margin = self._ink_saturation_min - features.ink_fraction",
+      "test_cover_at_first_leaf_is_untrusted_not_routed"),
+    # --- boundary comparators on the cover window + ink thresholds (delta re-audit 2026-07-06) ----
+    m("cover-near-start-boundary",
+      "        at_extreme = leaf_index <= self._cover_edge_leaves",
+      "        at_extreme = leaf_index < self._cover_edge_leaves",
+      "test_cover_near_start_boundary_leaf_is_extreme"),
+    m("cover-near-end-boundary",
+      "or leaf_index > n_leaves - self._cover_edge_leaves",
+      "or leaf_index >= n_leaves - self._cover_edge_leaves",
+      "test_near_end_boundary_leaf_just_outside_is_not_cover"),
+    m("cover-ink-boundary-exclusive",
+      "        if at_extreme and features.ink_fraction >= self._ink_saturation_min:",
+      "        if at_extreme and features.ink_fraction > self._ink_saturation_min:",
+      "test_cover_ink_saturation_boundary_is_inclusive"),
+    m("dark-ink-boundary-exclusive",
+      "        elif features.ink_fraction >= self._ink_dark_min:",
+      "        elif features.ink_fraction > self._ink_dark_min:",
+      "test_non_text_dark_ink_boundary_is_inclusive"),
+    m("position-leaf-type-relaxed",
+      "        if not (type(leaf_index) is int and 1 <= leaf_index <= n_leaves):",
+      "        if not (1 <= leaf_index <= n_leaves):",
+      "test_classify_rejects_invalid_position[1.0-20]"),
+    m("position-nleaves-type-relaxed",
+      "        if not (type(n_leaves) is int and n_leaves >= 1):",
+      "        if not (n_leaves >= 1):",
+      "test_classify_rejects_invalid_position[1-True]"),
+    m("cover-bypasses-band-margin",
+      "            raw = DensityBand.COVER\n            margin = features.ink_fraction - self._ink_saturation_min",
+      "            return DensityVerdict(DensityBand.COVER, confidence=features.ink_fraction - self._ink_saturation_min, signal=\"cover\")",
+      "test_cover_within_margin_of_saturation_abstains"),
+    # --- position validation --------------------------------------------------------------------
+    m("position-leaf-lower-bound-dropped",
+      "        if not (type(leaf_index) is int and 1 <= leaf_index <= n_leaves):",
+      "        if not (type(leaf_index) is int and leaf_index <= n_leaves):",
+      "test_classify_rejects_invalid_position[0-20]"),
+    m("position-leaf-upper-bound-dropped",
+      "        if not (type(leaf_index) is int and 1 <= leaf_index <= n_leaves):",
+      "        if not (type(leaf_index) is int and 1 <= leaf_index):",
+      "test_classify_rejects_invalid_position[21-20]"),
+    # Scoped to (1, 2.5): a non-int n_leaves only the count guard catches (with n_leaves=0 the
+    # leaf-index guard masks it — 1 <= 1 <= 0 already fails).
+    m("position-nleaves-guard-dropped",
+      "        if not (type(n_leaves) is int and n_leaves >= 1):",
+      "        if False:",
+      "test_classify_rejects_invalid_position[1-2.5]"),
+    # --- near_blank side: ink margin + untrusted --------------------------------------------------
+    m("nearblank-ink-margin-sign",
+      "            margin = self._ink_blank_max - features.ink_fraction  # distance up to the ink mid-band",
+      "            margin = features.ink_fraction - self._ink_blank_max  # distance up to the ink mid-band",
+      "test_near_blank_low_yield_is_untrusted"),
+    m("nearblank-margin-uses-max",
+      "                margin = min(margin, self._yield_content_min - features.token_yield)\n        else:",
+      "                margin = max(margin, self._yield_content_min - features.token_yield)\n        else:",
+      "test_near_blank_close_to_content_yield_abstains"),
+    # --- feature assembly: token_yield / alpha-token rule / mean_token_length --------------------
+    m("alpha-count-drops-len-floor",
+      "    alpha_count = sum(1 for s in stripped if len(s) >= _MIN_ALPHA_TOKEN_LEN and any(c.isalpha() for c in s))",
+      "    alpha_count = sum(1 for s in stripped if any(c.isalpha() for c in s))",
+      "test_token_yield_is_alpha_count_over_box_count"),
+    m("alpha-count-drops-isalpha",
+      "    alpha_count = sum(1 for s in stripped if len(s) >= _MIN_ALPHA_TOKEN_LEN and any(c.isalpha() for c in s))",
+      "    alpha_count = sum(1 for s in stripped if len(s) >= _MIN_ALPHA_TOKEN_LEN)",
+      "test_token_yield_is_alpha_count_over_box_count"),
+    m("mean-denominator-nonblank",
+      "    mean_token_length = sum(len(s) for s in stripped) / box_count if box_count else 0.0",
+      "    mean_token_length = sum(len(s) for s in stripped) / len([s for s in stripped if s]) if box_count else 0.0",
+      "test_mean_token_length_is_over_all_boxes_stripped"),
+    m("is-alpha-drops-len-floor",
+      "    return len(stripped) >= _MIN_ALPHA_TOKEN_LEN and any(c.isalpha() for c in stripped)",
+      "    return any(c.isalpha() for c in stripped)",
+      "test_is_alpha_token"),
+    m("is-alpha-drops-isalpha",
+      "    return len(stripped) >= _MIN_ALPHA_TOKEN_LEN and any(c.isalpha() for c in stripped)",
+      "    return len(stripped) >= _MIN_ALPHA_TOKEN_LEN",
+      "test_is_alpha_token"),
+    m("edge-strip-noop",
+      '    return _EDGE.sub("", text)',
+      "    return text",
+      "test_edge_strip_is_unicode_neutral"),
+    # --- ink-fraction extraction: direction, threshold, colorspace/alpha normalization ----------
+    m("ink-table-counts-light",
+      "_INK_TABLE = bytes(1 if v < _INK_LUMA_THRESHOLD else 0 for v in range(256))",
+      "_INK_TABLE = bytes(1 if v >= _INK_LUMA_THRESHOLD else 0 for v in range(256))",
+      "test_ink_fraction_asymmetric_pins_direction"),
+    m("ink-count-light-value",
+      "    return luma.translate(_INK_TABLE).count(1) / len(luma)",
+      "    return luma.translate(_INK_TABLE).count(0) / len(luma)",
+      "test_ink_fraction_asymmetric_pins_direction"),
+    m("ink-threshold-inclusive",
+      "_INK_TABLE = bytes(1 if v < _INK_LUMA_THRESHOLD else 0 for v in range(256))",
+      "_INK_TABLE = bytes(1 if v <= _INK_LUMA_THRESHOLD else 0 for v in range(256))",
+      "test_ink_fraction_threshold_boundary"),
+    m("ink-rgb-not-converted",
+      "    if pm.colorspace is None or pm.colorspace.n != 1:",
+      "    if False:",
+      "test_ink_fraction_converts_rgb_to_gray"),
+    m("ink-alpha-not-dropped",
+      "    if pm.alpha:",
+      "    if False:",
+      "test_ink_fraction_drops_alpha_channel"),
+    # --- record guards (G-21-analogue) ----------------------------------------------------------
+    m("feat-fraction-guard-dropped",
+      "            if not (math.isfinite(v) and 0.0 <= v <= 1.0):",
+      "            if False:",
+      "test_features_reject_out_of_range_ink_fraction[1.5]"),
+    m("feat-box-guard-dropped",
+      "        if not (type(self.box_count) is int and self.box_count >= 0):",
+      "        if False:",
+      "test_features_reject_non_count_box_count[-1]"),
+    m("feat-box-guard-relaxed-to-numeric",
+      "        if not (type(self.box_count) is int and self.box_count >= 0):",
+      "        if not (self.box_count >= 0):",
+      "test_features_reject_non_count_box_count[True]"),
+    m("feat-mean-guard-dropped",
+      "        if not (math.isfinite(self.mean_token_length) and self.mean_token_length >= 0.0):",
+      "        if False:",
+      "test_features_reject_bad_mean_token_length[-1.0]"),
+    # These two guards now have ColumnVerdict/PageColumnVerdict twins with byte-identical condition
+    # lines, so each patch carries its DensityVerdict-specific raise message as the unique anchor
+    # (the runner requires exactly one match; the scoped tests construct DensityVerdict).
+    m("verdict-confidence-guard-dropped",
+      "        if not (math.isfinite(self.confidence) and self.confidence >= 0.0):\n"
+      "            raise ValueError(\n"
+      "                f\"DensityVerdict.confidence must be a non-negative margin, got {self.confidence!r}\"\n"
+      "            )",
+      "        if False:\n"
+      "            raise ValueError(\n"
+      "                f\"DensityVerdict.confidence must be a non-negative margin, got {self.confidence!r}\"\n"
+      "            )",
+      "test_verdict_rejects_negative_or_nonfinite_confidence[-0.1]"),
+    m("verdict-signal-guard-dropped",
+      "        if not self.signal:\n"
+      "            raise ValueError(\"DensityVerdict.signal must name the deciding/routing basis\")",
+      "        if False:\n"
+      "            raise ValueError(\"DensityVerdict.signal must name the deciding/routing basis\")",
+      "test_verdict_rejects_empty_signal"),
+    # --- constructor band guards (fail-loud config integrity) -----------------------------------
+    m("ctor-yield-guard-dropped",
+      "        if not (math.isfinite(yield_content_min) and 0.0 < yield_content_min <= 1.0):",
+      "        if False:",
+      "test_classifier_rejects_incoherent_bands[overrides0-yield_content_min]"),
+    m("ctor-box-guard-dropped",
+      "        if not (type(box_content_min) is int and box_content_min >= 0):",
+      "        if False:",
+      "test_classifier_rejects_incoherent_bands[overrides2-box_content_min]"),
+    m("ctor-blank-guard-dropped",
+      "        if not (math.isfinite(ink_blank_max) and 0.0 <= ink_blank_max < 1.0):",
+      "        if False:",
+      "test_classifier_rejects_incoherent_bands[overrides4-ink_blank_max]"),
+    # The dark guard's range is shadowed by neighbours (ordering below, saturation above), so a
+    # dropped dark guard still RAISES via one of those — but their messages don't carry the dark
+    # guard's own "ink_dark_min must be in" wording, and overrides7's match pins exactly that phrase,
+    # so the drop still reds (the saturation guard's "ink_dark_min=1.5" substring cannot satisfy it).
+    m("ctor-dark-guard-dropped",
+      "        if not (math.isfinite(ink_dark_min) and 0.0 < ink_dark_min <= 1.0):",
+      "        if False:",
+      "test_classifier_rejects_incoherent_bands[overrides7-ink_dark_min must be in]"),
+    m("ctor-ordering-guard-dropped",
+      "        if not (ink_blank_max < ink_dark_min):",
+      "        if False:",
+      "test_classifier_rejects_incoherent_bands[overrides10-ink_blank_max]"),
+    m("ctor-margin-guard-dropped",
+      "        if not (math.isfinite(confidence_margin) and 0.0 < confidence_margin <= 1.0):",
+      "        if False:",
+      "test_classifier_rejects_incoherent_bands[overrides8-confidence_margin]"),
+    m("ctor-cover-edge-guard-dropped",
+      "        if not (type(cover_edge_leaves) is int and cover_edge_leaves >= 0):",
+      "        if False:",
+      "test_classifier_rejects_incoherent_bands[overrides12-cover_edge_leaves]"),
+    # overrides16 (ink_saturation_min=1.5) isolates the saturation VALUE guard's upper bound; the
+    # lower-bound cases (overrides14/15) are also caught by "> ink_dark_min", but 1.5 passes that and
+    # only the <= 1.0 clause catches it, so it isolates the whole-guard drop.
+    m("ctor-saturation-guard-dropped",
+      "        if not (math.isfinite(ink_saturation_min) and ink_dark_min < ink_saturation_min <= 1.0):",
+      "        if False:",
+      "test_classifier_rejects_incoherent_bands[overrides16-ink_saturation_min]"),
+    m("ctor-saturation-ordering-clause-dropped",
+      "        if not (math.isfinite(ink_saturation_min) and ink_dark_min < ink_saturation_min <= 1.0):",
+      "        if not (math.isfinite(ink_saturation_min) and ink_saturation_min <= 1.0):",
+      "test_classifier_rejects_incoherent_bands[overrides14-ink_saturation_min]"),
+    # --- G-1: bands are required constructor params (no default) — representative params ---------
+    m("g1-yield-default",
+      "        yield_content_min: float,",
+      "        yield_content_min: float = 0.5,",
+      "test_classifier_requires_every_band_no_default[yield_content_min]"),
+    m("g1-dark-default",
+      "        ink_dark_min: float,",
+      "        ink_dark_min: float = 0.6,",
+      "test_classifier_requires_every_band_no_default[ink_dark_min]"),
+    m("g1-margin-default",
+      "        confidence_margin: float,",
+      "        confidence_margin: float = 0.05,",
+      "test_classifier_requires_every_band_no_default[confidence_margin]"),
+    m("g1-cover-edge-default",
+      "        cover_edge_leaves: int,",
+      "        cover_edge_leaves: int = 3,",
+      "test_classifier_requires_every_band_no_default[cover_edge_leaves]"),
+    m("g1-saturation-default",
+      "        ink_saturation_min: float,",
+      "        ink_saturation_min: float = 0.9,",
+      "test_classifier_requires_every_band_no_default[ink_saturation_min]"),
+    # --- version pin ----------------------------------------------------------------------------
+    m("version-drift",
+      'SEGMENTATION_VERSION = "density-bands-v1"',
+      'SEGMENTATION_VERSION = "density-bands-v2"',
+      "test_version_and_params_are_pinned_for_the_sidecar_fingerprint"),
+]

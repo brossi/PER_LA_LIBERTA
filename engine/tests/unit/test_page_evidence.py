@@ -302,7 +302,7 @@ def test_admission_detects_post_ledger_evidence_drift(tmp_path):
         assert_reconciliation_admission(workspace=ws, cfg=cfg)
 
 
-def test_changed_evidence_returns_previous_human_verdict_to_review(tmp_path):
+def test_changed_review_raster_returns_previous_human_verdict_to_review(tmp_path):
     cfg, ws = _setup(tmp_path)
     first = build_page_evidence(workspace=ws, cfg=cfg, max_review_pages=2)
     review = read_json(first["review"])
@@ -326,21 +326,11 @@ def test_changed_evidence_returns_previous_human_verdict_to_review(tmp_path):
     })
     build_page_evidence(workspace=ws, cfg=cfg, max_review_pages=2)
 
-    geometry = ws.data / "geometry/page_0003.json"
-    atomic_write_json(
-        geometry,
-        {
-            "page": 3,
-            "geometry": {
-                "width": 100.0,
-                "height": 160.0,
-                "words": [{"text": "changed", "bbox": [1.0, 1.0, 2.0, 2.0]}],
-            },
-        },
-    )
+    raster = ws.data / "raster/page_0003.png"
+    raster.write_bytes(b"changed-review-raster")
     report_path = ws.data / "layout_assessment/copy1/run_report.json"
     report = read_json(report_path)
-    report["geometry"]["page_artifacts"][2]["geometry_sha256"] = _sha(geometry)
+    report["geometry"]["page_artifacts"][2]["raster_sha256"] = _sha(raster)
     atomic_write_json(report_path, report)
 
     result = build_page_evidence(workspace=ws, cfg=cfg, max_review_pages=2)

@@ -3,11 +3,14 @@
 from __future__ import annotations
 
 from engine.config.models import ResolvedConfig
+from engine.errors import ReconciliationAdmissionError
 from engine.lang.base import LanguagePlugin
 from engine.paths import BookWorkspace
 from engine.structure.page_evidence import DEFAULT_REVIEW_BOUND, build_page_evidence
 from engine.structure.page_evidence_presence_shadow import (
+    begin_presence_observation,
     observe_page_evidence_presence,
+    record_presence_unavailable,
 )
 
 
@@ -24,33 +27,62 @@ def run(
 ) -> dict:
     """Derive dispositions without changing OCR text or canonical output."""
     del lang
-    summary = build_page_evidence(
+    ledger_path = workspace.resolve("data", "page_evidence", witness_id, "ledger.json")
+    begin_presence_observation(
         workspace=workspace,
-        cfg=cfg,
+        book_id=cfg.book_id,
         witness_id=witness_id,
-        model=model,
-        max_review_pages=max_review_pages,
     )
+    try:
+        summary = build_page_evidence(
+            workspace=workspace,
+            cfg=cfg,
+            witness_id=witness_id,
+            model=model,
+            max_review_pages=max_review_pages,
+            enforce_review_bound=False,
+        )
+    except Exception as exc:
+        record_presence_unavailable(
+            workspace=workspace,
+            book_id=cfg.book_id,
+            witness_id=witness_id,
+            ledger_path=None,
+            failure=exc,
+        )
+        raise
     try:
         presence = presence_observer(
             workspace=workspace,
-            ledger_path=workspace.resolve(
-                "data", "page_evidence", witness_id, "ledger.json"
-            ),
+            ledger_path=ledger_path,
+            book_id=cfg.book_id,
             witness_id=witness_id,
             refresh=refresh_shadow,
         )
+        if not isinstance(presence, dict) or presence.get("status") not in {
+            "complete",
+            "complete_with_unavailable",
+            "unavailable",
+        }:
+            raise TypeError("presence observer returned an invalid summary")
     except Exception as exc:
         # The consumer is deliberately shadow-only. Its inability to observe a valid, already
         # written ledger cannot revise or revoke the engine-owned admission decision.
-        presence = {
-            "status": "unavailable",
-            "failure_type": type(exc).__name__,
-            "failure_message": str(exc) or type(exc).__name__,
-        }
+        presence = record_presence_unavailable(
+            workspace=workspace,
+            book_id=cfg.book_id,
+            witness_id=witness_id,
+            ledger_path=ledger_path,
+            failure=exc,
+        )
     print(
         f"  page evidence: {summary['pages']} pages, "
         f"{summary['review_pages']} require review; {summary['status']}"
     )
     print(f"  presence shadow: {presence['status']}")
+    if summary["review_pages"] > max_review_pages:
+        raise ReconciliationAdmissionError(
+            f"page-evidence review volume {summary['review_pages']} exceeds bound "
+            f"{max_review_pages}; see {summary['review']}"
+        )
     return {**summary, "presence_shadow": presence}

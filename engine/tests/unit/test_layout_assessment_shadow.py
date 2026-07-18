@@ -142,7 +142,7 @@ def test_valid_shadow_observation_persists_and_revalidates_exact_request(tmp_pat
     assert envelope["request"]["subject"]["source_sha256"] == "a" * 64
     assert envelope["provider"] == {
         "provider_id": "book_layout_sidecar",
-        "provider_version": "0.1.3",
+        "provider_version": "0.1.4",
     }
 
     request = assessment_request_from_dict(envelope["request"])
@@ -204,8 +204,8 @@ def test_previous_provider_version_invalidates_cache_without_refresh(tmp_path):
     assert second.status == shadow.STATUS_AVAILABLE
     assert second.cached is False
     assert provider.calls == 1
-    assert second.bundle.provider.provider_version == "0.1.3"
-    assert read_json(second.path)["provider"]["provider_version"] == "0.1.3"
+    assert second.bundle.provider.provider_version == "0.1.4"
+    assert read_json(second.path)["provider"]["provider_version"] == "0.1.4"
 
 
 @requires_sidecar

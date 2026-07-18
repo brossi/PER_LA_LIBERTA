@@ -13,7 +13,7 @@ A provider result may corroborate or contradict another signal, but no OCR backe
 truth oracle. In particular, OCR text with unresolved geometry and blank OCR with content-like
 geometry both require review.
 
-The companion `review.json` contains only unresolved pages, their exact review-specimen
+The schema-v2 companion `review.json` contains only unresolved pages, their exact review-specimen
 fingerprint, raster reference, competing signal summary, and an OCR excerpt. The review fingerprint
 binds the source raster and canonical OCR text: the page specimen that receives the human
 content/blank/non-text ruling. Geometry overlays, transformed contrast aids, retry records, and
@@ -31,10 +31,11 @@ The document has this shape:
 
 ```json
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "stale_class": "page-evidence-human-verdicts",
   "book_id": "ninnoli",
   "witness_id": "copy1",
+  "evidence_fingerprint_scheme": "source-raster-ocr-text-v1",
   "verdicts": [
     {
       "page": 4,
@@ -55,3 +56,9 @@ editing generated ledger files. A verdict whose evidence fingerprint no longer m
 as stale and returns to review automatically. Reconciliation checks the admitted ledger and every
 live evidence hash before reading its voting witnesses; an absent, partial, unresolved, or drifted
 ledger stops the step without creating canonical output.
+
+Verdict schema v2 makes fingerprint meaning explicit. New verdicts use
+`source-raster-ocr-text-v1`; schema-v1 verdicts are read as the former `pipeline-evidence-v1`
+contract and are written back with that explicit per-verdict scheme when the engine next records a
+decision. Reconciliation requires the current fingerprint scheme even though the broader ledger
+remains schema v1 for the provider's page-evidence vocabulary.

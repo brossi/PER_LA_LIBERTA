@@ -1,7 +1,7 @@
 # Layout assessment shadow boundary
 
 The engine consumes `book-layout-sidecar` only through its versioned `core` provider API. The
-dependency is optional and pinned to `v0.1.3`; install it with:
+dependency is optional and pinned to `v0.1.4`; install it with:
 
 ```sh
 uv sync --extra assessment
@@ -46,17 +46,27 @@ failures are persisted as `unavailable`; they are never interpreted as a blank-p
 After `ingest_gate` writes the total page-evidence ledger, a second observation-only consumer asks
 the v4 provider for `effective_geometry_ocr_text_presence_is_consistent` on every page. This is the
 first point where finalized effective geometry and canonical OCR-text presence coexist. The engine
-binds both named roles to one hashed `page_evidence_ledger` artifact with distinct JSON selectors
-and stores exact requests and bundles under:
+captures the ledger once, derives a minimal factual page-evidence projection containing only the
+source identity and six presence signals, and binds both named roles to that projection with
+distinct JSON selectors. Review bounds, verdicts, dispositions, and other policy fields do not
+invalidate an unchanged presence request. It stores the projection, exact requests, and bundles
+under:
 
 ```text
 books/<id>/work/data/layout_assessment/<witness>/page_evidence_presence/page_NNNN.json
+books/<id>/work/data/layout_assessment/<witness>/page_evidence_presence_projection.json
 books/<id>/work/data/layout_assessment/<witness>/page_evidence_presence_report.json
 ```
 
+The report binds the current full ledger and projection and manifests every page observation by
+path and SHA-256. Loading it revalidates the projection against the ledger, every request and
+bundle, the provider identity, page totals, contradiction/unavailable sets, and aggregate counts.
+A new run first replaces any older success with an unavailable sentinel; pre-provider failures and
+review-bound admission failures therefore cannot leave an apparently current older report.
+
 The result is factual shadow evidence only: both axes present or absent is `supported`; one-axis
 presence is `unsupported`; missing primitives are `not_applicable`. It cannot change a ledger
-disposition, review worklist, or reconciliation admission. A provider/import/adapter failure is
+disposition, review worklist, or reconciliation admission. A provider/import/translation failure is
 reported as unavailable after the engine-owned gate artifacts have already been written.
 
 For pages with at most two PDF-geometry words, the engine also records a bounded geometry retry

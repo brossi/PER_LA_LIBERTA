@@ -1,8 +1,9 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "stale_class": "page-evidence-human-verdicts",
   "book_id": "fenomeni_medianici",
   "witness_id": "copy1",
+  "evidence_fingerprint_scheme": "source-raster-ocr-text-v1",
   "verdicts": [
     {
       "page": 4,

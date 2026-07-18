@@ -42,6 +42,7 @@ from ..contracts.markers import (
 )
 from ..errors import BackendError, InvalidInvocationError, MissingInputError
 from ..lang.base import LanguagePlugin
+from ..ocr_provenance import is_ocr_fallback_provenance
 from ..paths import BookWorkspace
 from ..prompts.templating import PromptTemplate, build_prompt_context
 from ..util.jsonio import atomic_write_json, atomic_write_text, read_json
@@ -409,9 +410,7 @@ def _completed_page_text(
     if not isinstance(text, str) or text.startswith(SENTINEL_OCR_ERROR_PREFIX):
         return None
     provenance = record.get("provenance")
-    if isinstance(provenance, dict) and provenance.get("kind") in {
-        "provider_refusal_fallback", "explicit_recitation_fallback",
-    }:
+    if is_ocr_fallback_provenance(provenance):
         if source_sha256 is not None and provenance.get("source_sha256") != source_sha256:
             return None
         if fallback_identity is not None:

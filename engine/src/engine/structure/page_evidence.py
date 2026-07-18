@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 from collections import Counter
 from datetime import UTC, datetime
 from pathlib import Path
@@ -17,18 +18,26 @@ from engine.errors import (
     ReconciliationAdmissionError,
     StaleArtifactError,
 )
+from engine.ocr_provenance import is_ocr_fallback_provenance
 from engine.paths import BookWorkspace
 from engine.util.jsonio import atomic_write_json, read_json
 
 LEDGER_SCHEMA_VERSION = 1
 LEDGER_STALE_CLASS = "page-evidence-ledger"
-REVIEW_SCHEMA_VERSION = 1
+REVIEW_SCHEMA_VERSION = 2
 REVIEW_STALE_CLASS = "page-evidence-review"
-VERDICTS_SCHEMA_VERSION = 1
+VERDICTS_SCHEMA_VERSION = 2
 VERDICTS_STALE_CLASS = "page-evidence-human-verdicts"
 ADMISSION_SCHEMA_VERSION = 1
 ADMISSION_STALE_CLASS = "reconciliation-page-evidence-admission"
 DEFAULT_REVIEW_BOUND = 25
+
+REVIEW_FINGERPRINT_SCHEME = "source-raster-ocr-text-v1"
+PIPELINE_FINGERPRINT_SCHEME = "pipeline-evidence-v1"
+VERDICT_FINGERPRINT_SCHEMES = frozenset(
+    {REVIEW_FINGERPRINT_SCHEME, PIPELINE_FINGERPRINT_SCHEME}
+)
+_SHA256 = re.compile(r"^[0-9a-f]{64}$")
 
 DISPOSITIONS = {"content", "blank", "non_text", "review_required"}
 HUMAN_DISPOSITIONS = DISPOSITIONS - {"review_required"}
@@ -58,6 +67,7 @@ def build_page_evidence(
     witness_id: str = "copy1",
     model: str = "flash",
     max_review_pages: int = DEFAULT_REVIEW_BOUND,
+    enforce_review_bound: bool = True,
 ) -> dict[str, Any]:
     """Build the deterministic total ledger and its bounded review packet."""
     if type(max_review_pages) is not int or max_review_pages < 0:
@@ -175,18 +185,20 @@ def build_page_evidence(
             ocr=ocr,
             verdict=verdicts.get(page),
             evidence_sha256=evidence_sha256,
+            pipeline_evidence_sha256=pipeline_evidence_sha256,
         )
         page_record = {
             "page": page,
             "disposition": disposition,
             "reasons": reasons,
             "evidence_sha256": evidence_sha256,
+            "evidence_fingerprint_scheme": REVIEW_FINGERPRINT_SCHEME,
             "pipeline_evidence_sha256": pipeline_evidence_sha256,
             "review_specimen": review_specimen,
             "evidence": raw_evidence,
             "signals": {
                 "ocr_has_text": _ocr_has_text(ocr["text"]),
-                "ocr_fallback": isinstance(ocr.get("provenance"), dict),
+                "ocr_fallback": is_ocr_fallback_provenance(ocr.get("provenance")),
                 "baseline_geometry_boxes": artifact.get("word_count"),
                 "effective_geometry_boxes": artifact.get("effective_word_count"),
                 "retry_status": artifact.get("retry_status"),
@@ -203,6 +215,7 @@ def build_page_evidence(
             review_pages.append({
                 "page": page,
                 "evidence_sha256": evidence_sha256,
+                "evidence_fingerprint_scheme": REVIEW_FINGERPRINT_SCHEME,
                 "pipeline_evidence_sha256": pipeline_evidence_sha256,
                 "review_specimen": review_specimen,
                 "reasons": reasons,
@@ -248,6 +261,7 @@ def build_page_evidence(
             "sha256": _sha256_file(report_path),
         },
         "verdicts": {"scope": "book", "path": verdict_ref, "sha256": verdict_sha256},
+        "evidence_fingerprint_scheme": REVIEW_FINGERPRINT_SCHEME,
         "review_bound": max_review_pages,
         "status": "admitted" if not review_pages else "review_required",
         "counts": {key: counts.get(key, 0) for key in sorted(DISPOSITIONS)},
@@ -264,6 +278,7 @@ def build_page_evidence(
         "book_id": cfg.book_id,
         "witness_id": witness_id,
         "verdicts_path": verdict_ref,
+        "evidence_fingerprint_scheme": REVIEW_FINGERPRINT_SCHEME,
         "review_bound": max_review_pages,
         "review_count": len(review_pages),
         "pages": review_pages,
@@ -278,7 +293,7 @@ def build_page_evidence(
         "review_path": str(review_file.relative_to(workspace.root)),
         "review_sha256": _sha256_file(review_file),
     })
-    if len(review_pages) > max_review_pages:
+    if enforce_review_bound and len(review_pages) > max_review_pages:
         raise ReconciliationAdmissionError(
             f"page-evidence review volume {len(review_pages)} exceeds bound "
             f"{max_review_pages}; see {review_file}"
@@ -321,9 +336,14 @@ def assert_reconciliation_admission(
         ledger.get("schema_version") != LEDGER_SCHEMA_VERSION
         or ledger.get("stale_class") != LEDGER_STALE_CLASS
         or ledger.get("book_id") != cfg.book_id
+        or ledger.get("evidence_fingerprint_scheme") != REVIEW_FINGERPRINT_SCHEME
         or ledger.get("status") != "admitted"
         or [page.get("page") for page in ledger.get("pages", [])] != list(range(1, total + 1))
         or any(page.get("disposition") not in HUMAN_DISPOSITIONS for page in ledger.get("pages", []))
+        or any(
+            page.get("evidence_fingerprint_scheme") != REVIEW_FINGERPRINT_SCHEME
+            for page in ledger.get("pages", [])
+        )
     ):
         raise ReconciliationAdmissionError("page-evidence ledger is partial or unresolved")
     source_path = workspace.scans / cfg.manifest.scan.pdf
@@ -358,9 +378,15 @@ def _derive_disposition(
     ocr: dict[str, Any],
     verdict: dict[str, Any] | None,
     evidence_sha256: str,
+    pipeline_evidence_sha256: str,
 ) -> tuple[str, list[str], dict[str, Any] | None]:
     if verdict is not None:
-        if verdict["evidence_sha256"] == evidence_sha256:
+        expected_evidence = (
+            evidence_sha256
+            if verdict["evidence_fingerprint_scheme"] == REVIEW_FINGERPRINT_SCHEME
+            else pipeline_evidence_sha256
+        )
+        if verdict["evidence_sha256"] == expected_evidence:
             return verdict["disposition"], ["human_verdict"], verdict
         stale_reason = ["stale_human_verdict"]
     else:
@@ -420,16 +446,40 @@ def _load_verdicts(
     if not path.is_file():
         return None, {}
     document = _required_json(path, kind="human verdicts")
+    schema_version = document.get("schema_version")
+    document_fingerprint_scheme = document.get("evidence_fingerprint_scheme")
     if (
-        document.get("schema_version") != VERDICTS_SCHEMA_VERSION
+        type(schema_version) is not int
+        or schema_version not in {1, VERDICTS_SCHEMA_VERSION}
         or document.get("stale_class") != VERDICTS_STALE_CLASS
         or document.get("book_id") != book_id
         or document.get("witness_id") != witness_id
         or not isinstance(document.get("verdicts"), list)
     ):
         raise StaleArtifactError(f"human verdict document is malformed: {path}")
+    if schema_version == VERDICTS_SCHEMA_VERSION:
+        if document_fingerprint_scheme is not None and (
+            not isinstance(document_fingerprint_scheme, str)
+            or document_fingerprint_scheme not in VERDICT_FINGERPRINT_SCHEMES
+        ):
+            raise StaleArtifactError(f"human verdict document is malformed: {path}")
+        if document_fingerprint_scheme is None and (
+            not document["verdicts"]
+            or any(
+                not isinstance(item, dict) or "evidence_fingerprint_scheme" not in item
+                for item in document["verdicts"]
+            )
+        ):
+            raise StaleArtifactError(f"human verdict document is malformed: {path}")
     verdicts: dict[int, dict[str, Any]] = {}
     for verdict in document["verdicts"]:
+        if not isinstance(verdict, dict):
+            raise StaleArtifactError(f"invalid human verdict in {path}: {verdict!r}")
+        verdict = dict(verdict)
+        if schema_version == 1:
+            verdict["evidence_fingerprint_scheme"] = PIPELINE_FINGERPRINT_SCHEME
+        elif "evidence_fingerprint_scheme" not in verdict:
+            verdict["evidence_fingerprint_scheme"] = document_fingerprint_scheme
         page = verdict.get("page")
         if (
             type(page) is not int
@@ -437,6 +487,9 @@ def _load_verdicts(
             or page in verdicts
             or verdict.get("disposition") not in HUMAN_DISPOSITIONS
             or not isinstance(verdict.get("evidence_sha256"), str)
+            or _SHA256.fullmatch(verdict["evidence_sha256"]) is None
+            or not isinstance(verdict.get("evidence_fingerprint_scheme"), str)
+            or verdict["evidence_fingerprint_scheme"] not in VERDICT_FINGERPRINT_SCHEMES
             or not isinstance(verdict.get("reviewer"), str)
             or not verdict["reviewer"].strip()
             or not isinstance(verdict.get("decided_at"), str)
@@ -468,7 +521,7 @@ def record_page_verdict(
         )
     if type(page) is not int or page < 1:
         raise InvalidInvocationError("page verdict requires a positive page number")
-    if not isinstance(evidence_sha256, str) or len(evidence_sha256) != 64:
+    if not isinstance(evidence_sha256, str) or _SHA256.fullmatch(evidence_sha256) is None:
         raise InvalidInvocationError("page verdict requires a SHA-256 evidence fingerprint")
     if not isinstance(reviewer, str) or not reviewer.strip():
         raise InvalidInvocationError("page verdict requires a non-empty reviewer identity")
@@ -504,6 +557,14 @@ def record_page_verdict(
     packet = _required_json(
         review_path(workspace, witness_id=witness_id), kind="page-evidence review packet"
     )
+    if (
+        packet.get("schema_version") != REVIEW_SCHEMA_VERSION
+        or packet.get("stale_class") != REVIEW_STALE_CLASS
+        or packet.get("book_id") != cfg.book_id
+        or packet.get("witness_id") != witness_id
+        or packet.get("evidence_fingerprint_scheme") != REVIEW_FINGERPRINT_SCHEME
+    ):
+        raise StaleArtifactError("page-evidence review packet fingerprint contract is stale")
     packet_pages = packet.get("pages")
     if not isinstance(packet_pages, list):
         raise StaleArtifactError("page-evidence review packet pages are malformed")
@@ -532,6 +593,7 @@ def record_page_verdict(
         "page": page,
         "disposition": disposition,
         "evidence_sha256": evidence_sha256,
+        "evidence_fingerprint_scheme": REVIEW_FINGERPRINT_SCHEME,
         "reviewer": reviewer.strip(),
         "decided_at": decided_at or datetime.now(UTC).isoformat(),
     }
@@ -544,6 +606,7 @@ def record_page_verdict(
         "stale_class": VERDICTS_STALE_CLASS,
         "book_id": cfg.book_id,
         "witness_id": witness_id,
+        "evidence_fingerprint_scheme": REVIEW_FINGERPRINT_SCHEME,
         "verdicts": [existing[key] for key in sorted(existing)],
     })
     summary = build_page_evidence(

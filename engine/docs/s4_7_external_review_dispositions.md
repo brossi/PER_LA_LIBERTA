@@ -231,3 +231,31 @@ acted same day** (this remediation is itself the delta of the follow-up pass bel
 
 **Follow-up pass (Rule A on the remediation):** reconciler-only, grep-verified tag set + re-read of
 every remediation site; no new findings. Suite state untouched (doc-only delta; no code changed).
+
+## Sign-off focused read (2026-07-17) — record
+
+Ben's focused read of the item-2 spec's flagged content, per the post-audit plan (INV-4 math +
+the two audit-sharpenings; the already-Ben-ratified items not reopened):
+
+- **INV-4 half-open boundary classification (the interval math authored at rev 2.1, never
+  previously Ben-audited): audited.** Presented with per-point verification (class coherence,
+  coverage of `b ∈ [0, n]`, disjointness under the tiling property, stream-end degenerates).
+  One consequence made explicit at Ben's direction: both edges of a `delete` block project to
+  the same fresh position (empty fresh interval), so two old boundaries flanking a
+  wholly-deleted span collapse onto one fresh gap — recorded as a `[Sign-off note 2026-07-17]`
+  in the edge-candidate bullet; behavior judged honest, not a defect.
+- **Both audit-sharpenings [Ben-confirmed 2026-07-17]** as faithful implementations of prior
+  rulings, not new rulings:
+  - (a) delete + byte-identical insert is **generator-FORBIDDEN** (expressible only as an
+    ancestry-preserving move) — forced by ER-A2's exclusion composed with the §1.3 relation law
+    "∅ reserved for delete"; oracle-side filtering rejected as re-introducing the ambiguity the
+    ruling removed. Sites: parent §4 INV-1; item-2 §1.3.
+  - (b) a capped-out gap enters the INV-4 tiling as a **single synthetic unaligned block →
+    no-candidate** (interior; edges follow the general edge-candidate rule) — forced by ER-A1
+    (refused gaps project nothing) + DR-2 (never invent a boundary) + A7 (locate-within-window,
+    with the gap's inter-anchor fresh span as the region constraint). Sites: parent §2.2;
+    item-2 INV-4.
+- **PR-3 verified still unruled** (spec header: deferred-for-information, mechanism pinned).
+- Housekeeping note: the "deliberately left" findings-doc staleness recorded in the audit
+  section above was subsequently closed (dated G-1/G-2 closure notes in both findings docs,
+  same commit `25d8a55`), at Ben's direction, before commit.

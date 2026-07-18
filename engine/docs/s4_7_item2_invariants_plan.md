@@ -482,8 +482,9 @@ duplicate variants**, and the six-row expected outcomes are stated against that 
   Randomized drift that happens to land boundaries in churn is INV-1/INV-2 territory, where the
   allowed-set verdict oracle governs without class prediction.
 - **The half-open boundary classification (interval math authored at rev 2.1 — the trail
-  demanded the pin but never carried its content, so the math remains flagged for sign-off
-  audit; verdict model reframed per A7 — the classification ROUTES, it does not rule):** old-stream tokens are
+  demanded the pin but never carried its content; audited in Ben's sign-off focused read
+  2026-07-17, delete-edge collapse note added below; verdict model reframed per A7 — the
+  classification ROUTES, it does not rule):** old-stream tokens are
   indexed `0…n−1`; boundary `b` is the gap before token `b`, `b ∈ [0, n]`; opcode blocks carry
   half-open old-token intervals `[i1, i2)`. Classification of `b`:
   - **clean-candidate** — both flanking tokens (`b−1`, `b`) in `equal` blocks, no `insert`
@@ -491,7 +492,11 @@ duplicate variants**, and the six-row expected outcomes are stated against that 
   - **edge-candidate** — `b` at a block edge (`b == i1` or `b == i2`) with ≥1 flanking token in
     a non-`equal` block: the projection yields a well-defined candidate, but the aligner cannot
     report whether that edge was one of several optimal placements — a single witness that
-    cannot flag its own guesses.
+    cannot flag its own guesses. [Sign-off note 2026-07-17] A `delete` block's fresh interval is
+    empty (`[j, j)`), so **both** its edges project to the same fresh position `j`: two distinct
+    old boundaries flanking a wholly-deleted span collapse onto one fresh gap. This is the honest
+    reading (the span is gone; the intervening slot goes empty-extent — INV-3's territory), not a
+    classification defect.
   - **no-candidate** — `b` strictly interior to a `replace`/`delete` block (`i1 < b < i2`): the
     diff defines no old→fresh correspondence inside the block.
   - **two-candidate** — an `insert` anchored at `b` (empty old interval `[b, b)`): the fresh

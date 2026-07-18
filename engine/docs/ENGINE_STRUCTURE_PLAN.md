@@ -479,6 +479,20 @@ This redesigns the four findings of §1.
   read by core vs a thin per-book `StructurePlugin` class — is O2, **deferred by choice** and
   settled at this section's implementation.)*
 
+  > **DISCUSS AT S9 (flagged 2026-07-17, Ben + session):** before designing the recognizer's
+  > evidence inputs, revisit the **IA structured-OCR layer** as a parsed (not inferred) signal.
+  > Verified on PLL's own items: both witnesses publish `_abbyy.gz` / `_djvu.xml` (LOC also
+  > hOCR/chOCR), and the LOC derivation chain is `jp2 → abbyy → chocr → hocr → djvu.xml →
+  > djvu.txt` — i.e. **copy 1's text witness is a flattening of a recognition whose structure
+  > we discarded**: per-line font size + bbox, paragraph/column grouping, italic/bold runs,
+  > per-char confidence + `suspicious` flags. Demonstrated on the LOC file: chapter heads read
+  > `fs=12–13` centered vs body `fs=8` full-measure, and an in-prose "capitolo" mention stays
+  > `fs=8` — the heading-vs-mention discrimination S9 would otherwise infer. Posture if adopted:
+  > **attributed witness claims** (`typed_by`/confidence, correctable), never truth; adds **no
+  > new witness** (same recognition un-flattened), so it can't corroborate itself. Candidate
+  > consumers: S9 heading evidence (layout-first, lexicon-confirm; #83), `typography.json`
+  > candidate pre-seeding, source-noise damage maps (charConfidence), S2.1 column cross-check.
+
 - **7.2 — Replace `Structure` (F2) with a general model + per-book structure map.** The
   fixed-shape validator becomes (a) a general tree/blocks model in core and (b) the book's
   structure-map sidecar (§3.5). `validate.py`'s shape checks become assertions over the
@@ -647,7 +661,7 @@ Per the house tiers (`tests/unit` property/separability/isolation/neutrality; `t
 | **D32** | Overlapping/interleaved hierarchy parked for future support (reserved hook only, D15/D19) | **Decided (user)** |
 | **D33** | **O1 resolved — Option A "store-and-rebind."** `node_id` is an opaque label stored in B's map (not derived); humans mint containers, extractor mints leaves; re-extraction re-binds via geometry + fuzzy fingerprint + struct-path, fail-loud. Rejected Option B (hash-derived → churn). One-way gate (regen-guard family), revisitable after build-out. Entails D11/D12/D20/D24 | **Decided (user)** |
 | **D34** | **Cross-language alignment is general source↔target (LANG_A↔LANG_B); IT↔EN is PLL's instance, not the design.** Core carries no language pair (`feedback_engine_agnostic`); refines D7/R5 | **Decided (user)** |
-| **D35** | **The structural model is designed for a reasonably unbounded unit count (target order ~100k units):** machine-minted leaf identity, flat addressable node storage, no super-linear structure ops. The O3 HITL scale ceiling is therefore a resource/cost question, not an architectural limit | **Decided (user)** |
+| **D35** | **The structural model is designed for a reasonably unbounded unit count (target order ~100k units):** machine-minted leaf identity, flat addressable node storage, no super-linear structure ops. The O3 HITL scale ceiling is therefore a resource/cost question, not an architectural limit. **[Coherence note 2026-07-17, ER-A5, Ben-ruled (`s4_7_external_review_dispositions.md`)]** the *enforceable* scale gate is the S4.7 row's **sub-quadratic** wall-clock + peak-memory ceiling (incl. serialize/load/index); the evidence-composite measurement (INV-7) may close characterized-unresolved per DR-6/PR-4 with a named follow-up — no ceiling moved; this note reconciles the wording, it does not relax the design intent | **Decided (user)** |
 | **D36** | **Adversarial-audit gate (§9):** a `BUILD`/`GATE` task is not DONE until a pre-commit adversarial pass (mutation hunt + overlapping wide/narrow reviewers) is clean; re-audit any behavior-changing remediation **to a fixpoint** (docs/test-only terminates), re-aiming apertures at the delta; proportional to surface, self-applied (not a hook), **forward-only (does not reopen DONE tasks)**. Codifies the de-facto 5-lens practice in the S1.3b/S1.4/S1.5 rows + `feedback_adversarial_audit_cadence` | **Decided (user)** |
 
 ---

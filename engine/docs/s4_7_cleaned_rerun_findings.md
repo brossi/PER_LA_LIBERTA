@@ -9,7 +9,9 @@ strips, re-atomize, and the residual collapses.
 Nothing here is ratified. The S4.7 DoD zero-vs-strict-with-residual question is now **ruled** (DR-9,
 [Ben-ruled] 2026-07-09): S4.7 ships strict-with-characterized-residual, S5.2 owns the τ-calibrated
 zero — see `s4_7_plan.md` DR-9. The remaining governance calls (S5.1 supersession, the §1.3 G-2
-correction) remain Ben's.
+correction) remain Ben's. **[Dated note 2026-07-17: both since ruled — the S5.1 supersession is
+routed as issue #48 (G-1) and the §1.3 correction landed as G-2, commit `7e5d612`, 2026-07-09.
+This snapshot predates those rulings.]**
 
 ## Setup
 

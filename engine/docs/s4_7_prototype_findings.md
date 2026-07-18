@@ -349,4 +349,6 @@ joint monotone tiling over ALL slots incl. failed ones (the O(K·N³) DP S4.7 wa
   protocol / modes / `_contested_nodes` are kept.
 - Governance unchanged: the rewrite reverses two signed [Ben-ruled] S5.1 decisions and touches a born
   schema → formal S5.1 supersession + a new S5-milestone issue, **not** a tracker edit; §1.3
-  falsified-claim correction still awaits Ben's G-2 ruling.
+  falsified-claim correction still awaits Ben's G-2 ruling. **[Dated note 2026-07-17: both since
+  ruled — the supersession is issue #48 (G-1, 2026-07-09) and the G-2 correction landed, commit
+  `7e5d612`, 2026-07-09. This snapshot predates those rulings.]**

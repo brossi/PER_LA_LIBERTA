@@ -111,7 +111,7 @@ seeds, and modes live once, in the manifest; the lock record does not duplicate 
   (venv-aware) and `conftest.py` pins `sys.dont_write_bytecode` ([[feedback_mutation_pyc_staleness]]);
   additionally **verify the mutated source is the file actually imported** (module path recorded).
 - **Machine-readable run manifest** (the red is recorded as an artifact, not prose). The runner's
-  `--artifact` JSON already records the invoked test command (`test_cmd`), per-mutant `{label,
+  `--artifact` JSON already records the invoked test command (its command field), per-mutant `{label,
   status, detected, scope, files, rc, duration_s}` (`note` present only on ERROR records), purge
   and restore-verification. Item 2 extends it — **in a repository-local wrapper/artifact step; the
   shared out-of-repo `hunt.py` is left untouched** (editing cross-project tooling exceeds this

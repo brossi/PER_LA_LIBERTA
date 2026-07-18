@@ -142,7 +142,7 @@ def test_valid_shadow_observation_persists_and_revalidates_exact_request(tmp_pat
     assert envelope["request"]["subject"]["source_sha256"] == "a" * 64
     assert envelope["provider"] == {
         "provider_id": "book_layout_sidecar",
-        "provider_version": "0.1.2",
+        "provider_version": "0.1.3",
     }
 
     request = assessment_request_from_dict(envelope["request"])
@@ -182,7 +182,7 @@ def test_previous_provider_version_invalidates_cache_without_refresh(tmp_path):
 
     ws = BookWorkspace.for_book("synthetic", tmp_path).ensure()
     previous = CoreAssessmentProvider(
-        identity=ProviderIdentity("book_layout_sidecar", "0.1.1")
+        identity=ProviderIdentity("book_layout_sidecar", "0.1.2")
     )
     first = _observe(ws, provider_factory=lambda: previous, refresh=True)
     current = CoreAssessmentProvider()
@@ -200,12 +200,12 @@ def test_previous_provider_version_invalidates_cache_without_refresh(tmp_path):
     provider = _CountingProvider()
     second = _observe(ws, provider_factory=lambda: provider)
 
-    assert first.bundle.provider.provider_version == "0.1.1"
+    assert first.bundle.provider.provider_version == "0.1.2"
     assert second.status == shadow.STATUS_AVAILABLE
     assert second.cached is False
     assert provider.calls == 1
-    assert second.bundle.provider.provider_version == "0.1.2"
-    assert read_json(second.path)["provider"]["provider_version"] == "0.1.2"
+    assert second.bundle.provider.provider_version == "0.1.3"
+    assert read_json(second.path)["provider"]["provider_version"] == "0.1.3"
 
 
 @requires_sidecar
@@ -505,10 +505,10 @@ def test_installed_provider_conformance_packet_passes():
     from book_layout_sidecar.contracts.conformance import run_conformance_matrix
 
     assert run_conformance_matrix() == {
-        "matrix_version": 2,
-        "cases": 32,
-        "boundary_valid": 17,
-        "boundary_unavailable": 15,
+        "matrix_version": 3,
+        "cases": 45,
+        "boundary_valid": 22,
+        "boundary_unavailable": 23,
         "status": "ok",
     }
 

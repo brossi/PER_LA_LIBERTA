@@ -7,15 +7,19 @@ ordered ledger for exactly the scan page range at:
 books/<id>/work/data/page_evidence/<witness>/ledger.json
 ```
 
-Each page is `content`, `blank`, `non_text`, or `review_required`. The decision binds the source
-scan, raster, baseline geometry, selected retry, provider assessment, OCR checkpoint, and OCR text
-hash. A provider result may corroborate or contradict another signal, but no OCR backend is treated
-as a truth oracle. In particular, OCR text with unresolved geometry and blank OCR with content-like
+Each page is `content`, `blank`, `non_text`, or `review_required`. Admission binds the source scan,
+raster, baseline geometry, selected retry, provider assessment, OCR checkpoint, and OCR text hash.
+A provider result may corroborate or contradict another signal, but no OCR backend is treated as a
+truth oracle. In particular, OCR text with unresolved geometry and blank OCR with content-like
 geometry both require review.
 
-The companion `review.json` contains only unresolved pages, their exact evidence fingerprint,
-raster reference, competing signal summary, and an OCR excerpt. The command fails loud if its
-review volume exceeds `--max-review-pages`; it never relaxes disposition rules to fit the bound.
+The companion `review.json` contains only unresolved pages, their exact review-specimen
+fingerprint, raster reference, competing signal summary, and an OCR excerpt. The review fingerprint
+binds the source raster, selected geometry payload, canonical OCR text, and any transformed raster
+shown to the reviewer. Provider assessments remain separately hash-bound for admission, but a
+provider-only package or rule change does not invalidate a still-identical human specimen. The
+command fails loud if its review volume exceeds `--max-review-pages`; it never relaxes disposition
+rules to fit the bound.
 
 Human decisions live separately under:
 

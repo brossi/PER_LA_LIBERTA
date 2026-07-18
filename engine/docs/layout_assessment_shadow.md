@@ -1,7 +1,7 @@
 # Layout assessment shadow boundary
 
 The engine consumes `book-layout-sidecar` only through its versioned `core` provider API. The
-dependency is optional and pinned to `v0.1.2`; install it with:
+dependency is optional and pinned to `v0.1.3`; install it with:
 
 ```sh
 uv sync --extra assessment
@@ -42,6 +42,22 @@ Every reusable observation is re-parsed and revalidated against a freshly rebuil
 current provider identity. Source hash, normalized OCR boxes, adapter version, provider version,
 module configuration, or evidence-binding drift invalidates reuse. Provider/import/response
 failures are persisted as `unavailable`; they are never interpreted as a blank-page finding.
+
+After `ingest_gate` writes the total page-evidence ledger, a second observation-only consumer asks
+the v4 provider for `effective_geometry_ocr_text_presence_is_consistent` on every page. This is the
+first point where finalized effective geometry and canonical OCR-text presence coexist. The engine
+binds both named roles to one hashed `page_evidence_ledger` artifact with distinct JSON selectors
+and stores exact requests and bundles under:
+
+```text
+books/<id>/work/data/layout_assessment/<witness>/page_evidence_presence/page_NNNN.json
+books/<id>/work/data/layout_assessment/<witness>/page_evidence_presence_report.json
+```
+
+The result is factual shadow evidence only: both axes present or absent is `supported`; one-axis
+presence is `unsupported`; missing primitives are `not_applicable`. It cannot change a ledger
+disposition, review worklist, or reconciliation admission. A provider/import/adapter failure is
+reported as unavailable after the engine-owned gate artifacts have already been written.
 
 For pages with at most two PDF-geometry words, the engine also records a bounded geometry retry
 under `work/data/geometry/retry/<witness>/`. It first runs Tesseract on the exact persisted raster,

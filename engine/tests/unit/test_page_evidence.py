@@ -8,7 +8,7 @@ from engine.config.loader import load_book
 from engine.errors import ReconciliationAdmissionError, StaleArtifactError
 from engine.lang.registry import get_language_plugin
 from engine.paths import BookWorkspace
-from engine.steps import reconcile
+from engine.steps import ingest_gate, reconcile
 from engine.structure.page_evidence import (
     VERDICTS_SCHEMA_VERSION,
     VERDICTS_STALE_CLASS,
@@ -29,7 +29,7 @@ def _assessment(page: int) -> dict:
         "status": "available",
         "provider": {
             "provider_id": "book_layout_sidecar",
-            "provider_version": "0.1.2",
+            "provider_version": "0.1.3",
         },
         "bundle": {
             "results": [
@@ -65,7 +65,13 @@ def _setup(tmp_path):
         for path in (raster, geometry, assessment, ocr):
             path.parent.mkdir(parents=True, exist_ok=True)
         raster.write_bytes(f"raster-{page}".encode())
-        atomic_write_json(geometry, {"page": page})
+        atomic_write_json(
+            geometry,
+            {
+                "page": page,
+                "geometry": {"width": 100.0, "height": 160.0, "words": []},
+            },
+        )
         atomic_write_json(assessment, _assessment(page))
         atomic_write_json(ocr, {"page": page, "text": texts[page]})
         effective = 10 if page in {1, 3} else 0
@@ -150,6 +156,30 @@ def test_total_ledger_routes_contradictions_and_applies_bound_verdicts(tmp_path)
     assert [page["disposition"] for page in ledger["pages"]] == [
         "content", "blank", "blank", "content"
     ]
+
+
+def test_ingest_gate_presence_shadow_failure_cannot_change_admission(tmp_path):
+    cfg, ws = _setup(tmp_path)
+    lang = get_language_plugin(cfg.language_id)
+
+    def unavailable_observer(**kwargs):
+        raise RuntimeError("shadow provider unavailable")
+
+    result = ingest_gate.run(
+        workspace=ws,
+        cfg=cfg,
+        lang=lang,
+        max_review_pages=2,
+        presence_observer=unavailable_observer,
+    )
+
+    assert result["status"] == "review_required"
+    assert result["review_pages"] == 2
+    assert result["presence_shadow"] == {
+        "status": "unavailable",
+        "failure_type": "RuntimeError",
+        "failure_message": "shadow provider unavailable",
+    }
 
 
 def test_review_volume_exceeding_named_bound_fails_after_writing_packet(tmp_path):
@@ -297,7 +327,17 @@ def test_changed_evidence_returns_previous_human_verdict_to_review(tmp_path):
     build_page_evidence(workspace=ws, cfg=cfg, max_review_pages=2)
 
     geometry = ws.data / "geometry/page_0003.json"
-    atomic_write_json(geometry, {"page": 3, "changed": True})
+    atomic_write_json(
+        geometry,
+        {
+            "page": 3,
+            "geometry": {
+                "width": 100.0,
+                "height": 160.0,
+                "words": [{"text": "changed", "bbox": [1.0, 1.0, 2.0, 2.0]}],
+            },
+        },
+    )
     report_path = ws.data / "layout_assessment/copy1/run_report.json"
     report = read_json(report_path)
     report["geometry"]["page_artifacts"][2]["geometry_sha256"] = _sha(geometry)
@@ -308,6 +348,48 @@ def test_changed_evidence_returns_previous_human_verdict_to_review(tmp_path):
     assert result["review_pages"] == 1
     assert new_review["pages"][0]["page"] == 3
     assert new_review["pages"][0]["reasons"][0] == "stale_human_verdict"
+
+
+def test_provider_only_assessment_change_preserves_human_review_specimen(tmp_path):
+    cfg, ws = _setup(tmp_path)
+    first = build_page_evidence(workspace=ws, cfg=cfg, max_review_pages=2)
+    review = read_json(first["review"])
+    verdict_path = verdicts_path(ws, witness_id="copy1")
+    verdict_path.parent.mkdir(parents=True)
+    atomic_write_json(verdict_path, {
+        "schema_version": VERDICTS_SCHEMA_VERSION,
+        "stale_class": VERDICTS_STALE_CLASS,
+        "book_id": cfg.book_id,
+        "witness_id": "copy1",
+        "verdicts": [
+            {
+                "page": page["page"],
+                "disposition": "blank",
+                "evidence_sha256": page["evidence_sha256"],
+                "reviewer": "fixture-reviewer",
+                "decided_at": "2026-07-12T00:00:00Z",
+            }
+            for page in review["pages"]
+        ],
+    })
+    admitted = build_page_evidence(workspace=ws, cfg=cfg, max_review_pages=2)
+    before = read_json(admitted["ledger"])["pages"][2]
+
+    assessment_path = ws.data / "assessment/page_0003.json"
+    assessment = read_json(assessment_path)
+    assessment["provider_diagnostic"] = "changed without changing the review specimen"
+    atomic_write_json(assessment_path, assessment)
+    report_path = ws.data / "layout_assessment/copy1/run_report.json"
+    report = read_json(report_path)
+    report["geometry"]["page_artifacts"][2]["assessment_sha256"] = _sha(assessment_path)
+    atomic_write_json(report_path, report)
+
+    rebuilt = build_page_evidence(workspace=ws, cfg=cfg, max_review_pages=2)
+    after = read_json(rebuilt["ledger"])["pages"][2]
+    assert rebuilt["status"] == "admitted"
+    assert after["reasons"] == ["human_verdict"]
+    assert after["evidence_sha256"] == before["evidence_sha256"]
+    assert after["pipeline_evidence_sha256"] != before["pipeline_evidence_sha256"]
 
 
 def test_reconciliation_rejects_absent_ledger(tmp_path):

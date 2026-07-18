@@ -124,6 +124,14 @@ def build_page_evidence(
                 workspace, artifact, "assessment_path", "assessment_sha256", page
             ),
         }
+        geometry_record = _required_json(
+            _workspace_relative(workspace, evidence_files["geometry"]["path"]),
+            kind=f"page {page} geometry checkpoint",
+        )
+        selected_geometry = geometry_record.get("geometry")
+        if not isinstance(selected_geometry, dict):
+            raise StaleArtifactError(f"page {page} geometry checkpoint has no geometry payload")
+        transformed_raster_sha256 = None
         retry_ref = artifact.get("retry_path")
         if retry_ref is not None:
             evidence_files["geometry_retry"] = _evidence_file(
@@ -133,6 +141,9 @@ def build_page_evidence(
                 _workspace_relative(workspace, retry_ref),
                 kind=f"page {page} geometry retry",
             )
+            selected_geometry = retry_record.get("selected_geometry")
+            if not isinstance(selected_geometry, dict):
+                raise StaleArtifactError(f"page {page} geometry retry has no selected geometry")
             transformed_sha256 = retry_record.get("transformed_raster_sha256")
             if transformed_sha256 is not None:
                 transformed_path = workspace.resolve(
@@ -144,6 +155,7 @@ def build_page_evidence(
                     "path": str(transformed_path.relative_to(workspace.root)),
                     "sha256": transformed_sha256,
                 }
+                transformed_raster_sha256 = transformed_sha256
 
         ocr_path = workspace.resolve("state", f"ocr_{model}_pages", f"page_{page:04d}.json")
         ocr = _required_json(ocr_path, kind=f"page {page} OCR checkpoint")
@@ -160,7 +172,16 @@ def build_page_evidence(
             "files": evidence_files,
             "ocr_text_sha256": _sha256_text(ocr["text"]),
         }
-        evidence_sha256 = _dict_sha256(raw_evidence)
+        review_specimen = {
+            "page": page,
+            "source_sha256": source_sha256,
+            "raster_sha256": evidence_files["raster"]["sha256"],
+            "selected_geometry_sha256": _dict_sha256(selected_geometry),
+            "ocr_text_sha256": raw_evidence["ocr_text_sha256"],
+            "transformed_raster_sha256": transformed_raster_sha256,
+        }
+        evidence_sha256 = _dict_sha256(review_specimen)
+        pipeline_evidence_sha256 = _dict_sha256(raw_evidence)
         disposition, reasons, human = _derive_disposition(
             artifact=artifact,
             assessment=assessment,
@@ -174,6 +195,8 @@ def build_page_evidence(
             "disposition": disposition,
             "reasons": reasons,
             "evidence_sha256": evidence_sha256,
+            "pipeline_evidence_sha256": pipeline_evidence_sha256,
+            "review_specimen": review_specimen,
             "evidence": raw_evidence,
             "signals": {
                 "ocr_has_text": _ocr_has_text(ocr["text"]),
@@ -194,6 +217,8 @@ def build_page_evidence(
             review_pages.append({
                 "page": page,
                 "evidence_sha256": evidence_sha256,
+                "pipeline_evidence_sha256": pipeline_evidence_sha256,
+                "review_specimen": review_specimen,
                 "reasons": reasons,
                 "raster": evidence_files["raster"],
                 "assessment": evidence_files["assessment"],

@@ -8,8 +8,8 @@
     the standing decision record (``docs/`` + ``docs/decisions/``) resolves to a real test module or
     function — no dangling reference left by a rename/removal. Scoped (S2.1/#35): frozen
     point-in-time snapshots (``docs/probes/``, ``*discussion*`` plan-dialogue archives) are outside
-    the scan, and a ratified plan's not-yet-built test homes ride the self-cleaning
-    ``PENDING_TEST_HOMES`` allowlist below.
+    the scan. A ratified plan's not-yet-built test homes and exact non-test schema identifiers use
+    separate self-cleaning registries below.
 """
 
 from __future__ import annotations
@@ -81,6 +81,26 @@ PENDING_TEST_HOMES: dict[str, str] = {
     # (empty) — test_geometry_e2e landed with #39 (S2.1.5); its entry was deleted on resolution.
 }
 
+# Exact data/schema identifiers whose ``test_*`` spelling is not a test citation. This is separate
+# from PENDING_TEST_HOMES: these names are not expected to become tests. The governance control
+# below requires each exemption to remain present and unresolved, so removed or newly colliding
+# entries clean themselves rather than becoming a permanent blanket allowlist.
+NON_TEST_IDENTIFIERS: dict[str, str] = {
+    "test_cmd": "mutation-run artifact JSON field naming the invoked test command",
+}
+
+
+def _unresolved_citations(
+    cited: dict[str, list[str]], actual: set[str]
+) -> dict[str, list[str]]:
+    return {
+        name: srcs
+        for name, srcs in cited.items()
+        if not _resolves(name, actual)
+        and name not in PENDING_TEST_HOMES
+        and name not in NON_TEST_IDENTIFIERS
+    }
+
 
 def test_governance_docs_cite_only_resolvable_test_names():
     actual = _actual_test_names()
@@ -110,12 +130,35 @@ def test_governance_docs_cite_only_resolvable_test_names():
         f"PENDING_TEST_HOMES entries now resolve — the child landed; delete them: {stale_pending}"
     )
 
-    unresolved = {
-        name: srcs
-        for name, srcs in cited.items()
-        if not _resolves(name, actual) and name not in PENDING_TEST_HOMES
+    stale_non_test = {
+        name: reason for name, reason in NON_TEST_IDENTIFIERS.items() if name not in cited
     }
+    assert not stale_non_test, (
+        "NON_TEST_IDENTIFIERS entries no longer occur in governed docs; delete them: "
+        f"{stale_non_test}"
+    )
+    colliding_non_test = {
+        name: reason for name, reason in NON_TEST_IDENTIFIERS.items() if _resolves(name, actual)
+    }
+    assert not colliding_non_test, (
+        "NON_TEST_IDENTIFIERS entries now resolve as tests; delete the exemptions: "
+        f"{colliding_non_test}"
+    )
+
+    unresolved = _unresolved_citations(cited, actual)
     assert not unresolved, (
         "governance docs cite test names that no longer resolve (rename/removal left a dangling "
         f"reference):\n{unresolved}"
     )
+
+
+def test_governance_citation_filter_ignores_only_registered_non_test_identifiers():
+    cited = {
+        "test_real": ["plan.md"],
+        "test_cmd": ["plan.md"],
+        "test_removed": ["plan.md"],
+    }
+
+    assert _unresolved_citations(cited, {"test_real"}) == {
+        "test_removed": ["plan.md"]
+    }

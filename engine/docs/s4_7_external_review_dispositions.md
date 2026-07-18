@@ -265,3 +265,27 @@ the two audit-sharpenings; the already-Ben-ratified items not reopened):
 this confirmation was intended as the full document sign-off (recorded verbatim, both dates, so
 the provenance is exact). Header updated; build authorized per spec §3; the §0 prereg bundle
 remains a Ben-ratified gate before any red run.
+
+## Ceremony-budget ruling (Ben, 2026-07-18)
+
+Ben: «We need to cut down on the ceremony. I've let it get too onerous because while it may have
+served a purpose, adding ceremony to every single decision to the n-th degree means I'm less
+likely to pay attention to the important things because everything has the same effective level
+of importance: "priority must sign off".»
+
+**Effect — escalation is routed by consequence, three tiers:**
+
+- **Escalate (blocking, rare):** reversals/changes of Ben-ruled decisions (DR/G/PR/ER rows),
+  exported interfaces & schemas, the live edition/deploy-hold, irreproducible artifacts, and the
+  results-driven rulings Ben explicitly reserved (PR-3 confirmation-in-churn; S5.1-RG failure
+  routing).
+- **Disclose (non-blocking, default):** judgment parameters, forced compositions of ruled
+  decisions, audit remediations — done and committed, the judgment calls surfaced in the
+  reply/commit; Ben audits on pull.
+- **Just do:** mechanical folds, tracker syncs, red-first internals, mutation hunts.
+
+**First application:** the §0 prereg-bundle gate is re-ruled from "Ben-ratified before any red
+run" to "**authored + committed before any red run, judgment values disclosed**" —
+commit-before-measurement is the anti-tuning mechanism, not Ben's eyes. Spec header + §0 venue
+paragraph amended with dated notes. Prior sign-offs and rulings are unaffected; this governs
+process going forward.

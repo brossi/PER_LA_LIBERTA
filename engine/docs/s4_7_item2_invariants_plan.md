@@ -2,7 +2,9 @@
 
 **Status: rev 2.2, consolidated + delta-audited — SIGNED OFF (Ben, 2026-07-17, "I confirm both
 readings" at the close of the sign-off focused read; confirmation scope clarified 2026-07-18).
-Build authorized in the §3 order; the §0 prereg bundle must be Ben-ratified before any red run.** Rev 2 folded the seven-pass adversarial review and the four parent rulings
+Build authorized in the §3 order; the §0 prereg bundle must be authored + committed before any
+red run, judgment values disclosed (gate re-ruled from "Ben-ratified" per the ceremony-budget
+ruling, Ben 2026-07-18 — record in `s4_7_external_review_dispositions.md`).** Rev 2 folded the seven-pass adversarial review and the four parent rulings
 (**PR-1/PR-2/PR-4/PR-5, Ben 2026-07-17**) into a resolved build spec for DoD item 2 of
 `s4_7_plan.md`. Rev 2.1 applies the findings of the post-consolidation adversarial pass (three
 overlapping reviewers: trail-fidelity / overengineering / ambiguity-executability, 2026-07-17)
@@ -72,7 +74,10 @@ lock claims the conditional property only; the post-S4.6 real-PLL re-extract gat
 row `S5.1-RG`) is retained as a required forward gate.
 
 **Pre-registration + provenance venue (single home — ruled A5, 2026-07-17):**
-`docs/probes/s4_7_item2_prereg.md`, **ratified by Ben before any red run**. It holds: the INV-6
+`docs/probes/s4_7_item2_prereg.md`, **authored + committed before any red run — the
+commit-before-measurement act is what carries the anti-tuning function; judgment values are
+disclosed and Ben audits on pull (re-ruled from "Ben-ratified", ceremony-budget ruling, Ben
+2026-07-18)**. It holds: the INV-6
 acceptance bundle (growth estimator, numeric tolerance/upper bound, repetition statistic
 median-of-k with k stated, target hardware profile); the **INV-7 ceiling** (its own pre-registered
 number — the evidence-op budget, distinct from DR-7's end-to-end resource ceiling; that
@@ -614,8 +619,9 @@ duplicate variants**, and the six-row expected outcomes are stated against that 
   the bar from the cubic defect and institutionalizes it — the old baseline evidences only the
   RED, never the acceptance authority. The estimator, tolerance/upper bound, repetition statistic
   (median-of-k, k stated), and target hardware profile are **pinned in the §0 pre-registration
-  doc and ratified by Ben before the red run** (committing separately authorized) — so the
-  observed cubic cannot retro-set the bar. **[Folded per B-6, 2026-07-17]** Every measured point
+  doc, committed before the red run** (re-ruled from Ben-ratified, ceremony-budget ruling
+  2026-07-18; committing separately authorized) — so the observed cubic cannot retro-set the
+  bar. **[Folded per B-6, 2026-07-17]** Every measured point
   pins and reports the five size variables **`L/K/A/T/D`** (parent §5 as amended) and the fixture's
   relationships among them; the growth rule is stated against a **named** variable, never a bare
   "N".
@@ -652,8 +658,9 @@ duplicate variants**, and the six-row expected outcomes are stated against that 
   explicitly annotated**.
 - **Ceiling:** **pre-registered and independent of the measured baseline** (derived from D35's
   CLI wall-clock/memory rationale — a baseline-derived ceiling is the INV-6 circularity); never
-  moved. **The number is INV-7's own** (the evidence-op budget), recorded and ratified in the §0
-  pre-registration doc **before the red run** — it is *not* the DR-7 end-to-end resource ceiling,
+  moved. **The number is INV-7's own** (the evidence-op budget), recorded in the §0
+  pre-registration doc **and committed before the red run** (re-ruled from ratified,
+  ceremony-budget ruling 2026-07-18) — it is *not* the DR-7 end-to-end resource ceiling,
   so the item-2 INV-7 red does not stall on that tri-state (ruled A5).
 - **Fixture:** a deep synthetic chain (PLL is depth-4-shallow; this is a synthetic worst case,
   stated as such). **Depth is bounded, with a pre-flight proof** that construction, schema

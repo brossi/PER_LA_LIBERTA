@@ -259,3 +259,9 @@ the two audit-sharpenings; the already-Ben-ratified items not reopened):
 - Housekeeping note: the "deliberately left" findings-doc staleness recorded in the audit
   section above was subsequently closed (dated G-1/G-2 closure notes in both findings docs,
   same commit `25d8a55`), at Ben's direction, before commit.
+
+**Sign-off stamp:** the spec is **SIGNED OFF (Ben, 2026-07-17)** — the ratifying act is
+"I confirm both readings" at the close of the focused read above; Ben clarified 2026-07-18 that
+this confirmation was intended as the full document sign-off (recorded verbatim, both dates, so
+the provenance is exact). Header updated; build authorized per spec §3; the §0 prereg bundle
+remains a Ben-ratified gate before any red run.

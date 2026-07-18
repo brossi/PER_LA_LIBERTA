@@ -1,7 +1,8 @@
 # S4.7 item-2 — the red-first invariant harness (build spec — rev 2.2)
 
-**Status: rev 2.2, consolidated + delta-audited — FOR SIGN-OFF (not yet ratified; no code until
-signed off).** Rev 2 folded the seven-pass adversarial review and the four parent rulings
+**Status: rev 2.2, consolidated + delta-audited — SIGNED OFF (Ben, 2026-07-17, "I confirm both
+readings" at the close of the sign-off focused read; confirmation scope clarified 2026-07-18).
+Build authorized in the §3 order; the §0 prereg bundle must be Ben-ratified before any red run.** Rev 2 folded the seven-pass adversarial review and the four parent rulings
 (**PR-1/PR-2/PR-4/PR-5, Ben 2026-07-17**) into a resolved build spec for DoD item 2 of
 `s4_7_plan.md`. Rev 2.1 applies the findings of the post-consolidation adversarial pass (three
 overlapping reviewers: trail-fidelity / overengineering / ambiguity-executability, 2026-07-17)

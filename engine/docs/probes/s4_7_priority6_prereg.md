@@ -585,3 +585,45 @@ is `COMPLETE`. With no carried red remaining, the focused manifest command passe
 repository-wide default gate passes 1,980 tests with one registered scale test deselected, zero
 xfails, and only the five pre-existing SWIG deprecation warnings. Ruff and `git diff --check` are
 clean.
+
+## Final S4.7 closeout audit — 2026-07-19
+
+The six-item definition of done in `s4_7_plan.md` §8 was reconciled against the committed branch:
+
+1. The plan is ratified and every G/PR/ER design fork is resolved.
+2. Component 0 and INV-1…INV-7 retain their red-first manifests; the carried reds were observed
+   before the cubic implementation was removed.
+3. The anchored production rebind, schema v3, `bound ⊆ oracle`, anti-inertness, fail-loud policy,
+   and strict pre-calibration consumption contract are green. INV-7 is now an ordinary passing
+   assertion under its unchanged fixture and limits.
+4. The production harness and CI tiers are live. The retained final registered artifact
+   `s4_7_scale_registered_boundary_index_fingerprint.json` records `PASS` for every wall/RSS growth
+   check, every density timing and correctness point, and both 300-second / 6-GiB absolute checks.
+5. The wide/narrow adversarial findings are remediated, the Rule-A reconciliation is clean, and the
+   closeout-regenerated complete mutation profile has no surviving mutant and byte-identical
+   restoration.
+6. The tracker records S4.7 and S5.1-R as `DONE`; #84, #48, #33, and epic #85 close from this
+   evidence. The branch is integrated before moving to S4.6. The post-S4.6 S5.1-RG real-data gate
+   remains explicitly open.
+
+### Registered-campaign no-rerun ruling
+
+Ben approved retaining the completed 100,000-atom median-of-five campaign rather than repeating it
+at closeout after extensive controlled experimentation. This does not relabel the old artifact as a
+final-commit run. The chronology and execution boundary are explicit:
+
+- `27cbf18` contains the passing registered campaign and the scale/rebind mechanism it measured.
+- `ac1f4f5` changes the separately registered `evidence_findings()` operation and makes INV-7 green.
+- `2872f22` consolidates evidence restamping only when authoring evidence is supplied; the production
+  scale harness constructs both standalone and cold end-to-end `RebindContext` values without
+  `old_evidence`, so `_restamp_evidence()` returns before the changed path.
+- `15c06c0` adds the observer-only `evidence_supplied` span attribute and changes no result or phase
+  boundary.
+
+The final current-code default suite passes **1,991 tests** with one registered scale test deselected
+and zero xfails. The current INV-7 baseline is **0.143184 seconds** median and **1,417,936 bytes**
+peak. The tracker-source-locked closeout manifest kills **136/136** mutants with zero errors,
+byte-identical restoration, and **449 focused tests passing**; its SHA-256 is
+`d041252acdc30a71ca868f3201b321d129402bc290835f0344dc7d3acf25a627`.
+`ENGINE_STRUCTURE_TASKS.md` remains intentionally inside that manifest's source lock. No registered
+fixture, repetition count, statistic, or acceptance threshold was changed.

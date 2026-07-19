@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 3,
   "root_id": "n-0",
   "map_revision": 0,
   "block_vocabulary": [
@@ -87,7 +87,7 @@
         "present": true
       },
       "structure_map": {
-        "schema_version": 1,
+        "schema_version": 3,
         "stale_class": "structure-map",
         "present": true
       },

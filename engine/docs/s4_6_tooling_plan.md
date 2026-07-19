@@ -344,3 +344,19 @@ discipline; hunts run with `PYTHONDONTWRITEBYTECODE=1` + `__pycache__` purge).
 4. The live-demo acceptance run performed and its output quoted in the closing commit/issue.
 5. Tracker/runway/pin amendments in the same commit; issue closed.
 6. Rule B audit passed pre-commit; any delta Rule A re-audited.
+
+## §9 Post-ratification S4.6c source-observation addendum (2026-07-19)
+
+Issue #90 adds a source-observation step before the human stamping loop. The strict,
+source-locked `work/structure_observations.json` report is advisory input: it records declared
+structural-label sightings and candidate page features, but it does not alter this plan's gate,
+stamp, status, or structure-map semantics. Counts are factual diagnostics, never scalar confidence
+weights. No observation can supply `heading_atoms`, mutate `structure_map.json`, write
+`authoring_evidence.json`, or accept an evidence finding.
+
+An S4.6 author may cite an observation id in evidence prose only after checking its exact scan
+locator. The current PLL report is SHA-256
+`cf19c081c461f5aab2228cd3bfa8ad8232c7650fed6a7ccb002d31e754009bac`: both independent
+DjVu witnesses find `Parte Prima` only on their printed end-matter contents page, while
+`Parte Seconda` also appears in body pages. This supports reviewing `n-3` as an intentionally
+unheaded logical container; it does not synthesize an opening heading.

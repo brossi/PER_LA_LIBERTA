@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "book": "per_la_liberta",
+  "sources": [
+    {
+      "source_id": "copy1-djvu",
+      "format": "djvu-xml",
+      "source_ref": "https://archive.org/download/perlalibertdal00cres/perlalibertdal00cres_djvu.xml",
+      "sha256": "634a574c2dab690b4828a075612a6844f6237ddcefd89c4701ce64e39486b16a",
+      "bytes": 10036937
+    },
+    {
+      "source_id": "copy2-djvu",
+      "format": "djvu-xml",
+      "source_ref": "https://archive.org/download/perlalibertdall00cresgoog/perlalibertdall00cresgoog_djvu.xml",
+      "sha256": "d9f05dbe620742d7232efb467cb4dd5d04d21a87000e20898b045748e1385dfa",
+      "bytes": 7193256
+    },
+    {
+      "source_id": "copy1-text",
+      "format": "plain-text",
+      "source_ref": "inputs/copy1_raw.txt",
+      "sha256": "6a08d2df6e80223dd6790d31a12de9745968a48b6103f25878d3aeb1ac51126f",
+      "bytes": 918449
+    },
+    {
+      "source_id": "copy2-text",
+      "format": "plain-text",
+      "source_ref": "inputs/copy2_raw.txt",
+      "sha256": "dce1b27e07c8bcb2a55060cd3e9b6a03656be3e16b668b3bec60ff82ff5635b6",
+      "bytes": 815260
+    }
+  ]
+}

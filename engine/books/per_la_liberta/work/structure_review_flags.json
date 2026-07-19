@@ -1,0 +1,335 @@
+{
+  "schema_version": 1,
+  "stale_class": "structure-review-flags",
+  "book": "per_la_liberta",
+  "producer": {
+    "id": "pll-seed-structure-map-flags-v1",
+    "version": 1
+  },
+  "seed_identity": {
+    "candidate_semantics_sha256": "cf8a1a4e410dabdb32743cf1b43bc2609652a794035f5f393244e40516bd62b7",
+    "freeze_sha256": "ba43a40c8d8adacb07780e89b05bcb9836c76363c8e60528127de5a3e0af3a5d"
+  },
+  "flags": [
+    {
+      "flag_id": "flag-c713e40c51fe528bd85a",
+      "kind": "duplicate-heading",
+      "message": "Prefazione: duplicate heading-like atom canonical_04745 ('Prefazione 1') not used as a boundary (running head or index entry?) — REVIEW",
+      "target_node_id": "n-2",
+      "cited_atom_ids": [
+        "canonical_04745"
+      ],
+      "seed_decision_digest": "sha256:608109fa181b84a63ce20b71c41c88bfa1019d5a2b20d67f8edd40ebf9cd0950",
+      "seed_extent_digest": "sha256:64adf4ab1d80fce8b7ca7f4fdd9a8eb19b7fa87d2ea67e662a44e0e5f0744058",
+      "resolution_posture": "review-required",
+      "corroborating_observation_ids": []
+    },
+    {
+      "flag_id": "flag-30cc4ad734194e651239",
+      "kind": "duplicate-heading",
+      "message": "Parte Seconda: duplicate heading-like atom canonical_02240 ('PARTE  SECONDA') not used as a boundary (running head or index entry?) — REVIEW",
+      "target_node_id": "n-28",
+      "cited_atom_ids": [
+        "canonical_02240"
+      ],
+      "seed_decision_digest": "sha256:b8f8ca8f39d0bc58ed12f25eb0831ecb856d01063acb9a30d10cff270b83c007",
+      "seed_extent_digest": "sha256:fb79588d5e380ed5b269deab0d72ff4af358ed77c8e19b1b8f1b23f7a400ba42",
+      "resolution_posture": "review-required",
+      "corroborating_observation_ids": [
+        "obs-830d5cc6216554696647",
+        "obs-3f30d27607d224992688",
+        "obs-0ed63e13b88f703487f6",
+        "obs-5fc7b247b7be0236eada",
+        "obs-b4b60680be9533d869cd",
+        "obs-fb0aa83178f1da9d7f3b",
+        "obs-85dde1f13112208ef67f",
+        "obs-3afe9f077ca23c02a2f2",
+        "obs-f31e19b2cb90266c4a29",
+        "obs-86efc47a4963e61ae671",
+        "obs-61422a9b6830339d936c",
+        "obs-c6a0bf4144e022049b76"
+      ]
+    },
+    {
+      "flag_id": "flag-572cb4d397456150bf0f",
+      "kind": "duplicate-heading",
+      "message": "Parte Seconda: duplicate heading-like atom canonical_04757 ('PARTE  SECONDA') not used as a boundary (running head or index entry?) — REVIEW",
+      "target_node_id": "n-28",
+      "cited_atom_ids": [
+        "canonical_04757"
+      ],
+      "seed_decision_digest": "sha256:b8f8ca8f39d0bc58ed12f25eb0831ecb856d01063acb9a30d10cff270b83c007",
+      "seed_extent_digest": "sha256:fb79588d5e380ed5b269deab0d72ff4af358ed77c8e19b1b8f1b23f7a400ba42",
+      "resolution_posture": "review-required",
+      "corroborating_observation_ids": [
+        "obs-830d5cc6216554696647",
+        "obs-3f30d27607d224992688",
+        "obs-0ed63e13b88f703487f6",
+        "obs-5fc7b247b7be0236eada",
+        "obs-b4b60680be9533d869cd",
+        "obs-fb0aa83178f1da9d7f3b",
+        "obs-85dde1f13112208ef67f",
+        "obs-3afe9f077ca23c02a2f2",
+        "obs-f31e19b2cb90266c4a29",
+        "obs-86efc47a4963e61ae671",
+        "obs-61422a9b6830339d936c",
+        "obs-c6a0bf4144e022049b76"
+      ]
+    },
+    {
+      "flag_id": "flag-5a395a585d470c6dbee4",
+      "kind": "out-of-order-heading",
+      "message": "Parte Prima: only heading-like match sits AFTER Parte Seconda (the end-matter index?) at canonical_04743 — not used; part seeded without a heading atom; REVIEW",
+      "target_node_id": "n-3",
+      "cited_atom_ids": [
+        "canonical_04743"
+      ],
+      "seed_decision_digest": "sha256:13571eaa82757f1ff17e7d655c05f1d2d4274dc1931e97564f2dd13125a34a33",
+      "seed_extent_digest": "sha256:ebf545204c00632a6871bd574aa8c471165005abb1a99a69d0edd403176c59a5",
+      "resolution_posture": "review-required",
+      "corroborating_observation_ids": [
+        "obs-28e130326b3100b219d3",
+        "obs-d1fa863fa0b6487862fe",
+        "obs-b9f8d258de486cf735c5",
+        "obs-7d2a4de20bda25a63f71"
+      ]
+    },
+    {
+      "flag_id": "flag-946c073c2454d1503cf2",
+      "kind": "duplicate-heading",
+      "message": "Parte Prima: heading-like atom canonical_00497 ('Capitolo  Sesto') not used as a boundary — REVIEW (duplicate copy segment, running head, or index entry)",
+      "target_node_id": "n-9",
+      "cited_atom_ids": [
+        "canonical_00497"
+      ],
+      "seed_decision_digest": "sha256:0982266eec1759328b7cc0c0feb8810d79c5b658507fc4ae3810f231d8bedba7",
+      "seed_extent_digest": "sha256:bb6e64336a4d8d379c50783cb6d3ae970ed88ca60a667fd0af5f70b1159b3dd4",
+      "resolution_posture": "review-required",
+      "corroborating_observation_ids": []
+    },
+    {
+      "flag_id": "flag-fe8f5437090da3796101",
+      "kind": "duplicate-heading",
+      "message": "Parte Prima: heading-like atom canonical_00953 ('Capitolo Dodicesimo') not used as a boundary — REVIEW (duplicate copy segment, running head, or index entry)",
+      "target_node_id": "n-13",
+      "cited_atom_ids": [
+        "canonical_00953"
+      ],
+      "seed_decision_digest": "sha256:e55f7ee9fba827b8d013cdb23b83fbd947c3da43009351170461f2a51adc76e1",
+      "seed_extent_digest": "sha256:48e2c0790e325b751e2c612862b46d7920ed8d1df8bb08c3231e3cb91d636186",
+      "resolution_posture": "review-required",
+      "corroborating_observation_ids": []
+    },
+    {
+      "flag_id": "flag-67080e86826f020402dc",
+      "kind": "duplicate-heading",
+      "message": "Parte Prima: heading-like atom canonical_01516 ('Capitolo  Decimo  Ottavo') not used as a boundary — REVIEW (duplicate copy segment, running head, or index entry)",
+      "target_node_id": "n-21",
+      "cited_atom_ids": [
+        "canonical_01516"
+      ],
+      "seed_decision_digest": "sha256:15c6149b41e6895c306945142339fed751aa973afa4db6297ce62cf072e07497",
+      "seed_extent_digest": "sha256:174c8baa05b0a0023d957c1309fda973e958dbf51fd9f273d8ae763024ed4131",
+      "resolution_posture": "review-required",
+      "corroborating_observation_ids": []
+    },
+    {
+      "flag_id": "flag-542de4c34b6c741d8cc9",
+      "kind": "duplicate-heading",
+      "message": "Parte Prima: heading-like atom canonical_01876 ('Capitolo Ventesìmoteizo') not used as a boundary — REVIEW (duplicate copy segment, running head, or index entry)",
+      "target_node_id": "n-25",
+      "cited_atom_ids": [
+        "canonical_01876"
+      ],
+      "seed_decision_digest": "sha256:32fbd6f6c475525dc972f1efafebe7468b812297044d554449f8546bfa64688c",
+      "seed_extent_digest": "sha256:1cf969a0328e3eb892a2f78e7d71346d329ec81b499d7b03b51219027a235fde",
+      "resolution_posture": "review-required",
+      "corroborating_observation_ids": []
+    },
+    {
+      "flag_id": "flag-1db59d761ebdab35387a",
+      "kind": "duplicate-heading",
+      "message": "Parte Prima: heading-like atom canonical_01978 ('Capitolo  Ventesimo  Secondo') not used as a boundary — REVIEW (duplicate copy segment, running head, or index entry)",
+      "target_node_id": "n-25",
+      "cited_atom_ids": [
+        "canonical_01978"
+      ],
+      "seed_decision_digest": "sha256:32fbd6f6c475525dc972f1efafebe7468b812297044d554449f8546bfa64688c",
+      "seed_extent_digest": "sha256:1cf969a0328e3eb892a2f78e7d71346d329ec81b499d7b03b51219027a235fde",
+      "resolution_posture": "review-required",
+      "corroborating_observation_ids": []
+    },
+    {
+      "flag_id": "flag-e805623869442fb6a810",
+      "kind": "fuzzy-heading",
+      "message": "Parte Seconda 'Capitolo Decimosettimo': fuzzy heading match 'Capitolo Dccimoscttimo' (ratio 0.90) at canonical_03344 — REVIEW",
+      "target_node_id": "n-45",
+      "cited_atom_ids": [
+        "canonical_03344"
+      ],
+      "seed_decision_digest": "sha256:8f7bf4151ba8d6e146c95f4c00db1de3afd269154a8d329466d245882e62302e",
+      "seed_extent_digest": "sha256:e8c85f43c70b3b8323995d6db8574a354e749243b447e264e43398ae32192d5c",
+      "resolution_posture": "review-required",
+      "corroborating_observation_ids": []
+    },
+    {
+      "flag_id": "flag-94c42fc42c7da570206c",
+      "kind": "missing-heading",
+      "message": "Parte Seconda 'Capitolo Ventesimo Secondo': NO heading located — chapter NOT seeded; place it by hand (abstain, DT-3)",
+      "target_node_id": null,
+      "cited_atom_ids": [],
+      "seed_decision_digest": null,
+      "seed_extent_digest": null,
+      "resolution_posture": "correction-required",
+      "corroborating_observation_ids": []
+    },
+    {
+      "flag_id": "flag-4e983b66951c7f31f78d",
+      "kind": "duplicate-heading",
+      "message": "Parte Seconda: heading-like atom canonical_02438 ('Capitolo Qyarto') not used as a boundary — REVIEW (duplicate copy segment, running head, or index entry)",
+      "target_node_id": "n-31",
+      "cited_atom_ids": [
+        "canonical_02438"
+      ],
+      "seed_decision_digest": "sha256:ffa441068eef0293bbfaf9ce9afebffa33a5d6f2ee2e5587b590de02649d4910",
+      "seed_extent_digest": "sha256:4566a06aae30be13bf53f48b7854dfd627a4fcd2eebf71150732e0fca778cc99",
+      "resolution_posture": "review-required",
+      "corroborating_observation_ids": []
+    },
+    {
+      "flag_id": "flag-e77fbc768f7e350da15b",
+      "kind": "duplicate-heading",
+      "message": "Parte Seconda: heading-like atom canonical_02462 ('Capitolo  Terzo') not used as a boundary — REVIEW (duplicate copy segment, running head, or index entry)",
+      "target_node_id": "n-31",
+      "cited_atom_ids": [
+        "canonical_02462"
+      ],
+      "seed_decision_digest": "sha256:ffa441068eef0293bbfaf9ce9afebffa33a5d6f2ee2e5587b590de02649d4910",
+      "seed_extent_digest": "sha256:4566a06aae30be13bf53f48b7854dfd627a4fcd2eebf71150732e0fca778cc99",
+      "resolution_posture": "review-required",
+      "corroborating_observation_ids": []
+    },
+    {
+      "flag_id": "flag-8e45a826f6a9ce10a9ea",
+      "kind": "duplicate-heading",
+      "message": "Parte Seconda: heading-like atom canonical_02521 ('Capitolo Sesto') not used as a boundary — REVIEW (duplicate copy segment, running head, or index entry)",
+      "target_node_id": "n-31",
+      "cited_atom_ids": [
+        "canonical_02521"
+      ],
+      "seed_decision_digest": "sha256:ffa441068eef0293bbfaf9ce9afebffa33a5d6f2ee2e5587b590de02649d4910",
+      "seed_extent_digest": "sha256:4566a06aae30be13bf53f48b7854dfd627a4fcd2eebf71150732e0fca778cc99",
+      "resolution_posture": "review-required",
+      "corroborating_observation_ids": []
+    },
+    {
+      "flag_id": "flag-dd8d7b3f477dbe9ad7e7",
+      "kind": "duplicate-heading",
+      "message": "Parte Seconda: heading-like atom canonical_02580 ('Capitolo Settimo') not used as a boundary — REVIEW (duplicate copy segment, running head, or index entry)",
+      "target_node_id": "n-31",
+      "cited_atom_ids": [
+        "canonical_02580"
+      ],
+      "seed_decision_digest": "sha256:ffa441068eef0293bbfaf9ce9afebffa33a5d6f2ee2e5587b590de02649d4910",
+      "seed_extent_digest": "sha256:4566a06aae30be13bf53f48b7854dfd627a4fcd2eebf71150732e0fca778cc99",
+      "resolution_posture": "review-required",
+      "corroborating_observation_ids": []
+    },
+    {
+      "flag_id": "flag-200031b887d94c8c39cd",
+      "kind": "duplicate-heading",
+      "message": "Parte Seconda: heading-like atom canonical_02644 ('Capitolo Nono') not used as a boundary — REVIEW (duplicate copy segment, running head, or index entry)",
+      "target_node_id": "n-31",
+      "cited_atom_ids": [
+        "canonical_02644"
+      ],
+      "seed_decision_digest": "sha256:ffa441068eef0293bbfaf9ce9afebffa33a5d6f2ee2e5587b590de02649d4910",
+      "seed_extent_digest": "sha256:4566a06aae30be13bf53f48b7854dfd627a4fcd2eebf71150732e0fca778cc99",
+      "resolution_posture": "review-required",
+      "corroborating_observation_ids": []
+    },
+    {
+      "flag_id": "flag-98888b5887490646271c",
+      "kind": "duplicate-heading",
+      "message": "Parte Seconda: heading-like atom canonical_03441 ('Capitolo  Quattordicesimo') not used as a boundary — REVIEW (duplicate copy segment, running head, or index entry)",
+      "target_node_id": "n-46",
+      "cited_atom_ids": [
+        "canonical_03441"
+      ],
+      "seed_decision_digest": "sha256:e7c8cf8721c268ddfbcd571f745528363b9623c8325f4a8c24cf47195aa5c775",
+      "seed_extent_digest": "sha256:5dc2d362647ee23aa06249e0ac813d546beeff3dafcf6eb2473aa095a107d00f",
+      "resolution_posture": "review-required",
+      "corroborating_observation_ids": []
+    },
+    {
+      "flag_id": "flag-c57bab836359ad99d8de",
+      "kind": "duplicate-heading",
+      "message": "Parte Seconda: heading-like atom canonical_03541 ('Capitolo  O^indiccsimo') not used as a boundary — REVIEW (duplicate copy segment, running head, or index entry)",
+      "target_node_id": "n-46",
+      "cited_atom_ids": [
+        "canonical_03541"
+      ],
+      "seed_decision_digest": "sha256:e7c8cf8721c268ddfbcd571f745528363b9623c8325f4a8c24cf47195aa5c775",
+      "seed_extent_digest": "sha256:5dc2d362647ee23aa06249e0ac813d546beeff3dafcf6eb2473aa095a107d00f",
+      "resolution_posture": "review-required",
+      "corroborating_observation_ids": []
+    },
+    {
+      "flag_id": "flag-fc6e4922a307996409a3",
+      "kind": "duplicate-heading",
+      "message": "Parte Seconda: heading-like atom canonical_03574 ('Capitolo  Sedicesimo') not used as a boundary — REVIEW (duplicate copy segment, running head, or index entry)",
+      "target_node_id": "n-46",
+      "cited_atom_ids": [
+        "canonical_03574"
+      ],
+      "seed_decision_digest": "sha256:e7c8cf8721c268ddfbcd571f745528363b9623c8325f4a8c24cf47195aa5c775",
+      "seed_extent_digest": "sha256:5dc2d362647ee23aa06249e0ac813d546beeff3dafcf6eb2473aa095a107d00f",
+      "resolution_posture": "review-required",
+      "corroborating_observation_ids": []
+    },
+    {
+      "flag_id": "flag-2e0755c5164ccac761ad",
+      "kind": "duplicate-heading",
+      "message": "Parte Seconda: heading-like atom canonical_03618 ('Capitolo  Dccimoscttimo') not used as a boundary — REVIEW (duplicate copy segment, running head, or index entry)",
+      "target_node_id": "n-46",
+      "cited_atom_ids": [
+        "canonical_03618"
+      ],
+      "seed_decision_digest": "sha256:e7c8cf8721c268ddfbcd571f745528363b9623c8325f4a8c24cf47195aa5c775",
+      "seed_extent_digest": "sha256:5dc2d362647ee23aa06249e0ac813d546beeff3dafcf6eb2473aa095a107d00f",
+      "resolution_posture": "review-required",
+      "corroborating_observation_ids": []
+    },
+    {
+      "flag_id": "flag-170a902c917ca4f55c3f",
+      "kind": "duplicate-heading",
+      "message": "Parte Seconda: heading-like atom canonical_03676 ('Capitolo  Dccimottavo') not used as a boundary — REVIEW (duplicate copy segment, running head, or index entry)",
+      "target_node_id": "n-46",
+      "cited_atom_ids": [
+        "canonical_03676"
+      ],
+      "seed_decision_digest": "sha256:e7c8cf8721c268ddfbcd571f745528363b9623c8325f4a8c24cf47195aa5c775",
+      "seed_extent_digest": "sha256:5dc2d362647ee23aa06249e0ac813d546beeff3dafcf6eb2473aa095a107d00f",
+      "resolution_posture": "review-required",
+      "corroborating_observation_ids": []
+    },
+    {
+      "flag_id": "flag-cd95e3c5da0b7fa33f01",
+      "kind": "unsegmented-content",
+      "message": "end matter (the printed index) is NOT segmented off — it rides inside the last chapter's span after canonical_04668; split it by hand (abstain, DT-3)",
+      "target_node_id": "n-60",
+      "cited_atom_ids": [
+        "canonical_04668"
+      ],
+      "seed_decision_digest": "sha256:541cbc1d2a59ae3e6944c35bd424f808b812de62b84f0229ffdc7ee84aaff166",
+      "seed_extent_digest": "sha256:b2f52e8e89a0c6bb6c8e1287a2092c3b55d82afe160d4fd9d4d5c9b4397dedf9",
+      "resolution_posture": "correction-required",
+      "corroborating_observation_ids": [
+        "obs-28e130326b3100b219d3",
+        "obs-0ed63e13b88f703487f6",
+        "obs-d1fa863fa0b6487862fe",
+        "obs-fb0aa83178f1da9d7f3b"
+      ]
+    }
+  ]
+}

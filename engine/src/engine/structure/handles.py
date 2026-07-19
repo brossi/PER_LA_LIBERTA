@@ -547,6 +547,25 @@ def _effective_policy(
     return handle_policies.get(node.node_class)
 
 
+def effective_handle_policy(
+    pmap: ProjectionMap, node_id: str, handle_policies: HandlePolicies
+) -> str:
+    """Return the resolved §3.D.1 policy for a live, validated node.
+
+    This public read seam keeps inspection and review clients on the same nearest-ancestor
+    inheritance rule as validation. An unresolved policy is a violated caller precondition here;
+    the validator remains the owner of its typed map finding.
+    """
+
+    node = pmap.by_id.get(node_id)
+    if node is None:
+        raise ValueError(f"effective_handle_policy: node_id {node_id!r} is not in the map")
+    policy = _effective_policy(node, pmap, _parent_map(pmap), handle_policies)
+    if policy is None:
+        raise ValueError(f"effective_handle_policy: node {node_id!r} has no resolved policy")
+    return policy
+
+
 def _effective_policy_map(
     pmap: ProjectionMap,
     parents: Mapping[str, str],

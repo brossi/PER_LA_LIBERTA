@@ -1,0 +1,221 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/engine/structure-review-packet-v1.schema.json",
+  "title": "Engine structure-review packet v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "stale_class", "packet_policy", "renderer", "book",
+    "canonical_stream_id", "identity", "adjuncts", "class_counts", "status_counts",
+    "anomalies", "observation_associations", "unassociated_flags", "items", "packet_sha256"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "stale_class": {"const": "structure-review-packet"},
+    "packet_policy": {"const": "structure-review-packet-v1"},
+    "renderer": {"const": "structure-review-json-v1"},
+    "book": {"type": "string", "minLength": 1},
+    "canonical_stream_id": {"type": "string", "minLength": 1},
+    "identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["structure_map", "stream_freeze", "authoring_evidence"],
+      "properties": {
+        "structure_map": {"$ref": "#/$defs/mapIdentity"},
+        "stream_freeze": {"$ref": "#/$defs/freezeIdentity"},
+        "authoring_evidence": {"$ref": "#/$defs/optionalIdentity"}
+      }
+    },
+    "adjuncts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["structural_observations", "review_flags", "visual_sources"],
+      "properties": {
+        "structural_observations": {"$ref": "#/$defs/adjunct"},
+        "review_flags": {"$ref": "#/$defs/adjunct"},
+        "visual_sources": {"$ref": "#/$defs/visualAdjunct"}
+      }
+    },
+    "class_counts": {
+      "type": "object",
+      "additionalProperties": {"type": "integer", "minimum": 0}
+    },
+    "status_counts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["missing", "orphaned", "misbound", "stale-decision", "stale-extent", "fresh", "containers"],
+      "properties": {
+        "missing": {"type": "integer", "minimum": 0},
+        "orphaned": {"type": "integer", "minimum": 0},
+        "misbound": {"type": "integer", "minimum": 0},
+        "stale-decision": {"type": "integer", "minimum": 0},
+        "stale-extent": {"type": "integer", "minimum": 0},
+        "fresh": {"type": "integer", "minimum": 0},
+        "containers": {"type": "integer", "minimum": 0}
+      }
+    },
+    "anomalies": {
+      "type": "array",
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["kind", "message"],
+        "properties": {
+          "kind": {"enum": ["orphaned", "misbound"]},
+          "message": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "observation_associations": {
+      "type": "array", "items": {"$ref": "#/$defs/association"}
+    },
+    "unassociated_flags": {"type": "array", "items": {"type": "object"}},
+    "items": {"type": "array", "items": {"$ref": "#/$defs/item"}},
+    "packet_sha256": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "mapIdentity": {
+      "type": "object", "additionalProperties": false,
+      "required": ["schema_version", "sha256", "bytes", "map_revision", "root_id", "path"],
+      "properties": {
+        "schema_version": {"type": "integer", "minimum": 1},
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "bytes": {"type": "integer", "minimum": 0},
+        "map_revision": {"type": "integer", "minimum": 0},
+        "root_id": {"type": "string", "minLength": 1},
+        "path": {"type": "string", "minLength": 1}
+      }
+    },
+    "freezeIdentity": {
+      "type": "object", "additionalProperties": false,
+      "required": ["schema_version", "sha256", "bytes", "path", "streams"],
+      "properties": {
+        "schema_version": {"type": "integer", "minimum": 1},
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "bytes": {"type": "integer", "minimum": 0},
+        "path": {"type": "string", "minLength": 1},
+        "streams": {"type": "array", "items": {"type": "object"}}
+      }
+    },
+    "optionalIdentity": {
+      "oneOf": [
+        {
+          "type": "object", "additionalProperties": false,
+          "required": ["state", "reason"],
+          "properties": {"state": {"const": "unavailable"}, "reason": {"type": "string", "minLength": 1}}
+        },
+        {
+          "type": "object", "additionalProperties": false,
+          "required": ["state", "schema_version", "sha256", "bytes", "path"],
+          "properties": {
+            "state": {"const": "available"}, "schema_version": {"type": "integer", "minimum": 1},
+            "sha256": {"$ref": "#/$defs/sha256"}, "bytes": {"type": "integer", "minimum": 0},
+            "path": {"type": "string", "minLength": 1}
+          }
+        }
+      ]
+    },
+    "adjunct": {
+      "oneOf": [
+        {
+          "type": "object", "additionalProperties": false,
+          "required": ["state", "reason"],
+          "properties": {"state": {"enum": ["unavailable", "not_applicable"]}, "reason": {"type": "string", "minLength": 1}}
+        },
+        {
+          "type": "object", "additionalProperties": false,
+          "required": ["state", "schema_version", "policy", "sha256", "bytes", "path"],
+          "properties": {
+            "state": {"const": "available"}, "schema_version": {"type": "integer", "minimum": 1},
+            "policy": {"type": "string", "minLength": 1}, "sha256": {"$ref": "#/$defs/sha256"},
+            "bytes": {"type": "integer", "minimum": 0}, "path": {"type": "string", "minLength": 1}
+          }
+        }
+      ]
+    },
+    "visualAdjunct": {
+      "oneOf": [
+        {
+          "type": "object", "additionalProperties": false,
+          "required": ["state", "reason", "sources"],
+          "properties": {
+            "state": {"enum": ["unavailable", "not_applicable"]}, "reason": {"type": "string", "minLength": 1},
+            "sources": {"type": "array", "maxItems": 0}
+          }
+        },
+        {
+          "type": "object", "additionalProperties": false,
+          "required": ["state", "schema_version", "policy", "sha256", "bytes", "path", "sources"],
+          "properties": {
+            "state": {"const": "available"}, "schema_version": {"type": "integer", "minimum": 1},
+            "policy": {"type": "string", "minLength": 1}, "sha256": {"$ref": "#/$defs/sha256"},
+            "bytes": {"type": "integer", "minimum": 0}, "path": {"type": "string", "minLength": 1},
+            "sources": {"type": "array", "items": {"$ref": "#/$defs/visual"}}
+          }
+        }
+      ]
+    },
+    "visual": {
+      "type": "object", "additionalProperties": false,
+      "required": ["source_id", "witness_id", "kind", "media_type", "path", "sha256", "bytes", "page_numbering"],
+      "properties": {
+        "source_id": {"type": "string", "minLength": 1}, "witness_id": {"type": "string", "minLength": 1},
+        "kind": {"enum": ["pdf", "image", "raster-set"]}, "media_type": {"type": "string", "minLength": 1},
+        "path": {"type": "string", "minLength": 1}, "sha256": {"$ref": "#/$defs/sha256"},
+        "bytes": {"type": "integer", "minimum": 0}, "page_numbering": {"type": "string", "minLength": 1}
+      }
+    },
+    "association": {
+      "type": "object", "additionalProperties": false,
+      "required": ["expectation_id", "state", "candidate_node_ids"],
+      "properties": {
+        "expectation_id": {"type": "string", "minLength": 1},
+        "state": {"enum": ["associated", "unmatched", "ambiguous"]},
+        "candidate_node_ids": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true}
+      }
+    },
+    "item": {
+      "type": "object", "additionalProperties": false,
+      "required": ["node_id", "ordinal", "status", "inspection", "observations", "flags", "visuals", "review_fingerprint_policy", "review_fingerprint"],
+      "properties": {
+        "node_id": {"type": "string", "minLength": 1}, "ordinal": {"type": "integer", "minimum": 1},
+        "status": {
+          "type": "object", "additionalProperties": false, "required": ["state", "kinds"],
+          "properties": {
+            "state": {"enum": ["fresh", "missing", "stale"]},
+            "kinds": {"type": "array", "items": {"enum": ["missing", "stale-decision", "stale-extent"]}, "uniqueItems": true}
+          }
+        },
+        "inspection": {"type": "object"},
+        "observations": {"type": "array", "items": {"type": "object"}},
+        "flags": {
+          "type": "object", "additionalProperties": false, "required": ["state", "reason", "items"],
+          "properties": {
+            "state": {"enum": ["available", "unavailable", "not_applicable"]},
+            "reason": {"type": ["string", "null"]}, "items": {"type": "array", "items": {"type": "object"}}
+          }
+        },
+        "visuals": {"type": "array", "items": {"$ref": "#/$defs/itemVisual"}},
+        "review_fingerprint_policy": {"const": "structure-review-item-v1"},
+        "review_fingerprint": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "itemVisual": {
+      "type": "object", "additionalProperties": false,
+      "required": ["source_id", "witness_id", "kind", "media_type", "path", "sha256", "bytes", "page_numbering", "page_ranges"],
+      "properties": {
+        "source_id": {"type": "string", "minLength": 1}, "witness_id": {"type": "string", "minLength": 1},
+        "kind": {"enum": ["pdf", "image", "raster-set"]}, "media_type": {"type": "string", "minLength": 1},
+        "path": {"type": "string", "minLength": 1}, "sha256": {"$ref": "#/$defs/sha256"},
+        "bytes": {"type": "integer", "minimum": 0}, "page_numbering": {"type": "string", "minLength": 1},
+        "page_ranges": {
+          "type": "array",
+          "items": {
+            "type": "array", "prefixItems": [{"type": "integer", "minimum": 1}, {"type": "integer", "minimum": 1}],
+            "items": false, "minItems": 2, "maxItems": 2
+          }
+        }
+      }
+    }
+  }
+}

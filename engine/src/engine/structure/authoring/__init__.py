@@ -40,6 +40,7 @@ single-file form ran everything twice per invocation with a runpy warning.
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 import time
 from dataclasses import dataclass
@@ -47,10 +48,15 @@ from pathlib import Path
 from types import MappingProxyType
 from typing import Callable, Mapping
 
-from engine.errors import EngineError, MissingInputError, StaleArtifactError
-from engine.paths import BookWorkspace
+from engine.errors import EngineError
 from engine.structure.artifacts import authoring_evidence_path, structure_map_path
-from engine.structure.atom_store import AtomStream, load_workspace_streams
+from engine.structure.authoring_context import (
+    AuthoringContext,
+    STREAM_FREEZE_FILENAME as STREAM_FREEZE_FILENAME,
+    load_authoring_context,
+    workspace_for_book,
+)
+from engine.structure.authoring_inspection import StructureInspection
 from engine.structure.evidence import (
     EVIDENCE_FINDING_KINDS,
     AuthoringEvidence,
@@ -60,86 +66,26 @@ from engine.structure.evidence import (
     build_evidence_entry,
     decision_payload,
     extent_payload,
-    load_authoring_evidence,
     write_authoring_evidence,
 )
-from engine.structure.freeze import assert_freeze_matches, load_freeze_record
 from engine.structure.projection import (
     MINTED_BY_HUMAN,
     ContainerNode,
     Node,
 )
-from engine.structure.structure_map import StreamAtomReader, StructureMap, load_structure_map
-
-#: The committed per-book freeze pin's filename, at the book dir root beside ``inputs/`` (the
-#: S4.6-pre layout) — a *committed* sibling of the disposable ``work/`` tree, which is why it is
-#: not a ``BookWorkspace`` path accessor like the map/sidecar.
-STREAM_FREEZE_FILENAME = "stream_freeze.json"
+from engine.structure.structure_map import StructureMap
 
 
-# --- staged context loading (the DT-5 order, shared by every command) ---------------------------- #
+def _workspace(book_dir: Path):
+    """Compatibility-local name for the validation watcher."""
+
+    return workspace_for_book(book_dir)
 
 
-@dataclass(frozen=True, slots=True)
-class _AuthoringContext:
-    """Everything a command needs once the substrate-first stages have held: the freeze record,
-    the loaded streams + reader, the loaded map, and the sidecar (empty-but-book-bound when the
-    file does not exist yet — mid-authoring is a first-class state, plan §1)."""
+def _load_context(book_dir: Path, *, canonical_stream_id: str = "canonical"):
+    """Compatibility-local name; the shared loader is owned by ``authoring_context``."""
 
-    book: str
-    streams: Mapping[str, AtomStream]
-    reader: StreamAtomReader
-    smap: StructureMap
-    evidence: AuthoringEvidence
-    evidence_path: Path
-
-
-def _workspace(book_dir: Path) -> BookWorkspace:
-    book_dir = Path(book_dir)
-    return BookWorkspace.for_book(book_dir.name, book_dir.parent)
-
-
-def _load_context(book_dir: Path, *, canonical_stream_id: str = "canonical") -> _AuthoringContext:
-    """Run the substrate-first stages (plan DT-5) and hand back the loaded context.
-
-    1. the committed freeze pin (its ``book`` must equal the book dir's name — a copy-pasted pin
-       from another book is the wrong artifact, however well-formed);
-    2. the persisted streams (per-stream round-trip + hash tiers + reference integrity);
-    3. pin ↔ live (``assert_freeze_matches``);
-    4. the structure map (Tier-1 + Tier-2 through the born-agnostic loader);
-    5. the sidecar — loaded with the pin's ``book`` binding when present; an *absent* sidecar is
-       the empty worklist state, not an error (the gate then reports every container ``missing``,
-       which is exactly the S4.6 TODO list).
-
-    Everything raises its owner's typed error; nothing here re-wraps, so a failure names the layer
-    that actually failed.
-    """
-    book_dir = Path(book_dir)
-    record = load_freeze_record(book_dir / STREAM_FREEZE_FILENAME)
-    book = record["book"]
-    if book != book_dir.name:
-        raise StaleArtifactError(
-            f"freeze pin at {book_dir / STREAM_FREEZE_FILENAME} names book {book!r}, but the book "
-            f"dir is {book_dir.name!r} — wrong pin for this book"
-        )
-    workspace = _workspace(book_dir)
-    streams = load_workspace_streams(workspace, canonical_stream_id=canonical_stream_id)
-    assert_freeze_matches(record, streams)
-    reader = StreamAtomReader(streams, canonical_stream_id)
-    smap = load_structure_map(structure_map_path(workspace), reader)
-    evidence_path = authoring_evidence_path(workspace)
-    try:
-        evidence = load_authoring_evidence(evidence_path, expected_book=book)
-    except MissingInputError:
-        evidence = AuthoringEvidence(book=book, entries=())
-    return _AuthoringContext(
-        book=book,
-        streams=MappingProxyType(dict(streams)),
-        reader=reader,
-        smap=smap,
-        evidence=evidence,
-        evidence_path=evidence_path,
-    )
+    return load_authoring_context(book_dir, canonical_stream_id=canonical_stream_id)
 
 
 # --- T-3: the freeze×evidence composite gate ------------------------------------------------------ #
@@ -245,6 +191,16 @@ def authoring_status(
     status is never re-derived by a second staleness computation or by parsing messages (the
     single-producer discipline, s4_plan §1.4.1a)."""
     context = _load_context(book_dir, canonical_stream_id=canonical_stream_id)
+    return authoring_status_for_context(context)
+
+
+def authoring_status_for_context(context: AuthoringContext) -> AuthoringStatus:
+    """Assemble status from an already substrate-checked shared context.
+
+    Review-packet construction uses this seam so it cannot reload a different filesystem instant or
+    grow a second evidence-finding implementation.
+    """
+
     projection = context.smap.projection
     attributed = _attributed_findings(context.evidence, projection)
     kinds_by_node: dict[str, list[str]] = {}
@@ -339,6 +295,19 @@ def stamp_evidence(
     read-modify-write: this command loads the existing sidecar and replaces or appends exactly one
     entry; it never regenerates from nothing. There is deliberately no bulk variant."""
     context = _load_context(book_dir, canonical_stream_id=canonical_stream_id)
+    return stamp_evidence_for_context(context, node_id, evidence=evidence)
+
+
+def stamp_evidence_for_context(
+    context: AuthoringContext, node_id: str, *, evidence: str
+) -> Path:
+    """Stamp one node from an already current shared context.
+
+    The guarded review bridge uses this after recomputing the submitted item fingerprint against
+    the same context, keeping conflict checking and the existing evidence producer/writer on one
+    filesystem snapshot.
+    """
+
     node = context.smap.projection.by_id.get(node_id)
     if node is None:
         raise ValueError(
@@ -472,7 +441,9 @@ def explain_evidence_drift(
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="python -m engine.structure.authoring",
-        description="S4.6 authoring-loop tooling: validate / status / stamp / explain / gate.",
+        description=(
+            "S4.6 authoring-loop tooling: validate / status / inspect / stamp / explain / gate."
+        ),
     )
     parser.add_argument("--book", required=True, help="Book id under --books-dir.")
     parser.add_argument(
@@ -497,6 +468,14 @@ def _build_parser() -> argparse.ArgumentParser:
         "--interval", type=float, default=1.0, help="Watch poll interval in seconds."
     )
     sub.add_parser("status", help="The evidence worklist (kinds as columns).")
+    inspect = sub.add_parser("inspect", help="Read-only node/atom/heading/class inspection (#44).")
+    query = inspect.add_mutually_exclusive_group(required=True)
+    query.add_argument("--node", help="Inspect one exact node_id.")
+    query.add_argument("--atom", help="Inspect the node and slot owning one exact atom_id.")
+    query.add_argument("--heading", help="Find nodes whose designation/title contains this text.")
+    query.add_argument(
+        "--class-counts", action="store_true", help="Report the live node_class counts."
+    )
     stamp = sub.add_parser("stamp", help="Stamp ONE verified container's evidence entry.")
     stamp.add_argument("--node", required=True, help="The container's node_id.")
     stamp.add_argument(
@@ -528,6 +507,29 @@ def main(argv: list[str] | None = None) -> int:
         if args.command == "status":
             print(render_status(authoring_status(book_dir, canonical_stream_id=stream_id)), end="")
             return 0
+        if args.command == "inspect":
+            model = StructureInspection.build(
+                load_authoring_context(book_dir, canonical_stream_id=stream_id)
+            )
+            if args.node:
+                result = {"query": {"node": args.node}, "node": model.inspect_node(args.node)}
+            elif args.atom:
+                node_id, slot = model.node_for_atom(args.atom)
+                result = {
+                    "query": {"atom": args.atom},
+                    "owner": {"node_id": node_id, "slot": slot},
+                    "node": model.inspect_node(node_id),
+                }
+            elif args.heading:
+                matches = model.search_headings(args.heading)
+                result = {
+                    "query": {"heading": args.heading},
+                    "matches": [model.inspect_node(node_id) for node_id in matches],
+                }
+            else:
+                result = {"query": {"class_counts": True}, "class_counts": model.class_counts()}
+            print(json.dumps(result, sort_keys=True, ensure_ascii=False, indent=2))
+            return 0
         if args.command == "stamp":
             path = stamp_evidence(
                 book_dir, args.node, evidence=args.evidence, canonical_stream_id=stream_id
@@ -557,4 +559,3 @@ def main(argv: list[str] | None = None) -> int:
         print(f"error: {exc}", file=sys.stderr)
         return 2
     raise AssertionError(f"unhandled command {args.command!r}")  # argparse makes this unreachable
-

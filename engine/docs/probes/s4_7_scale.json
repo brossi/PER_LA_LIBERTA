@@ -1,0 +1,4693 @@
+{
+  "schema": "s4.7-production-scale@v1",
+  "created_at": "2026-07-18T17:48:28.993562+00:00",
+  "profile": "full",
+  "command": [
+    "/Users/ben_mpa/LLM/PER_LA_LIBERTA/engine/.venv/bin/python",
+    "/Users/ben_mpa/LLM/PER_LA_LIBERTA/engine/tools/s4_7_scale.py",
+    "--profile",
+    "full",
+    "--artifact",
+    "docs/probes/s4_7_scale.json",
+    "--checkpoint",
+    "docs/probes/s4_7_scale.checkpoint.json",
+    "--progress-log",
+    "/tmp/s4_7_scale_live_final_pass.log"
+  ],
+  "git": {
+    "head": "6b65a4fd975ce27bb8216aff799764c50bb7ee09",
+    "branch": "spike/s4_7",
+    "status": "M ../.github/workflows/engine.yml\n M .github/workflows/ci.yml\n M docs/ENGINE_STRUCTURE_TASKS.md\n M docs/probes/s4_7_item2_prereg.md\n M pyproject.toml\n M src/engine/structure/__init__.py\n M src/engine/structure/artifacts.py\n M src/engine/structure/handles.py\n M src/engine/structure/projection.py\n M src/engine/structure/rebind.py\n M src/engine/structure/schema/structure_map.schema.json\n M src/engine/structure/structure_map.py\n M tests/fixtures/structure/conforming_structure_map.json\n M tests/fixtures/structure/differ_structure_map.json\n M tests/fixtures/structure/invalid/alias_collision.json\n M tests/fixtures/structure/invalid/empty_container.json\n M tests/fixtures/structure/invalid/empty_map.json\n M tests/fixtures/structure/invalid/leaf_only.json\n M tests/fixtures/structure/invalid/malformed_manifest.json\n M tests/fixtures/structure/invalid/non_container_root.json\n M tests/fixtures/structure/rebind_positive_structure_map.json\n M tests/harness/relation.py\n M tests/hunts/hunt_rebind.py\n M tests/unit/test_authoring_evidence.py\n M tests/unit/test_harness_relation_laws.py\n M tests/unit/test_rebind.py\n M tests/unit/test_structure_artifacts.py\n M tests/unit/test_structure_born_gate.py\n M tests/unit/test_structure_handles.py\n M tests/unit/test_structure_map.py\n M uv.lock\n?? docs/probes/s4_7_priority1_component0_audit.md\n?? docs/probes/s4_7_priority2_inv1_inv2_audit.md\n?? docs/probes/s4_7_priority2_red_manifest.json\n?? docs/probes/s4_7_priority3_inv3_inv5_audit.md\n?? docs/probes/s4_7_priority3_red_manifest.json\n?? docs/probes/s4_7_priority4_inv6_inv7_audit.md\n?? docs/probes/s4_7_priority4_perf_baseline.json\n?? docs/probes/s4_7_priority4_red_manifest.json\n?? docs/probes/s4_7_priority5_item3_audit.md\n?? docs/probes/s4_7_priority5_mutation_manifest.json\n?? docs/probes/s4_7_priority5_perf_baseline.json\n?? docs/probes/s4_7_priority6_prereg.md\n?? docs/probes/s4_7_scale_failed_index_growth.checkpoint.json\n?? docs/probes/s4_7_scale_failed_index_growth.json\n?? docs/probes/s4_7_scale_infeasible_setup.checkpoint.json\n?? docs/probes/s4_7_scale_relation_quadratic.checkpoint.json\n?? src/engine/structure/boundary_anchor.py\n?? src/engine/structure/reanchor.py\n?? tests/harness/boundary.py\n?? tests/harness/invariants_3_5.py\n?? tests/harness/materialize.py\n?? tests/harness/oracle.py\n?? tests/harness/scale.py\n?? tests/harness/scale_production.py\n?? tests/scale/\n?? tests/unit/test_harness_materialize.py\n?? tests/unit/test_s4_7_inv1_inv2.py\n?? tests/unit/test_s4_7_inv3_inv5.py\n?? tests/unit/test_s4_7_inv6_inv7.py\n?? tests/unit/test_s4_7_reanchor.py\n?? tests/unit/test_s4_7_scale_production.py\n?? tools/s4_7_hunt_manifest.py\n?? tools/s4_7_perf_baseline.py\n?? tools/s4_7_scale.py"
+  },
+  "environment": {
+    "python": "3.13.0",
+    "python_executable": "/Users/ben_mpa/LLM/PER_LA_LIBERTA/engine/.venv/bin/python",
+    "platform": "macOS-26.5.1-arm64-arm-64bit-Mach-O",
+    "machine": "arm64",
+    "processor": "arm"
+  },
+  "source_identity": {
+    "pyproject.toml": "05e86a97085ef3e27aee8ba421044a6e677c907212885ebf39fafd83d49678a3",
+    "docs/probes/s4_7_priority6_prereg.md": "d16f3931d73a22cd5af2e1ffe3d951edf820793fe7730da12095229d5d9d3d96",
+    "src/engine/structure/atom_store.py": "34fe7eb9c0de2e83d0fcd6764c73952c15f87c5162d5934fff473dcbd6e5d0e6",
+    "src/engine/structure/boundary_anchor.py": "02dcd6ccef59eccedbd416493dc8b6395529e7fb0c1ce96ae77f392af57ade9a",
+    "src/engine/structure/handles.py": "46ea556b89b6e33615f9a7553ba7d4f9753e1b03f25624cf8729c207db793340",
+    "src/engine/structure/projection.py": "85f4594df3b07c45f5f7cb44f69b9c452aa3fb4dc77dd4e582439e0b5577eb45",
+    "src/engine/structure/reanchor.py": "9693e370e4f46a379cec05299243b7d765a473304117e8999bd8b662e2179fe8",
+    "src/engine/structure/rebind.py": "1e600ee7e553e9bc025907a1c0bb190efd6bc43bad1a49252a07fee25406de60",
+    "src/engine/structure/structure_map.py": "26268e6635c2630468977614eee83b6319ab9e2c99f9e4a7bb06d0e982d9b44c",
+    "tests/harness/materialize.py": "3a429b399de9870dbb721cca2234398958b4dd384e8b664dd5358ca81e17990e",
+    "tests/harness/oracle.py": "5fc5245b950362639874c7871e16bba6e4bd43c1daafa58840fd7c3f561e0712",
+    "tests/harness/relation.py": "5d006b2a6cc7106f575df27fd2f47d3f6d40935fe58c2fe78af243ddd9d612d5",
+    "tests/harness/scale.py": "61df6eed2e0acd9a059c410c1fe8c90cc0f7808dee4b30bd8629a8b95995fc40",
+    "tests/harness/scale_production.py": "b6f2a2430fbc5d9e41d7146f60eb15e19c3a581565f2667abd7989f119fd1d86",
+    "tests/scale/test_s4_7_production_scale.py": "cde61f487cd4f3c467fc7f3c772b3bf09f0eef598c8e49a517708250462f8d55",
+    "tests/unit/test_s4_7_scale_production.py": "c8a35595927c56d61de2f62fe12379c8856f66160f3cefdaf78c953956cb899c",
+    "tools/s4_7_scale.py": "9b1229dfb54a81e8f8a8f4d2b866902ba38ed7ccd6cd048b12727fb7ef30020f",
+    "uv.lock": "7c6e9b61e324e19325d085b00596a2e863e8ed97e18d2396dc95982b30620bb4"
+  },
+  "growth_limits": {
+    "max_slope": 1.5,
+    "max_adjacent_ratio": 50.0
+  },
+  "absolute_end_to_end_ceiling": {
+    "status": "RULED",
+    "owner": "Ben",
+    "ruled_at": "2026-07-18",
+    "preregistration": "docs/probes/s4_7_priority6_prereg.md",
+    "statistic": "median-of-5",
+    "max_seconds": 300.0,
+    "max_lifetime_rss_bytes": 6442450944,
+    "note": "Immutable post-ruling; lifetime RSS includes materialization."
+  },
+  "gate_evaluation": {
+    "status": "FAIL",
+    "failures": [
+      "density: density treatment 0.71 timing is not subquadratic: {'slope': 1.2580459595557594, 'adjacent_ratios': [5.76376242258546, 56.9358551390502], 'max_slope': 1.5, 'max_adjacent_ratio': 50.0}"
+    ],
+    "absolute_end_to_end": {
+      "status": "PASS",
+      "atom_count": 100000,
+      "statistic": "median-of-5",
+      "max_seconds": 300.0,
+      "max_lifetime_rss_bytes": 6442450944,
+      "observations": {
+        "wide": {
+          "median_seconds": 221.7093790420331,
+          "median_lifetime_peak_bytes": 1851736064.0,
+          "within_wall_clock_ceiling": true,
+          "within_lifetime_rss_ceiling": true
+        },
+        "deep": {
+          "median_seconds": 222.51129691698588,
+          "median_lifetime_peak_bytes": 1907818496.0,
+          "within_wall_clock_ceiling": true,
+          "within_lifetime_rss_ceiling": true
+        }
+      }
+    }
+  },
+  "atom_ladder": [
+    1000,
+    10000,
+    100000
+  ],
+  "repetitions": 5,
+  "rss_sampler_probe": {
+    "ledger": {
+      "family": "rss-allocation-probe",
+      "L": 1,
+      "K": 1,
+      "A": 1,
+      "T": 1,
+      "D": 1
+    },
+    "phase": "allocation_probe",
+    "elapsed_seconds": 0.07999987504445016,
+    "setup_elapsed_seconds": 0.12086516595445573,
+    "monitor_elapsed_seconds": 0.22791420784778893,
+    "raw_ru_maxrss_bytes": 108609536,
+    "lifetime_peak_bytes": 108609536,
+    "span_peak_bytes": 108609536,
+    "setup_baseline_bytes": 41402368,
+    "incremental_peak_bytes": 67207168,
+    "sample_interval_seconds": 0.005,
+    "sample_count": 13
+  },
+  "density_sweep": [
+    {
+      "requested_unique_fraction": 0.71,
+      "measured_anchor_density": 0.7291666666666666,
+      "slots": 24,
+      "tokens": 192,
+      "repetitions": 3,
+      "median_seconds": 0.004937999881803989,
+      "bound_correct": 17,
+      "abstained": 7,
+      "wrong": 0
+    },
+    {
+      "requested_unique_fraction": 0.6,
+      "measured_anchor_density": 0.6041666666666666,
+      "slots": 24,
+      "tokens": 192,
+      "repetitions": 3,
+      "median_seconds": 0.002547707874327898,
+      "bound_correct": 14,
+      "abstained": 10,
+      "wrong": 0
+    },
+    {
+      "requested_unique_fraction": 0.48,
+      "measured_anchor_density": 0.5208333333333334,
+      "slots": 24,
+      "tokens": 192,
+      "repetitions": 3,
+      "median_seconds": 0.0026571659836918116,
+      "bound_correct": 12,
+      "abstained": 12,
+      "wrong": 0
+    },
+    {
+      "requested_unique_fraction": 0.36,
+      "measured_anchor_density": 0.3958333333333333,
+      "slots": 24,
+      "tokens": 192,
+      "repetitions": 3,
+      "median_seconds": 0.0024327081628143787,
+      "bound_correct": 9,
+      "abstained": 15,
+      "wrong": 0
+    },
+    {
+      "requested_unique_fraction": 0.24,
+      "measured_anchor_density": 0.2708333333333333,
+      "slots": 24,
+      "tokens": 192,
+      "repetitions": 3,
+      "median_seconds": 0.0028650001622736454,
+      "bound_correct": 6,
+      "abstained": 18,
+      "wrong": 0
+    },
+    {
+      "requested_unique_fraction": 0.12,
+      "measured_anchor_density": 0.14583333333333334,
+      "slots": 24,
+      "tokens": 192,
+      "repetitions": 3,
+      "median_seconds": 0.0021600001491606236,
+      "bound_correct": 3,
+      "abstained": 21,
+      "wrong": 0
+    },
+    {
+      "requested_unique_fraction": 0.71,
+      "measured_anchor_density": 0.7104166666666667,
+      "slots": 240,
+      "tokens": 1920,
+      "repetitions": 3,
+      "median_seconds": 0.028461458161473274,
+      "bound_correct": 170,
+      "abstained": 70,
+      "wrong": 0
+    },
+    {
+      "requested_unique_fraction": 0.6,
+      "measured_anchor_density": 0.6020833333333333,
+      "slots": 240,
+      "tokens": 1920,
+      "repetitions": 3,
+      "median_seconds": 0.025977083016186953,
+      "bound_correct": 144,
+      "abstained": 96,
+      "wrong": 0
+    },
+    {
+      "requested_unique_fraction": 0.48,
+      "measured_anchor_density": 0.48125,
+      "slots": 240,
+      "tokens": 1920,
+      "repetitions": 3,
+      "median_seconds": 0.025949375005438924,
+      "bound_correct": 115,
+      "abstained": 125,
+      "wrong": 0
+    },
+    {
+      "requested_unique_fraction": 0.36,
+      "measured_anchor_density": 0.36041666666666666,
+      "slots": 240,
+      "tokens": 1920,
+      "repetitions": 3,
+      "median_seconds": 0.044459084048867226,
+      "bound_correct": 86,
+      "abstained": 154,
+      "wrong": 0
+    },
+    {
+      "requested_unique_fraction": 0.24,
+      "measured_anchor_density": 0.24375,
+      "slots": 240,
+      "tokens": 1920,
+      "repetitions": 3,
+      "median_seconds": 0.062258166959509254,
+      "bound_correct": 58,
+      "abstained": 182,
+      "wrong": 0
+    },
+    {
+      "requested_unique_fraction": 0.12,
+      "measured_anchor_density": 0.12291666666666666,
+      "slots": 240,
+      "tokens": 1920,
+      "repetitions": 3,
+      "median_seconds": 0.03607637505047023,
+      "bound_correct": 29,
+      "abstained": 211,
+      "wrong": 0
+    },
+    {
+      "requested_unique_fraction": 0.71,
+      "measured_anchor_density": 0.7102083333333333,
+      "slots": 2400,
+      "tokens": 19200,
+      "repetitions": 3,
+      "median_seconds": 1.6204774589277804,
+      "bound_correct": 1704,
+      "abstained": 696,
+      "wrong": 0
+    },
+    {
+      "requested_unique_fraction": 0.6,
+      "measured_anchor_density": 0.6002083333333333,
+      "slots": 2400,
+      "tokens": 19200,
+      "repetitions": 3,
+      "median_seconds": 1.4363445830531418,
+      "bound_correct": 1440,
+      "abstained": 960,
+      "wrong": 0
+    },
+    {
+      "requested_unique_fraction": 0.48,
+      "measured_anchor_density": 0.48020833333333335,
+      "slots": 2400,
+      "tokens": 19200,
+      "repetitions": 3,
+      "median_seconds": 1.0418102499097586,
+      "bound_correct": 1152,
+      "abstained": 1248,
+      "wrong": 0
+    },
+    {
+      "requested_unique_fraction": 0.36,
+      "measured_anchor_density": 0.36020833333333335,
+      "slots": 2400,
+      "tokens": 19200,
+      "repetitions": 3,
+      "median_seconds": 0.7532328751403838,
+      "bound_correct": 864,
+      "abstained": 1536,
+      "wrong": 0
+    },
+    {
+      "requested_unique_fraction": 0.24,
+      "measured_anchor_density": 0.24020833333333333,
+      "slots": 2400,
+      "tokens": 19200,
+      "repetitions": 3,
+      "median_seconds": 0.5707434171345085,
+      "bound_correct": 576,
+      "abstained": 1824,
+      "wrong": 0
+    },
+    {
+      "requested_unique_fraction": 0.12,
+      "measured_anchor_density": 0.12020833333333333,
+      "slots": 2400,
+      "tokens": 19200,
+      "repetitions": 3,
+      "median_seconds": 0.4415641671512276,
+      "bound_correct": 288,
+      "abstained": 2112,
+      "wrong": 0
+    }
+  ],
+  "density_timing_growth": {
+    "0.71": {
+      "slope": 1.2580459595557594,
+      "adjacent_ratios": [
+        5.76376242258546,
+        56.9358551390502
+      ],
+      "max_slope": 1.5,
+      "max_adjacent_ratio": 50.0
+    },
+    "0.60": {
+      "slope": 1.3755545057402052,
+      "adjacent_ratios": [
+        10.196256516669862,
+        55.29275870420557
+      ],
+      "max_slope": 1.5,
+      "max_adjacent_ratio": 50.0
+    },
+    "0.48": {
+      "slope": 1.2966849709311175,
+      "adjacent_ratios": [
+        9.765808822144185,
+        40.14779738207174
+      ],
+      "max_slope": 1.5,
+      "max_adjacent_ratio": 50.0
+    },
+    "0.36": {
+      "slope": 1.2454196271590159,
+      "adjacent_ratios": [
+        18.275551802084184,
+        16.942159094246467
+      ],
+      "max_slope": 1.5,
+      "max_adjacent_ratio": 50.0
+    },
+    "0.24": {
+      "slope": 1.149658130102268,
+      "adjacent_ratios": [
+        21.730598056965405,
+        9.167366226919306
+      ],
+      "max_slope": 1.5,
+      "max_adjacent_ratio": 50.0
+    },
+    "0.12": {
+      "slope": 1.155270021047177,
+      "adjacent_ratios": [
+        16.70202433295642,
+        12.23970441967872
+      ],
+      "max_slope": 1.5,
+      "max_adjacent_ratio": 50.0
+    }
+  },
+  "density_pairing": {
+    "slot_ladder": [
+      24,
+      240,
+      2400
+    ],
+    "tokens_per_slot": 8,
+    "same_atom_boundaries": true,
+    "same_edit_locations": "empty (remint-only generation change)",
+    "intended_treatment": "v3 boundary-anchor uniqueness density",
+    "residual_confounds": [
+      "one clustered repetition run",
+      "anchor ambiguity",
+      "shingle-frequency skew",
+      "backend tie behavior",
+      "512-token gap-cap activation"
+    ]
+  },
+  "substrate_cache": {
+    "schema": "s4.7-scale-substrate@v1",
+    "ordinary_phase_policy": "source-locked clone per child",
+    "end_to_end_policy": "cold materialization in every child",
+    "source_files": [
+      "src/engine/structure/boundary_anchor.py",
+      "src/engine/structure/handles.py",
+      "src/engine/structure/projection.py",
+      "src/engine/structure/schema/structure_map.schema.json",
+      "tests/harness/materialize.py",
+      "tests/harness/relation.py",
+      "tests/harness/scale_production.py"
+    ],
+    "materialization": {
+      "wide": [
+        {
+          "ledger": {
+            "family": "wide-rebind-production",
+            "L": 25,
+            "K": 25,
+            "A": 1000,
+            "T": 36000,
+            "D": 4
+          },
+          "phase": "materialize",
+          "elapsed_seconds": 0.5145735000260174,
+          "setup_elapsed_seconds": 0.37679020897485316,
+          "monitor_elapsed_seconds": 1.816796958912164,
+          "raw_ru_maxrss_bytes": 58097664,
+          "lifetime_peak_bytes": 58097664,
+          "span_peak_bytes": 58097664,
+          "setup_baseline_bytes": 41549824,
+          "incremental_peak_bytes": 16547840,
+          "sample_interval_seconds": 0.005,
+          "sample_count": 89
+        },
+        {
+          "ledger": {
+            "family": "wide-rebind-production",
+            "L": 250,
+            "K": 250,
+            "A": 10000,
+            "T": 360000,
+            "D": 4
+          },
+          "phase": "materialize",
+          "elapsed_seconds": 6.371527875075117,
+          "setup_elapsed_seconds": 0.24196045799180865,
+          "monitor_elapsed_seconds": 13.57151470798999,
+          "raw_ru_maxrss_bytes": 211501056,
+          "lifetime_peak_bytes": 211501056,
+          "span_peak_bytes": 211189760,
+          "setup_baseline_bytes": 41435136,
+          "incremental_peak_bytes": 169754624,
+          "sample_interval_seconds": 0.005,
+          "sample_count": 1029
+        },
+        {
+          "ledger": {
+            "family": "wide-rebind-production",
+            "L": 2500,
+            "K": 2500,
+            "A": 100000,
+            "T": 3600000,
+            "D": 4
+          },
+          "phase": "materialize",
+          "elapsed_seconds": 43.32690933300182,
+          "setup_elapsed_seconds": 0.36856354190967977,
+          "monitor_elapsed_seconds": 105.21827024989761,
+          "raw_ru_maxrss_bytes": 1160036352,
+          "lifetime_peak_bytes": 1160036352,
+          "span_peak_bytes": 1154465792,
+          "setup_baseline_bytes": 41435136,
+          "incremental_peak_bytes": 1113030656,
+          "sample_interval_seconds": 0.005,
+          "sample_count": 7451
+        }
+      ],
+      "deep": [
+        {
+          "ledger": {
+            "family": "deep-rebind-production",
+            "L": 25,
+            "K": 25,
+            "A": 1000,
+            "T": 36000,
+            "D": 25
+          },
+          "phase": "materialize",
+          "elapsed_seconds": 0.3316210829652846,
+          "setup_elapsed_seconds": 0.253144291928038,
+          "monitor_elapsed_seconds": 1.1783589590340853,
+          "raw_ru_maxrss_bytes": 56344576,
+          "lifetime_peak_bytes": 56344576,
+          "span_peak_bytes": 56344576,
+          "setup_baseline_bytes": 41353216,
+          "incremental_peak_bytes": 14991360,
+          "sample_interval_seconds": 0.005,
+          "sample_count": 54
+        },
+        {
+          "ledger": {
+            "family": "deep-rebind-production",
+            "L": 250,
+            "K": 250,
+            "A": 10000,
+            "T": 360000,
+            "D": 250
+          },
+          "phase": "materialize",
+          "elapsed_seconds": 5.8931808329652995,
+          "setup_elapsed_seconds": 0.350275166798383,
+          "monitor_elapsed_seconds": 12.333126332843676,
+          "raw_ru_maxrss_bytes": 217530368,
+          "lifetime_peak_bytes": 217530368,
+          "span_peak_bytes": 217530368,
+          "setup_baseline_bytes": 41336832,
+          "incremental_peak_bytes": 176193536,
+          "sample_interval_seconds": 0.005,
+          "sample_count": 904
+        },
+        {
+          "ledger": {
+            "family": "deep-rebind-production",
+            "L": 2500,
+            "K": 2500,
+            "A": 100000,
+            "T": 3600000,
+            "D": 2500
+          },
+          "phase": "materialize",
+          "elapsed_seconds": 40.97350975009613,
+          "setup_elapsed_seconds": 0.18784174998290837,
+          "monitor_elapsed_seconds": 103.89775879192166,
+          "raw_ru_maxrss_bytes": 1390379008,
+          "lifetime_peak_bytes": 1390379008,
+          "span_peak_bytes": 1389182976,
+          "setup_baseline_bytes": 41222144,
+          "incremental_peak_bytes": 1347960832,
+          "sample_interval_seconds": 0.005,
+          "sample_count": 6523
+        }
+      ]
+    }
+  },
+  "shapes": {
+    "wide": {
+      "points": [
+        {
+          "ledger": {
+            "family": "wide-rebind-production",
+            "L": 25,
+            "K": 25,
+            "A": 1000,
+            "T": 36000,
+            "D": 4
+          },
+          "phases": {
+            "serialize": {
+              "ledger": {
+                "family": "wide-rebind-production",
+                "L": 25,
+                "K": 25,
+                "A": 1000,
+                "T": 36000,
+                "D": 4
+              },
+              "phase": "serialize",
+              "samples": [
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 25,
+                    "K": 25,
+                    "A": 1000,
+                    "T": 36000,
+                    "D": 4
+                  },
+                  "phase": "serialize",
+                  "elapsed_seconds": 0.4877047501504421,
+                  "setup_elapsed_seconds": 0.8315940829925239,
+                  "monitor_elapsed_seconds": 1.358235000167042,
+                  "raw_ru_maxrss_bytes": 63078400,
+                  "lifetime_peak_bytes": 63078400,
+                  "span_peak_bytes": 62455808,
+                  "setup_baseline_bytes": 62406656,
+                  "incremental_peak_bytes": 49152,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 83
+                },
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 25,
+                    "K": 25,
+                    "A": 1000,
+                    "T": 36000,
+                    "D": 4
+                  },
+                  "phase": "serialize",
+                  "elapsed_seconds": 0.4836341249756515,
+                  "setup_elapsed_seconds": 0.717979040928185,
+                  "monitor_elapsed_seconds": 1.236684207804501,
+                  "raw_ru_maxrss_bytes": 65732608,
+                  "lifetime_peak_bytes": 65732608,
+                  "span_peak_bytes": 65716224,
+                  "setup_baseline_bytes": 64831488,
+                  "incremental_peak_bytes": 884736,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 83
+                },
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 25,
+                    "K": 25,
+                    "A": 1000,
+                    "T": 36000,
+                    "D": 4
+                  },
+                  "phase": "serialize",
+                  "elapsed_seconds": 0.5049507080111653,
+                  "setup_elapsed_seconds": 0.7492228751070797,
+                  "monitor_elapsed_seconds": 1.316051583038643,
+                  "raw_ru_maxrss_bytes": 64339968,
+                  "lifetime_peak_bytes": 64339968,
+                  "span_peak_bytes": 64339968,
+                  "setup_baseline_bytes": 63537152,
+                  "incremental_peak_bytes": 802816,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 83
+                },
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 25,
+                    "K": 25,
+                    "A": 1000,
+                    "T": 36000,
+                    "D": 4
+                  },
+                  "phase": "serialize",
+                  "elapsed_seconds": 0.4856062091421336,
+                  "setup_elapsed_seconds": 0.97683862503618,
+                  "monitor_elapsed_seconds": 1.4947809169534594,
+                  "raw_ru_maxrss_bytes": 65552384,
+                  "lifetime_peak_bytes": 65552384,
+                  "span_peak_bytes": 65536000,
+                  "setup_baseline_bytes": 64634880,
+                  "incremental_peak_bytes": 901120,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 84
+                },
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 25,
+                    "K": 25,
+                    "A": 1000,
+                    "T": 36000,
+                    "D": 4
+                  },
+                  "phase": "serialize",
+                  "elapsed_seconds": 0.6746487501077354,
+                  "setup_elapsed_seconds": 0.8559038750827312,
+                  "monitor_elapsed_seconds": 1.5803313341457397,
+                  "raw_ru_maxrss_bytes": 64372736,
+                  "lifetime_peak_bytes": 64389120,
+                  "span_peak_bytes": 64389120,
+                  "setup_baseline_bytes": 63455232,
+                  "incremental_peak_bytes": 933888,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 109
+                }
+              ],
+              "median_seconds": 0.4877047501504421,
+              "median_setup_seconds": 0.8315940829925239,
+              "median_monitor_seconds": 1.358235000167042,
+              "median_raw_ru_maxrss_bytes": 64372736.0,
+              "median_lifetime_peak_bytes": 64389120.0,
+              "median_span_peak_bytes": 64389120.0,
+              "median_setup_baseline_bytes": 63537152.0,
+              "median_incremental_peak_bytes": 884736.0
+            },
+            "load": {
+              "ledger": {
+                "family": "wide-rebind-production",
+                "L": 25,
+                "K": 25,
+                "A": 1000,
+                "T": 36000,
+                "D": 4
+              },
+              "phase": "load",
+              "samples": [
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 25,
+                    "K": 25,
+                    "A": 1000,
+                    "T": 36000,
+                    "D": 4
+                  },
+                  "phase": "load",
+                  "elapsed_seconds": 0.5316187089774758,
+                  "setup_elapsed_seconds": 0.39557279110886157,
+                  "monitor_elapsed_seconds": 0.9576312080025673,
+                  "raw_ru_maxrss_bytes": 63488000,
+                  "lifetime_peak_bytes": 63488000,
+                  "span_peak_bytes": 63242240,
+                  "setup_baseline_bytes": 46628864,
+                  "incremental_peak_bytes": 16613376,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 89
+                },
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 25,
+                    "K": 25,
+                    "A": 1000,
+                    "T": 36000,
+                    "D": 4
+                  },
+                  "phase": "load",
+                  "elapsed_seconds": 0.4366265421267599,
+                  "setup_elapsed_seconds": 0.2581814161967486,
+                  "monitor_elapsed_seconds": 0.7524161660112441,
+                  "raw_ru_maxrss_bytes": 65028096,
+                  "lifetime_peak_bytes": 65028096,
+                  "span_peak_bytes": 64798720,
+                  "setup_baseline_bytes": 45858816,
+                  "incremental_peak_bytes": 18939904,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 74
+                },
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 25,
+                    "K": 25,
+                    "A": 1000,
+                    "T": 36000,
+                    "D": 4
+                  },
+                  "phase": "load",
+                  "elapsed_seconds": 0.6224743749480695,
+                  "setup_elapsed_seconds": 0.38937141583301127,
+                  "monitor_elapsed_seconds": 1.0744338328950107,
+                  "raw_ru_maxrss_bytes": 63635456,
+                  "lifetime_peak_bytes": 63635456,
+                  "span_peak_bytes": 63455232,
+                  "setup_baseline_bytes": 46940160,
+                  "incremental_peak_bytes": 16515072,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 99
+                },
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 25,
+                    "K": 25,
+                    "A": 1000,
+                    "T": 36000,
+                    "D": 4
+                  },
+                  "phase": "load",
+                  "elapsed_seconds": 0.5314688750077039,
+                  "setup_elapsed_seconds": 0.24239537492394447,
+                  "monitor_elapsed_seconds": 0.8093699999153614,
+                  "raw_ru_maxrss_bytes": 65978368,
+                  "lifetime_peak_bytes": 65978368,
+                  "span_peak_bytes": 65896448,
+                  "setup_baseline_bytes": 45531136,
+                  "incremental_peak_bytes": 20365312,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 79
+                },
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 25,
+                    "K": 25,
+                    "A": 1000,
+                    "T": 36000,
+                    "D": 4
+                  },
+                  "phase": "load",
+                  "elapsed_seconds": 0.4720931660849601,
+                  "setup_elapsed_seconds": 0.2821961250156164,
+                  "monitor_elapsed_seconds": 0.8030446660704911,
+                  "raw_ru_maxrss_bytes": 64585728,
+                  "lifetime_peak_bytes": 64585728,
+                  "span_peak_bytes": 64585728,
+                  "setup_baseline_bytes": 46891008,
+                  "incremental_peak_bytes": 17694720,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 80
+                }
+              ],
+              "median_seconds": 0.5314688750077039,
+              "median_setup_seconds": 0.2821961250156164,
+              "median_monitor_seconds": 0.8093699999153614,
+              "median_raw_ru_maxrss_bytes": 64585728.0,
+              "median_lifetime_peak_bytes": 64585728.0,
+              "median_span_peak_bytes": 64585728.0,
+              "median_setup_baseline_bytes": 46628864.0,
+              "median_incremental_peak_bytes": 17694720.0
+            },
+            "index": {
+              "ledger": {
+                "family": "wide-rebind-production",
+                "L": 25,
+                "K": 25,
+                "A": 1000,
+                "T": 36000,
+                "D": 4
+              },
+              "phase": "index",
+              "samples": [
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 25,
+                    "K": 25,
+                    "A": 1000,
+                    "T": 36000,
+                    "D": 4
+                  },
+                  "phase": "index",
+                  "elapsed_seconds": 0.0015726671554148197,
+                  "setup_elapsed_seconds": 0.7316590829286724,
+                  "monitor_elapsed_seconds": 0.7683614168781787,
+                  "raw_ru_maxrss_bytes": 63619072,
+                  "lifetime_peak_bytes": 63619072,
+                  "span_peak_bytes": 63619072,
+                  "setup_baseline_bytes": 63586304,
+                  "incremental_peak_bytes": 32768,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 1
+                },
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 25,
+                    "K": 25,
+                    "A": 1000,
+                    "T": 36000,
+                    "D": 4
+                  },
+                  "phase": "index",
+                  "elapsed_seconds": 0.002807582961395383,
+                  "setup_elapsed_seconds": 0.6586259591858834,
+                  "monitor_elapsed_seconds": 0.7181286250706762,
+                  "raw_ru_maxrss_bytes": 63635456,
+                  "lifetime_peak_bytes": 63635456,
+                  "span_peak_bytes": 63635456,
+                  "setup_baseline_bytes": 63586304,
+                  "incremental_peak_bytes": 49152,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 1
+                },
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 25,
+                    "K": 25,
+                    "A": 1000,
+                    "T": 36000,
+                    "D": 4
+                  },
+                  "phase": "index",
+                  "elapsed_seconds": 0.0016656247898936272,
+                  "setup_elapsed_seconds": 0.7503097080625594,
+                  "monitor_elapsed_seconds": 0.7876353331375867,
+                  "raw_ru_maxrss_bytes": 63733760,
+                  "lifetime_peak_bytes": 63733760,
+                  "span_peak_bytes": 63733760,
+                  "setup_baseline_bytes": 63700992,
+                  "incremental_peak_bytes": 32768,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 1
+                },
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 25,
+                    "K": 25,
+                    "A": 1000,
+                    "T": 36000,
+                    "D": 4
+                  },
+                  "phase": "index",
+                  "elapsed_seconds": 0.003469291143119335,
+                  "setup_elapsed_seconds": 1.0037336251698434,
+                  "monitor_elapsed_seconds": 1.0797730840276927,
+                  "raw_ru_maxrss_bytes": 64307200,
+                  "lifetime_peak_bytes": 64307200,
+                  "span_peak_bytes": 64307200,
+                  "setup_baseline_bytes": 64258048,
+                  "incremental_peak_bytes": 49152,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 1
+                },
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 25,
+                    "K": 25,
+                    "A": 1000,
+                    "T": 36000,
+                    "D": 4
+                  },
+                  "phase": "index",
+                  "elapsed_seconds": 0.0014000830706208944,
+                  "setup_elapsed_seconds": 0.79372225003317,
+                  "monitor_elapsed_seconds": 0.8444116669707,
+                  "raw_ru_maxrss_bytes": 63324160,
+                  "lifetime_peak_bytes": 63324160,
+                  "span_peak_bytes": 63324160,
+                  "setup_baseline_bytes": 63275008,
+                  "incremental_peak_bytes": 49152,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 1
+                }
+              ],
+              "median_seconds": 0.0016656247898936272,
+              "median_setup_seconds": 0.7503097080625594,
+              "median_monitor_seconds": 0.7876353331375867,
+              "median_raw_ru_maxrss_bytes": 63635456.0,
+              "median_lifetime_peak_bytes": 63635456.0,
+              "median_span_peak_bytes": 63635456.0,
+              "median_setup_baseline_bytes": 63586304.0,
+              "median_incremental_peak_bytes": 49152.0
+            },
+            "rebind": {
+              "ledger": {
+                "family": "wide-rebind-production",
+                "L": 25,
+                "K": 25,
+                "A": 1000,
+                "T": 36000,
+                "D": 4
+              },
+              "phase": "rebind",
+              "samples": [
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 25,
+                    "K": 25,
+                    "A": 1000,
+                    "T": 36000,
+                    "D": 4
+                  },
+                  "phase": "rebind",
+                  "elapsed_seconds": 0.7298000419978052,
+                  "setup_elapsed_seconds": 0.7081902909558266,
+                  "monitor_elapsed_seconds": 1.4938970408402383,
+                  "raw_ru_maxrss_bytes": 89440256,
+                  "lifetime_peak_bytes": 89440256,
+                  "span_peak_bytes": 89440256,
+                  "setup_baseline_bytes": 64536576,
+                  "incremental_peak_bytes": 24903680,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 113
+                },
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 25,
+                    "K": 25,
+                    "A": 1000,
+                    "T": 36000,
+                    "D": 4
+                  },
+                  "phase": "rebind",
+                  "elapsed_seconds": 0.534298709128052,
+                  "setup_elapsed_seconds": 0.7257505841553211,
+                  "monitor_elapsed_seconds": 1.2900422089733183,
+                  "raw_ru_maxrss_bytes": 91914240,
+                  "lifetime_peak_bytes": 91914240,
+                  "span_peak_bytes": 91914240,
+                  "setup_baseline_bytes": 63242240,
+                  "incremental_peak_bytes": 28672000,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 87
+                },
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 25,
+                    "K": 25,
+                    "A": 1000,
+                    "T": 36000,
+                    "D": 4
+                  },
+                  "phase": "rebind",
+                  "elapsed_seconds": 0.4751992919482291,
+                  "setup_elapsed_seconds": 0.6915805411990732,
+                  "monitor_elapsed_seconds": 1.2024077081587166,
+                  "raw_ru_maxrss_bytes": 89014272,
+                  "lifetime_peak_bytes": 89014272,
+                  "span_peak_bytes": 89014272,
+                  "setup_baseline_bytes": 63455232,
+                  "incremental_peak_bytes": 25559040,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 80
+                },
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 25,
+                    "K": 25,
+                    "A": 1000,
+                    "T": 36000,
+                    "D": 4
+                  },
+                  "phase": "rebind",
+                  "elapsed_seconds": 0.5175835830159485,
+                  "setup_elapsed_seconds": 0.6817415000405163,
+                  "monitor_elapsed_seconds": 1.2302985829301178,
+                  "raw_ru_maxrss_bytes": 87654400,
+                  "lifetime_peak_bytes": 87654400,
+                  "span_peak_bytes": 87654400,
+                  "setup_baseline_bytes": 62521344,
+                  "incremental_peak_bytes": 25133056,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 85
+                },
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 25,
+                    "K": 25,
+                    "A": 1000,
+                    "T": 36000,
+                    "D": 4
+                  },
+                  "phase": "rebind",
+                  "elapsed_seconds": 0.6459285418968648,
+                  "setup_elapsed_seconds": 0.7861118328291923,
+                  "monitor_elapsed_seconds": 1.478913749800995,
+                  "raw_ru_maxrss_bytes": 87719936,
+                  "lifetime_peak_bytes": 87719936,
+                  "span_peak_bytes": 87719936,
+                  "setup_baseline_bytes": 63373312,
+                  "incremental_peak_bytes": 24346624,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 102
+                }
+              ],
+              "median_seconds": 0.534298709128052,
+              "median_setup_seconds": 0.7081902909558266,
+              "median_monitor_seconds": 1.2900422089733183,
+              "median_raw_ru_maxrss_bytes": 89014272.0,
+              "median_lifetime_peak_bytes": 89014272.0,
+              "median_span_peak_bytes": 89014272.0,
+              "median_setup_baseline_bytes": 63373312.0,
+              "median_incremental_peak_bytes": 25133056.0
+            },
+            "end_to_end": {
+              "ledger": {
+                "family": "wide-rebind-production",
+                "L": 25,
+                "K": 25,
+                "A": 1000,
+                "T": 36000,
+                "D": 4
+              },
+              "phase": "end_to_end",
+              "samples": [
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 25,
+                    "K": 25,
+                    "A": 1000,
+                    "T": 36000,
+                    "D": 4
+                  },
+                  "phase": "end_to_end",
+                  "elapsed_seconds": 2.5964953331276774,
+                  "setup_elapsed_seconds": 0.8802855408284813,
+                  "monitor_elapsed_seconds": 3.5940260000061244,
+                  "raw_ru_maxrss_bytes": 96043008,
+                  "lifetime_peak_bytes": 96043008,
+                  "span_peak_bytes": 95961088,
+                  "setup_baseline_bytes": 57245696,
+                  "incremental_peak_bytes": 38715392,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 329
+                },
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 25,
+                    "K": 25,
+                    "A": 1000,
+                    "T": 36000,
+                    "D": 4
+                  },
+                  "phase": "end_to_end",
+                  "elapsed_seconds": 1.4853927090298384,
+                  "setup_elapsed_seconds": 0.8948755830060691,
+                  "monitor_elapsed_seconds": 2.4166492908261716,
+                  "raw_ru_maxrss_bytes": 98304000,
+                  "lifetime_peak_bytes": 98304000,
+                  "span_peak_bytes": 98304000,
+                  "setup_baseline_bytes": 56541184,
+                  "incremental_peak_bytes": 41762816,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 253
+                },
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 25,
+                    "K": 25,
+                    "A": 1000,
+                    "T": 36000,
+                    "D": 4
+                  },
+                  "phase": "end_to_end",
+                  "elapsed_seconds": 1.308036084054038,
+                  "setup_elapsed_seconds": 0.8264858750626445,
+                  "monitor_elapsed_seconds": 2.1711462498642504,
+                  "raw_ru_maxrss_bytes": 98418688,
+                  "lifetime_peak_bytes": 98418688,
+                  "span_peak_bytes": 98418688,
+                  "setup_baseline_bytes": 57147392,
+                  "incremental_peak_bytes": 41271296,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 227
+                },
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 25,
+                    "K": 25,
+                    "A": 1000,
+                    "T": 36000,
+                    "D": 4
+                  },
+                  "phase": "end_to_end",
+                  "elapsed_seconds": 1.5258403329644352,
+                  "setup_elapsed_seconds": 0.8649731250479817,
+                  "monitor_elapsed_seconds": 2.4338111251126975,
+                  "raw_ru_maxrss_bytes": 97452032,
+                  "lifetime_peak_bytes": 97452032,
+                  "span_peak_bytes": 97452032,
+                  "setup_baseline_bytes": 58441728,
+                  "incremental_peak_bytes": 39010304,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 244
+                },
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 25,
+                    "K": 25,
+                    "A": 1000,
+                    "T": 36000,
+                    "D": 4
+                  },
+                  "phase": "end_to_end",
+                  "elapsed_seconds": 1.770723707973957,
+                  "setup_elapsed_seconds": 0.7545302920043468,
+                  "monitor_elapsed_seconds": 2.570742125157267,
+                  "raw_ru_maxrss_bytes": 96256000,
+                  "lifetime_peak_bytes": 96256000,
+                  "span_peak_bytes": 96256000,
+                  "setup_baseline_bytes": 57769984,
+                  "incremental_peak_bytes": 38486016,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 284
+                }
+              ],
+              "median_seconds": 1.5258403329644352,
+              "median_setup_seconds": 0.8649731250479817,
+              "median_monitor_seconds": 2.4338111251126975,
+              "median_raw_ru_maxrss_bytes": 97452032.0,
+              "median_lifetime_peak_bytes": 97452032.0,
+              "median_span_peak_bytes": 97452032.0,
+              "median_setup_baseline_bytes": 57245696.0,
+              "median_incremental_peak_bytes": 39010304.0
+            }
+          }
+        },
+        {
+          "ledger": {
+            "family": "wide-rebind-production",
+            "L": 250,
+            "K": 250,
+            "A": 10000,
+            "T": 360000,
+            "D": 4
+          },
+          "phases": {
+            "serialize": {
+              "ledger": {
+                "family": "wide-rebind-production",
+                "L": 250,
+                "K": 250,
+                "A": 10000,
+                "T": 360000,
+                "D": 4
+              },
+              "phase": "serialize",
+              "samples": [
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 250,
+                    "K": 250,
+                    "A": 10000,
+                    "T": 360000,
+                    "D": 4
+                  },
+                  "phase": "serialize",
+                  "elapsed_seconds": 3.881853374885395,
+                  "setup_elapsed_seconds": 3.9770202920772135,
+                  "monitor_elapsed_seconds": 7.978691417025402,
+                  "raw_ru_maxrss_bytes": 278937600,
+                  "lifetime_peak_bytes": 278937600,
+                  "span_peak_bytes": 190218240,
+                  "setup_baseline_bytes": 181895168,
+                  "incremental_peak_bytes": 8323072,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 664
+                },
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 250,
+                    "K": 250,
+                    "A": 10000,
+                    "T": 360000,
+                    "D": 4
+                  },
+                  "phase": "serialize",
+                  "elapsed_seconds": 3.011338874930516,
+                  "setup_elapsed_seconds": 4.6774276660289615,
+                  "monitor_elapsed_seconds": 7.748811250086874,
+                  "raw_ru_maxrss_bytes": 272072704,
+                  "lifetime_peak_bytes": 272072704,
+                  "span_peak_bytes": 212303872,
+                  "setup_baseline_bytes": 90898432,
+                  "incremental_peak_bytes": 121405440,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 533
+                },
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 250,
+                    "K": 250,
+                    "A": 10000,
+                    "T": 360000,
+                    "D": 4
+                  },
+                  "phase": "serialize",
+                  "elapsed_seconds": 4.176822749897838,
+                  "setup_elapsed_seconds": 4.103521167067811,
+                  "monitor_elapsed_seconds": 8.346519625047222,
+                  "raw_ru_maxrss_bytes": 281722880,
+                  "lifetime_peak_bytes": 281722880,
+                  "span_peak_bytes": 218546176,
+                  "setup_baseline_bytes": 210239488,
+                  "incremental_peak_bytes": 8306688,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 706
+                },
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 250,
+                    "K": 250,
+                    "A": 10000,
+                    "T": 360000,
+                    "D": 4
+                  },
+                  "phase": "serialize",
+                  "elapsed_seconds": 4.556358124827966,
+                  "setup_elapsed_seconds": 5.336406416958198,
+                  "monitor_elapsed_seconds": 9.965355791850016,
+                  "raw_ru_maxrss_bytes": 278511616,
+                  "lifetime_peak_bytes": 278511616,
+                  "span_peak_bytes": 211468288,
+                  "setup_baseline_bytes": 170819584,
+                  "incremental_peak_bytes": 40648704,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 782
+                },
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 250,
+                    "K": 250,
+                    "A": 10000,
+                    "T": 360000,
+                    "D": 4
+                  },
+                  "phase": "serialize",
+                  "elapsed_seconds": 4.53819854115136,
+                  "setup_elapsed_seconds": 6.083409208105877,
+                  "monitor_elapsed_seconds": 10.685557417105883,
+                  "raw_ru_maxrss_bytes": 283705344,
+                  "lifetime_peak_bytes": 283705344,
+                  "span_peak_bytes": 182435840,
+                  "setup_baseline_bytes": 91193344,
+                  "incremental_peak_bytes": 91242496,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 753
+                }
+              ],
+              "median_seconds": 4.176822749897838,
+              "median_setup_seconds": 4.6774276660289615,
+              "median_monitor_seconds": 8.346519625047222,
+              "median_raw_ru_maxrss_bytes": 278937600.0,
+              "median_lifetime_peak_bytes": 278937600.0,
+              "median_span_peak_bytes": 211468288.0,
+              "median_setup_baseline_bytes": 170819584.0,
+              "median_incremental_peak_bytes": 40648704.0
+            },
+            "load": {
+              "ledger": {
+                "family": "wide-rebind-production",
+                "L": 250,
+                "K": 250,
+                "A": 10000,
+                "T": 360000,
+                "D": 4
+              },
+              "phase": "load",
+              "samples": [
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 250,
+                    "K": 250,
+                    "A": 10000,
+                    "T": 360000,
+                    "D": 4
+                  },
+                  "phase": "load",
+                  "elapsed_seconds": 5.551822583889589,
+                  "setup_elapsed_seconds": 0.49059912492521107,
+                  "monitor_elapsed_seconds": 6.1883134169038385,
+                  "raw_ru_maxrss_bytes": 278822912,
+                  "lifetime_peak_bytes": 278822912,
+                  "span_peak_bytes": 276480000,
+                  "setup_baseline_bytes": 96649216,
+                  "incremental_peak_bytes": 179830784,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 888
+                },
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 250,
+                    "K": 250,
+                    "A": 10000,
+                    "T": 360000,
+                    "D": 4
+                  },
+                  "phase": "load",
+                  "elapsed_seconds": 5.00223712506704,
+                  "setup_elapsed_seconds": 0.3096491249743849,
+                  "monitor_elapsed_seconds": 5.423160374863073,
+                  "raw_ru_maxrss_bytes": 276185088,
+                  "lifetime_peak_bytes": 276185088,
+                  "span_peak_bytes": 276168704,
+                  "setup_baseline_bytes": 96534528,
+                  "incremental_peak_bytes": 179634176,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 833
+                },
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 250,
+                    "K": 250,
+                    "A": 10000,
+                    "T": 360000,
+                    "D": 4
+                  },
+                  "phase": "load",
+                  "elapsed_seconds": 5.186085124965757,
+                  "setup_elapsed_seconds": 0.306843499885872,
+                  "monitor_elapsed_seconds": 5.6105555419344455,
+                  "raw_ru_maxrss_bytes": 274137088,
+                  "lifetime_peak_bytes": 274137088,
+                  "span_peak_bytes": 272367616,
+                  "setup_baseline_bytes": 97533952,
+                  "incremental_peak_bytes": 174833664,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 848
+                },
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 250,
+                    "K": 250,
+                    "A": 10000,
+                    "T": 360000,
+                    "D": 4
+                  },
+                  "phase": "load",
+                  "elapsed_seconds": 5.608902708161622,
+                  "setup_elapsed_seconds": 0.4165533750783652,
+                  "monitor_elapsed_seconds": 6.115259750047699,
+                  "raw_ru_maxrss_bytes": 275611648,
+                  "lifetime_peak_bytes": 275611648,
+                  "span_peak_bytes": 275611648,
+                  "setup_baseline_bytes": 97288192,
+                  "incremental_peak_bytes": 178323456,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 914
+                },
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 250,
+                    "K": 250,
+                    "A": 10000,
+                    "T": 360000,
+                    "D": 4
+                  },
+                  "phase": "load",
+                  "elapsed_seconds": 4.732077499851584,
+                  "setup_elapsed_seconds": 0.2557915421202779,
+                  "monitor_elapsed_seconds": 5.116210542153567,
+                  "raw_ru_maxrss_bytes": 283672576,
+                  "lifetime_peak_bytes": 283672576,
+                  "span_peak_bytes": 283672576,
+                  "setup_baseline_bytes": 97648640,
+                  "incremental_peak_bytes": 186023936,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 783
+                }
+              ],
+              "median_seconds": 5.186085124965757,
+              "median_setup_seconds": 0.3096491249743849,
+              "median_monitor_seconds": 5.6105555419344455,
+              "median_raw_ru_maxrss_bytes": 276185088.0,
+              "median_lifetime_peak_bytes": 276185088.0,
+              "median_span_peak_bytes": 276168704.0,
+              "median_setup_baseline_bytes": 97288192.0,
+              "median_incremental_peak_bytes": 179634176.0
+            },
+            "index": {
+              "ledger": {
+                "family": "wide-rebind-production",
+                "L": 250,
+                "K": 250,
+                "A": 10000,
+                "T": 360000,
+                "D": 4
+              },
+              "phase": "index",
+              "samples": [
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 250,
+                    "K": 250,
+                    "A": 10000,
+                    "T": 360000,
+                    "D": 4
+                  },
+                  "phase": "index",
+                  "elapsed_seconds": 0.057163374964147806,
+                  "setup_elapsed_seconds": 5.351056500105187,
+                  "monitor_elapsed_seconds": 5.503492207964882,
+                  "raw_ru_maxrss_bytes": 278839296,
+                  "lifetime_peak_bytes": 278839296,
+                  "span_peak_bytes": 178929664,
+                  "setup_baseline_bytes": 175718400,
+                  "incremental_peak_bytes": 3211264,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 10
+                },
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 250,
+                    "K": 250,
+                    "A": 10000,
+                    "T": 360000,
+                    "D": 4
+                  },
+                  "phase": "index",
+                  "elapsed_seconds": 0.036281917011365294,
+                  "setup_elapsed_seconds": 6.459035333944485,
+                  "monitor_elapsed_seconds": 6.604492666898295,
+                  "raw_ru_maxrss_bytes": 269336576,
+                  "lifetime_peak_bytes": 269336576,
+                  "span_peak_bytes": 180060160,
+                  "setup_baseline_bytes": 178667520,
+                  "incremental_peak_bytes": 1392640,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 6
+                },
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 250,
+                    "K": 250,
+                    "A": 10000,
+                    "T": 360000,
+                    "D": 4
+                  },
+                  "phase": "index",
+                  "elapsed_seconds": 0.045730749843642116,
+                  "setup_elapsed_seconds": 5.155393874971196,
+                  "monitor_elapsed_seconds": 5.331297290977091,
+                  "raw_ru_maxrss_bytes": 281067520,
+                  "lifetime_peak_bytes": 281067520,
+                  "span_peak_bytes": 185679872,
+                  "setup_baseline_bytes": 183615488,
+                  "incremental_peak_bytes": 2064384,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 8
+                },
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 250,
+                    "K": 250,
+                    "A": 10000,
+                    "T": 360000,
+                    "D": 4
+                  },
+                  "phase": "index",
+                  "elapsed_seconds": 0.02347608283162117,
+                  "setup_elapsed_seconds": 6.333832124946639,
+                  "monitor_elapsed_seconds": 6.453509249957278,
+                  "raw_ru_maxrss_bytes": 266977280,
+                  "lifetime_peak_bytes": 266977280,
+                  "span_peak_bytes": 182648832,
+                  "setup_baseline_bytes": 181305344,
+                  "incremental_peak_bytes": 1343488,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 4
+                },
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 250,
+                    "K": 250,
+                    "A": 10000,
+                    "T": 360000,
+                    "D": 4
+                  },
+                  "phase": "index",
+                  "elapsed_seconds": 0.04416020819917321,
+                  "setup_elapsed_seconds": 5.506968874949962,
+                  "monitor_elapsed_seconds": 5.662561249919236,
+                  "raw_ru_maxrss_bytes": 283508736,
+                  "lifetime_peak_bytes": 283508736,
+                  "span_peak_bytes": 167460864,
+                  "setup_baseline_bytes": 164741120,
+                  "incremental_peak_bytes": 2719744,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 6
+                }
+              ],
+              "median_seconds": 0.04416020819917321,
+              "median_setup_seconds": 5.506968874949962,
+              "median_monitor_seconds": 5.662561249919236,
+              "median_raw_ru_maxrss_bytes": 278839296.0,
+              "median_lifetime_peak_bytes": 278839296.0,
+              "median_span_peak_bytes": 180060160.0,
+              "median_setup_baseline_bytes": 178667520.0,
+              "median_incremental_peak_bytes": 2064384.0
+            },
+            "rebind": {
+              "ledger": {
+                "family": "wide-rebind-production",
+                "L": 250,
+                "K": 250,
+                "A": 10000,
+                "T": 360000,
+                "D": 4
+              },
+              "phase": "rebind",
+              "samples": [
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 250,
+                    "K": 250,
+                    "A": 10000,
+                    "T": 360000,
+                    "D": 4
+                  },
+                  "phase": "rebind",
+                  "elapsed_seconds": 5.488528999965638,
+                  "setup_elapsed_seconds": 6.619911832967773,
+                  "monitor_elapsed_seconds": 12.270107708172873,
+                  "raw_ru_maxrss_bytes": 467271680,
+                  "lifetime_peak_bytes": 467271680,
+                  "span_peak_bytes": 467271680,
+                  "setup_baseline_bytes": 168230912,
+                  "incremental_peak_bytes": 299040768,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 932
+                },
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 250,
+                    "K": 250,
+                    "A": 10000,
+                    "T": 360000,
+                    "D": 4
+                  },
+                  "phase": "rebind",
+                  "elapsed_seconds": 5.935378083027899,
+                  "setup_elapsed_seconds": 8.381261375034228,
+                  "monitor_elapsed_seconds": 14.445952583104372,
+                  "raw_ru_maxrss_bytes": 467435520,
+                  "lifetime_peak_bytes": 467435520,
+                  "span_peak_bytes": 467435520,
+                  "setup_baseline_bytes": 100827136,
+                  "incremental_peak_bytes": 366608384,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 1006
+                },
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 250,
+                    "K": 250,
+                    "A": 10000,
+                    "T": 360000,
+                    "D": 4
+                  },
+                  "phase": "rebind",
+                  "elapsed_seconds": 5.681836792035028,
+                  "setup_elapsed_seconds": 6.301605375017971,
+                  "monitor_elapsed_seconds": 12.07000825018622,
+                  "raw_ru_maxrss_bytes": 468353024,
+                  "lifetime_peak_bytes": 468353024,
+                  "span_peak_bytes": 468353024,
+                  "setup_baseline_bytes": 125353984,
+                  "incremental_peak_bytes": 342999040,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 982
+                },
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 250,
+                    "K": 250,
+                    "A": 10000,
+                    "T": 360000,
+                    "D": 4
+                  },
+                  "phase": "rebind",
+                  "elapsed_seconds": 6.078316666185856,
+                  "setup_elapsed_seconds": 5.753574416041374,
+                  "monitor_elapsed_seconds": 11.952197666047141,
+                  "raw_ru_maxrss_bytes": 470827008,
+                  "lifetime_peak_bytes": 470827008,
+                  "span_peak_bytes": 470450176,
+                  "setup_baseline_bytes": 142753792,
+                  "incremental_peak_bytes": 327696384,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 1031
+                },
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 250,
+                    "K": 250,
+                    "A": 10000,
+                    "T": 360000,
+                    "D": 4
+                  },
+                  "phase": "rebind",
+                  "elapsed_seconds": 9.320415416965261,
+                  "setup_elapsed_seconds": 7.403968208003789,
+                  "monitor_elapsed_seconds": 16.810675124870613,
+                  "raw_ru_maxrss_bytes": 380485632,
+                  "lifetime_peak_bytes": 380485632,
+                  "span_peak_bytes": 380354560,
+                  "setup_baseline_bytes": 97124352,
+                  "incremental_peak_bytes": 283230208,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 1285
+                }
+              ],
+              "median_seconds": 5.935378083027899,
+              "median_setup_seconds": 6.619911832967773,
+              "median_monitor_seconds": 12.270107708172873,
+              "median_raw_ru_maxrss_bytes": 467435520.0,
+              "median_lifetime_peak_bytes": 467435520.0,
+              "median_span_peak_bytes": 467435520.0,
+              "median_setup_baseline_bytes": 125353984.0,
+              "median_incremental_peak_bytes": 327696384.0
+            },
+            "end_to_end": {
+              "ledger": {
+                "family": "wide-rebind-production",
+                "L": 250,
+                "K": 250,
+                "A": 10000,
+                "T": 360000,
+                "D": 4
+              },
+              "phase": "end_to_end",
+              "samples": [
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 250,
+                    "K": 250,
+                    "A": 10000,
+                    "T": 360000,
+                    "D": 4
+                  },
+                  "phase": "end_to_end",
+                  "elapsed_seconds": 13.589280458865687,
+                  "setup_elapsed_seconds": 7.845732958987355,
+                  "monitor_elapsed_seconds": 21.51489029196091,
+                  "raw_ru_maxrss_bytes": 536248320,
+                  "lifetime_peak_bytes": 536248320,
+                  "span_peak_bytes": 536199168,
+                  "setup_baseline_bytes": 144556032,
+                  "incremental_peak_bytes": 391643136,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 2341
+                },
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 250,
+                    "K": 250,
+                    "A": 10000,
+                    "T": 360000,
+                    "D": 4
+                  },
+                  "phase": "end_to_end",
+                  "elapsed_seconds": 11.570061792153865,
+                  "setup_elapsed_seconds": 7.343340166145936,
+                  "monitor_elapsed_seconds": 18.992099958006293,
+                  "raw_ru_maxrss_bytes": 549634048,
+                  "lifetime_peak_bytes": 549634048,
+                  "span_peak_bytes": 549634048,
+                  "setup_baseline_bytes": 160382976,
+                  "incremental_peak_bytes": 389251072,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 2012
+                },
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 250,
+                    "K": 250,
+                    "A": 10000,
+                    "T": 360000,
+                    "D": 4
+                  },
+                  "phase": "end_to_end",
+                  "elapsed_seconds": 11.603528416948393,
+                  "setup_elapsed_seconds": 7.3010392498690635,
+                  "monitor_elapsed_seconds": 18.99948333390057,
+                  "raw_ru_maxrss_bytes": 555696128,
+                  "lifetime_peak_bytes": 555696128,
+                  "span_peak_bytes": 555696128,
+                  "setup_baseline_bytes": 133988352,
+                  "incremental_peak_bytes": 421707776,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 2023
+                },
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 250,
+                    "K": 250,
+                    "A": 10000,
+                    "T": 360000,
+                    "D": 4
+                  },
+                  "phase": "end_to_end",
+                  "elapsed_seconds": 13.506539250025526,
+                  "setup_elapsed_seconds": 8.694699499988928,
+                  "monitor_elapsed_seconds": 22.319454750046134,
+                  "raw_ru_maxrss_bytes": 557891584,
+                  "lifetime_peak_bytes": 557891584,
+                  "span_peak_bytes": 557875200,
+                  "setup_baseline_bytes": 129777664,
+                  "incremental_peak_bytes": 428097536,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 2348
+                },
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 250,
+                    "K": 250,
+                    "A": 10000,
+                    "T": 360000,
+                    "D": 4
+                  },
+                  "phase": "end_to_end",
+                  "elapsed_seconds": 11.229060542071238,
+                  "setup_elapsed_seconds": 7.5363800001796335,
+                  "monitor_elapsed_seconds": 18.84283920796588,
+                  "raw_ru_maxrss_bytes": 555810816,
+                  "lifetime_peak_bytes": 555810816,
+                  "span_peak_bytes": 555810816,
+                  "setup_baseline_bytes": 135135232,
+                  "incremental_peak_bytes": 420675584,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 1959
+                }
+              ],
+              "median_seconds": 11.603528416948393,
+              "median_setup_seconds": 7.5363800001796335,
+              "median_monitor_seconds": 18.99948333390057,
+              "median_raw_ru_maxrss_bytes": 555696128.0,
+              "median_lifetime_peak_bytes": 555696128.0,
+              "median_span_peak_bytes": 555696128.0,
+              "median_setup_baseline_bytes": 135135232.0,
+              "median_incremental_peak_bytes": 420675584.0
+            }
+          }
+        },
+        {
+          "ledger": {
+            "family": "wide-rebind-production",
+            "L": 2500,
+            "K": 2500,
+            "A": 100000,
+            "T": 3600000,
+            "D": 4
+          },
+          "phases": {
+            "serialize": {
+              "ledger": {
+                "family": "wide-rebind-production",
+                "L": 2500,
+                "K": 2500,
+                "A": 100000,
+                "T": 3600000,
+                "D": 4
+              },
+              "phase": "serialize",
+              "samples": [
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 2500,
+                    "K": 2500,
+                    "A": 100000,
+                    "T": 3600000,
+                    "D": 4
+                  },
+                  "phase": "serialize",
+                  "elapsed_seconds": 29.108691375004128,
+                  "setup_elapsed_seconds": 33.53801204194315,
+                  "monitor_elapsed_seconds": 63.526942166965455,
+                  "raw_ru_maxrss_bytes": 1334050816,
+                  "lifetime_peak_bytes": 1334050816,
+                  "span_peak_bytes": 1334050816,
+                  "setup_baseline_bytes": 644382720,
+                  "incremental_peak_bytes": 689668096,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 5133
+                },
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 2500,
+                    "K": 2500,
+                    "A": 100000,
+                    "T": 3600000,
+                    "D": 4
+                  },
+                  "phase": "serialize",
+                  "elapsed_seconds": 28.33288799994625,
+                  "setup_elapsed_seconds": 32.56137620913796,
+                  "monitor_elapsed_seconds": 61.73872675001621,
+                  "raw_ru_maxrss_bytes": 1338671104,
+                  "lifetime_peak_bytes": 1338671104,
+                  "span_peak_bytes": 1338671104,
+                  "setup_baseline_bytes": 654639104,
+                  "incremental_peak_bytes": 684032000,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 5008
+                },
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 2500,
+                    "K": 2500,
+                    "A": 100000,
+                    "T": 3600000,
+                    "D": 4
+                  },
+                  "phase": "serialize",
+                  "elapsed_seconds": 28.19725283398293,
+                  "setup_elapsed_seconds": 32.72763912496157,
+                  "monitor_elapsed_seconds": 61.680585249792784,
+                  "raw_ru_maxrss_bytes": 1554071552,
+                  "lifetime_peak_bytes": 1554071552,
+                  "span_peak_bytes": 1554071552,
+                  "setup_baseline_bytes": 896221184,
+                  "incremental_peak_bytes": 657850368,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 4999
+                },
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 2500,
+                    "K": 2500,
+                    "A": 100000,
+                    "T": 3600000,
+                    "D": 4
+                  },
+                  "phase": "serialize",
+                  "elapsed_seconds": 30.216712875058874,
+                  "setup_elapsed_seconds": 33.12693208409473,
+                  "monitor_elapsed_seconds": 64.1718305000104,
+                  "raw_ru_maxrss_bytes": 1327153152,
+                  "lifetime_peak_bytes": 1327153152,
+                  "span_peak_bytes": 1326645248,
+                  "setup_baseline_bytes": 642203648,
+                  "incremental_peak_bytes": 684441600,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 5316
+                },
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 2500,
+                    "K": 2500,
+                    "A": 100000,
+                    "T": 3600000,
+                    "D": 4
+                  },
+                  "phase": "serialize",
+                  "elapsed_seconds": 28.89269366604276,
+                  "setup_elapsed_seconds": 33.20841900003143,
+                  "monitor_elapsed_seconds": 62.89376008301042,
+                  "raw_ru_maxrss_bytes": 1335623680,
+                  "lifetime_peak_bytes": 1335623680,
+                  "span_peak_bytes": 1335623680,
+                  "setup_baseline_bytes": 642727936,
+                  "incremental_peak_bytes": 692895744,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 5089
+                }
+              ],
+              "median_seconds": 28.89269366604276,
+              "median_setup_seconds": 33.12693208409473,
+              "median_monitor_seconds": 62.89376008301042,
+              "median_raw_ru_maxrss_bytes": 1335623680.0,
+              "median_lifetime_peak_bytes": 1335623680.0,
+              "median_span_peak_bytes": 1335623680.0,
+              "median_setup_baseline_bytes": 644382720.0,
+              "median_incremental_peak_bytes": 684441600.0
+            },
+            "load": {
+              "ledger": {
+                "family": "wide-rebind-production",
+                "L": 2500,
+                "K": 2500,
+                "A": 100000,
+                "T": 3600000,
+                "D": 4
+              },
+              "phase": "load",
+              "samples": [
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 2500,
+                    "K": 2500,
+                    "A": 100000,
+                    "T": 3600000,
+                    "D": 4
+                  },
+                  "phase": "load",
+                  "elapsed_seconds": 31.880995916901156,
+                  "setup_elapsed_seconds": 1.2603375841863453,
+                  "monitor_elapsed_seconds": 33.74617000017315,
+                  "raw_ru_maxrss_bytes": 1183547392,
+                  "lifetime_peak_bytes": 1183547392,
+                  "span_peak_bytes": 1182302208,
+                  "setup_baseline_bytes": 589561856,
+                  "incremental_peak_bytes": 592740352,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 5477
+                },
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 2500,
+                    "K": 2500,
+                    "A": 100000,
+                    "T": 3600000,
+                    "D": 4
+                  },
+                  "phase": "load",
+                  "elapsed_seconds": 33.77204883401282,
+                  "setup_elapsed_seconds": 1.8805810830090195,
+                  "monitor_elapsed_seconds": 36.106527500087395,
+                  "raw_ru_maxrss_bytes": 1195999232,
+                  "lifetime_peak_bytes": 1195999232,
+                  "span_peak_bytes": 1193967616,
+                  "setup_baseline_bytes": 311459840,
+                  "incremental_peak_bytes": 882507776,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 5802
+                },
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 2500,
+                    "K": 2500,
+                    "A": 100000,
+                    "T": 3600000,
+                    "D": 4
+                  },
+                  "phase": "load",
+                  "elapsed_seconds": 32.7279308331199,
+                  "setup_elapsed_seconds": 1.679034166969359,
+                  "monitor_elapsed_seconds": 34.8508797918912,
+                  "raw_ru_maxrss_bytes": 1218265088,
+                  "lifetime_peak_bytes": 1218265088,
+                  "span_peak_bytes": 1218265088,
+                  "setup_baseline_bytes": 472498176,
+                  "incremental_peak_bytes": 745766912,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 5597
+                },
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 2500,
+                    "K": 2500,
+                    "A": 100000,
+                    "T": 3600000,
+                    "D": 4
+                  },
+                  "phase": "load",
+                  "elapsed_seconds": 32.67582962499,
+                  "setup_elapsed_seconds": 1.817345666931942,
+                  "monitor_elapsed_seconds": 34.9216759998817,
+                  "raw_ru_maxrss_bytes": 1128136704,
+                  "lifetime_peak_bytes": 1128136704,
+                  "span_peak_bytes": 1125335040,
+                  "setup_baseline_bytes": 202260480,
+                  "incremental_peak_bytes": 923074560,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 5565
+                },
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 2500,
+                    "K": 2500,
+                    "A": 100000,
+                    "T": 3600000,
+                    "D": 4
+                  },
+                  "phase": "load",
+                  "elapsed_seconds": 33.48849170911126,
+                  "setup_elapsed_seconds": 1.553035540971905,
+                  "monitor_elapsed_seconds": 35.47093558288179,
+                  "raw_ru_maxrss_bytes": 1188347904,
+                  "lifetime_peak_bytes": 1188347904,
+                  "span_peak_bytes": 1186693120,
+                  "setup_baseline_bytes": 265060352,
+                  "incremental_peak_bytes": 921632768,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 5727
+                }
+              ],
+              "median_seconds": 32.7279308331199,
+              "median_setup_seconds": 1.679034166969359,
+              "median_monitor_seconds": 34.9216759998817,
+              "median_raw_ru_maxrss_bytes": 1188347904.0,
+              "median_lifetime_peak_bytes": 1188347904.0,
+              "median_span_peak_bytes": 1186693120.0,
+              "median_setup_baseline_bytes": 311459840.0,
+              "median_incremental_peak_bytes": 882507776.0
+            },
+            "index": {
+              "ledger": {
+                "family": "wide-rebind-production",
+                "L": 2500,
+                "K": 2500,
+                "A": 100000,
+                "T": 3600000,
+                "D": 4
+              },
+              "phase": "index",
+              "samples": [
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 2500,
+                    "K": 2500,
+                    "A": 100000,
+                    "T": 3600000,
+                    "D": 4
+                  },
+                  "phase": "index",
+                  "elapsed_seconds": 0.7733509999234229,
+                  "setup_elapsed_seconds": 34.67946675000712,
+                  "monitor_elapsed_seconds": 35.933890874963254,
+                  "raw_ru_maxrss_bytes": 1267777536,
+                  "lifetime_peak_bytes": 1267777536,
+                  "span_peak_bytes": 1267777536,
+                  "setup_baseline_bytes": 642383872,
+                  "incremental_peak_bytes": 625393664,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 136
+                },
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 2500,
+                    "K": 2500,
+                    "A": 100000,
+                    "T": 3600000,
+                    "D": 4
+                  },
+                  "phase": "index",
+                  "elapsed_seconds": 0.6880811250302941,
+                  "setup_elapsed_seconds": 34.60310420789756,
+                  "monitor_elapsed_seconds": 35.66743054194376,
+                  "raw_ru_maxrss_bytes": 1270153216,
+                  "lifetime_peak_bytes": 1270153216,
+                  "span_peak_bytes": 1270153216,
+                  "setup_baseline_bytes": 712622080,
+                  "incremental_peak_bytes": 557531136,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 121
+                },
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 2500,
+                    "K": 2500,
+                    "A": 100000,
+                    "T": 3600000,
+                    "D": 4
+                  },
+                  "phase": "index",
+                  "elapsed_seconds": 0.8143279999494553,
+                  "setup_elapsed_seconds": 33.29973962507211,
+                  "monitor_elapsed_seconds": 34.451256291009486,
+                  "raw_ru_maxrss_bytes": 1266171904,
+                  "lifetime_peak_bytes": 1266171904,
+                  "span_peak_bytes": 1266171904,
+                  "setup_baseline_bytes": 673972224,
+                  "incremental_peak_bytes": 592199680,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 136
+                },
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 2500,
+                    "K": 2500,
+                    "A": 100000,
+                    "T": 3600000,
+                    "D": 4
+                  },
+                  "phase": "index",
+                  "elapsed_seconds": 0.6955671249888837,
+                  "setup_elapsed_seconds": 33.83099550008774,
+                  "monitor_elapsed_seconds": 34.875565875088796,
+                  "raw_ru_maxrss_bytes": 1266532352,
+                  "lifetime_peak_bytes": 1266532352,
+                  "span_peak_bytes": 1266532352,
+                  "setup_baseline_bytes": 660602880,
+                  "incremental_peak_bytes": 605929472,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 112
+                },
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 2500,
+                    "K": 2500,
+                    "A": 100000,
+                    "T": 3600000,
+                    "D": 4
+                  },
+                  "phase": "index",
+                  "elapsed_seconds": 0.7749522079247981,
+                  "setup_elapsed_seconds": 34.12582233315334,
+                  "monitor_elapsed_seconds": 35.25032458314672,
+                  "raw_ru_maxrss_bytes": 1264107520,
+                  "lifetime_peak_bytes": 1264107520,
+                  "span_peak_bytes": 1264107520,
+                  "setup_baseline_bytes": 642056192,
+                  "incremental_peak_bytes": 622051328,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 125
+                }
+              ],
+              "median_seconds": 0.7733509999234229,
+              "median_setup_seconds": 34.12582233315334,
+              "median_monitor_seconds": 35.25032458314672,
+              "median_raw_ru_maxrss_bytes": 1266532352.0,
+              "median_lifetime_peak_bytes": 1266532352.0,
+              "median_span_peak_bytes": 1266532352.0,
+              "median_setup_baseline_bytes": 660602880.0,
+              "median_incremental_peak_bytes": 605929472.0
+            },
+            "rebind": {
+              "ledger": {
+                "family": "wide-rebind-production",
+                "L": 2500,
+                "K": 2500,
+                "A": 100000,
+                "T": 3600000,
+                "D": 4
+              },
+              "phase": "rebind",
+              "samples": [
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 2500,
+                    "K": 2500,
+                    "A": 100000,
+                    "T": 3600000,
+                    "D": 4
+                  },
+                  "phase": "rebind",
+                  "elapsed_seconds": 161.12264904100448,
+                  "setup_elapsed_seconds": 34.74239700008184,
+                  "monitor_elapsed_seconds": 196.55965708312578,
+                  "raw_ru_maxrss_bytes": 1740767232,
+                  "lifetime_peak_bytes": 1740767232,
+                  "span_peak_bytes": 1740095488,
+                  "setup_baseline_bytes": 1261764608,
+                  "incremental_peak_bytes": 478330880,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 25859
+                },
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 2500,
+                    "K": 2500,
+                    "A": 100000,
+                    "T": 3600000,
+                    "D": 4
+                  },
+                  "phase": "rebind",
+                  "elapsed_seconds": 164.03941191686317,
+                  "setup_elapsed_seconds": 34.3917185831815,
+                  "monitor_elapsed_seconds": 199.2111331250053,
+                  "raw_ru_maxrss_bytes": 1501200384,
+                  "lifetime_peak_bytes": 1501200384,
+                  "span_peak_bytes": 1498873856,
+                  "setup_baseline_bytes": 1255981056,
+                  "incremental_peak_bytes": 242892800,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 28727
+                },
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 2500,
+                    "K": 2500,
+                    "A": 100000,
+                    "T": 3600000,
+                    "D": 4
+                  },
+                  "phase": "rebind",
+                  "elapsed_seconds": 150.85257620899938,
+                  "setup_elapsed_seconds": 33.26499050017446,
+                  "monitor_elapsed_seconds": 184.78692812495865,
+                  "raw_ru_maxrss_bytes": 2075115520,
+                  "lifetime_peak_bytes": 2075115520,
+                  "span_peak_bytes": 2075115520,
+                  "setup_baseline_bytes": 1267548160,
+                  "incremental_peak_bytes": 807567360,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 26615
+                },
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 2500,
+                    "K": 2500,
+                    "A": 100000,
+                    "T": 3600000,
+                    "D": 4
+                  },
+                  "phase": "rebind",
+                  "elapsed_seconds": 158.8004313330166,
+                  "setup_elapsed_seconds": 34.2967945409473,
+                  "monitor_elapsed_seconds": 193.80585987493396,
+                  "raw_ru_maxrss_bytes": 1805533184,
+                  "lifetime_peak_bytes": 1805533184,
+                  "span_peak_bytes": 1805533184,
+                  "setup_baseline_bytes": 1264943104,
+                  "incremental_peak_bytes": 540590080,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 27922
+                },
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 2500,
+                    "K": 2500,
+                    "A": 100000,
+                    "T": 3600000,
+                    "D": 4
+                  },
+                  "phase": "rebind",
+                  "elapsed_seconds": 151.11236033402383,
+                  "setup_elapsed_seconds": 33.32033283403143,
+                  "monitor_elapsed_seconds": 185.1120717090089,
+                  "raw_ru_maxrss_bytes": 2146992128,
+                  "lifetime_peak_bytes": 2146992128,
+                  "span_peak_bytes": 2146992128,
+                  "setup_baseline_bytes": 1267744768,
+                  "incremental_peak_bytes": 879247360,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 26676
+                }
+              ],
+              "median_seconds": 158.8004313330166,
+              "median_setup_seconds": 34.2967945409473,
+              "median_monitor_seconds": 193.80585987493396,
+              "median_raw_ru_maxrss_bytes": 1805533184.0,
+              "median_lifetime_peak_bytes": 1805533184.0,
+              "median_span_peak_bytes": 1805533184.0,
+              "median_setup_baseline_bytes": 1264943104.0,
+              "median_incremental_peak_bytes": 540590080.0
+            },
+            "end_to_end": {
+              "ledger": {
+                "family": "wide-rebind-production",
+                "L": 2500,
+                "K": 2500,
+                "A": 100000,
+                "T": 3600000,
+                "D": 4
+              },
+              "phase": "end_to_end",
+              "samples": [
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 2500,
+                    "K": 2500,
+                    "A": 100000,
+                    "T": 3600000,
+                    "D": 4
+                  },
+                  "phase": "end_to_end",
+                  "elapsed_seconds": 220.63497629086487,
+                  "setup_elapsed_seconds": 37.07367541594431,
+                  "monitor_elapsed_seconds": 258.60284675005823,
+                  "raw_ru_maxrss_bytes": 1745207296,
+                  "lifetime_peak_bytes": 1745207296,
+                  "span_peak_bytes": 1737424896,
+                  "setup_baseline_bytes": 1254850560,
+                  "incremental_peak_bytes": 482574336,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 35730
+                },
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 2500,
+                    "K": 2500,
+                    "A": 100000,
+                    "T": 3600000,
+                    "D": 4
+                  },
+                  "phase": "end_to_end",
+                  "elapsed_seconds": 221.10670154099353,
+                  "setup_elapsed_seconds": 36.1081972499378,
+                  "monitor_elapsed_seconds": 258.4934029590804,
+                  "raw_ru_maxrss_bytes": 1888763904,
+                  "lifetime_peak_bytes": 1888763904,
+                  "span_peak_bytes": 1882619904,
+                  "setup_baseline_bytes": 1196539904,
+                  "incremental_peak_bytes": 686080000,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 35569
+                },
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 2500,
+                    "K": 2500,
+                    "A": 100000,
+                    "T": 3600000,
+                    "D": 4
+                  },
+                  "phase": "end_to_end",
+                  "elapsed_seconds": 222.8286028339062,
+                  "setup_elapsed_seconds": 36.61329299979843,
+                  "monitor_elapsed_seconds": 260.33374024997465,
+                  "raw_ru_maxrss_bytes": 1834647552,
+                  "lifetime_peak_bytes": 1834647552,
+                  "span_peak_bytes": 1782808576,
+                  "setup_baseline_bytes": 1465974784,
+                  "incremental_peak_bytes": 316833792,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 35866
+                },
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 2500,
+                    "K": 2500,
+                    "A": 100000,
+                    "T": 3600000,
+                    "D": 4
+                  },
+                  "phase": "end_to_end",
+                  "elapsed_seconds": 244.49006112501957,
+                  "setup_elapsed_seconds": 36.517605332890525,
+                  "monitor_elapsed_seconds": 283.8218217920512,
+                  "raw_ru_maxrss_bytes": 1851736064,
+                  "lifetime_peak_bytes": 1851736064,
+                  "span_peak_bytes": 1850671104,
+                  "setup_baseline_bytes": 1256701952,
+                  "incremental_peak_bytes": 593969152,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 41853
+                },
+                {
+                  "ledger": {
+                    "family": "wide-rebind-production",
+                    "L": 2500,
+                    "K": 2500,
+                    "A": 100000,
+                    "T": 3600000,
+                    "D": 4
+                  },
+                  "phase": "end_to_end",
+                  "elapsed_seconds": 221.7093790420331,
+                  "setup_elapsed_seconds": 37.30891933385283,
+                  "monitor_elapsed_seconds": 260.4937410419807,
+                  "raw_ru_maxrss_bytes": 2076393472,
+                  "lifetime_peak_bytes": 2076393472,
+                  "span_peak_bytes": 2066972672,
+                  "setup_baseline_bytes": 1213579264,
+                  "incremental_peak_bytes": 853393408,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 38621
+                }
+              ],
+              "median_seconds": 221.7093790420331,
+              "median_setup_seconds": 36.61329299979843,
+              "median_monitor_seconds": 260.33374024997465,
+              "median_raw_ru_maxrss_bytes": 1851736064.0,
+              "median_lifetime_peak_bytes": 1851736064.0,
+              "median_span_peak_bytes": 1850671104.0,
+              "median_setup_baseline_bytes": 1254850560.0,
+              "median_incremental_peak_bytes": 593969152.0
+            }
+          }
+        }
+      ],
+      "growth": {
+        "serialize": {
+          "median_seconds": {
+            "slope": 0.8863155237262951,
+            "adjacent_ratios": [
+              8.564244552896838,
+              6.917385629244013
+            ],
+            "max_slope": 1.5,
+            "max_adjacent_ratio": 50.0
+          },
+          "median_lifetime_peak_bytes": {
+            "slope": 0.6584358103114712,
+            "adjacent_ratios": [
+              4.3320610687022905,
+              4.788252569750367
+            ],
+            "max_slope": 1.5,
+            "max_adjacent_ratio": 50.0
+          },
+          "median_span_peak_bytes": {
+            "slope": 0.6584358103114712,
+            "adjacent_ratios": [
+              3.2842239185750635,
+              6.315952583869218
+            ],
+            "max_slope": 1.5,
+            "max_adjacent_ratio": 50.0
+          }
+        },
+        "load": {
+          "median_seconds": {
+            "slope": 0.8947203565579032,
+            "adjacent_ratios": [
+              9.758022282848797,
+              6.31071994471668
+            ],
+            "max_slope": 1.5,
+            "max_adjacent_ratio": 50.0
+          },
+          "median_lifetime_peak_bytes": {
+            "slope": 0.6324035226340265,
+            "adjacent_ratios": [
+              4.276255707762557,
+              4.302722904431393
+            ],
+            "max_slope": 1.5,
+            "max_adjacent_ratio": 50.0
+          },
+          "median_span_peak_bytes": {
+            "slope": 0.6321009326286451,
+            "adjacent_ratios": [
+              4.276002029426687,
+              4.296986236355007
+            ],
+            "max_slope": 1.5,
+            "max_adjacent_ratio": 50.0
+          }
+        },
+        "index": {
+          "median_seconds": {
+            "slope": 1.3333997377369347,
+            "adjacent_ratios": [
+              26.512698698482655,
+              17.512394788435394
+            ],
+            "max_slope": 1.5,
+            "max_adjacent_ratio": 50.0
+          },
+          "median_lifetime_peak_bytes": {
+            "slope": 0.6494585636255512,
+            "adjacent_ratios": [
+              4.381822863027806,
+              4.542158763734649
+            ],
+            "max_slope": 1.5,
+            "max_adjacent_ratio": 50.0
+          },
+          "median_span_peak_bytes": {
+            "slope": 0.6494585636255512,
+            "adjacent_ratios": [
+              2.829557157569516,
+              7.033939945404914
+            ],
+            "max_slope": 1.5,
+            "max_adjacent_ratio": 50.0
+          }
+        },
+        "rebind": {
+          "median_seconds": {
+            "slope": 1.2365337763988922,
+            "adjacent_ratios": [
+              11.10872622678451,
+              26.75489734800609
+            ],
+            "max_slope": 1.5,
+            "max_adjacent_ratio": 50.0
+          },
+          "median_lifetime_peak_bytes": {
+            "slope": 0.6535729152152119,
+            "adjacent_ratios": [
+              5.251242407509663,
+              3.8626358219418155
+            ],
+            "max_slope": 1.5,
+            "max_adjacent_ratio": 50.0
+          },
+          "median_span_peak_bytes": {
+            "slope": 0.6535729152152119,
+            "adjacent_ratios": [
+              5.251242407509663,
+              3.8626358219418155
+            ],
+            "max_slope": 1.5,
+            "max_adjacent_ratio": 50.0
+          }
+        },
+        "end_to_end": {
+          "median_seconds": {
+            "slope": 1.0811374875306956,
+            "adjacent_ratios": [
+              7.604680625006687,
+              19.10706563343259
+            ],
+            "max_slope": 1.5,
+            "max_adjacent_ratio": 50.0
+          },
+          "median_lifetime_peak_bytes": {
+            "slope": 0.6393940928644252,
+            "adjacent_ratios": [
+              5.702252858103564,
+              3.332281746616741
+            ],
+            "max_slope": 1.5,
+            "max_adjacent_ratio": 50.0
+          },
+          "median_span_peak_bytes": {
+            "slope": 0.6392691724428679,
+            "adjacent_ratios": [
+              5.702252858103564,
+              3.3303653035351
+            ],
+            "max_slope": 1.5,
+            "max_adjacent_ratio": 50.0
+          }
+        }
+      }
+    },
+    "deep": {
+      "points": [
+        {
+          "ledger": {
+            "family": "deep-rebind-production",
+            "L": 25,
+            "K": 25,
+            "A": 1000,
+            "T": 36000,
+            "D": 25
+          },
+          "phases": {
+            "serialize": {
+              "ledger": {
+                "family": "deep-rebind-production",
+                "L": 25,
+                "K": 25,
+                "A": 1000,
+                "T": 36000,
+                "D": 25
+              },
+              "phase": "serialize",
+              "samples": [
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 25,
+                    "K": 25,
+                    "A": 1000,
+                    "T": 36000,
+                    "D": 25
+                  },
+                  "phase": "serialize",
+                  "elapsed_seconds": 0.5914522081147879,
+                  "setup_elapsed_seconds": 0.41804208420217037,
+                  "monitor_elapsed_seconds": 1.171262833988294,
+                  "raw_ru_maxrss_bytes": 64716800,
+                  "lifetime_peak_bytes": 64716800,
+                  "span_peak_bytes": 64716800,
+                  "setup_baseline_bytes": 63815680,
+                  "incremental_peak_bytes": 901120,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 88
+                },
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 25,
+                    "K": 25,
+                    "A": 1000,
+                    "T": 36000,
+                    "D": 25
+                  },
+                  "phase": "serialize",
+                  "elapsed_seconds": 0.6800044581759721,
+                  "setup_elapsed_seconds": 0.9324293751269579,
+                  "monitor_elapsed_seconds": 1.684815458022058,
+                  "raw_ru_maxrss_bytes": 64585728,
+                  "lifetime_peak_bytes": 64585728,
+                  "span_peak_bytes": 64569344,
+                  "setup_baseline_bytes": 63668224,
+                  "incremental_peak_bytes": 901120,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 97
+                },
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 25,
+                    "K": 25,
+                    "A": 1000,
+                    "T": 36000,
+                    "D": 25
+                  },
+                  "phase": "serialize",
+                  "elapsed_seconds": 0.6125015828292817,
+                  "setup_elapsed_seconds": 0.9793567908927798,
+                  "monitor_elapsed_seconds": 1.6663807909935713,
+                  "raw_ru_maxrss_bytes": 65945600,
+                  "lifetime_peak_bytes": 65945600,
+                  "span_peak_bytes": 65929216,
+                  "setup_baseline_bytes": 65044480,
+                  "incremental_peak_bytes": 884736,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 90
+                },
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 25,
+                    "K": 25,
+                    "A": 1000,
+                    "T": 36000,
+                    "D": 25
+                  },
+                  "phase": "serialize",
+                  "elapsed_seconds": 0.6199359169695526,
+                  "setup_elapsed_seconds": 0.9975584580097347,
+                  "monitor_elapsed_seconds": 1.6781040420755744,
+                  "raw_ru_maxrss_bytes": 64471040,
+                  "lifetime_peak_bytes": 64471040,
+                  "span_peak_bytes": 64454656,
+                  "setup_baseline_bytes": 63569920,
+                  "incremental_peak_bytes": 884736,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 91
+                },
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 25,
+                    "K": 25,
+                    "A": 1000,
+                    "T": 36000,
+                    "D": 25
+                  },
+                  "phase": "serialize",
+                  "elapsed_seconds": 0.5938735001254827,
+                  "setup_elapsed_seconds": 0.9947705829981714,
+                  "monitor_elapsed_seconds": 1.6716663332190365,
+                  "raw_ru_maxrss_bytes": 65175552,
+                  "lifetime_peak_bytes": 65175552,
+                  "span_peak_bytes": 65175552,
+                  "setup_baseline_bytes": 63684608,
+                  "incremental_peak_bytes": 1490944,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 89
+                }
+              ],
+              "median_seconds": 0.6125015828292817,
+              "median_setup_seconds": 0.9793567908927798,
+              "median_monitor_seconds": 1.6716663332190365,
+              "median_raw_ru_maxrss_bytes": 64716800.0,
+              "median_lifetime_peak_bytes": 64716800.0,
+              "median_span_peak_bytes": 64716800.0,
+              "median_setup_baseline_bytes": 63684608.0,
+              "median_incremental_peak_bytes": 901120.0
+            },
+            "load": {
+              "ledger": {
+                "family": "deep-rebind-production",
+                "L": 25,
+                "K": 25,
+                "A": 1000,
+                "T": 36000,
+                "D": 25
+              },
+              "phase": "load",
+              "samples": [
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 25,
+                    "K": 25,
+                    "A": 1000,
+                    "T": 36000,
+                    "D": 25
+                  },
+                  "phase": "load",
+                  "elapsed_seconds": 0.6774143339134753,
+                  "setup_elapsed_seconds": 0.3242887919768691,
+                  "monitor_elapsed_seconds": 1.0712319589219987,
+                  "raw_ru_maxrss_bytes": 64978944,
+                  "lifetime_peak_bytes": 64978944,
+                  "span_peak_bytes": 64880640,
+                  "setup_baseline_bytes": 47136768,
+                  "incremental_peak_bytes": 17743872,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 98
+                },
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 25,
+                    "K": 25,
+                    "A": 1000,
+                    "T": 36000,
+                    "D": 25
+                  },
+                  "phase": "load",
+                  "elapsed_seconds": 0.5327350830193609,
+                  "setup_elapsed_seconds": 0.26428133388981223,
+                  "monitor_elapsed_seconds": 0.8516117089893669,
+                  "raw_ru_maxrss_bytes": 63766528,
+                  "lifetime_peak_bytes": 63782912,
+                  "span_peak_bytes": 63782912,
+                  "setup_baseline_bytes": 46694400,
+                  "incremental_peak_bytes": 17088512,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 84
+                },
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 25,
+                    "K": 25,
+                    "A": 1000,
+                    "T": 36000,
+                    "D": 25
+                  },
+                  "phase": "load",
+                  "elapsed_seconds": 0.5525953751057386,
+                  "setup_elapsed_seconds": 0.3036659159697592,
+                  "monitor_elapsed_seconds": 0.9147527909372002,
+                  "raw_ru_maxrss_bytes": 64749568,
+                  "lifetime_peak_bytes": 64749568,
+                  "span_peak_bytes": 64323584,
+                  "setup_baseline_bytes": 45514752,
+                  "incremental_peak_bytes": 18808832,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 84
+                },
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 25,
+                    "K": 25,
+                    "A": 1000,
+                    "T": 36000,
+                    "D": 25
+                  },
+                  "phase": "load",
+                  "elapsed_seconds": 0.531479291850701,
+                  "setup_elapsed_seconds": 0.32339908299036324,
+                  "monitor_elapsed_seconds": 0.9017412499524653,
+                  "raw_ru_maxrss_bytes": 63619072,
+                  "lifetime_peak_bytes": 63619072,
+                  "span_peak_bytes": 63307776,
+                  "setup_baseline_bytes": 45694976,
+                  "incremental_peak_bytes": 17612800,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 82
+                },
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 25,
+                    "K": 25,
+                    "A": 1000,
+                    "T": 36000,
+                    "D": 25
+                  },
+                  "phase": "load",
+                  "elapsed_seconds": 0.5645288748200983,
+                  "setup_elapsed_seconds": 0.3623410000000149,
+                  "monitor_elapsed_seconds": 0.9690493328962475,
+                  "raw_ru_maxrss_bytes": 63340544,
+                  "lifetime_peak_bytes": 63373312,
+                  "span_peak_bytes": 63373312,
+                  "setup_baseline_bytes": 46628864,
+                  "incremental_peak_bytes": 16744448,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 87
+                }
+              ],
+              "median_seconds": 0.5525953751057386,
+              "median_setup_seconds": 0.32339908299036324,
+              "median_monitor_seconds": 0.9147527909372002,
+              "median_raw_ru_maxrss_bytes": 63766528.0,
+              "median_lifetime_peak_bytes": 63782912.0,
+              "median_span_peak_bytes": 63782912.0,
+              "median_setup_baseline_bytes": 46628864.0,
+              "median_incremental_peak_bytes": 17612800.0
+            },
+            "index": {
+              "ledger": {
+                "family": "deep-rebind-production",
+                "L": 25,
+                "K": 25,
+                "A": 1000,
+                "T": 36000,
+                "D": 25
+              },
+              "phase": "index",
+              "samples": [
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 25,
+                    "K": 25,
+                    "A": 1000,
+                    "T": 36000,
+                    "D": 25
+                  },
+                  "phase": "index",
+                  "elapsed_seconds": 0.0016292498912662268,
+                  "setup_elapsed_seconds": 0.9415390000212938,
+                  "monitor_elapsed_seconds": 0.9835656250361353,
+                  "raw_ru_maxrss_bytes": 65060864,
+                  "lifetime_peak_bytes": 65060864,
+                  "span_peak_bytes": 65060864,
+                  "setup_baseline_bytes": 65028096,
+                  "incremental_peak_bytes": 32768,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 1
+                },
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 25,
+                    "K": 25,
+                    "A": 1000,
+                    "T": 36000,
+                    "D": 25
+                  },
+                  "phase": "index",
+                  "elapsed_seconds": 0.004610790871083736,
+                  "setup_elapsed_seconds": 0.7659958750009537,
+                  "monitor_elapsed_seconds": 0.8402530420571566,
+                  "raw_ru_maxrss_bytes": 66142208,
+                  "lifetime_peak_bytes": 66142208,
+                  "span_peak_bytes": 66142208,
+                  "setup_baseline_bytes": 66109440,
+                  "incremental_peak_bytes": 32768,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 1
+                },
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 25,
+                    "K": 25,
+                    "A": 1000,
+                    "T": 36000,
+                    "D": 25
+                  },
+                  "phase": "index",
+                  "elapsed_seconds": 0.0027259159833192825,
+                  "setup_elapsed_seconds": 0.8051152089610696,
+                  "monitor_elapsed_seconds": 0.8635450419969857,
+                  "raw_ru_maxrss_bytes": 64929792,
+                  "lifetime_peak_bytes": 64929792,
+                  "span_peak_bytes": 64929792,
+                  "setup_baseline_bytes": 64897024,
+                  "incremental_peak_bytes": 32768,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 1
+                },
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 25,
+                    "K": 25,
+                    "A": 1000,
+                    "T": 36000,
+                    "D": 25
+                  },
+                  "phase": "index",
+                  "elapsed_seconds": 0.0031995000317692757,
+                  "setup_elapsed_seconds": 0.8848453329410404,
+                  "monitor_elapsed_seconds": 0.9246506670024246,
+                  "raw_ru_maxrss_bytes": 64847872,
+                  "lifetime_peak_bytes": 64847872,
+                  "span_peak_bytes": 64847872,
+                  "setup_baseline_bytes": 64798720,
+                  "incremental_peak_bytes": 49152,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 1
+                },
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 25,
+                    "K": 25,
+                    "A": 1000,
+                    "T": 36000,
+                    "D": 25
+                  },
+                  "phase": "index",
+                  "elapsed_seconds": 0.001991415861994028,
+                  "setup_elapsed_seconds": 0.8322845839429647,
+                  "monitor_elapsed_seconds": 0.886520667001605,
+                  "raw_ru_maxrss_bytes": 64978944,
+                  "lifetime_peak_bytes": 64978944,
+                  "span_peak_bytes": 64978944,
+                  "setup_baseline_bytes": 64946176,
+                  "incremental_peak_bytes": 32768,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 1
+                }
+              ],
+              "median_seconds": 0.0027259159833192825,
+              "median_setup_seconds": 0.8322845839429647,
+              "median_monitor_seconds": 0.886520667001605,
+              "median_raw_ru_maxrss_bytes": 64978944.0,
+              "median_lifetime_peak_bytes": 64978944.0,
+              "median_span_peak_bytes": 64978944.0,
+              "median_setup_baseline_bytes": 64946176.0,
+              "median_incremental_peak_bytes": 32768.0
+            },
+            "rebind": {
+              "ledger": {
+                "family": "deep-rebind-production",
+                "L": 25,
+                "K": 25,
+                "A": 1000,
+                "T": 36000,
+                "D": 25
+              },
+              "phase": "rebind",
+              "samples": [
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 25,
+                    "K": 25,
+                    "A": 1000,
+                    "T": 36000,
+                    "D": 25
+                  },
+                  "phase": "rebind",
+                  "elapsed_seconds": 0.5043059999588877,
+                  "setup_elapsed_seconds": 0.8170054999645799,
+                  "monitor_elapsed_seconds": 1.3885729578323662,
+                  "raw_ru_maxrss_bytes": 92815360,
+                  "lifetime_peak_bytes": 92815360,
+                  "span_peak_bytes": 92815360,
+                  "setup_baseline_bytes": 63586304,
+                  "incremental_peak_bytes": 29229056,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 79
+                },
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 25,
+                    "K": 25,
+                    "A": 1000,
+                    "T": 36000,
+                    "D": 25
+                  },
+                  "phase": "rebind",
+                  "elapsed_seconds": 0.4787217089906335,
+                  "setup_elapsed_seconds": 0.8242430419195443,
+                  "monitor_elapsed_seconds": 1.3287566248327494,
+                  "raw_ru_maxrss_bytes": 91471872,
+                  "lifetime_peak_bytes": 91471872,
+                  "span_peak_bytes": 91406336,
+                  "setup_baseline_bytes": 63471616,
+                  "incremental_peak_bytes": 27934720,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 76
+                },
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 25,
+                    "K": 25,
+                    "A": 1000,
+                    "T": 36000,
+                    "D": 25
+                  },
+                  "phase": "rebind",
+                  "elapsed_seconds": 0.4603763341438025,
+                  "setup_elapsed_seconds": 0.8266772499773651,
+                  "monitor_elapsed_seconds": 1.3269048749934882,
+                  "raw_ru_maxrss_bytes": 91504640,
+                  "lifetime_peak_bytes": 91504640,
+                  "span_peak_bytes": 91471872,
+                  "setup_baseline_bytes": 65159168,
+                  "incremental_peak_bytes": 26312704,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 73
+                },
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 25,
+                    "K": 25,
+                    "A": 1000,
+                    "T": 36000,
+                    "D": 25
+                  },
+                  "phase": "rebind",
+                  "elapsed_seconds": 0.48072016704827547,
+                  "setup_elapsed_seconds": 0.768344416981563,
+                  "monitor_elapsed_seconds": 1.2747087078168988,
+                  "raw_ru_maxrss_bytes": 91176960,
+                  "lifetime_peak_bytes": 91176960,
+                  "span_peak_bytes": 91176960,
+                  "setup_baseline_bytes": 63340544,
+                  "incremental_peak_bytes": 27836416,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 75
+                },
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 25,
+                    "K": 25,
+                    "A": 1000,
+                    "T": 36000,
+                    "D": 25
+                  },
+                  "phase": "rebind",
+                  "elapsed_seconds": 0.5251475409604609,
+                  "setup_elapsed_seconds": 0.7097845000680536,
+                  "monitor_elapsed_seconds": 1.2729077499825507,
+                  "raw_ru_maxrss_bytes": 92291072,
+                  "lifetime_peak_bytes": 92291072,
+                  "span_peak_bytes": 92258304,
+                  "setup_baseline_bytes": 65978368,
+                  "incremental_peak_bytes": 26279936,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 81
+                }
+              ],
+              "median_seconds": 0.48072016704827547,
+              "median_setup_seconds": 0.8170054999645799,
+              "median_monitor_seconds": 1.3269048749934882,
+              "median_raw_ru_maxrss_bytes": 91504640.0,
+              "median_lifetime_peak_bytes": 91504640.0,
+              "median_span_peak_bytes": 91471872.0,
+              "median_setup_baseline_bytes": 63586304.0,
+              "median_incremental_peak_bytes": 27836416.0
+            },
+            "end_to_end": {
+              "ledger": {
+                "family": "deep-rebind-production",
+                "L": 25,
+                "K": 25,
+                "A": 1000,
+                "T": 36000,
+                "D": 25
+              },
+              "phase": "end_to_end",
+              "samples": [
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 25,
+                    "K": 25,
+                    "A": 1000,
+                    "T": 36000,
+                    "D": 25
+                  },
+                  "phase": "end_to_end",
+                  "elapsed_seconds": 1.3170539161656052,
+                  "setup_elapsed_seconds": 0.8361995830200613,
+                  "monitor_elapsed_seconds": 2.198594291927293,
+                  "raw_ru_maxrss_bytes": 101793792,
+                  "lifetime_peak_bytes": 101793792,
+                  "span_peak_bytes": 101793792,
+                  "setup_baseline_bytes": 57262080,
+                  "incremental_peak_bytes": 44531712,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 213
+                },
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 25,
+                    "K": 25,
+                    "A": 1000,
+                    "T": 36000,
+                    "D": 25
+                  },
+                  "phase": "end_to_end",
+                  "elapsed_seconds": 1.880320917116478,
+                  "setup_elapsed_seconds": 0.8290375829674304,
+                  "monitor_elapsed_seconds": 2.784661332843825,
+                  "raw_ru_maxrss_bytes": 102268928,
+                  "lifetime_peak_bytes": 102268928,
+                  "span_peak_bytes": 102268928,
+                  "setup_baseline_bytes": 58015744,
+                  "incremental_peak_bytes": 44253184,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 266
+                },
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 25,
+                    "K": 25,
+                    "A": 1000,
+                    "T": 36000,
+                    "D": 25
+                  },
+                  "phase": "end_to_end",
+                  "elapsed_seconds": 1.457592291990295,
+                  "setup_elapsed_seconds": 1.1197136251721531,
+                  "monitor_elapsed_seconds": 2.611560125136748,
+                  "raw_ru_maxrss_bytes": 101072896,
+                  "lifetime_peak_bytes": 101072896,
+                  "span_peak_bytes": 101072896,
+                  "setup_baseline_bytes": 58261504,
+                  "incremental_peak_bytes": 42811392,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 230
+                },
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 25,
+                    "K": 25,
+                    "A": 1000,
+                    "T": 36000,
+                    "D": 25
+                  },
+                  "phase": "end_to_end",
+                  "elapsed_seconds": 1.4450621251016855,
+                  "setup_elapsed_seconds": 0.9575940000358969,
+                  "monitor_elapsed_seconds": 2.450152833946049,
+                  "raw_ru_maxrss_bytes": 100958208,
+                  "lifetime_peak_bytes": 100958208,
+                  "span_peak_bytes": 100958208,
+                  "setup_baseline_bytes": 57950208,
+                  "incremental_peak_bytes": 43008000,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 228
+                },
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 25,
+                    "K": 25,
+                    "A": 1000,
+                    "T": 36000,
+                    "D": 25
+                  },
+                  "phase": "end_to_end",
+                  "elapsed_seconds": 1.581393125001341,
+                  "setup_elapsed_seconds": 0.9066451250109822,
+                  "monitor_elapsed_seconds": 2.572777207940817,
+                  "raw_ru_maxrss_bytes": 102088704,
+                  "lifetime_peak_bytes": 102088704,
+                  "span_peak_bytes": 102088704,
+                  "setup_baseline_bytes": 57737216,
+                  "incremental_peak_bytes": 44351488,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 240
+                }
+              ],
+              "median_seconds": 1.457592291990295,
+              "median_setup_seconds": 0.9066451250109822,
+              "median_monitor_seconds": 2.572777207940817,
+              "median_raw_ru_maxrss_bytes": 101793792.0,
+              "median_lifetime_peak_bytes": 101793792.0,
+              "median_span_peak_bytes": 101793792.0,
+              "median_setup_baseline_bytes": 57950208.0,
+              "median_incremental_peak_bytes": 44253184.0
+            }
+          }
+        },
+        {
+          "ledger": {
+            "family": "deep-rebind-production",
+            "L": 250,
+            "K": 250,
+            "A": 10000,
+            "T": 360000,
+            "D": 250
+          },
+          "phases": {
+            "serialize": {
+              "ledger": {
+                "family": "deep-rebind-production",
+                "L": 250,
+                "K": 250,
+                "A": 10000,
+                "T": 360000,
+                "D": 250
+              },
+              "phase": "serialize",
+              "samples": [
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 250,
+                    "K": 250,
+                    "A": 10000,
+                    "T": 360000,
+                    "D": 250
+                  },
+                  "phase": "serialize",
+                  "elapsed_seconds": 3.4538092501461506,
+                  "setup_elapsed_seconds": 4.474660916952416,
+                  "monitor_elapsed_seconds": 8.032479166984558,
+                  "raw_ru_maxrss_bytes": 324780032,
+                  "lifetime_peak_bytes": 324780032,
+                  "span_peak_bytes": 324780032,
+                  "setup_baseline_bytes": 287801344,
+                  "incremental_peak_bytes": 36978688,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 559
+                },
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 250,
+                    "K": 250,
+                    "A": 10000,
+                    "T": 360000,
+                    "D": 250
+                  },
+                  "phase": "serialize",
+                  "elapsed_seconds": 4.049455667147413,
+                  "setup_elapsed_seconds": 5.030181792099029,
+                  "monitor_elapsed_seconds": 9.153223250061274,
+                  "raw_ru_maxrss_bytes": 325517312,
+                  "lifetime_peak_bytes": 325517312,
+                  "span_peak_bytes": 325517312,
+                  "setup_baseline_bytes": 288129024,
+                  "incremental_peak_bytes": 37388288,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 638
+                },
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 250,
+                    "K": 250,
+                    "A": 10000,
+                    "T": 360000,
+                    "D": 250
+                  },
+                  "phase": "serialize",
+                  "elapsed_seconds": 2.949159665964544,
+                  "setup_elapsed_seconds": 5.173105458030477,
+                  "monitor_elapsed_seconds": 8.181256833020598,
+                  "raw_ru_maxrss_bytes": 325632000,
+                  "lifetime_peak_bytes": 325632000,
+                  "span_peak_bytes": 325632000,
+                  "setup_baseline_bytes": 288653312,
+                  "incremental_peak_bytes": 36978688,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 476
+                },
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 250,
+                    "K": 250,
+                    "A": 10000,
+                    "T": 360000,
+                    "D": 250
+                  },
+                  "phase": "serialize",
+                  "elapsed_seconds": 4.00602791714482,
+                  "setup_elapsed_seconds": 5.268592707812786,
+                  "monitor_elapsed_seconds": 9.364999165991321,
+                  "raw_ru_maxrss_bytes": 324632576,
+                  "lifetime_peak_bytes": 324632576,
+                  "span_peak_bytes": 324632576,
+                  "setup_baseline_bytes": 288178176,
+                  "incremental_peak_bytes": 36454400,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 646
+                },
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 250,
+                    "K": 250,
+                    "A": 10000,
+                    "T": 360000,
+                    "D": 250
+                  },
+                  "phase": "serialize",
+                  "elapsed_seconds": 3.983130207983777,
+                  "setup_elapsed_seconds": 5.465863541932777,
+                  "monitor_elapsed_seconds": 9.537791499868035,
+                  "raw_ru_maxrss_bytes": 325435392,
+                  "lifetime_peak_bytes": 325435392,
+                  "span_peak_bytes": 325435392,
+                  "setup_baseline_bytes": 288358400,
+                  "incremental_peak_bytes": 37076992,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 644
+                }
+              ],
+              "median_seconds": 3.983130207983777,
+              "median_setup_seconds": 5.173105458030477,
+              "median_monitor_seconds": 9.153223250061274,
+              "median_raw_ru_maxrss_bytes": 325435392.0,
+              "median_lifetime_peak_bytes": 325435392.0,
+              "median_span_peak_bytes": 325435392.0,
+              "median_setup_baseline_bytes": 288178176.0,
+              "median_incremental_peak_bytes": 36978688.0
+            },
+            "load": {
+              "ledger": {
+                "family": "deep-rebind-production",
+                "L": 250,
+                "K": 250,
+                "A": 10000,
+                "T": 360000,
+                "D": 250
+              },
+              "phase": "load",
+              "samples": [
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 250,
+                    "K": 250,
+                    "A": 10000,
+                    "T": 360000,
+                    "D": 250
+                  },
+                  "phase": "load",
+                  "elapsed_seconds": 5.09548258385621,
+                  "setup_elapsed_seconds": 0.30581487505696714,
+                  "monitor_elapsed_seconds": 5.553673041984439,
+                  "raw_ru_maxrss_bytes": 287965184,
+                  "lifetime_peak_bytes": 287965184,
+                  "span_peak_bytes": 287948800,
+                  "setup_baseline_bytes": 96436224,
+                  "incremental_peak_bytes": 191512576,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 770
+                },
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 250,
+                    "K": 250,
+                    "A": 10000,
+                    "T": 360000,
+                    "D": 250
+                  },
+                  "phase": "load",
+                  "elapsed_seconds": 5.5152085409499705,
+                  "setup_elapsed_seconds": 0.45996683300472796,
+                  "monitor_elapsed_seconds": 6.065241792006418,
+                  "raw_ru_maxrss_bytes": 288833536,
+                  "lifetime_peak_bytes": 288833536,
+                  "span_peak_bytes": 288817152,
+                  "setup_baseline_bytes": 97353728,
+                  "incremental_peak_bytes": 191463424,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 844
+                },
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 250,
+                    "K": 250,
+                    "A": 10000,
+                    "T": 360000,
+                    "D": 250
+                  },
+                  "phase": "load",
+                  "elapsed_seconds": 5.121895292075351,
+                  "setup_elapsed_seconds": 0.3005430831108242,
+                  "monitor_elapsed_seconds": 5.527632415993139,
+                  "raw_ru_maxrss_bytes": 288866304,
+                  "lifetime_peak_bytes": 288866304,
+                  "span_peak_bytes": 288866304,
+                  "setup_baseline_bytes": 97927168,
+                  "incremental_peak_bytes": 190939136,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 793
+                },
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 250,
+                    "K": 250,
+                    "A": 10000,
+                    "T": 360000,
+                    "D": 250
+                  },
+                  "phase": "load",
+                  "elapsed_seconds": 5.539477333892137,
+                  "setup_elapsed_seconds": 0.3083005000371486,
+                  "monitor_elapsed_seconds": 5.939589665969834,
+                  "raw_ru_maxrss_bytes": 287916032,
+                  "lifetime_peak_bytes": 287916032,
+                  "span_peak_bytes": 287899648,
+                  "setup_baseline_bytes": 97320960,
+                  "incremental_peak_bytes": 190578688,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 856
+                },
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 250,
+                    "K": 250,
+                    "A": 10000,
+                    "T": 360000,
+                    "D": 250
+                  },
+                  "phase": "load",
+                  "elapsed_seconds": 5.2039595420937985,
+                  "setup_elapsed_seconds": 0.2629087078385055,
+                  "monitor_elapsed_seconds": 5.571478416910395,
+                  "raw_ru_maxrss_bytes": 288014336,
+                  "lifetime_peak_bytes": 288014336,
+                  "span_peak_bytes": 288014336,
+                  "setup_baseline_bytes": 96567296,
+                  "incremental_peak_bytes": 191447040,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 806
+                }
+              ],
+              "median_seconds": 5.2039595420937985,
+              "median_setup_seconds": 0.30581487505696714,
+              "median_monitor_seconds": 5.571478416910395,
+              "median_raw_ru_maxrss_bytes": 288014336.0,
+              "median_lifetime_peak_bytes": 288014336.0,
+              "median_span_peak_bytes": 288014336.0,
+              "median_setup_baseline_bytes": 97320960.0,
+              "median_incremental_peak_bytes": 191447040.0
+            },
+            "index": {
+              "ledger": {
+                "family": "deep-rebind-production",
+                "L": 250,
+                "K": 250,
+                "A": 10000,
+                "T": 360000,
+                "D": 250
+              },
+              "phase": "index",
+              "samples": [
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 250,
+                    "K": 250,
+                    "A": 10000,
+                    "T": 360000,
+                    "D": 250
+                  },
+                  "phase": "index",
+                  "elapsed_seconds": 0.022595084039494395,
+                  "setup_elapsed_seconds": 5.52544324984774,
+                  "monitor_elapsed_seconds": 5.629093457944691,
+                  "raw_ru_maxrss_bytes": 289652736,
+                  "lifetime_peak_bytes": 289652736,
+                  "span_peak_bytes": 289652736,
+                  "setup_baseline_bytes": 288964608,
+                  "incremental_peak_bytes": 688128,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 4
+                },
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 250,
+                    "K": 250,
+                    "A": 10000,
+                    "T": 360000,
+                    "D": 250
+                  },
+                  "phase": "index",
+                  "elapsed_seconds": 0.042052207980304956,
+                  "setup_elapsed_seconds": 5.51044433307834,
+                  "monitor_elapsed_seconds": 5.645898333052173,
+                  "raw_ru_maxrss_bytes": 288620544,
+                  "lifetime_peak_bytes": 288620544,
+                  "span_peak_bytes": 288620544,
+                  "setup_baseline_bytes": 288129024,
+                  "incremental_peak_bytes": 491520,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 7
+                },
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 250,
+                    "K": 250,
+                    "A": 10000,
+                    "T": 360000,
+                    "D": 250
+                  },
+                  "phase": "index",
+                  "elapsed_seconds": 0.027105415938422084,
+                  "setup_elapsed_seconds": 5.640078291995451,
+                  "monitor_elapsed_seconds": 5.733242667047307,
+                  "raw_ru_maxrss_bytes": 289177600,
+                  "lifetime_peak_bytes": 289177600,
+                  "span_peak_bytes": 289177600,
+                  "setup_baseline_bytes": 288718848,
+                  "incremental_peak_bytes": 458752,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 5
+                },
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 250,
+                    "K": 250,
+                    "A": 10000,
+                    "T": 360000,
+                    "D": 250
+                  },
+                  "phase": "index",
+                  "elapsed_seconds": 0.026186875067651272,
+                  "setup_elapsed_seconds": 4.351906415773556,
+                  "monitor_elapsed_seconds": 4.477765207877383,
+                  "raw_ru_maxrss_bytes": 288391168,
+                  "lifetime_peak_bytes": 288391168,
+                  "span_peak_bytes": 288391168,
+                  "setup_baseline_bytes": 287719424,
+                  "incremental_peak_bytes": 671744,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 5
+                },
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 250,
+                    "K": 250,
+                    "A": 10000,
+                    "T": 360000,
+                    "D": 250
+                  },
+                  "phase": "index",
+                  "elapsed_seconds": 0.02562549989670515,
+                  "setup_elapsed_seconds": 4.966932207811624,
+                  "monitor_elapsed_seconds": 5.104584041982889,
+                  "raw_ru_maxrss_bytes": 288800768,
+                  "lifetime_peak_bytes": 288800768,
+                  "span_peak_bytes": 288784384,
+                  "setup_baseline_bytes": 288325632,
+                  "incremental_peak_bytes": 458752,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 4
+                }
+              ],
+              "median_seconds": 0.026186875067651272,
+              "median_setup_seconds": 5.51044433307834,
+              "median_monitor_seconds": 5.629093457944691,
+              "median_raw_ru_maxrss_bytes": 288800768.0,
+              "median_lifetime_peak_bytes": 288800768.0,
+              "median_span_peak_bytes": 288784384.0,
+              "median_setup_baseline_bytes": 288325632.0,
+              "median_incremental_peak_bytes": 491520.0
+            },
+            "rebind": {
+              "ledger": {
+                "family": "deep-rebind-production",
+                "L": 250,
+                "K": 250,
+                "A": 10000,
+                "T": 360000,
+                "D": 250
+              },
+              "phase": "rebind",
+              "samples": [
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 250,
+                    "K": 250,
+                    "A": 10000,
+                    "T": 360000,
+                    "D": 250
+                  },
+                  "phase": "rebind",
+                  "elapsed_seconds": 5.330481625162065,
+                  "setup_elapsed_seconds": 5.051689625019208,
+                  "monitor_elapsed_seconds": 10.464794375002384,
+                  "raw_ru_maxrss_bytes": 512393216,
+                  "lifetime_peak_bytes": 512393216,
+                  "span_peak_bytes": 512393216,
+                  "setup_baseline_bytes": 288292864,
+                  "incremental_peak_bytes": 224100352,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 850
+                },
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 250,
+                    "K": 250,
+                    "A": 10000,
+                    "T": 360000,
+                    "D": 250
+                  },
+                  "phase": "rebind",
+                  "elapsed_seconds": 4.289193000178784,
+                  "setup_elapsed_seconds": 4.862068583955988,
+                  "monitor_elapsed_seconds": 9.218638499965891,
+                  "raw_ru_maxrss_bytes": 573538304,
+                  "lifetime_peak_bytes": 573538304,
+                  "span_peak_bytes": 573538304,
+                  "setup_baseline_bytes": 288702464,
+                  "incremental_peak_bytes": 284835840,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 696
+                },
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 250,
+                    "K": 250,
+                    "A": 10000,
+                    "T": 360000,
+                    "D": 250
+                  },
+                  "phase": "rebind",
+                  "elapsed_seconds": 5.024682957911864,
+                  "setup_elapsed_seconds": 4.906408875016496,
+                  "monitor_elapsed_seconds": 10.016634207917377,
+                  "raw_ru_maxrss_bytes": 550846464,
+                  "lifetime_peak_bytes": 550846464,
+                  "span_peak_bytes": 543866880,
+                  "setup_baseline_bytes": 288751616,
+                  "incremental_peak_bytes": 255115264,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 811
+                },
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 250,
+                    "K": 250,
+                    "A": 10000,
+                    "T": 360000,
+                    "D": 250
+                  },
+                  "phase": "rebind",
+                  "elapsed_seconds": 4.857683458132669,
+                  "setup_elapsed_seconds": 5.576183832949027,
+                  "monitor_elapsed_seconds": 10.492125125136226,
+                  "raw_ru_maxrss_bytes": 564117504,
+                  "lifetime_peak_bytes": 564117504,
+                  "span_peak_bytes": 564117504,
+                  "setup_baseline_bytes": 288358400,
+                  "incremental_peak_bytes": 275759104,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 782
+                },
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 250,
+                    "K": 250,
+                    "A": 10000,
+                    "T": 360000,
+                    "D": 250
+                  },
+                  "phase": "rebind",
+                  "elapsed_seconds": 5.092109207995236,
+                  "setup_elapsed_seconds": 5.026982666924596,
+                  "monitor_elapsed_seconds": 10.199492667103186,
+                  "raw_ru_maxrss_bytes": 575750144,
+                  "lifetime_peak_bytes": 575750144,
+                  "span_peak_bytes": 575750144,
+                  "setup_baseline_bytes": 289243136,
+                  "incremental_peak_bytes": 286507008,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 816
+                }
+              ],
+              "median_seconds": 5.024682957911864,
+              "median_setup_seconds": 5.026982666924596,
+              "median_monitor_seconds": 10.199492667103186,
+              "median_raw_ru_maxrss_bytes": 564117504.0,
+              "median_lifetime_peak_bytes": 564117504.0,
+              "median_span_peak_bytes": 564117504.0,
+              "median_setup_baseline_bytes": 288702464.0,
+              "median_incremental_peak_bytes": 275759104.0
+            },
+            "end_to_end": {
+              "ledger": {
+                "family": "deep-rebind-production",
+                "L": 250,
+                "K": 250,
+                "A": 10000,
+                "T": 360000,
+                "D": 250
+              },
+              "phase": "end_to_end",
+              "samples": [
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 250,
+                    "K": 250,
+                    "A": 10000,
+                    "T": 360000,
+                    "D": 250
+                  },
+                  "phase": "end_to_end",
+                  "elapsed_seconds": 12.035554124973714,
+                  "setup_elapsed_seconds": 5.742772249970585,
+                  "monitor_elapsed_seconds": 17.83061654213816,
+                  "raw_ru_maxrss_bytes": 663257088,
+                  "lifetime_peak_bytes": 663257088,
+                  "span_peak_bytes": 661667840,
+                  "setup_baseline_bytes": 215908352,
+                  "incremental_peak_bytes": 445759488,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 1918
+                },
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 250,
+                    "K": 250,
+                    "A": 10000,
+                    "T": 360000,
+                    "D": 250
+                  },
+                  "phase": "end_to_end",
+                  "elapsed_seconds": 11.84528783406131,
+                  "setup_elapsed_seconds": 6.65288162487559,
+                  "monitor_elapsed_seconds": 18.550071750069037,
+                  "raw_ru_maxrss_bytes": 652984320,
+                  "lifetime_peak_bytes": 652984320,
+                  "span_peak_bytes": 649248768,
+                  "setup_baseline_bytes": 216350720,
+                  "incremental_peak_bytes": 432898048,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 1914
+                },
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 250,
+                    "K": 250,
+                    "A": 10000,
+                    "T": 360000,
+                    "D": 250
+                  },
+                  "phase": "end_to_end",
+                  "elapsed_seconds": 11.525024082977325,
+                  "setup_elapsed_seconds": 6.6687364999670535,
+                  "monitor_elapsed_seconds": 18.238792832940817,
+                  "raw_ru_maxrss_bytes": 633356288,
+                  "lifetime_peak_bytes": 633356288,
+                  "span_peak_bytes": 632193024,
+                  "setup_baseline_bytes": 216875008,
+                  "incremental_peak_bytes": 415318016,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 1864
+                },
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 250,
+                    "K": 250,
+                    "A": 10000,
+                    "T": 360000,
+                    "D": 250
+                  },
+                  "phase": "end_to_end",
+                  "elapsed_seconds": 12.052215249976143,
+                  "setup_elapsed_seconds": 6.462563915876672,
+                  "monitor_elapsed_seconds": 18.585637958021834,
+                  "raw_ru_maxrss_bytes": 668598272,
+                  "lifetime_peak_bytes": 668598272,
+                  "span_peak_bytes": 665436160,
+                  "setup_baseline_bytes": 216629248,
+                  "incremental_peak_bytes": 448806912,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 1930
+                },
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 250,
+                    "K": 250,
+                    "A": 10000,
+                    "T": 360000,
+                    "D": 250
+                  },
+                  "phase": "end_to_end",
+                  "elapsed_seconds": 11.057222499977797,
+                  "setup_elapsed_seconds": 6.41811537486501,
+                  "monitor_elapsed_seconds": 17.527471208013594,
+                  "raw_ru_maxrss_bytes": 615858176,
+                  "lifetime_peak_bytes": 615858176,
+                  "span_peak_bytes": 613138432,
+                  "setup_baseline_bytes": 216629248,
+                  "incremental_peak_bytes": 396509184,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 1769
+                }
+              ],
+              "median_seconds": 11.84528783406131,
+              "median_setup_seconds": 6.462563915876672,
+              "median_monitor_seconds": 18.238792832940817,
+              "median_raw_ru_maxrss_bytes": 652984320.0,
+              "median_lifetime_peak_bytes": 652984320.0,
+              "median_span_peak_bytes": 649248768.0,
+              "median_setup_baseline_bytes": 216629248.0,
+              "median_incremental_peak_bytes": 432898048.0
+            }
+          }
+        },
+        {
+          "ledger": {
+            "family": "deep-rebind-production",
+            "L": 2500,
+            "K": 2500,
+            "A": 100000,
+            "T": 3600000,
+            "D": 2500
+          },
+          "phases": {
+            "serialize": {
+              "ledger": {
+                "family": "deep-rebind-production",
+                "L": 2500,
+                "K": 2500,
+                "A": 100000,
+                "T": 3600000,
+                "D": 2500
+              },
+              "phase": "serialize",
+              "samples": [
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 2500,
+                    "K": 2500,
+                    "A": 100000,
+                    "T": 3600000,
+                    "D": 2500
+                  },
+                  "phase": "serialize",
+                  "elapsed_seconds": 28.901822208194062,
+                  "setup_elapsed_seconds": 32.82743987510912,
+                  "monitor_elapsed_seconds": 62.556404208997265,
+                  "raw_ru_maxrss_bytes": 1596571648,
+                  "lifetime_peak_bytes": 1596571648,
+                  "span_peak_bytes": 1596571648,
+                  "setup_baseline_bytes": 855375872,
+                  "incremental_peak_bytes": 741195776,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 4651
+                },
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 2500,
+                    "K": 2500,
+                    "A": 100000,
+                    "T": 3600000,
+                    "D": 2500
+                  },
+                  "phase": "serialize",
+                  "elapsed_seconds": 28.79133616690524,
+                  "setup_elapsed_seconds": 32.30813116719946,
+                  "monitor_elapsed_seconds": 61.883500959025696,
+                  "raw_ru_maxrss_bytes": 1348648960,
+                  "lifetime_peak_bytes": 1348648960,
+                  "span_peak_bytes": 1348648960,
+                  "setup_baseline_bytes": 658063360,
+                  "incremental_peak_bytes": 690585600,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 4639
+                },
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 2500,
+                    "K": 2500,
+                    "A": 100000,
+                    "T": 3600000,
+                    "D": 2500
+                  },
+                  "phase": "serialize",
+                  "elapsed_seconds": 28.242428957950324,
+                  "setup_elapsed_seconds": 32.536758417030796,
+                  "monitor_elapsed_seconds": 61.4569499171339,
+                  "raw_ru_maxrss_bytes": 1495810048,
+                  "lifetime_peak_bytes": 1495810048,
+                  "span_peak_bytes": 1495810048,
+                  "setup_baseline_bytes": 909328384,
+                  "incremental_peak_bytes": 586481664,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 4552
+                },
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 2500,
+                    "K": 2500,
+                    "A": 100000,
+                    "T": 3600000,
+                    "D": 2500
+                  },
+                  "phase": "serialize",
+                  "elapsed_seconds": 28.76173062506132,
+                  "setup_elapsed_seconds": 33.32491625007242,
+                  "monitor_elapsed_seconds": 62.874575125053525,
+                  "raw_ru_maxrss_bytes": 1346355200,
+                  "lifetime_peak_bytes": 1346355200,
+                  "span_peak_bytes": 1346355200,
+                  "setup_baseline_bytes": 656785408,
+                  "incremental_peak_bytes": 689569792,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 4621
+                },
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 2500,
+                    "K": 2500,
+                    "A": 100000,
+                    "T": 3600000,
+                    "D": 2500
+                  },
+                  "phase": "serialize",
+                  "elapsed_seconds": 28.854770915815607,
+                  "setup_elapsed_seconds": 32.899352042004466,
+                  "monitor_elapsed_seconds": 62.5731113338843,
+                  "raw_ru_maxrss_bytes": 1342783488,
+                  "lifetime_peak_bytes": 1342783488,
+                  "span_peak_bytes": 1342750720,
+                  "setup_baseline_bytes": 659439616,
+                  "incremental_peak_bytes": 683311104,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 4655
+                }
+              ],
+              "median_seconds": 28.79133616690524,
+              "median_setup_seconds": 32.82743987510912,
+              "median_monitor_seconds": 62.556404208997265,
+              "median_raw_ru_maxrss_bytes": 1348648960.0,
+              "median_lifetime_peak_bytes": 1348648960.0,
+              "median_span_peak_bytes": 1348648960.0,
+              "median_setup_baseline_bytes": 659439616.0,
+              "median_incremental_peak_bytes": 689569792.0
+            },
+            "load": {
+              "ledger": {
+                "family": "deep-rebind-production",
+                "L": 2500,
+                "K": 2500,
+                "A": 100000,
+                "T": 3600000,
+                "D": 2500
+              },
+              "phase": "load",
+              "samples": [
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 2500,
+                    "K": 2500,
+                    "A": 100000,
+                    "T": 3600000,
+                    "D": 2500
+                  },
+                  "phase": "load",
+                  "elapsed_seconds": 31.771044084103778,
+                  "setup_elapsed_seconds": 1.4838154579047114,
+                  "monitor_elapsed_seconds": 33.70480258297175,
+                  "raw_ru_maxrss_bytes": 1361772544,
+                  "lifetime_peak_bytes": 1361772544,
+                  "span_peak_bytes": 1357987840,
+                  "setup_baseline_bytes": 366051328,
+                  "incremental_peak_bytes": 991936512,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 5021
+                },
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 2500,
+                    "K": 2500,
+                    "A": 100000,
+                    "T": 3600000,
+                    "D": 2500
+                  },
+                  "phase": "load",
+                  "elapsed_seconds": 31.149724750081077,
+                  "setup_elapsed_seconds": 1.5684470001142472,
+                  "monitor_elapsed_seconds": 33.148785250028595,
+                  "raw_ru_maxrss_bytes": 1308475392,
+                  "lifetime_peak_bytes": 1308475392,
+                  "span_peak_bytes": 1297612800,
+                  "setup_baseline_bytes": 352272384,
+                  "incremental_peak_bytes": 945340416,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 4934
+                },
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 2500,
+                    "K": 2500,
+                    "A": 100000,
+                    "T": 3600000,
+                    "D": 2500
+                  },
+                  "phase": "load",
+                  "elapsed_seconds": 31.30870012496598,
+                  "setup_elapsed_seconds": 1.6828119580168277,
+                  "monitor_elapsed_seconds": 33.407439625123516,
+                  "raw_ru_maxrss_bytes": 1365934080,
+                  "lifetime_peak_bytes": 1365934080,
+                  "span_peak_bytes": 1365884928,
+                  "setup_baseline_bytes": 590168064,
+                  "incremental_peak_bytes": 775716864,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 4952
+                },
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 2500,
+                    "K": 2500,
+                    "A": 100000,
+                    "T": 3600000,
+                    "D": 2500
+                  },
+                  "phase": "load",
+                  "elapsed_seconds": 32.70393995917402,
+                  "setup_elapsed_seconds": 1.7343751250300556,
+                  "monitor_elapsed_seconds": 34.8630739999935,
+                  "raw_ru_maxrss_bytes": 1270693888,
+                  "lifetime_peak_bytes": 1270693888,
+                  "span_peak_bytes": 1269481472,
+                  "setup_baseline_bytes": 589987840,
+                  "incremental_peak_bytes": 679493632,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 5117
+                },
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 2500,
+                    "K": 2500,
+                    "A": 100000,
+                    "T": 3600000,
+                    "D": 2500
+                  },
+                  "phase": "load",
+                  "elapsed_seconds": 32.05395058286376,
+                  "setup_elapsed_seconds": 1.8839047499932349,
+                  "monitor_elapsed_seconds": 34.466551000019535,
+                  "raw_ru_maxrss_bytes": 1187266560,
+                  "lifetime_peak_bytes": 1187266560,
+                  "span_peak_bytes": 1179926528,
+                  "setup_baseline_bytes": 347422720,
+                  "incremental_peak_bytes": 832503808,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 5094
+                }
+              ],
+              "median_seconds": 31.771044084103778,
+              "median_setup_seconds": 1.6828119580168277,
+              "median_monitor_seconds": 33.70480258297175,
+              "median_raw_ru_maxrss_bytes": 1308475392.0,
+              "median_lifetime_peak_bytes": 1308475392.0,
+              "median_span_peak_bytes": 1297612800.0,
+              "median_setup_baseline_bytes": 366051328.0,
+              "median_incremental_peak_bytes": 832503808.0
+            },
+            "index": {
+              "ledger": {
+                "family": "deep-rebind-production",
+                "L": 2500,
+                "K": 2500,
+                "A": 100000,
+                "T": 3600000,
+                "D": 2500
+              },
+              "phase": "index",
+              "samples": [
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 2500,
+                    "K": 2500,
+                    "A": 100000,
+                    "T": 3600000,
+                    "D": 2500
+                  },
+                  "phase": "index",
+                  "elapsed_seconds": 1.2147292091976851,
+                  "setup_elapsed_seconds": 35.83440029108897,
+                  "monitor_elapsed_seconds": 37.81618612492457,
+                  "raw_ru_maxrss_bytes": 1233879040,
+                  "lifetime_peak_bytes": 1233879040,
+                  "span_peak_bytes": 1233879040,
+                  "setup_baseline_bytes": 652869632,
+                  "incremental_peak_bytes": 581009408,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 196
+                },
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 2500,
+                    "K": 2500,
+                    "A": 100000,
+                    "T": 3600000,
+                    "D": 2500
+                  },
+                  "phase": "index",
+                  "elapsed_seconds": 0.9387872081715614,
+                  "setup_elapsed_seconds": 35.67548841703683,
+                  "monitor_elapsed_seconds": 37.042164667043835,
+                  "raw_ru_maxrss_bytes": 1272987648,
+                  "lifetime_peak_bytes": 1272987648,
+                  "span_peak_bytes": 1272987648,
+                  "setup_baseline_bytes": 657440768,
+                  "incremental_peak_bytes": 615546880,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 151
+                },
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 2500,
+                    "K": 2500,
+                    "A": 100000,
+                    "T": 3600000,
+                    "D": 2500
+                  },
+                  "phase": "index",
+                  "elapsed_seconds": 0.7467657919041812,
+                  "setup_elapsed_seconds": 33.317650750046596,
+                  "monitor_elapsed_seconds": 34.40223720786162,
+                  "raw_ru_maxrss_bytes": 1285472256,
+                  "lifetime_peak_bytes": 1285472256,
+                  "span_peak_bytes": 1285472256,
+                  "setup_baseline_bytes": 658767872,
+                  "incremental_peak_bytes": 626704384,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 119
+                },
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 2500,
+                    "K": 2500,
+                    "A": 100000,
+                    "T": 3600000,
+                    "D": 2500
+                  },
+                  "phase": "index",
+                  "elapsed_seconds": 0.7831167078111321,
+                  "setup_elapsed_seconds": 33.696274041896686,
+                  "monitor_elapsed_seconds": 34.907956583891064,
+                  "raw_ru_maxrss_bytes": 1279787008,
+                  "lifetime_peak_bytes": 1279787008,
+                  "span_peak_bytes": 1279787008,
+                  "setup_baseline_bytes": 655179776,
+                  "incremental_peak_bytes": 624607232,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 127
+                },
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 2500,
+                    "K": 2500,
+                    "A": 100000,
+                    "T": 3600000,
+                    "D": 2500
+                  },
+                  "phase": "index",
+                  "elapsed_seconds": 0.7210008329711854,
+                  "setup_elapsed_seconds": 34.688622292131186,
+                  "monitor_elapsed_seconds": 35.773853291990235,
+                  "raw_ru_maxrss_bytes": 1275035648,
+                  "lifetime_peak_bytes": 1275035648,
+                  "span_peak_bytes": 1275035648,
+                  "setup_baseline_bytes": 658636800,
+                  "incremental_peak_bytes": 616398848,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 117
+                }
+              ],
+              "median_seconds": 0.7831167078111321,
+              "median_setup_seconds": 34.688622292131186,
+              "median_monitor_seconds": 35.773853291990235,
+              "median_raw_ru_maxrss_bytes": 1275035648.0,
+              "median_lifetime_peak_bytes": 1275035648.0,
+              "median_span_peak_bytes": 1275035648.0,
+              "median_setup_baseline_bytes": 657440768.0,
+              "median_incremental_peak_bytes": 616398848.0
+            },
+            "rebind": {
+              "ledger": {
+                "family": "deep-rebind-production",
+                "L": 2500,
+                "K": 2500,
+                "A": 100000,
+                "T": 3600000,
+                "D": 2500
+              },
+              "phase": "rebind",
+              "samples": [
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 2500,
+                    "K": 2500,
+                    "A": 100000,
+                    "T": 3600000,
+                    "D": 2500
+                  },
+                  "phase": "rebind",
+                  "elapsed_seconds": 157.12693037488498,
+                  "setup_elapsed_seconds": 34.98191083385609,
+                  "monitor_elapsed_seconds": 192.84561612503603,
+                  "raw_ru_maxrss_bytes": 1722040320,
+                  "lifetime_peak_bytes": 1722040320,
+                  "span_peak_bytes": 1719517184,
+                  "setup_baseline_bytes": 1276100608,
+                  "incremental_peak_bytes": 443416576,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 25196
+                },
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 2500,
+                    "K": 2500,
+                    "A": 100000,
+                    "T": 3600000,
+                    "D": 2500
+                  },
+                  "phase": "rebind",
+                  "elapsed_seconds": 153.68207166693173,
+                  "setup_elapsed_seconds": 34.163462582975626,
+                  "monitor_elapsed_seconds": 188.61306979204528,
+                  "raw_ru_maxrss_bytes": 1956986880,
+                  "lifetime_peak_bytes": 1956986880,
+                  "span_peak_bytes": 1955954688,
+                  "setup_baseline_bytes": 1276805120,
+                  "incremental_peak_bytes": 679149568,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 24661
+                },
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 2500,
+                    "K": 2500,
+                    "A": 100000,
+                    "T": 3600000,
+                    "D": 2500
+                  },
+                  "phase": "rebind",
+                  "elapsed_seconds": 154.55431591602974,
+                  "setup_elapsed_seconds": 32.951543249888346,
+                  "monitor_elapsed_seconds": 188.20836083288305,
+                  "raw_ru_maxrss_bytes": 1940078592,
+                  "lifetime_peak_bytes": 1940078592,
+                  "span_peak_bytes": 1938391040,
+                  "setup_baseline_bytes": 1282473984,
+                  "incremental_peak_bytes": 655917056,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 24808
+                },
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 2500,
+                    "K": 2500,
+                    "A": 100000,
+                    "T": 3600000,
+                    "D": 2500
+                  },
+                  "phase": "rebind",
+                  "elapsed_seconds": 149.72191612515599,
+                  "setup_elapsed_seconds": 33.773038665996864,
+                  "monitor_elapsed_seconds": 184.26359329093248,
+                  "raw_ru_maxrss_bytes": 2039627776,
+                  "lifetime_peak_bytes": 2039627776,
+                  "span_peak_bytes": 2039283712,
+                  "setup_baseline_bytes": 1283653632,
+                  "incremental_peak_bytes": 755630080,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 24031
+                },
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 2500,
+                    "K": 2500,
+                    "A": 100000,
+                    "T": 3600000,
+                    "D": 2500
+                  },
+                  "phase": "rebind",
+                  "elapsed_seconds": 151.35121658304706,
+                  "setup_elapsed_seconds": 33.03543391707353,
+                  "monitor_elapsed_seconds": 185.11267495900393,
+                  "raw_ru_maxrss_bytes": 2337292288,
+                  "lifetime_peak_bytes": 2337292288,
+                  "span_peak_bytes": 2335096832,
+                  "setup_baseline_bytes": 1285160960,
+                  "incremental_peak_bytes": 1049935872,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 24271
+                }
+              ],
+              "median_seconds": 153.68207166693173,
+              "median_setup_seconds": 33.773038665996864,
+              "median_monitor_seconds": 188.20836083288305,
+              "median_raw_ru_maxrss_bytes": 1956986880.0,
+              "median_lifetime_peak_bytes": 1956986880.0,
+              "median_span_peak_bytes": 1955954688.0,
+              "median_setup_baseline_bytes": 1282473984.0,
+              "median_incremental_peak_bytes": 679149568.0
+            },
+            "end_to_end": {
+              "ledger": {
+                "family": "deep-rebind-production",
+                "L": 2500,
+                "K": 2500,
+                "A": 100000,
+                "T": 3600000,
+                "D": 2500
+              },
+              "phase": "end_to_end",
+              "samples": [
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 2500,
+                    "K": 2500,
+                    "A": 100000,
+                    "T": 3600000,
+                    "D": 2500
+                  },
+                  "phase": "end_to_end",
+                  "elapsed_seconds": 222.51129691698588,
+                  "setup_elapsed_seconds": 36.68835262488574,
+                  "monitor_elapsed_seconds": 260.11472491687164,
+                  "raw_ru_maxrss_bytes": 1864400896,
+                  "lifetime_peak_bytes": 1864400896,
+                  "span_peak_bytes": 1862795264,
+                  "setup_baseline_bytes": 1340915712,
+                  "incremental_peak_bytes": 521879552,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 35740
+                },
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 2500,
+                    "K": 2500,
+                    "A": 100000,
+                    "T": 3600000,
+                    "D": 2500
+                  },
+                  "phase": "end_to_end",
+                  "elapsed_seconds": 222.7358964998275,
+                  "setup_elapsed_seconds": 36.761519874911755,
+                  "monitor_elapsed_seconds": 260.4061794169247,
+                  "raw_ru_maxrss_bytes": 1907818496,
+                  "lifetime_peak_bytes": 1907818496,
+                  "span_peak_bytes": 1902493696,
+                  "setup_baseline_bytes": 1413038080,
+                  "incremental_peak_bytes": 489455616,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 35781
+                },
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 2500,
+                    "K": 2500,
+                    "A": 100000,
+                    "T": 3600000,
+                    "D": 2500
+                  },
+                  "phase": "end_to_end",
+                  "elapsed_seconds": 237.8705311671365,
+                  "setup_elapsed_seconds": 37.07505516684614,
+                  "monitor_elapsed_seconds": 278.4693705418613,
+                  "raw_ru_maxrss_bytes": 1912225792,
+                  "lifetime_peak_bytes": 1912225792,
+                  "span_peak_bytes": 1908473856,
+                  "setup_baseline_bytes": 1447247872,
+                  "incremental_peak_bytes": 461225984,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 39268
+                },
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 2500,
+                    "K": 2500,
+                    "A": 100000,
+                    "T": 3600000,
+                    "D": 2500
+                  },
+                  "phase": "end_to_end",
+                  "elapsed_seconds": 222.13851087493822,
+                  "setup_elapsed_seconds": 43.60105154104531,
+                  "monitor_elapsed_seconds": 267.7031075831037,
+                  "raw_ru_maxrss_bytes": 1801371648,
+                  "lifetime_peak_bytes": 1801371648,
+                  "span_peak_bytes": 1794179072,
+                  "setup_baseline_bytes": 783515648,
+                  "incremental_peak_bytes": 1010663424,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 39176
+                },
+                {
+                  "ledger": {
+                    "family": "deep-rebind-production",
+                    "L": 2500,
+                    "K": 2500,
+                    "A": 100000,
+                    "T": 3600000,
+                    "D": 2500
+                  },
+                  "phase": "end_to_end",
+                  "elapsed_seconds": 220.5050609591417,
+                  "setup_elapsed_seconds": 37.14056595880538,
+                  "monitor_elapsed_seconds": 259.05684074992314,
+                  "raw_ru_maxrss_bytes": 2089697280,
+                  "lifetime_peak_bytes": 2089697280,
+                  "span_peak_bytes": 2082619392,
+                  "setup_baseline_bytes": 1114423296,
+                  "incremental_peak_bytes": 968196096,
+                  "sample_interval_seconds": 0.005,
+                  "sample_count": 38172
+                }
+              ],
+              "median_seconds": 222.51129691698588,
+              "median_setup_seconds": 37.07505516684614,
+              "median_monitor_seconds": 260.4061794169247,
+              "median_raw_ru_maxrss_bytes": 1907818496.0,
+              "median_lifetime_peak_bytes": 1907818496.0,
+              "median_span_peak_bytes": 1902493696.0,
+              "median_setup_baseline_bytes": 1340915712.0,
+              "median_incremental_peak_bytes": 521879552.0
+            }
+          }
+        }
+      ],
+      "growth": {
+        "serialize": {
+          "median_seconds": {
+            "slope": 0.8360773025102887,
+            "adjacent_ratios": [
+              6.503052922059088,
+              7.228319101694429
+            ],
+            "max_slope": 1.5,
+            "max_adjacent_ratio": 50.0
+          },
+          "median_lifetime_peak_bytes": {
+            "slope": 0.6594409434480798,
+            "adjacent_ratios": [
+              5.028607594936709,
+              4.144137340784373
+            ],
+            "max_slope": 1.5,
+            "max_adjacent_ratio": 50.0
+          },
+          "median_span_peak_bytes": {
+            "slope": 0.6594409434480798,
+            "adjacent_ratios": [
+              5.028607594936709,
+              4.144137340784373
+            ],
+            "max_slope": 1.5,
+            "max_adjacent_ratio": 50.0
+          }
+        },
+        "load": {
+          "median_seconds": {
+            "slope": 0.8798121206831212,
+            "adjacent_ratios": [
+              9.417305639045614,
+              6.105167387854208
+            ],
+            "max_slope": 1.5,
+            "max_adjacent_ratio": 50.0
+          },
+          "median_lifetime_peak_bytes": {
+            "slope": 0.6560306082136698,
+            "adjacent_ratios": [
+              4.515540714102235,
+              4.543091188349735
+            ],
+            "max_slope": 1.5,
+            "max_adjacent_ratio": 50.0
+          },
+          "median_span_peak_bytes": {
+            "slope": 0.6542203889356651,
+            "adjacent_ratios": [
+              4.515540714102235,
+              4.505375732407987
+            ],
+            "max_slope": 1.5,
+            "max_adjacent_ratio": 50.0
+          }
+        },
+        "index": {
+          "median_seconds": {
+            "slope": 1.2291570118141897,
+            "adjacent_ratios": [
+              9.606633230039666,
+              29.90493160363829
+            ],
+            "max_slope": 1.5,
+            "max_adjacent_ratio": 50.0
+          },
+          "median_lifetime_peak_bytes": {
+            "slope": 0.64637483898415,
+            "adjacent_ratios": [
+              4.444528492183561,
+              4.414931638962955
+            ],
+            "max_slope": 1.5,
+            "max_adjacent_ratio": 50.0
+          },
+          "median_span_peak_bytes": {
+            "slope": 0.6463748389841502,
+            "adjacent_ratios": [
+              4.444276348966213,
+              4.415182117326676
+            ],
+            "max_slope": 1.5,
+            "max_adjacent_ratio": 50.0
+          }
+        },
+        "rebind": {
+          "median_seconds": {
+            "slope": 1.2523654321770519,
+            "adjacent_ratios": [
+              10.452407247161048,
+              30.58542657401777
+            ],
+            "max_slope": 1.5,
+            "max_adjacent_ratio": 50.0
+          },
+          "median_lifetime_peak_bytes": {
+            "slope": 0.6650723986651546,
+            "adjacent_ratios": [
+              6.164905998209489,
+              3.4691121373181146
+            ],
+            "max_slope": 1.5,
+            "max_adjacent_ratio": 50.0
+          },
+          "median_span_peak_bytes": {
+            "slope": 0.6650356112387245,
+            "adjacent_ratios": [
+              6.167114454594304,
+              3.467282390868694
+            ],
+            "max_slope": 1.5,
+            "max_adjacent_ratio": 50.0
+          }
+        },
+        "end_to_end": {
+          "median_seconds": {
+            "slope": 1.0918580010178582,
+            "adjacent_ratios": [
+              8.126612564537476,
+              18.78479442915276
+            ],
+            "max_slope": 1.5,
+            "max_adjacent_ratio": 50.0
+          },
+          "median_lifetime_peak_bytes": {
+            "slope": 0.6364078809897894,
+            "adjacent_ratios": [
+              6.41477547078706,
+              2.9216911303475097
+            ],
+            "max_slope": 1.5,
+            "max_adjacent_ratio": 50.0
+          },
+          "median_span_peak_bytes": {
+            "slope": 0.6358009667407429,
+            "adjacent_ratios": [
+              6.378078223080637,
+              2.9303000479471066
+            ],
+            "max_slope": 1.5,
+            "max_adjacent_ratio": 50.0
+          }
+        }
+      }
+    }
+  }
+}

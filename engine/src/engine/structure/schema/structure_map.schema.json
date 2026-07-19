@@ -18,8 +18,8 @@
   "properties": {
     "schema_version": {
       "type": "integer",
-      "const": 2,
-      "description": "The structure-map document schema version. Bound to STRUCTURE_MAP_SCHEMA_VERSION via schema_version_const() (inv 10) — a bump here without the Python constant (or vice versa) fails the binding test. v2 (S5.1) widened rebind_anchors with the slot-keyed content_fingerprint + tightened region.page to minimum 1, re-entering provisional and re-running the birth gate."
+      "const": 3,
+      "description": "The structure-map document schema version. Bound to STRUCTURE_MAP_SCHEMA_VERSION via schema_version_const() (inv 10). v3 (S4.7/#48) adds stored per-slot prefix/exact/suffix boundary anchors; v2/v3 dual support is intentionally absent."
     },
     "root_id": {
       "type": "string",
@@ -149,7 +149,7 @@
     "rebind_anchors": {
       "type": "object",
       "additionalProperties": false,
-      "description": "Optional re-bind checkpoint sub-object (D-S4-H, inv 13/24). The admitted keys are region and content_fingerprint — a present/geom key is rejected by additionalProperties:false (node-level anchors are never the atom-level Geom). Populated at S5.1 (checkpoints R2, never identity). Coordinate contract (s4_plan §0.3 A-3, BR-022): region's page and bbox_region are expressed in the same coordinate space as the atom-level Geom the S2.1 matcher emits — one space shared with atom geometry, never a second convention — so a stored region is directly comparable to an atom's box at re-bind time. region.page is the 1-based scan number (minimum 1, a Tier-2 comparability check backs it in rebind.py). The concrete space (and any witness/space discriminator field) is an S5-planning decision; widening this shape further is a schema-version bump that re-enters provisional and re-runs the birth gate.",
+      "description": "Optional re-bind checkpoint sub-object (D-S4-H, inv 13/24): region, slot content_fingerprint, and v3 slot boundary_anchors. A present/geom key is rejected by additionalProperties:false (node-level anchors are never atom Geom). These are checkpoints R2, never identity. Under BR-022, region.page is the 1-based scan number and region uses the same coordinate space as the atom-level Geom.",
       "properties": {
         "region": {
           "type": ["object", "null"],
@@ -174,7 +174,36 @@
             "heading": {"$ref": "#/$defs/slot_fingerprint"},
             "signature": {"$ref": "#/$defs/slot_fingerprint"}
           }
+        },
+        "boundary_anchors": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Slot-keyed stored start/end boundary anchors (S4.7/#48).",
+          "properties": {
+            "body": {"$ref": "#/$defs/slot_boundary_anchors"},
+            "heading": {"$ref": "#/$defs/slot_boundary_anchors"},
+            "signature": {"$ref": "#/$defs/slot_boundary_anchors"}
+          }
         }
+      }
+    },
+    "boundary_anchor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["prefix", "exact", "suffix"],
+      "properties": {
+        "prefix": {"type": "array", "maxItems": 23, "items": {"type": "string", "minLength": 1}},
+        "exact": {"type": "array", "minItems": 1, "maxItems": 24, "items": {"type": "string", "minLength": 1}},
+        "suffix": {"type": "array", "maxItems": 23, "items": {"type": "string", "minLength": 1}}
+      }
+    },
+    "slot_boundary_anchors": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["start", "end"],
+      "properties": {
+        "start": {"$ref": "#/$defs/boundary_anchor"},
+        "end": {"$ref": "#/$defs/boundary_anchor"}
       }
     },
     "slot_fingerprint": {

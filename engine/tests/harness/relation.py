@@ -21,7 +21,13 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Mapping
 
-VALID_OPS = frozenset({"char_sub", "drop", "insert", "duplicate", "split", "merge", "move"})
+# ``remint`` is the materialization transition from a working atom id to the regenerated
+# canonical stream's id.  It is deliberately not a perturbation class: without it an unchanged
+# atom would retain its old id and the harness would never exercise annotation transfer between
+# generations.  Keeping it in the event log also lets law 6 account for every final fresh id.
+VALID_OPS = frozenset(
+    {"char_sub", "drop", "insert", "duplicate", "split", "merge", "move", "remint"}
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -34,10 +40,60 @@ class LineageEvent:
     old_ids: tuple[str, ...]
     fresh_ids: tuple[str, ...]
     position: int | None = None
+    old_position: int | None = None
+    old_texts: tuple[str, ...] = ()
+    fresh_texts: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
         if self.op not in VALID_OPS:
             raise ValueError(f"unknown op {self.op!r}; valid: {sorted(VALID_OPS)}")
+        object.__setattr__(self, "old_ids", tuple(self.old_ids))
+        object.__setattr__(self, "fresh_ids", tuple(self.fresh_ids))
+        object.__setattr__(self, "old_texts", tuple(self.old_texts))
+        object.__setattr__(self, "fresh_texts", tuple(self.fresh_texts))
+        expected = {
+            "drop": (1, 0),
+            "insert": (0, 1),
+            "char_sub": (1, 1),
+            "remint": (1, 1),
+            "split": (1, None),
+            "duplicate": (1, None),
+            "merge": (None, 1),
+            "move": (None, None),
+        }[self.op]
+        old_n, fresh_n = expected
+        if old_n is not None and len(self.old_ids) != old_n:
+            raise ValueError(
+                f"{self.op}: expected {old_n} old id(s), got {len(self.old_ids)}"
+            )
+        if fresh_n is not None and len(self.fresh_ids) != fresh_n:
+            raise ValueError(
+                f"{self.op}: expected {fresh_n} fresh id(s), got {len(self.fresh_ids)}"
+            )
+        if (
+            self.op in {"split", "merge"}
+            and max(len(self.old_ids), len(self.fresh_ids)) < 2
+        ):
+            raise ValueError(
+                f"{self.op}: re-segmentation requires at least two source/product ids"
+            )
+        if self.op == "duplicate" and not self.fresh_ids:
+            raise ValueError("duplicate: expected at least one copied fresh id")
+        if self.op == "move":
+            if not self.old_ids or self.fresh_ids != self.old_ids:
+                raise ValueError(
+                    "move: fresh_ids must repeat the non-empty moved old_ids block"
+                )
+            if self.position is None:
+                raise ValueError("move: destination position is required")
+        if len(set(self.old_ids)) != len(self.old_ids) or len(
+            set(self.fresh_ids)
+        ) != len(self.fresh_ids):
+            raise ValueError(f"{self.op}: event ids must be unique within each side")
+        if self.old_texts and len(self.old_texts) != len(self.old_ids):
+            raise ValueError(f"{self.op}: old_texts cardinality must match old_ids")
+        if self.fresh_texts and len(self.fresh_texts) != len(self.fresh_ids):
+            raise ValueError(f"{self.op}: fresh_texts cardinality must match fresh_ids")
 
 
 @dataclass(frozen=True, slots=True)
@@ -75,60 +131,92 @@ def compose_events(
 
     Working state maps each live stream id to its set of ORIGINAL old-id ancestors, so lineage
     survives chains (split then char_sub then move). Insert-introduced atoms carry an empty
-    ancestor set and are tracked in ``inserted`` (their descendants inherit the inserted mark).
+    ancestor set; any surviving descendant with an empty set is therefore classified as inserted
+    without a second, drift-prone bookkeeping channel.
     """
+    if len(set(old_order)) != len(old_order):
+        raise CompositionError("old_order contains duplicate atom ids")
     stream: list[str] = list(old_order)
     ancestors: dict[str, frozenset[str]] = {a: frozenset({a}) for a in old_order}
-    inserted_mark: set[str] = set()
+    positions = {atom_id: index for index, atom_id in enumerate(stream)}
     deleted: set[str] = set()
-    moved: set[str] = set()
+    moved_candidates: set[str] = set()
+
+    def _refresh_positions(start: int) -> None:
+        for index in range(start, len(stream)):
+            positions[stream[index]] = index
 
     def _index(atom_id: str, op: str) -> int:
-        try:
-            return stream.index(atom_id)
-        except ValueError:
-            raise CompositionError(f"{op}: id {atom_id!r} not in working stream") from None
+        idx = positions.get(atom_id)
+        if idx is None or stream[idx] != atom_id:
+            raise CompositionError(
+                f"{op}: id {atom_id!r} not in working stream"
+            )
+        return idx
+
+    def _new_ids(ids: tuple[str, ...], op: str) -> None:
+        # ``ancestors`` intentionally retains every id ever seen, including ids no longer live.
+        # It is therefore the stronger used-id index; scanning ``stream`` here made an all-remint
+        # event log quadratic without detecting anything the mapping did not already detect.
+        duplicates = [atom_id for atom_id in ids if atom_id in ancestors]
+        if duplicates:
+            raise CompositionError(f"{op}: output id(s) already used: {duplicates}")
+
+    def _position(position: int | None, op: str, *, maximum: int) -> int:
+        pos = maximum if position is None else position
+        if isinstance(pos, bool) or not isinstance(pos, int) or not 0 <= pos <= maximum:
+            raise CompositionError(f"{op}: position {pos!r} outside [0, {maximum}]")
+        return pos
 
     for ev in events:
         if ev.op == "drop":
             (target,) = ev.old_ids
             idx = _index(target, ev.op)
             del stream[idx]
-            if not ancestors[target] and target in inserted_mark:
-                inserted_mark.discard(target)
+            positions.pop(target)
+            _refresh_positions(idx)
             deleted.update(ancestors[target])
         elif ev.op == "insert":
             (fresh,) = ev.fresh_ids
-            pos = len(stream) if ev.position is None else ev.position
+            _new_ids(ev.fresh_ids, ev.op)
+            pos = _position(ev.position, ev.op, maximum=len(stream))
             stream.insert(pos, fresh)
             ancestors[fresh] = frozenset()
-            inserted_mark.add(fresh)
-        elif ev.op == "char_sub":
+            _refresh_positions(pos)
+        elif ev.op in {"char_sub", "remint"}:
             (target,) = ev.old_ids
             (fresh,) = ev.fresh_ids
-            stream[_index(target, ev.op)] = fresh
+            _new_ids(ev.fresh_ids, ev.op)
+            idx = _index(target, ev.op)
+            stream[idx] = fresh
             ancestors[fresh] = ancestors[target]
-            if target in inserted_mark:
-                inserted_mark.add(fresh)
+            positions.pop(target)
+            positions[fresh] = idx
         elif ev.op == "split":
             (target,) = ev.old_ids
             idx = _index(target, ev.op)
+            _new_ids(ev.fresh_ids, ev.op)
             stream[idx : idx + 1] = list(ev.fresh_ids)
+            positions.pop(target)
             for fresh in ev.fresh_ids:
                 ancestors[fresh] = ancestors[target]
-                if target in inserted_mark:
-                    inserted_mark.add(fresh)
+            _refresh_positions(idx)
         elif ev.op == "duplicate":
             (target,) = ev.old_ids
             idx = _index(target, ev.op)
+            _new_ids(ev.fresh_ids, ev.op)
             for offset, fresh in enumerate(ev.fresh_ids, start=1):
                 stream.insert(idx + offset, fresh)
                 ancestors[fresh] = ancestors[target]
-                if target in inserted_mark:
-                    inserted_mark.add(fresh)
+            _refresh_positions(idx + 1)
         elif ev.op == "merge":
             (fresh,) = ev.fresh_ids
-            indices = sorted(_index(t, ev.op) for t in ev.old_ids)
+            indices = [_index(t, ev.op) for t in ev.old_ids]
+            if indices != list(range(indices[0], indices[0] + len(indices))):
+                raise CompositionError(
+                    f"merge: sources must be a contiguous working-stream block: {ev.old_ids}"
+                )
+            _new_ids(ev.fresh_ids, ev.op)
             merged: frozenset[str] = frozenset()
             for t in ev.old_ids:
                 merged |= ancestors[t]
@@ -136,30 +224,47 @@ def compose_events(
                 del stream[idx]
             stream.insert(indices[0], fresh)
             ancestors[fresh] = merged
-            if any(t in inserted_mark for t in ev.old_ids):
-                inserted_mark.add(fresh)
+            for target in ev.old_ids:
+                positions.pop(target)
+            _refresh_positions(indices[0])
         elif ev.op == "move":
-            (target,) = ev.old_ids
-            idx = _index(target, ev.op)
-            del stream[idx]
-            pos = len(stream) if ev.position is None else ev.position
-            stream.insert(pos, target)
-            moved.update(ancestors[target])
+            indices = [_index(target, ev.op) for target in ev.old_ids]
+            if indices != list(range(indices[0], indices[0] + len(indices))):
+                raise CompositionError(
+                    f"move: sources must be a contiguous working-stream block: {ev.old_ids}"
+                )
+            block = stream[indices[0] : indices[-1] + 1]
+            del stream[indices[0] : indices[-1] + 1]
+            pos = _position(ev.position, ev.op, maximum=len(stream))
+            before = tuple(stream)
+            stream[pos:pos] = block
+            # A destination that reconstructs the old order is a generated no-op, not a realized
+            # move.  Rejecting it keeps realized-operation counts and law 5 honest.
+            old_again = list(before)
+            old_again[indices[0] : indices[0]] = block
+            if stream == old_again:
+                raise CompositionError(
+                    "move: destination leaves the working order unchanged"
+                )
+            _refresh_positions(min(indices[0], pos))
+            for target in ev.old_ids:
+                moved_candidates.update(ancestors[target])
 
-    pairs = frozenset(
-        (old, fresh) for fresh in stream for old in ancestors[fresh]
-    )
-    final_inserted = frozenset(f for f in stream if f in inserted_mark or not ancestors[f])
+    pairs = frozenset((old, fresh) for fresh in stream for old in ancestors[fresh])
+    final_inserted = frozenset(f for f in stream if not ancestors[f])
     # An original old id counts deleted only if NO final atom carries its lineage.
     survivors = {old for old, _ in pairs}
     final_deleted = frozenset(d for d in deleted if d not in survivors)
+    final_moved = _final_moved_old_ids(
+        old_order, tuple(stream), pairs, moved_candidates
+    )
     return ProvenanceRelation(
         old_order=old_order,
         fresh_order=tuple(stream),
         pairs=pairs,
         inserted=final_inserted,
         deleted=final_deleted,
-        moved=frozenset(moved),
+        moved=final_moved,
         old_content=dict(old_content or {}),
         fresh_content=dict(fresh_content or {}),
     )
@@ -178,7 +283,10 @@ def check_relation_laws(
     for fresh in rel.fresh_order:
         if fresh not in rel.inserted and not ancestry_of.get(fresh):
             violations.append(
-                RelationLawViolation("orphan-fresh", f"final atom {fresh!r} has no ancestry and no insert event")
+                RelationLawViolation(
+                    "orphan-fresh",
+                    f"final atom {fresh!r} has no ancestry and no insert event",
+                )
             )
 
     # Law 2 — deleted old atoms have no final descendants.
@@ -186,20 +294,30 @@ def check_relation_laws(
     for old, fresh in rel.pairs:
         if old in rel.deleted and fresh in final_set:
             violations.append(
-                RelationLawViolation("deleted-descendant", f"deleted {old!r} has final descendant {fresh!r}")
+                RelationLawViolation(
+                    "deleted-descendant",
+                    f"deleted {old!r} has final descendant {fresh!r}",
+                )
             )
 
-    # Law 3 — split/duplicate descendants preserve exactly one source lineage.
-    single_lineage_products: set[str] = set()
+    # Law 3 — split/duplicate descendants preserve the source lineage exactly. For the normal
+    # old-derived case that is exactly one original lineage; an insert-derived atom legitimately
+    # has none. Comparing to the event source catches both an added and a dropped lineage.
+    single_lineage_products: dict[str, set[str]] = {}
     for ev in events:
         if ev.op in ("split", "duplicate"):
-            single_lineage_products.update(ev.fresh_ids)
-    for fresh in single_lineage_products:
-        if fresh in final_set and len(ancestry_of.get(fresh, set())) > 1:
+            expected: set[str] = set()
+            for source in ev.old_ids:
+                expected.update(_transitive_old(source, events, rel))
+            for fresh in ev.fresh_ids:
+                single_lineage_products[fresh] = expected
+    for fresh, expected in single_lineage_products.items():
+        if fresh in final_set and ancestry_of.get(fresh, set()) != expected:
             violations.append(
                 RelationLawViolation(
                     "multi-lineage",
-                    f"split/duplicate product {fresh!r} carries {len(ancestry_of[fresh])} lineages",
+                    f"split/duplicate product {fresh!r} carries "
+                    f"{sorted(ancestry_of.get(fresh, set()))}; expected exactly {sorted(expected)}",
                 )
             )
 
@@ -226,14 +344,22 @@ def check_relation_laws(
     for old in rel.moved:
         if old not in {o for o, _ in rel.pairs}:
             violations.append(
-                RelationLawViolation("move-ancestry", f"moved atom {old!r} lost its lineage")
+                RelationLawViolation(
+                    "move-ancestry", f"moved atom {old!r} lost its lineage"
+                )
             )
 
     # Law 6 — the final relation equals the independent composition of the event log.
     try:
-        reference = compose_events(rel.old_order, events, rel.old_content, rel.fresh_content)
+        reference = compose_events(
+            rel.old_order, events, rel.old_content, rel.fresh_content
+        )
     except CompositionError as exc:
-        violations.append(RelationLawViolation("composition-mismatch", f"event log not applicable: {exc}"))
+        violations.append(
+            RelationLawViolation(
+                "composition-mismatch", f"event log not applicable: {exc}"
+            )
+        )
     else:
         for field_name in ("fresh_order", "pairs", "inserted", "deleted", "moved"):
             if getattr(reference, field_name) != getattr(rel, field_name):
@@ -251,23 +377,28 @@ def check_relation_laws(
         (fresh,) = ev.fresh_ids
         if fresh in final_set and not ancestry_of.get(fresh):
             violations.append(
-                RelationLawViolation("content-ancestry", f"char_sub product {fresh!r} lost its lineage")
+                RelationLawViolation(
+                    "content-ancestry", f"char_sub product {fresh!r} lost its lineage"
+                )
             )
 
     # Forbidden composition [audit sharpening 2026-07-17] — delete(X) + insertion of
     # byte-identical X-content is expressible only as a move (ER-A2 as sharpened).
-    dropped_contents = {
-        rel.old_content[t]
-        for ev in events
-        if ev.op == "drop"
-        for t in ev.old_ids
-        if t in rel.old_content
-    }
+    dropped_contents: set[str] = set()
+    for ev in events:
+        if ev.op != "drop":
+            continue
+        if ev.old_texts:
+            dropped_contents.update(ev.old_texts)
+        else:
+            dropped_contents.update(
+                rel.old_content[t] for t in ev.old_ids if t in rel.old_content
+            )
     for ev in events:
         if ev.op != "insert":
             continue
         (fresh,) = ev.fresh_ids
-        content = rel.fresh_content.get(fresh)
+        content = ev.fresh_texts[0] if ev.fresh_texts else rel.fresh_content.get(fresh)
         if content is not None and content in dropped_contents:
             violations.append(
                 RelationLawViolation(
@@ -279,7 +410,9 @@ def check_relation_laws(
     return violations
 
 
-def _transitive_old(working_id: str, events: list[LineageEvent], rel: ProvenanceRelation) -> set[str]:
+def _transitive_old(
+    working_id: str, events: list[LineageEvent], rel: ProvenanceRelation
+) -> set[str]:
     """Original-old ancestors of a working id at merge time: original ids map to themselves;
     ids minted by earlier events resolve through those events' sources, recursively."""
     if working_id in rel.old_order:
@@ -291,3 +424,32 @@ def _transitive_old(working_id: str, events: list[LineageEvent], rel: Provenance
                 out |= _transitive_old(src, events, rel)
             return out
     return set()  # insert-introduced: no old ancestry
+
+
+def _final_moved_old_ids(
+    old_order: tuple[str, ...],
+    fresh_order: tuple[str, ...],
+    pairs: frozenset[tuple[str, str]],
+    candidates: set[str] | frozenset[str],
+) -> frozenset[str]:
+    """Move candidates whose final relative order actually differs from the old generation."""
+    old_position = {old_id: index for index, old_id in enumerate(old_order)}
+    fresh_index = {fresh_id: index for index, fresh_id in enumerate(fresh_order)}
+    final_position: dict[str, int] = {}
+    for old_id, fresh_id in pairs:
+        index = fresh_index[fresh_id]
+        final_position[old_id] = min(index, final_position.get(old_id, index))
+    survivors = set(final_position)
+    return frozenset(
+        candidate
+        for candidate in candidates & survivors
+        if any(
+            other != candidate
+            and (
+                final_position[candidate] == final_position[other]
+                or (old_position[candidate] < old_position[other])
+                != (final_position[candidate] < final_position[other])
+            )
+            for other in survivors
+        )
+    )

@@ -1,0 +1,12 @@
+{
+  "emitted_at": "2026-07-19T01:06:32.171957+00:00",
+  "emitter_pid": 3837,
+  "event": "scale-campaign-finalized",
+  "event_sequence": 767,
+  "gate_failures": [],
+  "measurement_total": 150,
+  "run_elapsed_seconds": 2.3833e-05,
+  "run_id": "registered-boundary-index-fingerprint-20260719",
+  "status": "COMPLETE",
+  "telemetry_schema": "s4.7-scale-progress@v2"
+}

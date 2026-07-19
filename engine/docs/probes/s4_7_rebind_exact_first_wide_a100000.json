@@ -1,0 +1,765 @@
+{
+  "cases": {
+    "wide/identical": {
+      "atom_count": 100000,
+      "fingerprint_counts": {
+        "fingerprint_evaluated_slots": [
+          2500
+        ],
+        "fresh_fingerprint_computations": [
+          2500
+        ],
+        "one_computation_per_evaluated_slot": true
+      },
+      "fixture_variant": "identical",
+      "median_lifetime_peak_bytes": 1274986496,
+      "median_named_span_seconds": 183.70400616596453,
+      "repetitions": 1,
+      "samples": [
+        {
+          "elapsed_seconds": 183.70400616596453,
+          "incremental_peak_bytes": 262225920,
+          "ledger": {
+            "A": 100000,
+            "D": 4,
+            "K": 2500,
+            "L": 2500,
+            "T": 3600000,
+            "family": "wide-rebind-production"
+          },
+          "lifetime_peak_bytes": 1274986496,
+          "monitor_elapsed_seconds": 390.050426291069,
+          "phase": "rebind",
+          "raw_ru_maxrss_bytes": 1274986496,
+          "sample_count": 29469,
+          "sample_interval_seconds": 0.005,
+          "setup_baseline_bytes": 765952000,
+          "setup_elapsed_seconds": 204.33029720792547,
+          "span_peak_bytes": 1028177920,
+          "telemetry": {
+            "child_trace": {
+              "active_stage": "idle",
+              "schema": "engine-rebind-telemetry@v1",
+              "spans": [
+                {
+                  "attributes": {},
+                  "cpu_seconds": 46.519566,
+                  "name": "setup.materialize-fixture",
+                  "parent": "setup.prepare",
+                  "start_offset_seconds": 0.0020905,
+                  "wall_seconds": 62.934344291
+                },
+                {
+                  "attributes": {},
+                  "cpu_seconds": 0.001719,
+                  "name": "persist.prepare-workspaces",
+                  "parent": "setup.persist-prerequisites",
+                  "start_offset_seconds": 62.93945675,
+                  "wall_seconds": 0.003249708
+                },
+                {
+                  "attributes": {
+                    "stream_count": 2
+                  },
+                  "cpu_seconds": 5.742259,
+                  "name": "persist.old-streams",
+                  "parent": "setup.persist-prerequisites",
+                  "start_offset_seconds": 62.942734416,
+                  "wall_seconds": 8.266902709
+                },
+                {
+                  "attributes": {
+                    "stream_count": 2
+                  },
+                  "cpu_seconds": 4.345793,
+                  "name": "persist.fresh-streams",
+                  "parent": "setup.persist-prerequisites",
+                  "start_offset_seconds": 71.209818958,
+                  "wall_seconds": 5.03584075
+                },
+                {
+                  "attributes": {},
+                  "cpu_seconds": 32.376341,
+                  "name": "persist.structure-map",
+                  "parent": "setup.persist-prerequisites",
+                  "start_offset_seconds": 76.245727083,
+                  "wall_seconds": 42.800261833
+                },
+                {
+                  "attributes": {},
+                  "cpu_seconds": 42.467127,
+                  "name": "setup.persist-prerequisites",
+                  "parent": "setup.prepare",
+                  "start_offset_seconds": 62.939007166,
+                  "wall_seconds": 56.111290459
+                },
+                {
+                  "attributes": {
+                    "stream_count": 2
+                  },
+                  "cpu_seconds": 6.133301,
+                  "name": "load.old-streams",
+                  "parent": "setup.load-prerequisites",
+                  "start_offset_seconds": 119.051425,
+                  "wall_seconds": 12.428390333
+                },
+                {
+                  "attributes": {
+                    "stream_count": 2
+                  },
+                  "cpu_seconds": 8.019622,
+                  "name": "load.fresh-streams",
+                  "parent": "setup.load-prerequisites",
+                  "start_offset_seconds": 131.480436416,
+                  "wall_seconds": 18.846692042
+                },
+                {
+                  "attributes": {},
+                  "cpu_seconds": 34.80444,
+                  "name": "load.structure-map",
+                  "parent": "setup.load-prerequisites",
+                  "start_offset_seconds": 150.33060225,
+                  "wall_seconds": 53.356522583
+                },
+                {
+                  "attributes": {},
+                  "cpu_seconds": 48.96862,
+                  "name": "setup.load-prerequisites",
+                  "parent": "setup.prepare",
+                  "start_offset_seconds": 119.051361958,
+                  "wall_seconds": 84.649028417
+                },
+                {
+                  "attributes": {},
+                  "cpu_seconds": 0.139217,
+                  "name": "index.readers",
+                  "parent": "setup.index-prerequisites",
+                  "start_offset_seconds": 203.700540458,
+                  "wall_seconds": 0.212731667
+                },
+                {
+                  "attributes": {},
+                  "cpu_seconds": 0.184618,
+                  "name": "index.validate-map",
+                  "parent": "setup.index-prerequisites",
+                  "start_offset_seconds": 203.913307958,
+                  "wall_seconds": 0.1933395
+                },
+                {
+                  "attributes": {
+                    "fresh_included_atoms": 100000,
+                    "old_included_atoms": 100000
+                  },
+                  "cpu_seconds": 2e-05,
+                  "name": "index.compare-cardinality",
+                  "parent": "setup.index-prerequisites",
+                  "start_offset_seconds": 204.106662166,
+                  "wall_seconds": 2.1084e-05
+                },
+                {
+                  "attributes": {},
+                  "cpu_seconds": 0.323947,
+                  "name": "setup.index-prerequisites",
+                  "parent": "setup.prepare",
+                  "start_offset_seconds": 203.700512916,
+                  "wall_seconds": 0.406175792
+                },
+                {
+                  "attributes": {},
+                  "cpu_seconds": 138.281129,
+                  "name": "setup.prepare",
+                  "parent": null,
+                  "start_offset_seconds": 9.1708e-05,
+                  "wall_seconds": 204.106707875
+                },
+                {
+                  "attributes": {
+                    "node_count": 2503,
+                    "slot_count": 2500
+                  },
+                  "cpu_seconds": 0.060516,
+                  "name": "rebind.enumerate-slots",
+                  "parent": "named.rebind",
+                  "start_offset_seconds": 205.127791291,
+                  "wall_seconds": 0.070672417
+                },
+                {
+                  "attributes": {
+                    "atom_count": 100000,
+                    "token_count": 3600000
+                  },
+                  "cpu_seconds": 1.295603,
+                  "name": "rebind.materialize-old-tokens",
+                  "parent": "named.rebind",
+                  "start_offset_seconds": 205.198736625,
+                  "wall_seconds": 1.8164675
+                },
+                {
+                  "attributes": {
+                    "atom_count": 100000,
+                    "token_count": 3600000
+                  },
+                  "cpu_seconds": 1.390638,
+                  "name": "rebind.materialize-fresh-tokens",
+                  "parent": "named.rebind",
+                  "start_offset_seconds": 207.015399916,
+                  "wall_seconds": 2.179907625
+                },
+                {
+                  "attributes": {
+                    "alignment_blocks": 1,
+                    "chained_anchors": 0,
+                    "identity_fast_path": true,
+                    "near_duplicate": true
+                  },
+                  "cpu_seconds": 0.045868,
+                  "name": "rebind.align-tokens",
+                  "parent": "named.rebind",
+                  "start_offset_seconds": 209.440155666,
+                  "wall_seconds": 0.059609042
+                },
+                {
+                  "attributes": {
+                    "query_count": 5000,
+                    "unique_query_count": 5000
+                  },
+                  "cpu_seconds": 0.096642,
+                  "name": "rebind.prepare-anchor-queries",
+                  "parent": "named.rebind",
+                  "start_offset_seconds": 209.4997885,
+                  "wall_seconds": 0.186288458
+                },
+                {
+                  "attributes": {
+                    "exact_resolved_queries": 5000,
+                    "exact_windows_scanned": 7199991,
+                    "fuzzy_resolved_queries": 0,
+                    "fuzzy_searched_queries": 0,
+                    "fuzzy_windows_scanned": 0,
+                    "group_count": 2,
+                    "signature_count": 0,
+                    "unresolved_queries": 0,
+                    "windows_scanned": 7199991
+                  },
+                  "cpu_seconds": 1.745655,
+                  "name": "rebind.locate-old-anchors",
+                  "parent": "named.rebind",
+                  "start_offset_seconds": 209.686135833,
+                  "wall_seconds": 2.490572625
+                },
+                {
+                  "attributes": {
+                    "exact_resolved_queries": 5000,
+                    "exact_windows_scanned": 0,
+                    "fuzzy_resolved_queries": 0,
+                    "fuzzy_searched_queries": 0,
+                    "fuzzy_windows_scanned": 0,
+                    "reused_old_locator": true,
+                    "signature_count": 0,
+                    "tokens_identical": true,
+                    "unresolved_queries": 0,
+                    "windows_scanned": 0
+                  },
+                  "cpu_seconds": 2.2e-05,
+                  "name": "rebind.locate-fresh-anchors",
+                  "parent": "named.rebind",
+                  "start_offset_seconds": 212.17691425,
+                  "wall_seconds": 2.2583e-05
+                },
+                {
+                  "attributes": {
+                    "unique_boundaries": 2501
+                  },
+                  "cpu_seconds": 0.005077,
+                  "name": "rebind.index-boundary-owners",
+                  "parent": "named.rebind",
+                  "start_offset_seconds": 212.17694175,
+                  "wall_seconds": 0.005445041
+                },
+                {
+                  "attributes": {
+                    "analysis_skipped": true,
+                    "gram_widths_analyzed": 0,
+                    "tokens_identical": true,
+                    "unresolved_duplication": false
+                  },
+                  "cpu_seconds": 7e-06,
+                  "name": "rebind.detect-token-duplication",
+                  "parent": "named.rebind",
+                  "start_offset_seconds": 212.182403375,
+                  "wall_seconds": 7.375e-06
+                },
+                {
+                  "attributes": {
+                    "fresh_tokenless_atoms": 0,
+                    "old_tokenless_atoms": 0,
+                    "unresolved_duplication": false
+                  },
+                  "cpu_seconds": 0.17708,
+                  "name": "rebind.detect-tokenless-duplication",
+                  "parent": "named.rebind",
+                  "start_offset_seconds": 212.182413208,
+                  "wall_seconds": 0.310326083
+                },
+                {
+                  "attributes": {
+                    "bound_slots": 2500,
+                    "fingerprint_evaluated_slots": 2500,
+                    "fresh_fingerprint_computations": 2500,
+                    "resolved_boundaries": 5000,
+                    "slot_count": 2500,
+                    "unresolved_reasons": {}
+                  },
+                  "cpu_seconds": 124.489963,
+                  "name": "rebind.resolve-slots",
+                  "parent": "named.rebind",
+                  "start_offset_seconds": 212.492823208,
+                  "wall_seconds": 161.118864125
+                },
+                {
+                  "attributes": {
+                    "bound_nodes": 2503,
+                    "node_count": 2503
+                  },
+                  "cpu_seconds": 0.003103,
+                  "name": "rebind.aggregate-nodes",
+                  "parent": "named.rebind",
+                  "start_offset_seconds": 373.611770291,
+                  "wall_seconds": 0.004187875
+                },
+                {
+                  "attributes": {
+                    "node_count": 2503
+                  },
+                  "cpu_seconds": 1.307018,
+                  "name": "rebind.migrate-projection",
+                  "parent": "named.rebind",
+                  "start_offset_seconds": 373.616002208,
+                  "wall_seconds": 1.623941458
+                },
+                {
+                  "attributes": {
+                    "all_bound_before_validation": true,
+                    "contested_nodes": 0,
+                    "map_valid": true
+                  },
+                  "cpu_seconds": 3.049486,
+                  "name": "rebind.validate-projection",
+                  "parent": "named.rebind",
+                  "start_offset_seconds": 375.240116291,
+                  "wall_seconds": 9.514386709
+                },
+                {
+                  "attributes": {
+                    "restamped_entries": 0,
+                    "stale_decisions": 0
+                  },
+                  "cpu_seconds": 6.8e-05,
+                  "name": "rebind.restamp-evidence",
+                  "parent": "named.rebind",
+                  "start_offset_seconds": 384.754603291,
+                  "wall_seconds": 0.000236292
+                },
+                {
+                  "attributes": {
+                    "bound_nodes": 2503,
+                    "unresolved_nodes": 0
+                  },
+                  "cpu_seconds": 1.41062,
+                  "name": "rebind.assemble-report",
+                  "parent": "named.rebind",
+                  "start_offset_seconds": 384.75484425,
+                  "wall_seconds": 1.700453833
+                },
+                {
+                  "attributes": {},
+                  "cpu_seconds": 136.503128,
+                  "name": "named.rebind",
+                  "parent": null,
+                  "start_offset_seconds": 204.122904583,
+                  "wall_seconds": 183.70381675
+                }
+              ]
+            },
+            "fixture_variant": "identical",
+            "schema": "s4.7-runtime-telemetry@v1",
+            "stage_rss": [
+              {
+                "first_monitor_elapsed_seconds": 0.007977291010320187,
+                "last_monitor_elapsed_seconds": 390.0298525830731,
+                "name": "idle",
+                "rss_peak_bytes": 1736212480,
+                "sample_count": 354
+              },
+              {
+                "first_monitor_elapsed_seconds": 203.91606008308008,
+                "last_monitor_elapsed_seconds": 204.12049362505786,
+                "name": "index.readers",
+                "rss_peak_bytes": 768589824,
+                "sample_count": 37
+              },
+              {
+                "first_monitor_elapsed_seconds": 204.12650245800614,
+                "last_monitor_elapsed_seconds": 204.3178544580005,
+                "name": "index.validate-map",
+                "rss_peak_bytes": 770703360,
+                "sample_count": 34
+              },
+              {
+                "first_monitor_elapsed_seconds": 131.69705391605385,
+                "last_monitor_elapsed_seconds": 150.5393561660312,
+                "name": "load.fresh-streams",
+                "rss_peak_bytes": 1274314752,
+                "sample_count": 2520
+              },
+              {
+                "first_monitor_elapsed_seconds": 119.26713074999861,
+                "last_monitor_elapsed_seconds": 131.6902727910783,
+                "name": "load.old-streams",
+                "rss_peak_bytes": 1113587712,
+                "sample_count": 1749
+              },
+              {
+                "first_monitor_elapsed_seconds": 150.54552116594277,
+                "last_monitor_elapsed_seconds": 203.89919095812365,
+                "name": "load.structure-map",
+                "rss_peak_bytes": 646381568,
+                "sample_count": 7986
+              },
+              {
+                "first_monitor_elapsed_seconds": 204.33717687497847,
+                "last_monitor_elapsed_seconds": 388.0376554999966,
+                "name": "named.rebind",
+                "rss_peak_bytes": 922238976,
+                "sample_count": 449
+              },
+              {
+                "first_monitor_elapsed_seconds": 71.42756391596049,
+                "last_monitor_elapsed_seconds": 76.45727287512273,
+                "name": "persist.fresh-streams",
+                "rss_peak_bytes": 1014972416,
+                "sample_count": 880
+              },
+              {
+                "first_monitor_elapsed_seconds": 63.156474583083764,
+                "last_monitor_elapsed_seconds": 71.42182775004767,
+                "name": "persist.old-streams",
+                "rss_peak_bytes": 1001848832,
+                "sample_count": 1301
+              },
+              {
+                "first_monitor_elapsed_seconds": 76.46298754098825,
+                "last_monitor_elapsed_seconds": 119.26112354104407,
+                "name": "persist.structure-map",
+                "rss_peak_bytes": 965640192,
+                "sample_count": 6899
+              },
+              {
+                "first_monitor_elapsed_seconds": 373.82864033291116,
+                "last_monitor_elapsed_seconds": 373.82869495800696,
+                "name": "rebind.aggregate-nodes",
+                "rss_peak_bytes": 335970304,
+                "sample_count": 1
+              },
+              {
+                "first_monitor_elapsed_seconds": 209.65589512512088,
+                "last_monitor_elapsed_seconds": 209.71230737492442,
+                "name": "rebind.align-tokens",
+                "rss_peak_bytes": 752058368,
+                "sample_count": 10
+              },
+              {
+                "first_monitor_elapsed_seconds": 384.9685843749903,
+                "last_monitor_elapsed_seconds": 386.6670419580769,
+                "name": "rebind.assemble-report",
+                "rss_peak_bytes": 707051520,
+                "sample_count": 294
+              },
+              {
+                "first_monitor_elapsed_seconds": 212.3967438749969,
+                "last_monitor_elapsed_seconds": 212.7035687910393,
+                "name": "rebind.detect-tokenless-duplication",
+                "rss_peak_bytes": 761397248,
+                "sample_count": 50
+              },
+              {
+                "first_monitor_elapsed_seconds": 205.3426045831293,
+                "last_monitor_elapsed_seconds": 205.40772949997336,
+                "name": "rebind.enumerate-slots",
+                "rss_peak_bytes": 665616384,
+                "sample_count": 12
+              },
+              {
+                "first_monitor_elapsed_seconds": 212.3909560830798,
+                "last_monitor_elapsed_seconds": 212.3910010829568,
+                "name": "rebind.index-boundary-owners",
+                "rss_peak_bytes": 372850688,
+                "sample_count": 1
+              },
+              {
+                "first_monitor_elapsed_seconds": 209.904383208137,
+                "last_monitor_elapsed_seconds": 212.38507941598073,
+                "name": "rebind.locate-old-anchors",
+                "rss_peak_bytes": 835534848,
+                "sample_count": 398
+              },
+              {
+                "first_monitor_elapsed_seconds": 207.22922675008886,
+                "last_monitor_elapsed_seconds": 209.40805041603744,
+                "name": "rebind.materialize-fresh-tokens",
+                "rss_peak_bytes": 836009984,
+                "sample_count": 340
+              },
+              {
+                "first_monitor_elapsed_seconds": 205.41476733307354,
+                "last_monitor_elapsed_seconds": 207.22343420796096,
+                "name": "rebind.materialize-old-tokens",
+                "rss_peak_bytes": 714145792,
+                "sample_count": 289
+              },
+              {
+                "first_monitor_elapsed_seconds": 373.8344168749172,
+                "last_monitor_elapsed_seconds": 375.45185354095884,
+                "name": "rebind.migrate-projection",
+                "rss_peak_bytes": 767410176,
+                "sample_count": 275
+              },
+              {
+                "first_monitor_elapsed_seconds": 209.71757820807397,
+                "last_monitor_elapsed_seconds": 209.89897912507877,
+                "name": "rebind.prepare-anchor-queries",
+                "rss_peak_bytes": 835010560,
+                "sample_count": 28
+              },
+              {
+                "first_monitor_elapsed_seconds": 212.70931491605006,
+                "last_monitor_elapsed_seconds": 373.8228269161191,
+                "name": "rebind.resolve-slots",
+                "rss_peak_bytes": 769638400,
+                "sample_count": 25791
+              },
+              {
+                "first_monitor_elapsed_seconds": 375.4575674161315,
+                "last_monitor_elapsed_seconds": 384.96284066606313,
+                "name": "rebind.validate-projection",
+                "rss_peak_bytes": 1028177920,
+                "sample_count": 1530
+              },
+              {
+                "first_monitor_elapsed_seconds": 203.90450983308256,
+                "last_monitor_elapsed_seconds": 203.91031237505376,
+                "name": "setup.load-prerequisites",
+                "rss_peak_bytes": 655114240,
+                "sample_count": 2
+              },
+              {
+                "first_monitor_elapsed_seconds": 0.21760675008408725,
+                "last_monitor_elapsed_seconds": 63.15047429106198,
+                "name": "setup.materialize-fixture",
+                "rss_peak_bytes": 1262649344,
+                "sample_count": 9902
+              }
+            ]
+          }
+        }
+      ],
+      "shape": "wide",
+      "span_medians": {
+        "index.compare-cardinality": {
+          "median_cpu_seconds": 2e-05,
+          "median_wall_seconds": 2.1084e-05
+        },
+        "index.readers": {
+          "median_cpu_seconds": 0.139217,
+          "median_wall_seconds": 0.212731667
+        },
+        "index.validate-map": {
+          "median_cpu_seconds": 0.184618,
+          "median_wall_seconds": 0.1933395
+        },
+        "load.fresh-streams": {
+          "median_cpu_seconds": 8.019622,
+          "median_wall_seconds": 18.846692042
+        },
+        "load.old-streams": {
+          "median_cpu_seconds": 6.133301,
+          "median_wall_seconds": 12.428390333
+        },
+        "load.structure-map": {
+          "median_cpu_seconds": 34.80444,
+          "median_wall_seconds": 53.356522583
+        },
+        "named.rebind": {
+          "median_cpu_seconds": 136.503128,
+          "median_wall_seconds": 183.70381675
+        },
+        "persist.fresh-streams": {
+          "median_cpu_seconds": 4.345793,
+          "median_wall_seconds": 5.03584075
+        },
+        "persist.old-streams": {
+          "median_cpu_seconds": 5.742259,
+          "median_wall_seconds": 8.266902709
+        },
+        "persist.prepare-workspaces": {
+          "median_cpu_seconds": 0.001719,
+          "median_wall_seconds": 0.003249708
+        },
+        "persist.structure-map": {
+          "median_cpu_seconds": 32.376341,
+          "median_wall_seconds": 42.800261833
+        },
+        "rebind.aggregate-nodes": {
+          "median_cpu_seconds": 0.003103,
+          "median_wall_seconds": 0.004187875
+        },
+        "rebind.align-tokens": {
+          "median_cpu_seconds": 0.045868,
+          "median_wall_seconds": 0.059609042
+        },
+        "rebind.assemble-report": {
+          "median_cpu_seconds": 1.41062,
+          "median_wall_seconds": 1.700453833
+        },
+        "rebind.detect-token-duplication": {
+          "median_cpu_seconds": 7e-06,
+          "median_wall_seconds": 7.375e-06
+        },
+        "rebind.detect-tokenless-duplication": {
+          "median_cpu_seconds": 0.17708,
+          "median_wall_seconds": 0.310326083
+        },
+        "rebind.enumerate-slots": {
+          "median_cpu_seconds": 0.060516,
+          "median_wall_seconds": 0.070672417
+        },
+        "rebind.index-boundary-owners": {
+          "median_cpu_seconds": 0.005077,
+          "median_wall_seconds": 0.005445041
+        },
+        "rebind.locate-fresh-anchors": {
+          "median_cpu_seconds": 2.2e-05,
+          "median_wall_seconds": 2.2583e-05
+        },
+        "rebind.locate-old-anchors": {
+          "median_cpu_seconds": 1.745655,
+          "median_wall_seconds": 2.490572625
+        },
+        "rebind.materialize-fresh-tokens": {
+          "median_cpu_seconds": 1.390638,
+          "median_wall_seconds": 2.179907625
+        },
+        "rebind.materialize-old-tokens": {
+          "median_cpu_seconds": 1.295603,
+          "median_wall_seconds": 1.8164675
+        },
+        "rebind.migrate-projection": {
+          "median_cpu_seconds": 1.307018,
+          "median_wall_seconds": 1.623941458
+        },
+        "rebind.prepare-anchor-queries": {
+          "median_cpu_seconds": 0.096642,
+          "median_wall_seconds": 0.186288458
+        },
+        "rebind.resolve-slots": {
+          "median_cpu_seconds": 124.489963,
+          "median_wall_seconds": 161.118864125
+        },
+        "rebind.restamp-evidence": {
+          "median_cpu_seconds": 6.8e-05,
+          "median_wall_seconds": 0.000236292
+        },
+        "rebind.validate-projection": {
+          "median_cpu_seconds": 3.049486,
+          "median_wall_seconds": 9.514386709
+        },
+        "setup.index-prerequisites": {
+          "median_cpu_seconds": 0.323947,
+          "median_wall_seconds": 0.406175792
+        },
+        "setup.load-prerequisites": {
+          "median_cpu_seconds": 48.96862,
+          "median_wall_seconds": 84.649028417
+        },
+        "setup.materialize-fixture": {
+          "median_cpu_seconds": 46.519566,
+          "median_wall_seconds": 62.934344291
+        },
+        "setup.persist-prerequisites": {
+          "median_cpu_seconds": 42.467127,
+          "median_wall_seconds": 56.111290459
+        },
+        "setup.prepare": {
+          "median_cpu_seconds": 138.281129,
+          "median_wall_seconds": 204.106707875
+        }
+      }
+    }
+  },
+  "command": [
+    "/Users/ben_mpa/LLM/PER_LA_LIBERTA/engine/.venv/bin/python3",
+    "/Users/ben_mpa/LLM/PER_LA_LIBERTA/engine/tools/s4_7_rebind_telemetry.py",
+    "--artifact",
+    "docs/probes/s4_7_rebind_exact_first_wide_a100000.json",
+    "--stage",
+    "exact-first-anchor-lookup",
+    "--atom-count",
+    "100000",
+    "--repetitions",
+    "1",
+    "--shape",
+    "wide",
+    "--fixture-variant",
+    "identical",
+    "--progress-log",
+    "docs/probes/s4_7_rebind_exact_first_wide_a100000.progress.ndjson",
+    "--progress-format",
+    "both"
+  ],
+  "created_at": "2026-07-18T20:44:17.305850+00:00",
+  "environment": {
+    "machine": "arm64",
+    "platform": "macOS-26.5.1-arm64-arm-64bit-Mach-O",
+    "python": "3.13.0"
+  },
+  "fixture": {
+    "drift": "one OCR-class token edit plus one split and one merge per 400 old atoms; aggregate atom cardinality remains stable",
+    "identical": "reminted atom ids with identical old/fresh tokens"
+  },
+  "git": {
+    "branch": "spike/s4_7",
+    "head": "6b65a4fd975ce27bb8216aff799764c50bb7ee09",
+    "status": "M ../.github/workflows/engine.yml\n M .github/workflows/ci.yml\n M docs/ENGINE_STRUCTURE_TASKS.md\n M docs/probes/s4_7_item2_prereg.md\n M pyproject.toml\n M src/engine/structure/__init__.py\n M src/engine/structure/artifacts.py\n M src/engine/structure/handles.py\n M src/engine/structure/projection.py\n M src/engine/structure/rebind.py\n M src/engine/structure/schema/structure_map.schema.json\n M src/engine/structure/structure_map.py\n M tests/fixtures/structure/conforming_structure_map.json\n M tests/fixtures/structure/differ_structure_map.json\n M tests/fixtures/structure/invalid/alias_collision.json\n M tests/fixtures/structure/invalid/empty_container.json\n M tests/fixtures/structure/invalid/empty_map.json\n M tests/fixtures/structure/invalid/leaf_only.json\n M tests/fixtures/structure/invalid/malformed_manifest.json\n M tests/fixtures/structure/invalid/non_container_root.json\n M tests/fixtures/structure/rebind_positive_structure_map.json\n M tests/harness/relation.py\n M tests/hunts/hunt_rebind.py\n M tests/unit/test_authoring_evidence.py\n M tests/unit/test_harness_relation_laws.py\n M tests/unit/test_rebind.py\n M tests/unit/test_structure_artifacts.py\n M tests/unit/test_structure_born_gate.py\n M tests/unit/test_structure_handles.py\n M tests/unit/test_structure_map.py\n M uv.lock\n?? docs/probes/s4_7_priority1_component0_audit.md\n?? docs/probes/s4_7_priority2_inv1_inv2_audit.md\n?? docs/probes/s4_7_priority2_red_manifest.json\n?? docs/probes/s4_7_priority3_inv3_inv5_audit.md\n?? docs/probes/s4_7_priority3_red_manifest.json\n?? docs/probes/s4_7_priority4_inv6_inv7_audit.md\n?? docs/probes/s4_7_priority4_perf_baseline.json\n?? docs/probes/s4_7_priority4_red_manifest.json\n?? docs/probes/s4_7_priority5_item3_audit.md\n?? docs/probes/s4_7_priority5_mutation_manifest.json\n?? docs/probes/s4_7_priority5_perf_baseline.json\n?? docs/probes/s4_7_priority6_prereg.md\n?? docs/probes/s4_7_rebind_duplication_skip_a10000.json\n?? docs/probes/s4_7_rebind_duplication_skip_a10000.progress.ndjson\n?? docs/probes/s4_7_rebind_exact_first_a10000.json\n?? docs/probes/s4_7_rebind_exact_first_a10000.progress.ndjson\n?? docs/probes/s4_7_rebind_exact_first_wide_a100000.progress.ndjson\n?? docs/probes/s4_7_rebind_fingerprint_reuse_a10000.json\n?? docs/probes/s4_7_rebind_fingerprint_reuse_a10000.progress.ndjson\n?? docs/probes/s4_7_rebind_fingerprint_reuse_wide_a100000.json\n?? docs/probes/s4_7_rebind_fingerprint_reuse_wide_a100000.progress.ndjson\n?? docs/probes/s4_7_rebind_identity_alignment_a10000.json\n?? docs/probes/s4_7_rebind_identity_alignment_a10000.progress.ndjson\n?? docs/probes/s4_7_rebind_telemetry_baseline.json\n?? docs/probes/s4_7_scale.checkpoint.json\n?? docs/probes/s4_7_scale.json\n?? docs/probes/s4_7_scale_cycle_wide_a100000.active.json\n?? docs/probes/s4_7_scale_cycle_wide_a100000.checkpoint.json\n?? docs/probes/s4_7_scale_cycle_wide_a100000.json\n?? docs/probes/s4_7_scale_cycle_wide_a100000.progress.ndjson\n?? docs/probes/s4_7_scale_failed_index_growth.checkpoint.json\n?? docs/probes/s4_7_scale_failed_index_growth.json\n?? docs/probes/s4_7_scale_infeasible_setup.checkpoint.json\n?? docs/probes/s4_7_scale_relation_quadratic.checkpoint.json\n?? src/engine/structure/boundary_anchor.py\n?? src/engine/structure/reanchor.py\n?? src/engine/structure/rebind_telemetry.py\n?? tests/harness/boundary.py\n?? tests/harness/invariants_3_5.py\n?? tests/harness/materialize.py\n?? tests/harness/oracle.py\n?? tests/harness/scale.py\n?? tests/harness/scale_production.py\n?? tests/scale/\n?? tests/unit/test_harness_materialize.py\n?? tests/unit/test_s4_7_inv1_inv2.py\n?? tests/unit/test_s4_7_inv3_inv5.py\n?? tests/unit/test_s4_7_inv6_inv7.py\n?? tests/unit/test_s4_7_reanchor.py\n?? tests/unit/test_s4_7_scale_production.py\n?? tools/s4_7_hunt_manifest.py\n?? tools/s4_7_perf_baseline.py\n?? tools/s4_7_rebind_telemetry.py\n?? tools/s4_7_scale.py\n?? tools/s4_7_scale_cycle.py"
+  },
+  "progress": {
+    "path": "/Users/ben_mpa/LLM/PER_LA_LIBERTA/engine/docs/probes/s4_7_rebind_exact_first_wide_a100000.progress.ndjson",
+    "sha256": "c3f04cd517b5e9bccb91cbdea69e98245da089813f88da51e9aec59aadfb8b65",
+    "summary": {
+      "event_sequence_first": 1,
+      "event_sequence_last": 30,
+      "heartbeat_count": 26,
+      "host": {
+        "available_memory_max_bytes": 2439348224.0,
+        "available_memory_min_bytes": 1052213248.0,
+        "child_cpu_percent_max": 88.46939484732935,
+        "child_cpu_percent_min": 34.15173654893701,
+        "load_1m_max": 26.89697265625,
+        "memory_percent_max": 87.8,
+        "swap_used_max_bytes": 10783883264.0
+      },
+      "record_count": 30
+    }
+  },
+  "schema": "s4.7-rebind-telemetry-comparison@v2",
+  "source_identity": {
+    "src/engine/structure/reanchor.py": "e8bdc14f8000f7f30f72622805b75de8ea43900ca6c9a9c40b5575da63c5232e",
+    "src/engine/structure/rebind.py": "5369bf1542950e7796c093f6d5f196070334bf6e2dd68ac869680df238877a9b",
+    "src/engine/structure/rebind_telemetry.py": "9c0405b2cb722562df0fd436d0efb85140be8d440d5b27f9b6fad833467d704e",
+    "tests/harness/materialize.py": "3a429b399de9870dbb721cca2234398958b4dd384e8b664dd5358ca81e17990e",
+    "tests/harness/relation.py": "5d006b2a6cc7106f575df27fd2f47d3f6d40935fe58c2fe78af243ddd9d612d5",
+    "tests/harness/scale_production.py": "c337c390286d554e787b719d42cdaad0f87fbf520e8989b6fc9bfe96901a0a5b",
+    "tools/s4_7_rebind_telemetry.py": "d3d2f0109e94b800bedb4402f850764259807fd61f8d66ae9bb9df61329b8786"
+  },
+  "stage": "exact-first-anchor-lookup",
+  "step_semantics": "phase.repetition; this diagnostic measures phase 4 (rebind) only"
+}

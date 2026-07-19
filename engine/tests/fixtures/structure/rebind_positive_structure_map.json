@@ -1,5 +1,5 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "root_id": "r-root",
   "map_revision": 1,
   "block_vocabulary": [
@@ -25,7 +25,7 @@
     "canonical_geometry_hash": "sha256:fixture-geometry",
     "layers": {
       "atom_store": {"schema_version": 1, "stale_class": "atom-stream", "present": true},
-      "structure_map": {"schema_version": 2, "stale_class": "structure-map", "present": true},
+      "structure_map": {"schema_version": 3, "stale_class": "structure-map", "present": true},
       "relation_store": {"schema_version": 1, "stale_class": "relation-store", "present": false}
     },
     "resource_lineage": {
@@ -74,6 +74,12 @@
               "the wise learn"
             ]
           }
+        },
+        "boundary_anchors": {
+          "body": {
+            "start": {"prefix": [], "exact": ["silence"], "suffix": ["keeps", "its", "counsel"]},
+            "end": {"prefix": ["its", "counsel"], "exact": ["well"], "suffix": ["masks", "conceal"]}
+          }
         }
       }
     },
@@ -94,6 +100,12 @@
               "masks conceal the",
               "conceal the face"
             ]
+          }
+        },
+        "boundary_anchors": {
+          "body": {
+            "start": {"prefix": ["counsel", "well"], "exact": ["masks"], "suffix": ["conceal", "the", "face"]},
+            "end": {"prefix": ["conceal", "the"], "exact": ["face"], "suffix": []}
           }
         }
       }

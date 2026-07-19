@@ -95,7 +95,9 @@ STRUCTURE_SRC = Path(__file__).resolve().parents[2] / "src" / "engine" / "struct
 
 
 def _load_generator():
-    spec = importlib.util.spec_from_file_location("_generate_structure_fixture", GENERATOR)
+    spec = importlib.util.spec_from_file_location(
+        "_generate_structure_fixture", GENERATOR
+    )
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
@@ -115,7 +117,9 @@ def _write_doc(tmp_path: Path, doc: dict) -> Path:
 
 
 def _load(tmp_path: Path, doc: dict, store=None):
-    return structure.load_structure_map(_write_doc(tmp_path, doc), store or GEN.conforming_atom_store())
+    return structure.load_structure_map(
+        _write_doc(tmp_path, doc), store or GEN.conforming_atom_store()
+    )
 
 
 def _load_codes(tmp_path: Path, doc: dict, store=None) -> tuple[EC, ...]:
@@ -163,7 +167,9 @@ def test_conforming_fixture_loads_clean_through_the_full_loader():
 
 def test_loader_missing_file_and_non_json_fail_loud(tmp_path):
     with pytest.raises(MissingInputError):
-        structure.load_structure_map(tmp_path / "absent.json", GEN.conforming_atom_store())
+        structure.load_structure_map(
+            tmp_path / "absent.json", GEN.conforming_atom_store()
+        )
     bad = tmp_path / "bad.json"
     bad.write_text("{not json", encoding="utf-8")
     with pytest.raises(StaleArtifactError, match="not valid JSON"):
@@ -203,6 +209,47 @@ def test_version_derived_fixture_validates_at_tier1():
     jsonschema.validate(_fresh_doc(), smod.load_schema())
 
 
+def test_native_tier1_validator_matches_python_authority_on_fixture_and_mutation_corpus():
+    schema = smod.load_schema()
+    authority = jsonschema.Draft202012Validator(schema)
+    native = smod._tier1_schema_validator()
+    cases: list[tuple[str, dict]] = []
+    for path in sorted((FIXTURES_ROOT / "structure").rglob("*.json")):
+        cases.append(
+            (str(path.relative_to(FIXTURES_ROOT)), json.loads(path.read_text()))
+        )
+
+    mutations: list[tuple[str, tuple[object, ...], object]] = [
+        ("wrong-version", ("schema_version",), STRUCTURE_MAP_SCHEMA_VERSION + 1),
+        ("unknown-root-member", ("surprise",), True),
+        ("page-zero", ("nodes", 1, "rebind_anchors", "region", "page"), 0),
+        ("boolean-revision", ("map_revision",), True),
+    ]
+    for name, path, value in mutations:
+        doc = _fresh_doc()
+        target = doc
+        for component in path[:-1]:
+            target = target[component]
+        target[path[-1]] = value
+        cases.append((name, doc))
+
+    both_slots = _fresh_doc()
+    both_slots["nodes"][2]["children"] = []
+    cases.append(("container-leaf-xor", both_slots))
+    missing_manifest = _fresh_doc()
+    del missing_manifest["manifest"]["canonical_content_hash"]
+    cases.append(("missing-manifest-member", missing_manifest))
+
+    for name, doc in cases:
+        authority_errors = list(authority.iter_errors(doc))
+        native_errors = list(native.iter_errors(doc))
+        assert bool(native_errors) == bool(authority_errors), name
+        if authority_errors:
+            assert tuple(native_errors[0].instance_path) == tuple(
+                authority_errors[0].absolute_path
+            ), name
+
+
 def test_bumped_document_version_fails_tier1(tmp_path):
     doc = _fresh_doc()
     doc["schema_version"] = STRUCTURE_MAP_SCHEMA_VERSION + 1
@@ -217,8 +264,10 @@ def test_committed_fixture_is_byte_exact_to_the_generator_output():
     # Two bindings: content (dict) AND byte format — a hand-edit to one without the other, a constant
     # bump without a refresh, OR a reformat of the committed file all fail here. Without the byte
     # check, format-only drift slips through.
-    assert _fresh_doc() == GEN.build_fixture()                       # content binding
-    assert FIXTURE.read_text(encoding="utf-8") == GEN.render()       # byte-exact: no format drift
+    assert _fresh_doc() == GEN.build_fixture()  # content binding
+    assert (
+        FIXTURE.read_text(encoding="utf-8") == GEN.render()
+    )  # byte-exact: no format drift
 
 
 def test_artifact_locations_are_distinct_and_contained(tmp_path):
@@ -257,13 +306,18 @@ def test_node_with_neither_slot_fails_tier1(tmp_path):
 def test_schema_keeps_node_class_open_no_enum():
     node_class = smod.load_schema()["$defs"]["node_class"]
     assert node_class["type"] == "string"
-    assert "enum" not in node_class, "node_class must stay an OPEN per-book vocabulary (inv 22)"
+    assert "enum" not in node_class, (
+        "node_class must stay an OPEN per-book vocabulary (inv 22)"
+    )
 
 
 def test_minted_by_description_carries_the_conceptual_authority_phrase():
     # §3.C.2: the schema description carries "conceptual minting authority" verbatim — the term is
     # the design decision (authority ≠ runtime writer), so it is pinned, not paraphrasable.
-    assert "conceptual minting authority" in smod.load_schema()["$defs"]["minted_by"]["description"]
+    assert (
+        "conceptual minting authority"
+        in smod.load_schema()["$defs"]["minted_by"]["description"]
+    )
 
 
 def test_region_description_pins_the_shared_coordinate_space_contract():
@@ -311,12 +365,29 @@ def _valid_slot_fp() -> dict:
     }
 
 
+def _valid_boundary_pair() -> dict:
+    return {
+        "start": {
+            "prefix": ["before"],
+            "exact": ["alpha"],
+            "suffix": ["beta", "gamma"],
+        },
+        "end": {
+            "prefix": ["beta", "gamma"],
+            "exact": ["delta"],
+            "suffix": ["after"],
+        },
+    }
+
+
 def test_content_fingerprint_slot_shapes_validate(tmp_path):
     # inv 13 (v2): a leaf carries {body: fp}; a container carries {heading: fp, signature: fp}
     # (slots optional). Both slot-keyed shapes load clean through the full loader — the S5.1 anchor
     # the map stores so it is self-sufficient for the content signal (D-1).
     doc = _fresh_doc()
-    doc["nodes"][2]["rebind_anchors"] = {"content_fingerprint": {"body": _valid_slot_fp()}}
+    doc["nodes"][2]["rebind_anchors"] = {
+        "content_fingerprint": {"body": _valid_slot_fp()}
+    }
     doc["nodes"][1]["rebind_anchors"]["content_fingerprint"] = {
         "heading": _valid_slot_fp(),
         "signature": _valid_slot_fp(),
@@ -334,7 +405,9 @@ def test_content_fingerprint_slot_shapes_validate(tmp_path):
         pytest.param(lambda fp: fp.update(k=0), id="k-below-1"),
         pytest.param(lambda fp: fp.update(token_count=-1), id="token-count-negative"),
         pytest.param(lambda fp: fp.update(algo_id=""), id="algo-id-blank"),
-        pytest.param(lambda fp: fp.update(shingles=["a", "a"]), id="shingles-not-unique"),
+        pytest.param(
+            lambda fp: fp.update(shingles=["a", "a"]), id="shingles-not-unique"
+        ),
         pytest.param(lambda fp: fp.update(shingles=[1]), id="shingle-not-string"),
     ],
 )
@@ -355,7 +428,9 @@ def test_content_fingerprint_rejects_unknown_slot(tmp_path):
     # inv 24 (v2): only body/heading/signature are admitted slots — a stray slot key (e.g. a
     # descendant-text "paragraph") is rejected by additionalProperties:false (per-slot ruling).
     doc = _fresh_doc()
-    doc["nodes"][2]["rebind_anchors"] = {"content_fingerprint": {"paragraph": _valid_slot_fp()}}
+    doc["nodes"][2]["rebind_anchors"] = {
+        "content_fingerprint": {"paragraph": _valid_slot_fp()}
+    }
     with pytest.raises(StaleArtifactError, match="Tier-1"):
         _load(tmp_path, doc)
 
@@ -373,21 +448,31 @@ def test_region_page_zero_is_rejected_at_tier1(tmp_path):
 # --- typed-model round-trip (S5.1 Phase B): rebind_anchors modeled, exposed, byte-stable --------- #
 
 
-def test_v2_map_exposes_typed_rebind_anchors_to_readers(tmp_path):
-    # Typed-model round-trip: a loaded v2 map exposes rebind_anchors as a typed RebindAnchors
-    # (region → Region, content_fingerprint → SlotFingerprint) to readers like rebind.py — NOT
+def test_v3_map_exposes_typed_rebind_anchors_to_readers(tmp_path):
+    # Typed-model round-trip: a loaded v3 map exposes fingerprints and boundary anchors to readers.
     # dropped-on-load (the old reserved-field behavior). Mutant (hunt_rebind): drop the field on
     # load → red here.
     doc = _fresh_doc()
     leaf_id = doc["nodes"][2]["node_id"]
-    doc["nodes"][2]["rebind_anchors"] = {"content_fingerprint": {"body": _valid_slot_fp()}}
+    doc["nodes"][2]["rebind_anchors"] = {
+        "content_fingerprint": {"body": _valid_slot_fp()},
+        "boundary_anchors": {"body": _valid_boundary_pair()},
+    }
     smap = _load(tmp_path, doc)
     leaf = smap.projection.by_id[leaf_id]
     assert isinstance(leaf.rebind_anchors, structure.RebindAnchors)
     fp = leaf.rebind_anchors.fingerprint("body")
     assert isinstance(fp, structure.SlotFingerprint)
     assert fp.k == 3 and fp.token_count == 5
-    assert set(fp.shingles) == {"alpha beta gamma", "beta gamma delta", "gamma delta epsilon"}
+    assert set(fp.shingles) == {
+        "alpha beta gamma",
+        "beta gamma delta",
+        "gamma delta epsilon",
+    }
+    boundaries = leaf.rebind_anchors.boundaries("body")
+    assert isinstance(boundaries, structure.SlotBoundaryAnchors)
+    assert boundaries.start.exact == ("alpha",)
+    assert boundaries.end.exact == ("delta",)
     # the section node's region seed is typed too, and a page>=1 Region is well-formed
     section = smap.projection.by_id["n-1"]
     assert isinstance(section.rebind_anchors.region, structure.Region)
@@ -396,11 +481,29 @@ def test_v2_map_exposes_typed_rebind_anchors_to_readers(tmp_path):
     assert smap.projection.by_id["n-0"].rebind_anchors is None
 
 
+def test_v3_boundary_anchor_total_footprint_is_bounded_on_load(tmp_path):
+    doc = _fresh_doc()
+    pair = _valid_boundary_pair()
+    pair["start"] = {
+        "prefix": [f"p{i}" for i in range(23)],
+        "exact": ["x"],
+        "suffix": ["overflow"],
+    }
+    doc["nodes"][2]["rebind_anchors"] = {
+        "content_fingerprint": {"body": _valid_slot_fp()},
+        "boundary_anchors": {"body": pair},
+    }
+    with pytest.raises(StaleArtifactError, match="footprint"):
+        _load(tmp_path, doc)
+
+
 def test_rebind_anchors_survive_dump_load_dump_byte_identically(tmp_path):
     # The re-render path is `doc`-driven, so the typed slot is a pure additive read: a v2 map
     # carrying a region + a slot fingerprint re-renders byte-for-byte (inv 20 extended to anchors).
     doc = _fresh_doc()
-    doc["nodes"][2]["rebind_anchors"] = {"content_fingerprint": {"body": _valid_slot_fp()}}
+    doc["nodes"][2]["rebind_anchors"] = {
+        "content_fingerprint": {"body": _valid_slot_fp()}
+    }
     path = _write_doc(tmp_path, doc)
     smap = structure.load_structure_map(path, GEN.conforming_atom_store())
     assert smod.render_structure_map(smap.doc) == path.read_text(encoding="utf-8")
@@ -420,8 +523,14 @@ def test_shared_canonical_hash_producers_match_the_manifest():
         profile_version="p",
         recognizer_version="r",
     )
-    assert structure.canonical_content_hash(canonical) == manifest["canonical_content_hash"]
-    assert structure.canonical_geometry_hash(canonical) == manifest["canonical_geometry_hash"]
+    assert (
+        structure.canonical_content_hash(canonical)
+        == manifest["canonical_content_hash"]
+    )
+    assert (
+        structure.canonical_geometry_hash(canonical)
+        == manifest["canonical_geometry_hash"]
+    )
 
 
 # --- inv 11 / 12b — manifest completeness + stale-class stamping ---------------------------------- #
@@ -502,7 +611,9 @@ def test_negative_fixture_empty_map_is_root_id_dangling_not_no_root():
 
 def test_negative_fixture_leaf_only_is_multiple_roots():
     with pytest.raises(StructureValidationError) as ei:
-        structure.load_structure_map(_invalid("leaf_only.json"), _DuckStore(included=("i0", "i1")))
+        structure.load_structure_map(
+            _invalid("leaf_only.json"), _DuckStore(included=("i0", "i1"))
+        )
     assert EC.MULTIPLE_ROOTS in ei.value.codes
 
 
@@ -514,7 +625,9 @@ def test_negative_fixture_empty_container_fires_inv26():
 
 def test_negative_fixture_non_container_root_is_no_root():
     with pytest.raises(StructureValidationError) as ei:
-        structure.load_structure_map(_invalid("non_container_root.json"), _DuckStore(included=("i0",)))
+        structure.load_structure_map(
+            _invalid("non_container_root.json"), _DuckStore(included=("i0",))
+        )
     assert EC.NO_ROOT in ei.value.codes
 
 
@@ -522,16 +635,22 @@ def test_negative_fixture_malformed_manifest_is_a_tier1_rejection_not_an_ec_code
     # inv 11/M9: the S4 manifest rejection is structural completeness at the LOAD BOUNDARY — a
     # StaleArtifactError, never a semantic EC payload (the closed set has no manifest code).
     with pytest.raises(StaleArtifactError, match="Tier-1"):
-        structure.load_structure_map(_invalid("malformed_manifest.json"), _DuckStore(included=("i0",)))
+        structure.load_structure_map(
+            _invalid("malformed_manifest.json"), _DuckStore(included=("i0",))
+        )
 
 
 def test_negative_fixture_alias_collision_passes_tier1_fails_semantically():
     # The §4.2 headline shape: JSON-parses, Tier-1-validates (asserted explicitly), and fails ONLY
     # at Tier-2 — two status:active aliases sharing the uniqueness key.
     doc = json.loads(_invalid("alias_collision.json").read_text(encoding="utf-8"))
-    jsonschema.validate(doc, smod.load_schema())  # Tier-1 passes: the failure is purely semantic
+    jsonschema.validate(
+        doc, smod.load_schema()
+    )  # Tier-1 passes: the failure is purely semantic
     with pytest.raises(StructureValidationError) as ei:
-        structure.load_structure_map(_invalid("alias_collision.json"), _DuckStore(included=("i0",)))
+        structure.load_structure_map(
+            _invalid("alias_collision.json"), _DuckStore(included=("i0",))
+        )
     assert EC.ALIAS_COLLISION in ei.value.codes
 
 
@@ -544,13 +663,20 @@ def test_negative_fixture_alias_collision_passes_tier1_fails_semantically():
 
 
 def _canonical_ids(doc) -> list[str]:
-    return [doc["nodes"][1]["heading_atoms"][0], doc["nodes"][2]["body_atoms"][0], doc["nodes"][3]["body_atoms"][0]]
+    return [
+        doc["nodes"][1]["heading_atoms"][0],
+        doc["nodes"][2]["body_atoms"][0],
+        doc["nodes"][3]["body_atoms"][0],
+    ]
 
 
 def test_phase2_dup_ownership(tmp_path):
     doc = _fresh_doc()
     c0 = _canonical_ids(doc)[0]
-    doc["nodes"][2]["body_atoms"] = [c0, *doc["nodes"][2]["body_atoms"]]  # heading atom also in a body
+    doc["nodes"][2]["body_atoms"] = [
+        c0,
+        *doc["nodes"][2]["body_atoms"],
+    ]  # heading atom also in a body
     assert EC.DUP_OWNERSHIP in _load_codes(tmp_path, doc)
 
 
@@ -563,7 +689,9 @@ def test_phase2_unowned_included_atom(tmp_path):
 def test_phase2_owned_excluded_atom(tmp_path):
     doc = _fresh_doc()
     furniture_id = doc["furniture_atoms"][0]["atom_id"]
-    doc["furniture_atoms"] = []  # move it out of the furniture bucket (else DUP_OWNERSHIP co-fires)
+    doc[
+        "furniture_atoms"
+    ] = []  # move it out of the furniture bucket (else DUP_OWNERSHIP co-fires)
     doc["nodes"][3]["body_atoms"].append(furniture_id)
     codes = _load_codes(tmp_path, doc)
     assert EC.OWNED_EXCLUDED_ATOM in codes
@@ -585,7 +713,14 @@ def test_phase2_dangling_children_ref(tmp_path):
 
 def test_phase2_orphan_node_co_fires_multiple_roots(tmp_path):
     doc = _fresh_doc()
-    doc["nodes"].append({"node_id": "stray", "node_class": "block", "minted_by": "machine", "body_atoms": []})
+    doc["nodes"].append(
+        {
+            "node_id": "stray",
+            "node_class": "block",
+            "minted_by": "machine",
+            "body_atoms": [],
+        }
+    )
     codes = _load_codes(tmp_path, doc)
     assert EC.ORPHAN_NODE in codes
     assert EC.MULTIPLE_ROOTS in codes  # the pinned structural co-fire (P3A-4)
@@ -606,7 +741,9 @@ def test_phase2_duplicate_child_ref(tmp_path):
 
 def test_phase2_reachable_cycle_asserts_cycle_token(tmp_path):
     doc = _fresh_doc()
-    doc["nodes"][1]["children"].append(doc["root_id"])  # section points back at the root
+    doc["nodes"][1]["children"].append(
+        doc["root_id"]
+    )  # section points back at the root
     codes = _load_codes(tmp_path, doc)
     assert EC.CYCLE in codes
     assert EC.NO_ROOT in codes  # the root is now parented: |Z| == 0 on this shape
@@ -616,8 +753,18 @@ def test_phase2_disconnected_cycle_is_unreachable_not_cycle(tmp_path):
     doc = _fresh_doc()
     doc["nodes"].extend(
         [
-            {"node_id": "x", "node_class": "section", "minted_by": "human", "children": ["y"]},
-            {"node_id": "y", "node_class": "section", "minted_by": "human", "children": ["x"]},
+            {
+                "node_id": "x",
+                "node_class": "section",
+                "minted_by": "human",
+                "children": ["y"],
+            },
+            {
+                "node_id": "y",
+                "node_class": "section",
+                "minted_by": "human",
+                "children": ["x"],
+            },
         ]
     )
     codes = _load_codes(tmp_path, doc)
@@ -637,8 +784,8 @@ def test_phase2_empty_container(tmp_path):
 def test_phase2_body_atoms_unordered(tmp_path):
     doc = _fresh_doc()
     c0, c1, _ = _canonical_ids(doc)
-    doc["nodes"][1]["heading_atoms"] = []          # free c0 so no DUP_OWNERSHIP co-fires
-    doc["nodes"][2]["body_atoms"] = [c1, c0]       # descending canonical index
+    doc["nodes"][1]["heading_atoms"] = []  # free c0 so no DUP_OWNERSHIP co-fires
+    doc["nodes"][2]["body_atoms"] = [c1, c0]  # descending canonical index
     assert _load_codes(tmp_path, doc) == (EC.BODY_ATOMS_UNORDERED,)
 
 
@@ -704,7 +851,10 @@ def test_phase2_alias_temporal_incomplete_isolated(tmp_path):
 @pytest.mark.parametrize(
     "entry,code",
     [
-        ({"name": "Unknown", "kind": "leaf", "status": "reserved"}, EC.VOCAB_UNKNOWN_COLLISION),
+        (
+            {"name": "Unknown", "kind": "leaf", "status": "reserved"},
+            EC.VOCAB_UNKNOWN_COLLISION,
+        ),
         ({"name": "   ", "kind": "leaf", "status": "reserved"}, EC.VOCAB_EMPTY),
         ({"name": "Block", "kind": "leaf", "status": "reserved"}, EC.VOCAB_DUPLICATE),
         ({"name": "tercet", "kind": "leaf", "status": "active"}, EC.VOCAB_UNUSED),
@@ -775,8 +925,15 @@ def test_canonical_hashes_stable_under_rebuild():
 
 
 def test_text_edit_moves_content_hash_only():
-    base = _manifest_for([_atom("A", "alpha", Geom.absent()), _atom("B", "beta", _matched_geom())])
-    edited = _manifest_for([_atom("A", "alpha CHANGED", Geom.absent()), _atom("B", "beta", _matched_geom())])
+    base = _manifest_for(
+        [_atom("A", "alpha", Geom.absent()), _atom("B", "beta", _matched_geom())]
+    )
+    edited = _manifest_for(
+        [
+            _atom("A", "alpha CHANGED", Geom.absent()),
+            _atom("B", "beta", _matched_geom()),
+        ]
+    )
     assert edited["canonical_content_hash"] != base["canonical_content_hash"]
     assert edited["canonical_geometry_hash"] == base["canonical_geometry_hash"]
 
@@ -784,9 +941,14 @@ def test_text_edit_moves_content_hash_only():
 def test_geometry_edit_moves_geometry_hash_only():
     # X8: capture emits only Geom.absent() today, so the geometry red is unproducible from captured
     # streams — the fixture SYNTHESIZES a Geom.matched atom (the real factory) and edits its region.
-    base = _manifest_for([_atom("A", "alpha", Geom.absent()), _atom("B", "beta", _matched_geom())])
+    base = _manifest_for(
+        [_atom("A", "alpha", Geom.absent()), _atom("B", "beta", _matched_geom())]
+    )
     moved = _manifest_for(
-        [_atom("A", "alpha", Geom.absent()), _atom("B", "beta", _matched_geom(page=2, bbox=(9.0, 9.0, 12.0, 12.0)))]
+        [
+            _atom("A", "alpha", Geom.absent()),
+            _atom("B", "beta", _matched_geom(page=2, bbox=(9.0, 9.0, 12.0, 12.0))),
+        ]
     )
     assert moved["canonical_geometry_hash"] != base["canonical_geometry_hash"]
     assert moved["canonical_content_hash"] == base["canonical_content_hash"]
@@ -797,7 +959,10 @@ def test_atom_order_enters_the_hash():
     # content hash — a mutant that sorts/normalizes the payload before hashing would erase the
     # difference and red here.
     a, b = _atom("A", "alpha", Geom.absent()), _atom("B", "beta", Geom.absent())
-    assert _manifest_for([a, b])["canonical_content_hash"] != _manifest_for([b, a])["canonical_content_hash"]
+    assert (
+        _manifest_for([a, b])["canonical_content_hash"]
+        != _manifest_for([b, a])["canonical_content_hash"]
+    )
 
 
 def test_content_hash_producer_is_the_named_lineage_composition():
@@ -808,7 +973,12 @@ def test_content_hash_producer_is_the_named_lineage_composition():
     expected = _sha256_bytes(
         _canonical(
             [
-                {"atom_id": a.atom_id, "text": a.text, "raw_span": list(a.raw_span), "raw_source_hash": a.raw_source_hash}
+                {
+                    "atom_id": a.atom_id,
+                    "text": a.text,
+                    "raw_span": list(a.raw_span),
+                    "raw_source_hash": a.raw_source_hash,
+                }
                 for a in atoms
             ]
         ).encode("utf-8")
@@ -844,10 +1014,16 @@ def test_licensed_supersede_snapshots_then_writes(tmp_path):
     structure.write_structure_map(ws, old)
     new = _fresh_doc()
     new["map_revision"] = old["map_revision"] + 1
-    path = structure.write_structure_map(ws, new, supersede_revision=old["map_revision"])
+    path = structure.write_structure_map(
+        ws, new, supersede_revision=old["map_revision"]
+    )
     snapshot = structure_map_snapshot_path(ws, old["map_revision"])
-    assert snapshot.read_text(encoding="utf-8") == smod.render_structure_map(old)  # history kept
-    assert path.read_text(encoding="utf-8") == smod.render_structure_map(new)      # live superseded
+    assert snapshot.read_text(encoding="utf-8") == smod.render_structure_map(
+        old
+    )  # history kept
+    assert path.read_text(encoding="utf-8") == smod.render_structure_map(
+        new
+    )  # live superseded
 
 
 def test_supersede_must_name_the_exact_stored_revision(tmp_path):
@@ -856,7 +1032,9 @@ def test_supersede_must_name_the_exact_stored_revision(tmp_path):
     new = _fresh_doc()
     new["map_revision"] = 4
     with pytest.raises(StructureValidationError) as ei:
-        structure.write_structure_map(ws, new, supersede_revision=3)  # stale belief about the store
+        structure.write_structure_map(
+            ws, new, supersede_revision=3
+        )  # stale belief about the store
     assert EC.MAP_OVERWRITE_BLOCKED in ei.value.codes
 
 
@@ -906,14 +1084,20 @@ def test_writer_has_no_env_var_escape():
 
 
 def test_assert_schema_born_raises_on_a_provisional_version(monkeypatch):
-    monkeypatch.setitem(STRUCTURE_MAP_SCHEMA_STATUS, STRUCTURE_MAP_SCHEMA_VERSION, SCHEMA_STATUS_PROVISIONAL)
+    monkeypatch.setitem(
+        STRUCTURE_MAP_SCHEMA_STATUS,
+        STRUCTURE_MAP_SCHEMA_VERSION,
+        SCHEMA_STATUS_PROVISIONAL,
+    )
     with pytest.raises(StructureValidationError) as ei:
         structure.assert_schema_born()
     assert EC.SCHEMA_NOT_BORN in ei.value.codes
 
 
 def test_assert_schema_born_passes_on_a_born_version(monkeypatch):
-    monkeypatch.setitem(STRUCTURE_MAP_SCHEMA_STATUS, STRUCTURE_MAP_SCHEMA_VERSION, SCHEMA_STATUS_BORN)
+    monkeypatch.setitem(
+        STRUCTURE_MAP_SCHEMA_STATUS, STRUCTURE_MAP_SCHEMA_VERSION, SCHEMA_STATUS_BORN
+    )
     structure.assert_schema_born()  # no raise
 
 
@@ -930,7 +1114,11 @@ def test_loader_is_born_agnostic(monkeypatch):
     # X1 — the deadlock breaker: with the schema status forced provisional, the loader still loads
     # the conforming fixture CLEAN. Every red-test above routes through this loader on a provisional
     # schema; a born-aware loader would short-circuit them all into SCHEMA_NOT_BORN.
-    monkeypatch.setitem(STRUCTURE_MAP_SCHEMA_STATUS, STRUCTURE_MAP_SCHEMA_VERSION, SCHEMA_STATUS_PROVISIONAL)
+    monkeypatch.setitem(
+        STRUCTURE_MAP_SCHEMA_STATUS,
+        STRUCTURE_MAP_SCHEMA_VERSION,
+        SCHEMA_STATUS_PROVISIONAL,
+    )
     smap = structure.load_structure_map(FIXTURE, GEN.conforming_atom_store())
     assert len(smap.projection.nodes) == 4
 
@@ -968,13 +1156,17 @@ def test_no_structure_module_reads_the_decision_field():
     # inv 25: the field is reserved present-but-inert — value-semantics are S8.2. The schema .json
     # legitimately DEFINES the property (exempt: this scan walks the .py AST only).
     scanned = sorted(STRUCTURE_SRC.rglob("*.py"))
-    assert scanned, f"no .py files under {STRUCTURE_SRC}; the no-reader scan would pass vacuously"
+    assert scanned, (
+        f"no .py files under {STRUCTURE_SRC}; the no-reader scan would pass vacuously"
+    )
     offenders = {}
     for py in scanned:
         hits = _decision_reads(ast.parse(py.read_text(encoding="utf-8")))
         if hits:
             offenders[py.name] = hits
-    assert not offenders, f"S4 code reads the reserved-inert decision field (inv 25): {offenders}"
+    assert not offenders, (
+        f"S4 code reads the reserved-inert decision field (inv 25): {offenders}"
+    )
 
 
 def test_decision_scanner_catches_a_planted_reader(tmp_path):
@@ -990,7 +1182,10 @@ def test_decision_is_schema_present_and_round_trips():
     doc = _fresh_doc()
     assert doc["nodes"][1]["decision"] == "human-approved"
     smap = structure.load_structure_map(FIXTURE, GEN.conforming_atom_store())
-    assert json.loads(smod.render_structure_map(smap.doc))["nodes"][1]["decision"] == "human-approved"
+    assert (
+        json.loads(smod.render_structure_map(smap.doc))["nodes"][1]["decision"]
+        == "human-approved"
+    )
 
 
 # --- §4.3 — the ResourceLineage contract ----------------------------------------------------------- #
@@ -1039,10 +1234,16 @@ class _CountingAccess(NodeTableAccess):
 
 def _flat_map(n: int) -> ProjectionMap:
     leaves = tuple(
-        LeafNode(node_id=f"L{i}", node_class="block", minted_by="machine", body_atoms=()) for i in range(n)
+        LeafNode(
+            node_id=f"L{i}", node_class="block", minted_by="machine", body_atoms=()
+        )
+        for i in range(n)
     )
     root = ContainerNode(
-        node_id="root", node_class="section", minted_by="human", children=tuple(leaf.node_id for leaf in leaves)
+        node_id="root",
+        node_class="section",
+        minted_by="human",
+        children=tuple(leaf.node_id for leaf in leaves),
     )
     return ProjectionMap(root_id="root", nodes=(root, *leaves))
 
@@ -1061,7 +1262,9 @@ def test_reference_integrity_ref_ops_scale_linearly():
     small, large = _ref_ops(1200), _ref_ops(2400)
     assert small > 0
     ratio = large / small
-    assert 1.7 <= ratio <= 2.4, f"ref_ops ratio {ratio:.2f} is not linear-shaped (≈2 expected, ≈4 = quadratic)"
+    assert 1.7 <= ratio <= 2.4, (
+        f"ref_ops ratio {ratio:.2f} is not linear-shaped (≈2 expected, ≈4 = quadratic)"
+    )
 
 
 # --- audit remediation (B-7 correctness findings): the numeric load/write boundary ----------------- #
@@ -1097,9 +1300,13 @@ def test_nan_in_region_is_rejected_at_parse_not_a_render_crash(tmp_path):
     # render_structure_map (allow_nan=False) AFTER a "clean" load. The loader rejects it at parse.
     doc = _fresh_doc()
     path = tmp_path / "structure_map.json"
-    text = smod.render_structure_map(doc).replace('"page": 3', '"page": 3, "extra": NaN')
+    text = smod.render_structure_map(doc).replace(
+        '"page": 3', '"page": 3, "extra": NaN'
+    )
     # (write raw text: the NaN token cannot be produced through the renderer, by design)
-    path.write_text(text.replace('"bbox_region": [10.0', '"bbox_region": [NaN'), encoding="utf-8")
+    path.write_text(
+        text.replace('"bbox_region": [10.0', '"bbox_region": [NaN'), encoding="utf-8"
+    )
     with pytest.raises(StaleArtifactError, match="non-finite|not valid JSON"):
         structure.load_structure_map(path, GEN.conforming_atom_store())
 
@@ -1123,8 +1330,12 @@ def test_writer_rejects_a_non_finite_doc_before_touching_disk(tmp_path):
     new["nodes"][1]["rebind_anchors"]["region"]["bbox_region"][0] = float("nan")
     with pytest.raises(StaleArtifactError, match="not renderable"):
         structure.write_structure_map(ws, new, supersede_revision=old["map_revision"])
-    assert not structure_map_snapshot_path(ws, old["map_revision"]).exists()  # no partial state
-    assert structure.structure_map_path(ws).read_text(encoding="utf-8") == smod.render_structure_map(old)
+    assert not structure_map_snapshot_path(
+        ws, old["map_revision"]
+    ).exists()  # no partial state
+    assert structure.structure_map_path(ws).read_text(
+        encoding="utf-8"
+    ) == smod.render_structure_map(old)
 
 
 def test_supersede_license_on_an_empty_workspace_is_blocked(tmp_path):
@@ -1150,7 +1361,9 @@ def test_snapshot_dir_existing_as_a_file_is_stale_not_a_bare_oserror(tmp_path):
     ws = _workspace(tmp_path)
     old = _fresh_doc()
     structure.write_structure_map(ws, old)
-    structure_map_snapshot_path(ws, old["map_revision"]).parent.write_text("not a dir", encoding="utf-8")
+    structure_map_snapshot_path(ws, old["map_revision"]).parent.write_text(
+        "not a dir", encoding="utf-8"
+    )
     new = _fresh_doc()
     new["map_revision"] = old["map_revision"] + 1
     with pytest.raises(StaleArtifactError, match="snapshot"):
@@ -1171,9 +1384,15 @@ def test_stream_reader_scope_prefers_the_canonical_stream_on_id_collision():
     # stream's scopes win unconditionally.
     shared = _atom("shared_0", "alpha", Geom.absent())
     excluded_twin = Atom(
-        atom_id="shared_0", text="alpha", raw_span=(0, 5), raw_source_hash=hash_raw("alpha"),
-        page_range=PAGE_UNMAPPED, norm_layer="raw", geom=Geom.absent(),
-        capture_provenance_class="page-number", witness="a-witness",
+        atom_id="shared_0",
+        text="alpha",
+        raw_span=(0, 5),
+        raw_source_hash=hash_raw("alpha"),
+        page_range=PAGE_UNMAPPED,
+        norm_layer="raw",
+        geom=Geom.absent(),
+        capture_provenance_class="page-number",
+        witness="a-witness",
         processing_scope=PROCESSING_SCOPE_EXCLUDED,
     )
     reader = structure.StreamAtomReader(
@@ -1185,14 +1404,16 @@ def test_stream_reader_scope_prefers_the_canonical_stream_on_id_collision():
     assert reader.scope_of("shared_0") == PROCESSING_SCOPE_INCLUDED
 
 
-def test_phase2_node_id_derived_from_rendered_handle_routes_through_the_loader(tmp_path):
+def test_phase2_node_id_derived_from_rendered_handle_routes_through_the_loader(
+    tmp_path,
+):
     # The S4.3 substring-of-rendered-handle arm (inv 6), loader-routed: an id that is a proper
     # substring of its OWN designation-string handle (but not equal to the designation or its slug,
     # so the projection.py arms stay silent).
     doc = _fresh_doc()
     leaf_a = doc["nodes"][2]
     leaf_a["node_id"] = "p-sile"
-    leaf_a["designation"] = "Deep Silence"          # own html_slug: "deep-silence" ⊃ "p-sile"
+    leaf_a["designation"] = "Deep Silence"  # own html_slug: "deep-silence" ⊃ "p-sile"
     leaf_a["handle_policy"] = "designation-string"
     doc["nodes"][1]["children"] = ["p-sile"]
     assert EC.NODE_ID_DERIVED in _load_codes(tmp_path, doc)
@@ -1208,7 +1429,9 @@ def test_phase2_undeclared_node_class_with_override_no_longer_loads_clean(tmp_pa
     assert EC.CLASS_NOT_IN_VOCAB in _load_codes(tmp_path, doc)
 
 
-def test_phase2_undeclared_node_class_without_override_co_fires_policy_unresolved(tmp_path):
+def test_phase2_undeclared_node_class_without_override_co_fires_policy_unresolved(
+    tmp_path,
+):
     # Without the override the class also fails policy resolution — both codes surface in the one
     # collected payload (Tier-2b), pinning that the new code did not absorb/shadow the old one.
     doc = _fresh_doc()

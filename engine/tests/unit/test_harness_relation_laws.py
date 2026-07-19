@@ -21,9 +21,12 @@ Laws (spec §1.3, verbatim numbering):
 
 from __future__ import annotations
 
+import inspect
+
 import pytest
 
 from harness.relation import (
+    CompositionError,
     LineageEvent,
     ProvenanceRelation,
     RelationLawViolation,
@@ -212,3 +215,97 @@ def test_forbidden_composition_requires_byte_identity():
         fresh_content={"n1": "identical text."},
     )
     assert "forbidden-composition" not in _codes(check_relation_laws(rel, events))
+
+
+def test_remint_makes_unchanged_content_a_distinct_fresh_identity():
+    events = [
+        LineageEvent(
+            op="remint",
+            old_ids=("a1",),
+            fresh_ids=("f1",),
+            old_texts=("same",),
+            fresh_texts=("same",),
+        )
+    ]
+    rel = compose_events(("a1",), events)
+    assert rel.fresh_order == ("f1",)
+    assert rel.pairs == frozenset({("a1", "f1")})
+
+
+def test_reference_composer_indexes_remint_ids_without_linear_stream_scans():
+    source = inspect.getsource(compose_events)
+    assert ".index(" not in source
+    assert "atom_id in stream" not in source
+
+    count = 20_000
+    old = tuple(f"old-{index}" for index in range(count))
+    events = [
+        LineageEvent("remint", (atom_id,), (f"fresh-{index}",))
+        for index, atom_id in enumerate(old)
+    ]
+    relation = compose_events(old, events)
+    assert relation.fresh_order[0] == "fresh-0"
+    assert relation.fresh_order[-1] == f"fresh-{count - 1}"
+    assert len(relation.pairs) == count
+
+
+def test_event_composition_rejects_any_output_id_reuse():
+    with pytest.raises(CompositionError, match="old_order contains duplicate"):
+        compose_events(("a1", "a1"), [])
+    with pytest.raises(CompositionError, match="already used"):
+        compose_events(
+            ("a1",),
+            [LineageEvent("remint", ("a1",), ("a1",))],
+        )
+    with pytest.raises(CompositionError, match="already used"):
+        compose_events(
+            ("a1",),
+            [
+                LineageEvent("remint", ("a1",), ("f1",)),
+                LineageEvent("char_sub", ("f1",), ("f1",)),
+            ],
+        )
+
+
+def test_event_composition_rejects_noncontiguous_merge_and_out_of_range_position():
+    with pytest.raises(CompositionError, match="contiguous"):
+        compose_events(
+            ("a1", "a2", "a3"),
+            [LineageEvent("merge", ("a1", "a3"), ("f1",))],
+        )
+    with pytest.raises(CompositionError, match="contiguous"):
+        compose_events(
+            ("a1", "a2"),
+            [LineageEvent("merge", ("a2", "a1"), ("f1",))],
+        )
+    with pytest.raises(CompositionError, match="outside"):
+        compose_events(
+            ("a1",),
+            [LineageEvent("insert", (), ("f1",), position=3)],
+        )
+
+
+def test_event_composition_moves_a_contiguous_block_and_rejects_a_noop_move():
+    moved = compose_events(
+        ("a1", "a2", "a3", "a4"),
+        [LineageEvent("move", ("a2", "a3"), ("a2", "a3"), position=0)],
+    )
+    assert moved.fresh_order == ("a2", "a3", "a1", "a4")
+    assert moved.moved == {"a2", "a3"}
+    with pytest.raises(CompositionError, match="unchanged"):
+        compose_events(
+            ("a1", "a2", "a3"),
+            [LineageEvent("move", ("a2",), ("a2",), position=1)],
+        )
+
+
+def test_event_composition_does_not_call_a_move_out_and_back_final_drift():
+    rel = compose_events(
+        ("a1", "a2", "a3"),
+        [
+            LineageEvent("move", ("a2",), ("a2",), position=2),
+            LineageEvent("move", ("a2",), ("a2",), position=1),
+        ],
+    )
+    assert rel.fresh_order == ("a1", "a2", "a3")
+    assert rel.moved == frozenset()

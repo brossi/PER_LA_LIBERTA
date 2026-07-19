@@ -658,6 +658,7 @@ def test_engine_error_exit_codes_are_globally_unique_across_the_owner_modules():
     assert not collisions, f"EngineError exit codes collide across owner modules: {collisions}"
     assert geometry_mod.GeometryError.exit_code == 13
     assert rebind_mod.RebindError.exit_code == 14
+    assert rebind_mod.RebindNotConsumableError.exit_code == 17
 
 
 def test_evidence_gate_error_rejects_an_empty_payload():

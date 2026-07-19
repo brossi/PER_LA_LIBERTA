@@ -1,0 +1,771 @@
+{
+  "schema": "s4.7-item2-priority4-perf-baseline@v1",
+  "created_at": "2026-07-18T07:51:38.234107+00:00",
+  "command": [
+    "/Users/ben_mpa/LLM/PER_LA_LIBERTA/engine/.venv/bin/python3",
+    "/Users/ben_mpa/LLM/PER_LA_LIBERTA/engine/tools/s4_7_perf_baseline.py",
+    "--artifact",
+    "docs/probes/s4_7_priority4_perf_baseline.json"
+  ],
+  "repo": "/Users/ben_mpa/LLM/PER_LA_LIBERTA/engine",
+  "git": {
+    "head": "6b65a4fd975ce27bb8216aff799764c50bb7ee09",
+    "branch": "spike/s4_7",
+    "status": "M docs/probes/s4_7_item2_prereg.md\n M tests/harness/relation.py\n M tests/hunts/hunt_rebind.py\n M tests/unit/test_harness_relation_laws.py\n?? docs/probes/s4_7_priority1_component0_audit.md\n?? docs/probes/s4_7_priority2_inv1_inv2_audit.md\n?? docs/probes/s4_7_priority2_red_manifest.json\n?? docs/probes/s4_7_priority3_inv3_inv5_audit.md\n?? docs/probes/s4_7_priority3_red_manifest.json\n?? src/engine/structure/boundary_anchor.py\n?? tests/harness/boundary.py\n?? tests/harness/invariants_3_5.py\n?? tests/harness/materialize.py\n?? tests/harness/oracle.py\n?? tests/harness/scale.py\n?? tests/unit/test_harness_materialize.py\n?? tests/unit/test_s4_7_inv1_inv2.py\n?? tests/unit/test_s4_7_inv3_inv5.py\n?? tools/s4_7_hunt_manifest.py\n?? tools/s4_7_perf_baseline.py"
+  },
+  "environment": {
+    "python": "3.13.0",
+    "python_executable": "/Users/ben_mpa/LLM/PER_LA_LIBERTA/engine/.venv/bin/python3",
+    "platform": "macOS-26.5.1-arm64-arm-64bit-Mach-O",
+    "machine": "arm64",
+    "processor": "arm",
+    "uv_lock_sha256": "d56c32c65aa5c185d35f8bb75024ccb0a57939025ba11b3d7d93cc553ffffd27"
+  },
+  "repetitions": 5,
+  "source_identity": {
+    "docs/probes/s4_7_item2_prereg.md": "98b1b06287f64a8459e4ec64ff94eb724304345678b003932966c4bb5acc8d9b",
+    "src/engine/structure/evidence.py": "8990f7756180c4d28dc0eceee2a69911ecf959a64946ab713040a1b3fa49bfa8",
+    "src/engine/structure/rebind.py": "7e7e9cdc9fb233d7be824ca1ab53f9a98ae516aaa4d36d5e722b55f465b67d2c",
+    "tests/harness/materialize.py": "159adc3b0056e7b3d29a6555c40306e7f9befe31f87d5659f8264eb35de947c6",
+    "tests/harness/scale.py": "b624e397cd83d20b85595da5dd3e76b4a2287255fe543c44db22a3f3760a1f25",
+    "tools/s4_7_perf_baseline.py": "8f56d1feeec5b93c7fb77c069c11bda6f58330c097b99154973ec03e17e74dd1"
+  },
+  "inv6": {
+    "axis": "T",
+    "ladder": [
+      300,
+      600,
+      1200,
+      2400,
+      4800
+    ],
+    "limits": {
+      "max_slope": 1.5,
+      "max_adjacent_ratio": 50.0
+    },
+    "points": [
+      {
+        "ledger": {
+          "family": "wide-rebind-pll-ratio",
+          "L": 1,
+          "K": 1,
+          "A": 8,
+          "T": 300,
+          "D": 2
+        },
+        "seed": 47300,
+        "preflight": {
+          "serialize": true,
+          "load": true,
+          "index": true,
+          "rebind": true,
+          "end_to_end": true,
+          "reported_nodes": 2
+        },
+        "phases": {
+          "serialize": {
+            "elapsed_seconds": [
+              0.00031670904718339443,
+              0.00024112500250339508,
+              0.0002113750670105219,
+              0.00020275008864700794,
+              0.00020045810379087925
+            ],
+            "peak_bytes": [
+              68235,
+              68235,
+              68235,
+              68235,
+              68235
+            ],
+            "median_seconds": 0.0002113750670105219,
+            "median_peak_bytes": 68235.0
+          },
+          "load": {
+            "elapsed_seconds": [
+              0.017415041103959084,
+              0.017226333962753415,
+              0.017395874951034784,
+              0.017434915993362665,
+              0.017493417020887136
+            ],
+            "peak_bytes": [
+              140411,
+              138073,
+              135817,
+              135394,
+              135488
+            ],
+            "median_seconds": 0.017415041103959084,
+            "median_peak_bytes": 135817.0
+          },
+          "index": {
+            "elapsed_seconds": [
+              7.258402183651924e-05,
+              4.39169816672802e-05,
+              3.929086960852146e-05,
+              3.395904786884785e-05,
+              3.408314660191536e-05
+            ],
+            "peak_bytes": [
+              5632,
+              5592,
+              5552,
+              5520,
+              5496
+            ],
+            "median_seconds": 3.929086960852146e-05,
+            "median_peak_bytes": 5552.0
+          },
+          "rebind": {
+            "elapsed_seconds": [
+              0.0007287499029189348,
+              0.0005595420952886343,
+              0.000528666889294982,
+              0.0005137501284480095,
+              0.0005055409856140614
+            ],
+            "peak_bytes": [
+              98424,
+              98408,
+              98392,
+              98376,
+              98360
+            ],
+            "median_seconds": 0.000528666889294982,
+            "median_peak_bytes": 98392.0
+          },
+          "end_to_end": {
+            "elapsed_seconds": [
+              0.019077874952927232,
+              0.021904666908085346,
+              0.019589582923799753,
+              0.018580124946311116,
+              0.01837358297780156
+            ],
+            "peak_bytes": [
+              208260,
+              207406,
+              207210,
+              207343,
+              207484
+            ],
+            "median_seconds": 0.019077874952927232,
+            "median_peak_bytes": 207406.0
+          }
+        }
+      },
+      {
+        "ledger": {
+          "family": "wide-rebind-pll-ratio",
+          "L": 1,
+          "K": 1,
+          "A": 17,
+          "T": 600,
+          "D": 2
+        },
+        "seed": 47600,
+        "preflight": {
+          "serialize": true,
+          "load": true,
+          "index": true,
+          "rebind": true,
+          "end_to_end": true,
+          "reported_nodes": 2
+        },
+        "phases": {
+          "serialize": {
+            "elapsed_seconds": [
+              0.0007962081581354141,
+              0.0004797079600393772,
+              0.00042283302173018456,
+              0.000413290923461318,
+              0.00041574984788894653
+            ],
+            "peak_bytes": [
+              128874,
+              128874,
+              128874,
+              128874,
+              128874
+            ],
+            "median_seconds": 0.00042283302173018456,
+            "median_peak_bytes": 128874.0
+          },
+          "load": {
+            "elapsed_seconds": [
+              0.019563250010833144,
+              0.022246957989409566,
+              0.020690874895080924,
+              0.02013583295047283,
+              0.019444166915491223
+            ],
+            "peak_bytes": [
+              202822,
+              201506,
+              201553,
+              201600,
+              201553
+            ],
+            "median_seconds": 0.02013583295047283,
+            "median_peak_bytes": 201553.0
+          },
+          "index": {
+            "elapsed_seconds": [
+              9.375018998980522e-05,
+              8.183298632502556e-05,
+              7.399986498057842e-05,
+              4.845811054110527e-05,
+              4.41248994320631e-05
+            ],
+            "peak_bytes": [
+              8138,
+              8138,
+              8138,
+              8138,
+              8138
+            ],
+            "median_seconds": 7.399986498057842e-05,
+            "median_peak_bytes": 8138.0
+          },
+          "rebind": {
+            "elapsed_seconds": [
+              0.002686458872631192,
+              0.003153833094984293,
+              0.001607875106856227,
+              0.0021924159955233335,
+              0.0019124159589409828
+            ],
+            "peak_bytes": [
+              246504,
+              246504,
+              246504,
+              246504,
+              246504
+            ],
+            "median_seconds": 0.0021924159955233335,
+            "median_peak_bytes": 246504.0
+          },
+          "end_to_end": {
+            "elapsed_seconds": [
+              0.021561125060543418,
+              0.021102500148117542,
+              0.02859787503257394,
+              0.03424350009299815,
+              0.021664915839210153
+            ],
+            "peak_bytes": [
+              433921,
+              433686,
+              433780,
+              433686,
+              433827
+            ],
+            "median_seconds": 0.021664915839210153,
+            "median_peak_bytes": 433780.0
+          }
+        }
+      },
+      {
+        "ledger": {
+          "family": "wide-rebind-pll-ratio",
+          "L": 1,
+          "K": 1,
+          "A": 33,
+          "T": 1200,
+          "D": 2
+        },
+        "seed": 48200,
+        "preflight": {
+          "serialize": true,
+          "load": true,
+          "index": true,
+          "rebind": true,
+          "end_to_end": true,
+          "reported_nodes": 2
+        },
+        "phases": {
+          "serialize": {
+            "elapsed_seconds": [
+              0.0009028329513967037,
+              0.0007892081048339605,
+              0.0007725001778453588,
+              0.0007667921017855406,
+              0.0007476671598851681
+            ],
+            "peak_bytes": [
+              243401,
+              243401,
+              243401,
+              243401,
+              243401
+            ],
+            "median_seconds": 0.0007725001778453588,
+            "median_peak_bytes": 243401.0
+          },
+          "load": {
+            "elapsed_seconds": [
+              0.024294292088598013,
+              0.024290167028084397,
+              0.023548416793346405,
+              0.023193083005025983,
+              0.02331220800988376
+            ],
+            "peak_bytes": [
+              368733,
+              362341,
+              364362,
+              362470,
+              363046
+            ],
+            "median_seconds": 0.023548416793346405,
+            "median_peak_bytes": 363046.0
+          },
+          "index": {
+            "elapsed_seconds": [
+              0.00010462501086294651,
+              6.575020961463451e-05,
+              5.9625133872032166e-05,
+              5.3625088185071945e-05,
+              5.370797589421272e-05
+            ],
+            "peak_bytes": [
+              13098,
+              13098,
+              13098,
+              13098,
+              13098
+            ],
+            "median_seconds": 5.9625133872032166e-05,
+            "median_peak_bytes": 13098.0
+          },
+          "rebind": {
+            "elapsed_seconds": [
+              0.0023298340383917093,
+              0.0021016248501837254,
+              0.002174000022932887,
+              0.002159042051061988,
+              0.0025665410794317722
+            ],
+            "peak_bytes": [
+              381784,
+              381784,
+              381784,
+              381784,
+              381784
+            ],
+            "median_seconds": 0.002174000022932887,
+            "median_peak_bytes": 381784.0
+          },
+          "end_to_end": {
+            "elapsed_seconds": [
+              0.026477792067453265,
+              0.026415250031277537,
+              0.02830599993467331,
+              0.027114749886095524,
+              0.02614737511612475
+            ],
+            "peak_bytes": [
+              719203,
+              717652,
+              717464,
+              718075,
+              716853
+            ],
+            "median_seconds": 0.026477792067453265,
+            "median_peak_bytes": 717652.0
+          }
+        }
+      },
+      {
+        "ledger": {
+          "family": "wide-rebind-pll-ratio",
+          "L": 2,
+          "K": 2,
+          "A": 67,
+          "T": 2400,
+          "D": 2
+        },
+        "seed": 49400,
+        "preflight": {
+          "serialize": true,
+          "load": true,
+          "index": true,
+          "rebind": true,
+          "end_to_end": true,
+          "reported_nodes": 3
+        },
+        "phases": {
+          "serialize": {
+            "elapsed_seconds": [
+              0.0016266659367829561,
+              0.0018179581966251135,
+              0.0015082499012351036,
+              0.0014567920006811619,
+              0.0014599591959267855
+            ],
+            "peak_bytes": [
+              465642,
+              465642,
+              465642,
+              465642,
+              465642
+            ],
+            "median_seconds": 0.0015082499012351036,
+            "median_peak_bytes": 465642.0
+          },
+          "load": {
+            "elapsed_seconds": [
+              0.03148920810781419,
+              0.030494125094264746,
+              0.03136029210872948,
+              0.031836583046242595,
+              0.030510750133544207
+            ],
+            "peak_bytes": [
+              697499,
+              697358,
+              697593,
+              703045,
+              697452
+            ],
+            "median_seconds": 0.03136029210872948,
+            "median_peak_bytes": 697499.0
+          },
+          "index": {
+            "elapsed_seconds": [
+              0.00016175000928342342,
+              0.00011129211634397507,
+              0.00010087504051625729,
+              9.933416731655598e-05,
+              9.591598063707352e-05
+            ],
+            "peak_bytes": [
+              23182,
+              23182,
+              23182,
+              23182,
+              23182
+            ],
+            "median_seconds": 0.00010087504051625729,
+            "median_peak_bytes": 23182.0
+          },
+          "rebind": {
+            "elapsed_seconds": [
+              0.06701570795848966,
+              0.06632674997672439,
+              0.06502975011244416,
+              0.06516304216347635,
+              0.06525941588915884
+            ],
+            "peak_bytes": [
+              782594,
+              782594,
+              782594,
+              782594,
+              782594
+            ],
+            "median_seconds": 0.06525941588915884,
+            "median_peak_bytes": 782594.0
+          },
+          "end_to_end": {
+            "elapsed_seconds": [
+              0.12747841700911522,
+              0.09886695886962116,
+              0.09753454197198153,
+              0.0974831657949835,
+              0.09798979200422764
+            ],
+            "peak_bytes": [
+              1423337,
+              1423807,
+              1424277,
+              1423149,
+              1423619
+            ],
+            "median_seconds": 0.09798979200422764,
+            "median_peak_bytes": 1423619.0
+          }
+        }
+      },
+      {
+        "ledger": {
+          "family": "wide-rebind-pll-ratio",
+          "L": 3,
+          "K": 3,
+          "A": 133,
+          "T": 4800,
+          "D": 2
+        },
+        "seed": 51800,
+        "preflight": {
+          "serialize": true,
+          "load": true,
+          "index": true,
+          "rebind": true,
+          "end_to_end": true,
+          "reported_nodes": 4
+        },
+        "phases": {
+          "serialize": {
+            "elapsed_seconds": [
+              0.0030264579690992832,
+              0.0029111250769346952,
+              0.002892416203394532,
+              0.003060125047340989,
+              0.003123041009530425
+            ],
+            "peak_bytes": [
+              920714,
+              920714,
+              920714,
+              920714,
+              920714
+            ],
+            "median_seconds": 0.0030264579690992832,
+            "median_peak_bytes": 920714.0
+          },
+          "load": {
+            "elapsed_seconds": [
+              0.045789791038259864,
+              0.0471619579475373,
+              0.04645941709168255,
+              0.045344125013798475,
+              0.045383207965642214
+            ],
+            "peak_bytes": [
+              1373490,
+              1374195,
+              1376451,
+              1375875,
+              1375746
+            ],
+            "median_seconds": 0.045789791038259864,
+            "median_peak_bytes": 1375746.0
+          },
+          "index": {
+            "elapsed_seconds": [
+              0.0003139588516205549,
+              0.00022208411246538162,
+              0.00024683400988578796,
+              0.0002753329463303089,
+              0.00034350017085671425
+            ],
+            "peak_bytes": [
+              43458,
+              43458,
+              43458,
+              43458,
+              43458
+            ],
+            "median_seconds": 0.0002753329463303089,
+            "median_peak_bytes": 43458.0
+          },
+          "rebind": {
+            "elapsed_seconds": [
+              6.097217082977295,
+              6.121822041925043,
+              6.0985419161152095,
+              6.10504737496376,
+              6.196832332992926
+            ],
+            "peak_bytes": [
+              1691696,
+              1691696,
+              1691696,
+              1691696,
+              1691696
+            ],
+            "median_seconds": 6.10504737496376,
+            "median_peak_bytes": 1691696.0
+          },
+          "end_to_end": {
+            "elapsed_seconds": [
+              6.220325375208631,
+              6.15443154098466,
+              6.150003042072058,
+              6.1618392909877,
+              6.216161124873906
+            ],
+            "peak_bytes": [
+              2952967,
+              2950993,
+              2955552,
+              2951651,
+              2952779
+            ],
+            "median_seconds": 6.1618392909877,
+            "median_peak_bytes": 2952779.0
+          }
+        }
+      }
+    ],
+    "growth_by_phase": {
+      "serialize": {
+        "wall_clock": {
+          "slope": 0.9514221928764162,
+          "adjacent_ratios": [
+            2.000392135696575,
+            1.8269627444998882,
+            1.952426607126334,
+            2.0066024646319693
+          ],
+          "max_slope": 1.5,
+          "max_adjacent_ratio": 50.0
+        },
+        "tracemalloc_peak": {
+          "slope": 0.9361598445891165,
+          "adjacent_ratios": [
+            1.8886788305122004,
+            1.888674208917237,
+            1.9130652708904237,
+            1.9773001576318288
+          ],
+          "max_slope": 1.5,
+          "max_adjacent_ratio": 50.0
+        }
+      },
+      "load": {
+        "wall_clock": {
+          "slope": 0.3428558051233526,
+          "adjacent_ratios": [
+            1.156232295420492,
+            1.1694781562435161,
+            1.3317367525782167,
+            1.4601200422337193
+          ],
+          "max_slope": 1.5,
+          "max_adjacent_ratio": 50.0
+        },
+        "tracemalloc_peak": {
+          "slope": 0.847198820783749,
+          "adjacent_ratios": [
+            1.4840042115493641,
+            1.801243345422792,
+            1.9212413853891794,
+            1.972398526736239
+          ],
+          "max_slope": 1.5,
+          "max_adjacent_ratio": 50.0
+        }
+      },
+      "index": {
+        "wall_clock": {
+          "slope": 0.6064797207959741,
+          "adjacent_ratios": [
+            1.8833857768454487,
+            0.8057465224792104,
+            1.6918207803567524,
+            2.7294457074932774
+          ],
+          "max_slope": 1.5,
+          "max_adjacent_ratio": 50.0
+        },
+        "tracemalloc_peak": {
+          "slope": 0.7447343469233231,
+          "adjacent_ratios": [
+            1.4657780979827089,
+            1.6094863602850824,
+            1.769888532600397,
+            1.874644120438271
+          ],
+          "max_slope": 1.5,
+          "max_adjacent_ratio": 50.0
+        }
+      },
+      "rebind": {
+        "wall_clock": {
+          "slope": 3.18863043985273,
+          "adjacent_ratios": [
+            4.147065079954391,
+            0.9916001467659195,
+            30.018130267137284,
+            93.55044466430714
+          ],
+          "max_slope": 1.5,
+          "max_adjacent_ratio": 50.0
+        },
+        "tracemalloc_peak": {
+          "slope": 0.9874224009740983,
+          "adjacent_ratios": [
+            2.505325636230588,
+            1.5487943400512771,
+            2.0498344613708275,
+            2.161652146579197
+          ],
+          "max_slope": 1.5,
+          "max_adjacent_ratio": 50.0
+        }
+      },
+      "end_to_end": {
+        "wall_clock": {
+          "slope": 1.884790436120118,
+          "adjacent_ratios": [
+            1.1356042479923045,
+            1.222150700421026,
+            3.7008294254518885,
+            62.88246117230105
+          ],
+          "max_slope": 1.5,
+          "max_adjacent_ratio": 50.0
+        },
+        "tracemalloc_peak": {
+          "slope": 0.9377615344604577,
+          "adjacent_ratios": [
+            2.0914534777200275,
+            1.6544146802526627,
+            1.9837177350582176,
+            2.074135706252867
+          ],
+          "max_slope": 1.5,
+          "max_adjacent_ratio": 50.0
+        }
+      }
+    }
+  },
+  "inv7": {
+    "ledger": {
+      "family": "deep-evidence-isolated-core",
+      "L": 3000,
+      "K": 3000,
+      "A": 3000,
+      "T": 3000,
+      "D": 3000
+    },
+    "limits": {
+      "max_seconds": 2.0,
+      "max_peak_bytes": 536870912
+    },
+    "preflight": {
+      "construction": true,
+      "schema_validation": true,
+      "serialization": true,
+      "iterative_beyond_recursion_limit": true,
+      "persisted_decode_feasible": false,
+      "decode_budget": 1000000,
+      "decoded_witness_ids": 4501500,
+      "input_bytes": 3376845,
+      "node_count": 6000
+    },
+    "evidence_findings": {
+      "elapsed_seconds": [
+        4.135136083001271,
+        4.116274458123371,
+        4.091492250096053,
+        4.092459207866341,
+        4.109154375037178
+      ],
+      "peak_bytes": [
+        934592,
+        934592,
+        934592,
+        934592,
+        934592
+      ],
+      "median_seconds": 4.109154375037178,
+      "median_peak_bytes": 934592.0
+    },
+    "within_wall_clock_ceiling": false,
+    "within_tracemalloc_ceiling": true
+  }
+}

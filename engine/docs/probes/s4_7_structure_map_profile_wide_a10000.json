@@ -1,0 +1,907 @@
+{
+  "cases": {
+    "wide/identical": {
+      "atom_count": 10000,
+      "fingerprint_counts": {
+        "fingerprint_evaluated_slots": [
+          250
+        ],
+        "fresh_fingerprint_computations": [
+          250
+        ],
+        "one_computation_per_evaluated_slot": true
+      },
+      "fixture_variant": "identical",
+      "median_lifetime_peak_bytes": 326057984,
+      "median_named_span_seconds": 4.128361665876582,
+      "repetitions": 1,
+      "samples": [
+        {
+          "elapsed_seconds": 4.128361665876582,
+          "incremental_peak_bytes": 222429184,
+          "ledger": {
+            "A": 10000,
+            "D": 4,
+            "K": 250,
+            "L": 250,
+            "T": 360000,
+            "family": "wide-rebind-production"
+          },
+          "lifetime_peak_bytes": 326057984,
+          "monitor_elapsed_seconds": 24.37851525004953,
+          "phase": "rebind",
+          "raw_ru_maxrss_bytes": 326057984,
+          "sample_count": 611,
+          "sample_interval_seconds": 0.005,
+          "setup_baseline_bytes": 101908480,
+          "setup_elapsed_seconds": 19.8701677499339,
+          "span_peak_bytes": 324337664,
+          "telemetry": {
+            "child_trace": {
+              "active_stage": "idle",
+              "schema": "engine-rebind-telemetry@v1",
+              "spans": [
+                {
+                  "attributes": {},
+                  "cpu_seconds": 4.748759,
+                  "name": "setup.materialize-fixture",
+                  "parent": "setup.prepare",
+                  "start_offset_seconds": 0.001503166,
+                  "wall_seconds": 7.077499209
+                },
+                {
+                  "attributes": {},
+                  "cpu_seconds": 0.001647,
+                  "name": "persist.prepare-workspaces",
+                  "parent": "setup.persist-prerequisites",
+                  "start_offset_seconds": 7.079268166,
+                  "wall_seconds": 0.004261625
+                },
+                {
+                  "attributes": {
+                    "stream_count": 2
+                  },
+                  "cpu_seconds": 0.521974,
+                  "name": "persist.old-streams",
+                  "parent": "setup.persist-prerequisites",
+                  "start_offset_seconds": 7.083559291,
+                  "wall_seconds": 1.368519334
+                },
+                {
+                  "attributes": {
+                    "stream_count": 2
+                  },
+                  "cpu_seconds": 0.472387,
+                  "name": "persist.fresh-streams",
+                  "parent": "setup.persist-prerequisites",
+                  "start_offset_seconds": 8.452329916,
+                  "wall_seconds": 0.72698275
+                },
+                {
+                  "attributes": {},
+                  "cpu_seconds": 2.995295,
+                  "name": "structure-map.write.tier1",
+                  "parent": "persist.structure-map",
+                  "start_offset_seconds": 9.179381416,
+                  "wall_seconds": 3.559293417
+                },
+                {
+                  "attributes": {
+                    "character_count": 28348757
+                  },
+                  "cpu_seconds": 0.09641,
+                  "name": "structure-map.write.render",
+                  "parent": "persist.structure-map",
+                  "start_offset_seconds": 12.738982625,
+                  "wall_seconds": 0.120055083
+                },
+                {
+                  "attributes": {},
+                  "cpu_seconds": 0.014735,
+                  "name": "structure-map.write.io",
+                  "parent": "persist.structure-map",
+                  "start_offset_seconds": 12.866806958,
+                  "wall_seconds": 0.033279417
+                },
+                {
+                  "attributes": {},
+                  "cpu_seconds": 3.108061,
+                  "name": "persist.structure-map",
+                  "parent": "setup.persist-prerequisites",
+                  "start_offset_seconds": 9.179335083,
+                  "wall_seconds": 3.720821792
+                },
+                {
+                  "attributes": {},
+                  "cpu_seconds": 4.104537,
+                  "name": "setup.persist-prerequisites",
+                  "parent": "setup.prepare",
+                  "start_offset_seconds": 7.079251291,
+                  "wall_seconds": 5.821129584
+                },
+                {
+                  "attributes": {
+                    "stream_count": 2
+                  },
+                  "cpu_seconds": 0.380435,
+                  "name": "load.old-streams",
+                  "parent": "setup.load-prerequisites",
+                  "start_offset_seconds": 12.900443916,
+                  "wall_seconds": 0.636754042
+                },
+                {
+                  "attributes": {
+                    "stream_count": 2
+                  },
+                  "cpu_seconds": 0.313384,
+                  "name": "load.fresh-streams",
+                  "parent": "setup.load-prerequisites",
+                  "start_offset_seconds": 13.537310916,
+                  "wall_seconds": 0.393110084
+                },
+                {
+                  "attributes": {
+                    "byte_count": 28348757
+                  },
+                  "cpu_seconds": 0.02351,
+                  "name": "structure-map.load.read",
+                  "parent": "load.structure-map",
+                  "start_offset_seconds": 13.934621791,
+                  "wall_seconds": 0.033461709
+                },
+                {
+                  "attributes": {},
+                  "cpu_seconds": 0.054915,
+                  "name": "structure-map.load.parse",
+                  "parent": "load.structure-map",
+                  "start_offset_seconds": 13.968114041,
+                  "wall_seconds": 0.102144084
+                },
+                {
+                  "attributes": {},
+                  "cpu_seconds": 3.492464,
+                  "name": "structure-map.load.tier1",
+                  "parent": "load.structure-map",
+                  "start_offset_seconds": 14.070285166,
+                  "wall_seconds": 5.220131125
+                },
+                {
+                  "attributes": {},
+                  "cpu_seconds": 0.081543,
+                  "name": "structure-map.load.typed-build",
+                  "parent": "load.structure-map",
+                  "start_offset_seconds": 19.290850416,
+                  "wall_seconds": 0.156507375
+                },
+                {
+                  "attributes": {},
+                  "cpu_seconds": 0.02693,
+                  "name": "structure-map.load.tier2",
+                  "parent": "load.structure-map",
+                  "start_offset_seconds": 19.447399583,
+                  "wall_seconds": 0.053476208
+                },
+                {
+                  "attributes": {},
+                  "cpu_seconds": 3.683815,
+                  "name": "load.structure-map",
+                  "parent": "setup.load-prerequisites",
+                  "start_offset_seconds": 13.930448375,
+                  "wall_seconds": 5.570612
+                },
+                {
+                  "attributes": {},
+                  "cpu_seconds": 4.379374,
+                  "name": "setup.load-prerequisites",
+                  "parent": "setup.prepare",
+                  "start_offset_seconds": 12.90042225,
+                  "wall_seconds": 6.604584458
+                },
+                {
+                  "attributes": {},
+                  "cpu_seconds": 0.016937,
+                  "name": "index.readers",
+                  "parent": "setup.index-prerequisites",
+                  "start_offset_seconds": 19.505321541,
+                  "wall_seconds": 0.030323
+                },
+                {
+                  "attributes": {},
+                  "cpu_seconds": 0.023392,
+                  "name": "index.validate-map",
+                  "parent": "setup.index-prerequisites",
+                  "start_offset_seconds": 19.535679291,
+                  "wall_seconds": 0.035690167
+                },
+                {
+                  "attributes": {
+                    "fresh_included_atoms": 10000,
+                    "old_included_atoms": 10000
+                  },
+                  "cpu_seconds": 1.2e-05,
+                  "name": "index.compare-cardinality",
+                  "parent": "setup.index-prerequisites",
+                  "start_offset_seconds": 19.57140375,
+                  "wall_seconds": 1.2625e-05
+                },
+                {
+                  "attributes": {},
+                  "cpu_seconds": 0.040502,
+                  "name": "setup.index-prerequisites",
+                  "parent": "setup.prepare",
+                  "start_offset_seconds": 19.505296458,
+                  "wall_seconds": 0.06738675
+                },
+                {
+                  "attributes": {},
+                  "cpu_seconds": 13.274676,
+                  "name": "setup.prepare",
+                  "parent": null,
+                  "start_offset_seconds": 9.9083e-05,
+                  "wall_seconds": 19.576040667
+                },
+                {
+                  "attributes": {
+                    "node_count": 253,
+                    "slot_count": 250
+                  },
+                  "cpu_seconds": 0.008757,
+                  "name": "rebind.enumerate-slots",
+                  "parent": "named.rebind",
+                  "start_offset_seconds": 19.852499958,
+                  "wall_seconds": 0.014307125
+                },
+                {
+                  "attributes": {
+                    "atom_count": 10000,
+                    "token_count": 360000
+                  },
+                  "cpu_seconds": 0.140965,
+                  "name": "rebind.materialize-old-tokens",
+                  "parent": "named.rebind",
+                  "start_offset_seconds": 19.866890416,
+                  "wall_seconds": 0.229615625
+                },
+                {
+                  "attributes": {
+                    "atom_count": 10000,
+                    "token_count": 360000
+                  },
+                  "cpu_seconds": 0.27416,
+                  "name": "rebind.materialize-fresh-tokens",
+                  "parent": "named.rebind",
+                  "start_offset_seconds": 20.096534,
+                  "wall_seconds": 0.461462625
+                },
+                {
+                  "attributes": {
+                    "alignment_blocks": 1,
+                    "chained_anchors": 0,
+                    "identity_fast_path": true,
+                    "near_duplicate": true
+                  },
+                  "cpu_seconds": 0.004064,
+                  "name": "rebind.align-tokens",
+                  "parent": "named.rebind",
+                  "start_offset_seconds": 20.565261208,
+                  "wall_seconds": 0.018717333
+                },
+                {
+                  "attributes": {
+                    "query_count": 500,
+                    "unique_query_count": 500
+                  },
+                  "cpu_seconds": 0.001203,
+                  "name": "rebind.prepare-anchor-queries",
+                  "parent": "named.rebind",
+                  "start_offset_seconds": 20.584014,
+                  "wall_seconds": 0.0325255
+                },
+                {
+                  "attributes": {
+                    "exact_resolved_queries": 500,
+                    "exact_windows_scanned": 719991,
+                    "fuzzy_resolved_queries": 0,
+                    "fuzzy_searched_queries": 0,
+                    "fuzzy_windows_scanned": 0,
+                    "group_count": 2,
+                    "signature_count": 0,
+                    "unresolved_queries": 0,
+                    "windows_scanned": 719991
+                  },
+                  "cpu_seconds": 0.180917,
+                  "name": "rebind.locate-old-anchors",
+                  "parent": "named.rebind",
+                  "start_offset_seconds": 20.616607,
+                  "wall_seconds": 0.530458375
+                },
+                {
+                  "attributes": {
+                    "exact_resolved_queries": 500,
+                    "exact_windows_scanned": 0,
+                    "fuzzy_resolved_queries": 0,
+                    "fuzzy_searched_queries": 0,
+                    "fuzzy_windows_scanned": 0,
+                    "reused_old_locator": true,
+                    "signature_count": 0,
+                    "tokens_identical": true,
+                    "unresolved_queries": 0,
+                    "windows_scanned": 0
+                  },
+                  "cpu_seconds": 4.7e-05,
+                  "name": "rebind.locate-fresh-anchors",
+                  "parent": "named.rebind",
+                  "start_offset_seconds": 21.151558833,
+                  "wall_seconds": 5.025e-05
+                },
+                {
+                  "attributes": {
+                    "unique_boundaries": 251
+                  },
+                  "cpu_seconds": 0.001096,
+                  "name": "rebind.index-boundary-owners",
+                  "parent": "named.rebind",
+                  "start_offset_seconds": 21.151625333,
+                  "wall_seconds": 0.002845875
+                },
+                {
+                  "attributes": {
+                    "analysis_skipped": true,
+                    "gram_widths_analyzed": 0,
+                    "tokens_identical": true,
+                    "unresolved_duplication": false
+                  },
+                  "cpu_seconds": 6e-06,
+                  "name": "rebind.detect-token-duplication",
+                  "parent": "named.rebind",
+                  "start_offset_seconds": 21.154493,
+                  "wall_seconds": 6.916e-06
+                },
+                {
+                  "attributes": {
+                    "fresh_tokenless_atoms": 0,
+                    "old_tokenless_atoms": 0,
+                    "unresolved_duplication": false
+                  },
+                  "cpu_seconds": 0.022308,
+                  "name": "rebind.detect-tokenless-duplication",
+                  "parent": "named.rebind",
+                  "start_offset_seconds": 21.154502458,
+                  "wall_seconds": 0.048216333
+                },
+                {
+                  "attributes": {
+                    "bound_slots": 250,
+                    "fingerprint_evaluated_slots": 250,
+                    "fresh_fingerprint_computations": 250,
+                    "resolved_boundaries": 500,
+                    "slot_count": 250,
+                    "unresolved_reasons": {}
+                  },
+                  "cpu_seconds": 1.326639,
+                  "name": "rebind.resolve-slots",
+                  "parent": "named.rebind",
+                  "start_offset_seconds": 21.20276475,
+                  "wall_seconds": 2.080474291
+                },
+                {
+                  "attributes": {
+                    "bound_nodes": 253,
+                    "node_count": 253
+                  },
+                  "cpu_seconds": 0.000226,
+                  "name": "rebind.aggregate-nodes",
+                  "parent": "named.rebind",
+                  "start_offset_seconds": 23.283314125,
+                  "wall_seconds": 0.000227208
+                },
+                {
+                  "attributes": {
+                    "node_count": 253
+                  },
+                  "cpu_seconds": 0.131691,
+                  "name": "rebind.migrate-projection",
+                  "parent": "named.rebind",
+                  "start_offset_seconds": 23.283557833,
+                  "wall_seconds": 0.183206083
+                },
+                {
+                  "attributes": {
+                    "all_bound_before_validation": true,
+                    "contested_nodes": 0,
+                    "map_valid": true
+                  },
+                  "cpu_seconds": 0.024233,
+                  "name": "rebind.validate-projection",
+                  "parent": "named.rebind",
+                  "start_offset_seconds": 23.46678275,
+                  "wall_seconds": 0.037224041
+                },
+                {
+                  "attributes": {
+                    "restamped_entries": 0,
+                    "stale_decisions": 0
+                  },
+                  "cpu_seconds": 4.4e-05,
+                  "name": "rebind.restamp-evidence",
+                  "parent": "named.rebind",
+                  "start_offset_seconds": 23.50408225,
+                  "wall_seconds": 4.6791e-05
+                },
+                {
+                  "attributes": {
+                    "bound_nodes": 253,
+                    "unresolved_nodes": 0
+                  },
+                  "cpu_seconds": 0.156411,
+                  "name": "rebind.assemble-report",
+                  "parent": "named.rebind",
+                  "start_offset_seconds": 23.504139625,
+                  "wall_seconds": 0.198506791
+                },
+                {
+                  "attributes": {},
+                  "cpu_seconds": 2.401328,
+                  "name": "named.rebind",
+                  "parent": null,
+                  "start_offset_seconds": 19.60413275,
+                  "wall_seconds": 4.128299458
+                }
+              ]
+            },
+            "fixture_variant": "identical",
+            "schema": "s4.7-runtime-telemetry@v1",
+            "stage_rss": [
+              {
+                "first_monitor_elapsed_seconds": 0.008593792095780373,
+                "last_monitor_elapsed_seconds": 24.37197420792654,
+                "name": "idle",
+                "rss_peak_bytes": 231997440,
+                "sample_count": 97
+              },
+              {
+                "first_monitor_elapsed_seconds": 19.775510458042845,
+                "last_monitor_elapsed_seconds": 19.805087458109483,
+                "name": "index.readers",
+                "rss_peak_bytes": 100270080,
+                "sample_count": 5
+              },
+              {
+                "first_monitor_elapsed_seconds": 19.811396125005558,
+                "last_monitor_elapsed_seconds": 19.834649542113766,
+                "name": "index.validate-map",
+                "rss_peak_bytes": 100859904,
+                "sample_count": 5
+              },
+              {
+                "first_monitor_elapsed_seconds": 13.809472041903064,
+                "last_monitor_elapsed_seconds": 14.199663541978225,
+                "name": "load.fresh-streams",
+                "rss_peak_bytes": 282476544,
+                "sample_count": 67
+              },
+              {
+                "first_monitor_elapsed_seconds": 13.172187292017043,
+                "last_monitor_elapsed_seconds": 13.803563457913697,
+                "name": "load.old-streams",
+                "rss_peak_bytes": 236699648,
+                "sample_count": 90
+              },
+              {
+                "first_monitor_elapsed_seconds": 19.876200542086735,
+                "last_monitor_elapsed_seconds": 23.996956875082105,
+                "name": "named.rebind",
+                "rss_peak_bytes": 324337664,
+                "sample_count": 39
+              },
+              {
+                "first_monitor_elapsed_seconds": 8.724331957986578,
+                "last_monitor_elapsed_seconds": 9.443811583099887,
+                "name": "persist.fresh-streams",
+                "rss_peak_bytes": 62291968,
+                "sample_count": 113
+              },
+              {
+                "first_monitor_elapsed_seconds": 7.359245083061978,
+                "last_monitor_elapsed_seconds": 8.718583000125363,
+                "name": "persist.old-streams",
+                "rss_peak_bytes": 144228352,
+                "sample_count": 161
+              },
+              {
+                "first_monitor_elapsed_seconds": 7.35247016698122,
+                "last_monitor_elapsed_seconds": 7.352474458049983,
+                "name": "persist.prepare-workspaces",
+                "rss_peak_bytes": 137216000,
+                "sample_count": 1
+              },
+              {
+                "first_monitor_elapsed_seconds": 13.128932458115742,
+                "last_monitor_elapsed_seconds": 13.134706333046779,
+                "name": "persist.structure-map",
+                "rss_peak_bytes": 146358272,
+                "sample_count": 2
+              },
+              {
+                "first_monitor_elapsed_seconds": 20.84137325012125,
+                "last_monitor_elapsed_seconds": 20.849034042097628,
+                "name": "rebind.align-tokens",
+                "rss_peak_bytes": 323534848,
+                "sample_count": 2
+              },
+              {
+                "first_monitor_elapsed_seconds": 23.77461591712199,
+                "last_monitor_elapsed_seconds": 23.97226104210131,
+                "name": "rebind.assemble-report",
+                "rss_peak_bytes": 201801728,
+                "sample_count": 34
+              },
+              {
+                "first_monitor_elapsed_seconds": 21.427656583022326,
+                "last_monitor_elapsed_seconds": 21.46878574998118,
+                "name": "rebind.detect-tokenless-duplication",
+                "rss_peak_bytes": 92520448,
+                "sample_count": 8
+              },
+              {
+                "first_monitor_elapsed_seconds": 20.124656582949683,
+                "last_monitor_elapsed_seconds": 20.131323124980554,
+                "name": "rebind.enumerate-slots",
+                "rss_peak_bytes": 139034624,
+                "sample_count": 2
+              },
+              {
+                "first_monitor_elapsed_seconds": 20.888971792068332,
+                "last_monitor_elapsed_seconds": 21.41310266708024,
+                "name": "rebind.locate-old-anchors",
+                "rss_peak_bytes": 304562176,
+                "sample_count": 62
+              },
+              {
+                "first_monitor_elapsed_seconds": 20.367320083081722,
+                "last_monitor_elapsed_seconds": 20.823196083074436,
+                "name": "rebind.materialize-fresh-tokens",
+                "rss_peak_bytes": 324304896,
+                "sample_count": 74
+              },
+              {
+                "first_monitor_elapsed_seconds": 20.136922457953915,
+                "last_monitor_elapsed_seconds": 20.36154633294791,
+                "name": "rebind.materialize-old-tokens",
+                "rss_peak_bytes": 179814400,
+                "sample_count": 35
+              },
+              {
+                "first_monitor_elapsed_seconds": 23.555722624994814,
+                "last_monitor_elapsed_seconds": 23.736349541926757,
+                "name": "rebind.migrate-projection",
+                "rss_peak_bytes": 130695168,
+                "sample_count": 30
+              },
+              {
+                "first_monitor_elapsed_seconds": 20.85475020809099,
+                "last_monitor_elapsed_seconds": 20.883227833081037,
+                "name": "rebind.prepare-anchor-queries",
+                "rss_peak_bytes": 317472768,
+                "sample_count": 4
+              },
+              {
+                "first_monitor_elapsed_seconds": 21.474732167087495,
+                "last_monitor_elapsed_seconds": 23.549953874899074,
+                "name": "rebind.resolve-slots",
+                "rss_peak_bytes": 127664128,
+                "sample_count": 315
+              },
+              {
+                "first_monitor_elapsed_seconds": 23.74163179192692,
+                "last_monitor_elapsed_seconds": 23.76758158300072,
+                "name": "rebind.validate-projection",
+                "rss_peak_bytes": 135790592,
+                "sample_count": 5
+              },
+              {
+                "first_monitor_elapsed_seconds": 19.842115541920066,
+                "last_monitor_elapsed_seconds": 19.842118666972965,
+                "name": "setup.index-prerequisites",
+                "rss_peak_bytes": 100876288,
+                "sample_count": 1
+              },
+              {
+                "first_monitor_elapsed_seconds": 0.2723956669215113,
+                "last_monitor_elapsed_seconds": 7.345123375067487,
+                "name": "setup.materialize-fixture",
+                "rss_peak_bytes": 202162176,
+                "sample_count": 1088
+              },
+              {
+                "first_monitor_elapsed_seconds": 14.240042000077665,
+                "last_monitor_elapsed_seconds": 14.337369000073522,
+                "name": "structure-map.load.parse",
+                "rss_peak_bytes": 260292608,
+                "sample_count": 16
+              },
+              {
+                "first_monitor_elapsed_seconds": 14.205413500079885,
+                "last_monitor_elapsed_seconds": 14.23428583308123,
+                "name": "structure-map.load.read",
+                "rss_peak_bytes": 263323648,
+                "sample_count": 6
+              },
+              {
+                "first_monitor_elapsed_seconds": 14.343148750020191,
+                "last_monitor_elapsed_seconds": 19.55785583308898,
+                "name": "structure-map.load.tier1",
+                "rss_peak_bytes": 244711424,
+                "sample_count": 814
+              },
+              {
+                "first_monitor_elapsed_seconds": 19.717943458119407,
+                "last_monitor_elapsed_seconds": 19.7690707501024,
+                "name": "structure-map.load.tier2",
+                "rss_peak_bytes": 89833472,
+                "sample_count": 9
+              },
+              {
+                "first_monitor_elapsed_seconds": 19.564249250106514,
+                "last_monitor_elapsed_seconds": 19.71208008308895,
+                "name": "structure-map.load.typed-build",
+                "rss_peak_bytes": 83099648,
+                "sample_count": 23
+              },
+              {
+                "first_monitor_elapsed_seconds": 13.140763917006552,
+                "last_monitor_elapsed_seconds": 13.166439332999289,
+                "name": "structure-map.write.io",
+                "rss_peak_bytes": 142950400,
+                "sample_count": 5
+              },
+              {
+                "first_monitor_elapsed_seconds": 13.010044832946733,
+                "last_monitor_elapsed_seconds": 13.12284899991937,
+                "name": "structure-map.write.render",
+                "rss_peak_bytes": 117620736,
+                "sample_count": 19
+              },
+              {
+                "first_monitor_elapsed_seconds": 9.449540625093505,
+                "last_monitor_elapsed_seconds": 13.00411287508905,
+                "name": "structure-map.write.tier1",
+                "rss_peak_bytes": 85753856,
+                "sample_count": 603
+              }
+            ]
+          }
+        }
+      ],
+      "shape": "wide",
+      "span_medians": {
+        "index.compare-cardinality": {
+          "median_cpu_seconds": 1.2e-05,
+          "median_wall_seconds": 1.2625e-05
+        },
+        "index.readers": {
+          "median_cpu_seconds": 0.016937,
+          "median_wall_seconds": 0.030323
+        },
+        "index.validate-map": {
+          "median_cpu_seconds": 0.023392,
+          "median_wall_seconds": 0.035690167
+        },
+        "load.fresh-streams": {
+          "median_cpu_seconds": 0.313384,
+          "median_wall_seconds": 0.393110084
+        },
+        "load.old-streams": {
+          "median_cpu_seconds": 0.380435,
+          "median_wall_seconds": 0.636754042
+        },
+        "load.structure-map": {
+          "median_cpu_seconds": 3.683815,
+          "median_wall_seconds": 5.570612
+        },
+        "named.rebind": {
+          "median_cpu_seconds": 2.401328,
+          "median_wall_seconds": 4.128299458
+        },
+        "persist.fresh-streams": {
+          "median_cpu_seconds": 0.472387,
+          "median_wall_seconds": 0.72698275
+        },
+        "persist.old-streams": {
+          "median_cpu_seconds": 0.521974,
+          "median_wall_seconds": 1.368519334
+        },
+        "persist.prepare-workspaces": {
+          "median_cpu_seconds": 0.001647,
+          "median_wall_seconds": 0.004261625
+        },
+        "persist.structure-map": {
+          "median_cpu_seconds": 3.108061,
+          "median_wall_seconds": 3.720821792
+        },
+        "rebind.aggregate-nodes": {
+          "median_cpu_seconds": 0.000226,
+          "median_wall_seconds": 0.000227208
+        },
+        "rebind.align-tokens": {
+          "median_cpu_seconds": 0.004064,
+          "median_wall_seconds": 0.018717333
+        },
+        "rebind.assemble-report": {
+          "median_cpu_seconds": 0.156411,
+          "median_wall_seconds": 0.198506791
+        },
+        "rebind.detect-token-duplication": {
+          "median_cpu_seconds": 6e-06,
+          "median_wall_seconds": 6.916e-06
+        },
+        "rebind.detect-tokenless-duplication": {
+          "median_cpu_seconds": 0.022308,
+          "median_wall_seconds": 0.048216333
+        },
+        "rebind.enumerate-slots": {
+          "median_cpu_seconds": 0.008757,
+          "median_wall_seconds": 0.014307125
+        },
+        "rebind.index-boundary-owners": {
+          "median_cpu_seconds": 0.001096,
+          "median_wall_seconds": 0.002845875
+        },
+        "rebind.locate-fresh-anchors": {
+          "median_cpu_seconds": 4.7e-05,
+          "median_wall_seconds": 5.025e-05
+        },
+        "rebind.locate-old-anchors": {
+          "median_cpu_seconds": 0.180917,
+          "median_wall_seconds": 0.530458375
+        },
+        "rebind.materialize-fresh-tokens": {
+          "median_cpu_seconds": 0.27416,
+          "median_wall_seconds": 0.461462625
+        },
+        "rebind.materialize-old-tokens": {
+          "median_cpu_seconds": 0.140965,
+          "median_wall_seconds": 0.229615625
+        },
+        "rebind.migrate-projection": {
+          "median_cpu_seconds": 0.131691,
+          "median_wall_seconds": 0.183206083
+        },
+        "rebind.prepare-anchor-queries": {
+          "median_cpu_seconds": 0.001203,
+          "median_wall_seconds": 0.0325255
+        },
+        "rebind.resolve-slots": {
+          "median_cpu_seconds": 1.326639,
+          "median_wall_seconds": 2.080474291
+        },
+        "rebind.restamp-evidence": {
+          "median_cpu_seconds": 4.4e-05,
+          "median_wall_seconds": 4.6791e-05
+        },
+        "rebind.validate-projection": {
+          "median_cpu_seconds": 0.024233,
+          "median_wall_seconds": 0.037224041
+        },
+        "setup.index-prerequisites": {
+          "median_cpu_seconds": 0.040502,
+          "median_wall_seconds": 0.06738675
+        },
+        "setup.load-prerequisites": {
+          "median_cpu_seconds": 4.379374,
+          "median_wall_seconds": 6.604584458
+        },
+        "setup.materialize-fixture": {
+          "median_cpu_seconds": 4.748759,
+          "median_wall_seconds": 7.077499209
+        },
+        "setup.persist-prerequisites": {
+          "median_cpu_seconds": 4.104537,
+          "median_wall_seconds": 5.821129584
+        },
+        "setup.prepare": {
+          "median_cpu_seconds": 13.274676,
+          "median_wall_seconds": 19.576040667
+        },
+        "structure-map.load.parse": {
+          "median_cpu_seconds": 0.054915,
+          "median_wall_seconds": 0.102144084
+        },
+        "structure-map.load.read": {
+          "median_cpu_seconds": 0.02351,
+          "median_wall_seconds": 0.033461709
+        },
+        "structure-map.load.tier1": {
+          "median_cpu_seconds": 3.492464,
+          "median_wall_seconds": 5.220131125
+        },
+        "structure-map.load.tier2": {
+          "median_cpu_seconds": 0.02693,
+          "median_wall_seconds": 0.053476208
+        },
+        "structure-map.load.typed-build": {
+          "median_cpu_seconds": 0.081543,
+          "median_wall_seconds": 0.156507375
+        },
+        "structure-map.write.io": {
+          "median_cpu_seconds": 0.014735,
+          "median_wall_seconds": 0.033279417
+        },
+        "structure-map.write.render": {
+          "median_cpu_seconds": 0.09641,
+          "median_wall_seconds": 0.120055083
+        },
+        "structure-map.write.tier1": {
+          "median_cpu_seconds": 2.995295,
+          "median_wall_seconds": 3.559293417
+        }
+      }
+    }
+  },
+  "command": [
+    "/Users/ben_mpa/LLM/PER_LA_LIBERTA/engine/.venv/bin/python3",
+    "/Users/ben_mpa/LLM/PER_LA_LIBERTA/engine/tools/s4_7_rebind_telemetry.py",
+    "--artifact",
+    "docs/probes/s4_7_structure_map_profile_wide_a10000.json",
+    "--stage",
+    "structure-map-profile",
+    "--atom-count",
+    "10000",
+    "--repetitions",
+    "1",
+    "--shape",
+    "wide",
+    "--fixture-variant",
+    "identical",
+    "--progress-log",
+    "docs/probes/s4_7_structure_map_profile_wide_a10000.progress.ndjson",
+    "--progress-format",
+    "both"
+  ],
+  "created_at": "2026-07-18T20:47:03.255184+00:00",
+  "environment": {
+    "machine": "arm64",
+    "platform": "macOS-26.5.1-arm64-arm-64bit-Mach-O",
+    "python": "3.13.0"
+  },
+  "fixture": {
+    "drift": "one OCR-class token edit plus one split and one merge per 400 old atoms; aggregate atom cardinality remains stable",
+    "identical": "reminted atom ids with identical old/fresh tokens"
+  },
+  "git": {
+    "branch": "spike/s4_7",
+    "head": "6b65a4fd975ce27bb8216aff799764c50bb7ee09",
+    "status": "M ../.github/workflows/engine.yml\n M .github/workflows/ci.yml\n M docs/ENGINE_STRUCTURE_TASKS.md\n M docs/probes/s4_7_item2_prereg.md\n M pyproject.toml\n M src/engine/structure/__init__.py\n M src/engine/structure/artifacts.py\n M src/engine/structure/handles.py\n M src/engine/structure/projection.py\n M src/engine/structure/rebind.py\n M src/engine/structure/schema/structure_map.schema.json\n M src/engine/structure/structure_map.py\n M tests/fixtures/structure/conforming_structure_map.json\n M tests/fixtures/structure/differ_structure_map.json\n M tests/fixtures/structure/invalid/alias_collision.json\n M tests/fixtures/structure/invalid/empty_container.json\n M tests/fixtures/structure/invalid/empty_map.json\n M tests/fixtures/structure/invalid/leaf_only.json\n M tests/fixtures/structure/invalid/malformed_manifest.json\n M tests/fixtures/structure/invalid/non_container_root.json\n M tests/fixtures/structure/rebind_positive_structure_map.json\n M tests/harness/relation.py\n M tests/hunts/hunt_rebind.py\n M tests/unit/test_authoring_evidence.py\n M tests/unit/test_harness_relation_laws.py\n M tests/unit/test_rebind.py\n M tests/unit/test_structure_artifacts.py\n M tests/unit/test_structure_born_gate.py\n M tests/unit/test_structure_handles.py\n M tests/unit/test_structure_map.py\n M uv.lock\n?? docs/probes/s4_7_priority1_component0_audit.md\n?? docs/probes/s4_7_priority2_inv1_inv2_audit.md\n?? docs/probes/s4_7_priority2_red_manifest.json\n?? docs/probes/s4_7_priority3_inv3_inv5_audit.md\n?? docs/probes/s4_7_priority3_red_manifest.json\n?? docs/probes/s4_7_priority4_inv6_inv7_audit.md\n?? docs/probes/s4_7_priority4_perf_baseline.json\n?? docs/probes/s4_7_priority4_red_manifest.json\n?? docs/probes/s4_7_priority5_item3_audit.md\n?? docs/probes/s4_7_priority5_mutation_manifest.json\n?? docs/probes/s4_7_priority5_perf_baseline.json\n?? docs/probes/s4_7_priority6_prereg.md\n?? docs/probes/s4_7_rebind_duplication_skip_a10000.json\n?? docs/probes/s4_7_rebind_duplication_skip_a10000.progress.ndjson\n?? docs/probes/s4_7_rebind_exact_first_a10000.json\n?? docs/probes/s4_7_rebind_exact_first_a10000.progress.ndjson\n?? docs/probes/s4_7_rebind_exact_first_wide_a100000.json\n?? docs/probes/s4_7_rebind_exact_first_wide_a100000.progress.ndjson\n?? docs/probes/s4_7_rebind_fingerprint_reuse_a10000.json\n?? docs/probes/s4_7_rebind_fingerprint_reuse_a10000.progress.ndjson\n?? docs/probes/s4_7_rebind_fingerprint_reuse_wide_a100000.json\n?? docs/probes/s4_7_rebind_fingerprint_reuse_wide_a100000.progress.ndjson\n?? docs/probes/s4_7_rebind_identity_alignment_a10000.json\n?? docs/probes/s4_7_rebind_identity_alignment_a10000.progress.ndjson\n?? docs/probes/s4_7_rebind_telemetry_baseline.json\n?? docs/probes/s4_7_scale.checkpoint.json\n?? docs/probes/s4_7_scale.json\n?? docs/probes/s4_7_scale_cycle_wide_a100000.active.json\n?? docs/probes/s4_7_scale_cycle_wide_a100000.checkpoint.json\n?? docs/probes/s4_7_scale_cycle_wide_a100000.json\n?? docs/probes/s4_7_scale_cycle_wide_a100000.progress.ndjson\n?? docs/probes/s4_7_scale_failed_index_growth.checkpoint.json\n?? docs/probes/s4_7_scale_failed_index_growth.json\n?? docs/probes/s4_7_scale_infeasible_setup.checkpoint.json\n?? docs/probes/s4_7_scale_relation_quadratic.checkpoint.json\n?? docs/probes/s4_7_structure_map_profile_wide_a10000.progress.ndjson\n?? src/engine/structure/boundary_anchor.py\n?? src/engine/structure/reanchor.py\n?? src/engine/structure/rebind_telemetry.py\n?? tests/harness/boundary.py\n?? tests/harness/invariants_3_5.py\n?? tests/harness/materialize.py\n?? tests/harness/oracle.py\n?? tests/harness/scale.py\n?? tests/harness/scale_production.py\n?? tests/scale/\n?? tests/unit/test_harness_materialize.py\n?? tests/unit/test_s4_7_inv1_inv2.py\n?? tests/unit/test_s4_7_inv3_inv5.py\n?? tests/unit/test_s4_7_inv6_inv7.py\n?? tests/unit/test_s4_7_reanchor.py\n?? tests/unit/test_s4_7_scale_production.py\n?? tools/s4_7_hunt_manifest.py\n?? tools/s4_7_perf_baseline.py\n?? tools/s4_7_rebind_telemetry.py\n?? tools/s4_7_scale.py\n?? tools/s4_7_scale_cycle.py"
+  },
+  "progress": {
+    "path": "/Users/ben_mpa/LLM/PER_LA_LIBERTA/engine/docs/probes/s4_7_structure_map_profile_wide_a10000.progress.ndjson",
+    "sha256": "ae385c5c240d0ef743f960d2e8dc89631df41b6d3a284f631a5cbd0844366d36",
+    "summary": {
+      "event_sequence_first": 1,
+      "event_sequence_last": 5,
+      "heartbeat_count": 1,
+      "host": {
+        "available_memory_max_bytes": 1115947008.0,
+        "available_memory_min_bytes": 1115947008.0,
+        "child_cpu_percent_max": 69.09974943901942,
+        "child_cpu_percent_min": 69.09974943901942,
+        "load_1m_max": 5.978515625,
+        "memory_percent_max": 87.0,
+        "swap_used_max_bytes": 8379301888.0
+      },
+      "record_count": 5
+    }
+  },
+  "schema": "s4.7-rebind-telemetry-comparison@v2",
+  "source_identity": {
+    "src/engine/structure/reanchor.py": "e8bdc14f8000f7f30f72622805b75de8ea43900ca6c9a9c40b5575da63c5232e",
+    "src/engine/structure/rebind.py": "5369bf1542950e7796c093f6d5f196070334bf6e2dd68ac869680df238877a9b",
+    "src/engine/structure/rebind_telemetry.py": "65b6e62353a37dda251e13785454ea7cc63748a4e6d6aa1aad8fe09c1fe0fd44",
+    "tests/harness/materialize.py": "3a429b399de9870dbb721cca2234398958b4dd384e8b664dd5358ca81e17990e",
+    "tests/harness/relation.py": "5d006b2a6cc7106f575df27fd2f47d3f6d40935fe58c2fe78af243ddd9d612d5",
+    "tests/harness/scale_production.py": "cd366e695872511652997ef76ab10e16b7324d2d20398bb0956b531dc5aa3818",
+    "tools/s4_7_rebind_telemetry.py": "d3d2f0109e94b800bedb4402f850764259807fd61f8d66ae9bb9df61329b8786"
+  },
+  "stage": "structure-map-profile",
+  "step_semantics": "phase.repetition; this diagnostic measures phase 4 (rebind) only"
+}

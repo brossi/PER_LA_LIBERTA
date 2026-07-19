@@ -57,6 +57,7 @@ from dataclasses import dataclass, field
 from types import MappingProxyType
 
 from engine.structure.atoms import PROCESSING_SCOPE_EXCLUDED
+from engine.structure.boundary_anchor import BoundaryAnchor
 from engine.structure.errors import EC, StructureValidationError
 
 #: The two conceptual minting authorities (§3.C.2): a **human** mints a container, the **extractor**
@@ -172,7 +173,8 @@ class Region:
     whole-extent map — a multi-page own-extent is recovered by the re-attach assignment, not stored.
     ``page`` is the 1-based scan number (``>= 1`` — the **Tier-2 backing** for the schema's
     ``minimum: 1``, so a page 0 that Tier-1 somehow admitted still fails here); ``bbox_region`` is
-    exactly four floats ``[x0, y0, x1, y1]``. The re-attach DP treats a present region as a hard pin.
+    exactly four floats ``[x0, y0, x1, y1]``. Re-bind uses page equality only: a primary-mode pin or
+    a tie-mode disambiguator, never a content-score rescue.
     """
 
     page: int
@@ -222,18 +224,27 @@ class SlotFingerprint:
 
 
 @dataclass(frozen=True, slots=True)
+class SlotBoundaryAnchors:
+    """Stored start/end content anchors for one atom-owning slot (structure-map v3)."""
+
+    start: BoundaryAnchor
+    end: BoundaryAnchor
+
+
+@dataclass(frozen=True, slots=True)
 class RebindAnchors:
     """The typed re-bind **checkpoint** sub-object on a node (S5.1, D-1: stored, so the map is
     self-sufficient for the content signal). ``region`` is the optional single geometry seed;
     ``content_fingerprint`` maps a slot name (in :data:`FINGERPRINT_SLOTS`) → its
-    :class:`SlotFingerprint`, only the node's **own** slots. Both are checkpoints (R2), **never
-    identity**. Stored as a tuple of ``(slot, fingerprint)`` pairs so a frozen node stays hashable;
-    resolve a slot via :meth:`fingerprint`. The structural-path anchor is **derived** at re-bind
-    time (§1.1), never stored, so it is deliberately absent here.
+    :class:`SlotFingerprint`, only the node's **own** slots. v3 ``boundary_anchors`` stores each
+    slot's bounded start/end prefix+exact+suffix content context. All are checkpoints (R2), **never
+    identity**, and use tuple pairs so a frozen node stays hashable. Structural paths remain derived
+    and deliberately absent.
     """
 
     region: Region | None = None
     content_fingerprint: tuple[tuple[str, SlotFingerprint], ...] = ()
+    boundary_anchors: tuple[tuple[str, SlotBoundaryAnchors], ...] = ()
 
     def __post_init__(self) -> None:
         pairs = tuple(self.content_fingerprint)
@@ -247,12 +258,32 @@ class RebindAnchors:
                     f"{FINGERPRINT_SLOTS} (per-slot ruling; never descendant text)"
                 )
         object.__setattr__(self, "content_fingerprint", pairs)
+        boundary_pairs = tuple(self.boundary_anchors)
+        boundary_slots = [slot for slot, _ in boundary_pairs]
+        if len(set(boundary_slots)) != len(boundary_slots):
+            raise ValueError(
+                f"RebindAnchors.boundary_anchors has a duplicate slot: {boundary_slots}"
+            )
+        for slot in boundary_slots:
+            if slot not in FINGERPRINT_SLOTS:
+                raise ValueError(
+                    f"RebindAnchors: unknown boundary-anchor slot {slot!r} — admitted slots are "
+                    f"{FINGERPRINT_SLOTS}"
+                )
+        object.__setattr__(self, "boundary_anchors", boundary_pairs)
 
     def fingerprint(self, slot: str) -> SlotFingerprint | None:
         """The :class:`SlotFingerprint` stored for ``slot`` (``None`` if the node has none for it)."""
         for name, fp in self.content_fingerprint:
             if name == slot:
                 return fp
+        return None
+
+    def boundaries(self, slot: str) -> SlotBoundaryAnchors | None:
+        """The stored v3 boundary-anchor pair for ``slot`` (``None`` if absent)."""
+        for name, anchors in self.boundary_anchors:
+            if name == slot:
+                return anchors
         return None
 
 

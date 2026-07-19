@@ -44,8 +44,9 @@ ATOM_STORE_SCHEMA_VERSION = 1
 #: (C) classes, so a schema change to one names *which* layer changed (§3.6). Bound by S1.5.
 ATOM_STORE_STALE_CLASS = "atom-stream"
 #: L2 structure-map schema version (containers/projections + lineage manifest). Bound by S4.4;
-#: bumped 1→2 at S5.1 (the slot-keyed ``content_fingerprint`` rebind-anchor + ``region.page`` ≥ 1).
-STRUCTURE_MAP_SCHEMA_VERSION = 2
+#: bumped 1→2 at S5.1 (slot fingerprints), then 2→3 at S4.7/#48 (stored per-slot
+#: prefix/exact/suffix boundary anchors; no v2/v3 dual support).
+STRUCTURE_MAP_SCHEMA_VERSION = 3
 #: The L2 structure-map stale class — the M3 discriminator the lineage manifest stamps and S8.1
 #: routes on, so a structure-map schema change names *this* layer (not the atom store or relation
 #: store). A distinct wire string from every other stale class (inv 12a). Built at S4.0; stamped
@@ -87,7 +88,16 @@ SCHEMA_STATUS_BORN = "born"
 #: populating the slot-keyed ``content_fingerprint`` anchor) validated through the born-agnostic
 #: loader (``test_structure_born_gate.py``), proving the widened v2 shape generalizes. v1's entry
 #: is preserved explicitly (a version bump never retires an older born schema — S8.1 reads v1 maps).
-STRUCTURE_MAP_SCHEMA_STATUS: dict[int, str] = {1: SCHEMA_STATUS_BORN, 2: SCHEMA_STATUS_BORN}
+#:
+#: **Version 3 flipped ``born`` at S4.7/#48 (2026-07-18):** the non-PLL rebind fixture populates
+#: slot-keyed start/end prefix+exact+suffix anchors and validates through the born-agnostic loader.
+STRUCTURE_MAP_SCHEMA_STATUS: dict[int, str] = {
+    1: SCHEMA_STATUS_BORN,
+    2: SCHEMA_STATUS_BORN,
+    # v3 re-entered provisional when its schema shape landed, then was born by the independent
+    # non-PLL boundary-anchor fixture in test_structure_born_gate.py.
+    3: SCHEMA_STATUS_BORN,
+}
 
 # --- resource + normalization-policy lineage (S3.0) ------------------------------------- #
 

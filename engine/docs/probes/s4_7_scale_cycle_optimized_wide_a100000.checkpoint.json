@@ -1,0 +1,2849 @@
+{
+  "active_state": "/Users/ben_mpa/LLM/PER_LA_LIBERTA/engine/docs/probes/s4_7_scale_cycle_optimized_wide_a100000.active.json",
+  "artifact": "/Users/ben_mpa/LLM/PER_LA_LIBERTA/engine/docs/probes/s4_7_scale_cycle_optimized_wide_a100000.json",
+  "artifact_sha256": "e7b106db83c4592dd24d7a9da6a871c7a39ef7db3ec12838ec2321c78693d6a9",
+  "completed_event_count": 6,
+  "created_at": "2026-07-18T21:31:10.214521+00:00",
+  "events": [
+    {
+      "event": "substrate-materialization-complete",
+      "progress": {
+        "atom_count": 100000,
+        "fixture_variant": null,
+        "measurement_index": 0,
+        "measurement_total": 5,
+        "phase": "materialize",
+        "phase_index": 0,
+        "phase_total": 5,
+        "point_step_index": 0,
+        "point_step_total": 5,
+        "repetition": 0,
+        "repetitions": 1,
+        "shape": "wide",
+        "step_coordinate": "prep"
+      },
+      "sample": {
+        "elapsed_seconds": 64.99646379216574,
+        "incremental_peak_bytes": 1214087168,
+        "ledger": {
+          "A": 100000,
+          "D": 4,
+          "K": 2500,
+          "L": 2500,
+          "T": 3600000,
+          "family": "wide-rebind-production"
+        },
+        "lifetime_peak_bytes": 1257635840,
+        "monitor_elapsed_seconds": 112.6947209998034,
+        "phase": "materialize",
+        "raw_ru_maxrss_bytes": 1257635840,
+        "sample_count": 10013,
+        "sample_interval_seconds": 0.005,
+        "setup_baseline_bytes": 43548672,
+        "setup_elapsed_seconds": 0.14479933283291757,
+        "span_peak_bytes": 1257635840,
+        "telemetry": {
+          "child_trace": {
+            "active_stage": "idle",
+            "schema": "engine-rebind-telemetry@v1",
+            "spans": [
+              {
+                "attributes": {},
+                "cpu_seconds": 3.8e-05,
+                "name": "setup.prepare",
+                "parent": null,
+                "start_offset_seconds": 0.000138292,
+                "wall_seconds": 3.925e-05
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 51.609922,
+                "name": "named.materialize",
+                "parent": null,
+                "start_offset_seconds": 0.001833959,
+                "wall_seconds": 64.996174333
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 32.345191,
+                "name": "finalize.cache-substrate",
+                "parent": null,
+                "start_offset_seconds": 64.9986635,
+                "wall_seconds": 46.858760917
+              }
+            ]
+          },
+          "fixture_variant": "identical",
+          "progress_poll_interval_seconds": 5.0,
+          "schema": "s4.7-runtime-telemetry@v1",
+          "stage_rss": [
+            {
+              "first_monitor_elapsed_seconds": 65.15016729081981,
+              "last_monitor_elapsed_seconds": 112.00082337483764,
+              "name": "finalize.cache-substrate",
+              "rss_peak_bytes": 1592950784,
+              "sample_count": 7472
+            },
+            {
+              "first_monitor_elapsed_seconds": 0.007805249886587262,
+              "last_monitor_elapsed_seconds": 112.68035183288157,
+              "name": "idle",
+              "rss_peak_bytes": 1322369024,
+              "sample_count": 136
+            },
+            {
+              "first_monitor_elapsed_seconds": 0.14722099993377924,
+              "last_monitor_elapsed_seconds": 65.14116520783864,
+              "name": "named.materialize",
+              "rss_peak_bytes": 1257635840,
+              "sample_count": 10013
+            }
+          ]
+        }
+      }
+    },
+    {
+      "event": "phase-sample-complete",
+      "progress": {
+        "atom_count": 100000,
+        "fixture_variant": null,
+        "measurement_index": 1,
+        "measurement_total": 5,
+        "phase": "serialize",
+        "phase_index": 1,
+        "phase_total": 5,
+        "point_step_index": 1,
+        "point_step_total": 5,
+        "repetition": 1,
+        "repetitions": 1,
+        "shape": "wide",
+        "step_coordinate": "1.1"
+      },
+      "sample": {
+        "elapsed_seconds": 18.560430249897763,
+        "incremental_peak_bytes": 593838080,
+        "ledger": {
+          "A": 100000,
+          "D": 4,
+          "K": 2500,
+          "L": 2500,
+          "T": 3600000,
+          "family": "wide-rebind-production"
+        },
+        "lifetime_peak_bytes": 1624506368,
+        "monitor_elapsed_seconds": 38.40026354207657,
+        "phase": "serialize",
+        "raw_ru_maxrss_bytes": 1624506368,
+        "sample_count": 2989,
+        "sample_interval_seconds": 0.005,
+        "setup_baseline_bytes": 1030094848,
+        "setup_elapsed_seconds": 18.6338115001563,
+        "span_peak_bytes": 1623932928,
+        "telemetry": {
+          "child_trace": {
+            "active_stage": "idle",
+            "schema": "engine-rebind-telemetry@v1",
+            "spans": [
+              {
+                "attributes": {},
+                "cpu_seconds": 0.976274,
+                "name": "setup.clone-substrate",
+                "parent": "setup.prepare",
+                "start_offset_seconds": 0.001999083,
+                "wall_seconds": 1.771964209
+              },
+              {
+                "attributes": {
+                  "stream_count": 2
+                },
+                "cpu_seconds": 4.406664,
+                "name": "load.old-streams",
+                "parent": "setup.load-prerequisites",
+                "start_offset_seconds": 1.774172875,
+                "wall_seconds": 5.891257792
+              },
+              {
+                "attributes": {
+                  "stream_count": 2
+                },
+                "cpu_seconds": 5.187729,
+                "name": "load.fresh-streams",
+                "parent": "setup.load-prerequisites",
+                "start_offset_seconds": 7.665496958,
+                "wall_seconds": 7.105783792
+              },
+              {
+                "attributes": {
+                  "byte_count": 283462757
+                },
+                "cpu_seconds": 0.241268,
+                "name": "structure-map.load.read",
+                "parent": "load.structure-map",
+                "start_offset_seconds": 14.876288208,
+                "wall_seconds": 0.388390334
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 0.745704,
+                "name": "structure-map.load.parse",
+                "parent": "load.structure-map",
+                "start_offset_seconds": 15.264827875,
+                "wall_seconds": 1.085397292
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 0.527966,
+                "name": "structure-map.load.tier1",
+                "parent": "load.structure-map",
+                "start_offset_seconds": 16.350463583,
+                "wall_seconds": 0.712138709
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 0.531252,
+                "name": "structure-map.load.typed-build",
+                "parent": "load.structure-map",
+                "start_offset_seconds": 17.062789042,
+                "wall_seconds": 0.633655666
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 0.279751,
+                "name": "structure-map.load.tier2",
+                "parent": "load.structure-map",
+                "start_offset_seconds": 17.696463417,
+                "wall_seconds": 0.335765416
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 2.405584,
+                "name": "load.structure-map",
+                "parent": "setup.load-prerequisites",
+                "start_offset_seconds": 14.771386083,
+                "wall_seconds": 3.260947792
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 12.007515,
+                "name": "setup.load-prerequisites",
+                "parent": "setup.prepare",
+                "start_offset_seconds": 1.774148625,
+                "wall_seconds": 16.26580925
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 12.985191,
+                "name": "setup.prepare",
+                "parent": null,
+                "start_offset_seconds": 0.000151167,
+                "wall_seconds": 18.039943875
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 0.00195,
+                "name": "persist.prepare-workspaces",
+                "parent": "named.serialize",
+                "start_offset_seconds": 18.042997542,
+                "wall_seconds": 0.002931916
+              },
+              {
+                "attributes": {
+                  "stream_count": 2
+                },
+                "cpu_seconds": 5.957063,
+                "name": "persist.old-streams",
+                "parent": "named.serialize",
+                "start_offset_seconds": 18.045990792,
+                "wall_seconds": 7.231028625
+              },
+              {
+                "attributes": {
+                  "stream_count": 2
+                },
+                "cpu_seconds": 6.229598,
+                "name": "persist.fresh-streams",
+                "parent": "named.serialize",
+                "start_offset_seconds": 25.277098833,
+                "wall_seconds": 8.464060334
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 0.402833,
+                "name": "structure-map.write.tier1",
+                "parent": "persist.structure-map",
+                "start_offset_seconds": 33.741191458,
+                "wall_seconds": 0.491883417
+              },
+              {
+                "attributes": {
+                  "character_count": 283462757
+                },
+                "cpu_seconds": 1.290455,
+                "name": "structure-map.write.render",
+                "parent": "persist.structure-map",
+                "start_offset_seconds": 34.23310525,
+                "wall_seconds": 1.76485575
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 0.159032,
+                "name": "structure-map.write.io",
+                "parent": "persist.structure-map",
+                "start_offset_seconds": 35.998417292,
+                "wall_seconds": 0.604429
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 1.852864,
+                "name": "persist.structure-map",
+                "parent": "named.serialize",
+                "start_offset_seconds": 33.741182708,
+                "wall_seconds": 2.861701709
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 14.041788,
+                "name": "named.serialize",
+                "parent": null,
+                "start_offset_seconds": 18.042939875,
+                "wall_seconds": 18.56036975
+              }
+            ]
+          },
+          "fixture_variant": "identical",
+          "progress_poll_interval_seconds": 5.0,
+          "schema": "s4.7-runtime-telemetry@v1",
+          "stage_rss": [
+            {
+              "first_monitor_elapsed_seconds": 0.007747958181425929,
+              "last_monitor_elapsed_seconds": 38.3823551251553,
+              "name": "idle",
+              "rss_peak_bytes": 1473626112,
+              "sample_count": 280
+            },
+            {
+              "first_monitor_elapsed_seconds": 8.2585580421146,
+              "last_monitor_elapsed_seconds": 15.361089291982353,
+              "name": "load.fresh-streams",
+              "rss_peak_bytes": 1046970368,
+              "sample_count": 1111
+            },
+            {
+              "first_monitor_elapsed_seconds": 2.3680689171887934,
+              "last_monitor_elapsed_seconds": 8.252005917020142,
+              "name": "load.old-streams",
+              "rss_peak_bytes": 886996992,
+              "sample_count": 924
+            },
+            {
+              "first_monitor_elapsed_seconds": 15.366564332973212,
+              "last_monitor_elapsed_seconds": 15.46543883299455,
+              "name": "load.structure-map",
+              "rss_peak_bytes": 649527296,
+              "sample_count": 16
+            },
+            {
+              "first_monitor_elapsed_seconds": 25.86899562506005,
+              "last_monitor_elapsed_seconds": 34.33191137504764,
+              "name": "persist.fresh-streams",
+              "rss_peak_bytes": 1316110336,
+              "sample_count": 1330
+            },
+            {
+              "first_monitor_elapsed_seconds": 18.642621708102524,
+              "last_monitor_elapsed_seconds": 25.86311654211022,
+              "name": "persist.old-streams",
+              "rss_peak_bytes": 1623932928,
+              "sample_count": 1205
+            },
+            {
+              "first_monitor_elapsed_seconds": 18.636845167027786,
+              "last_monitor_elapsed_seconds": 18.636848042020574,
+              "name": "persist.prepare-workspaces",
+              "rss_peak_bytes": 1031847936,
+              "sample_count": 1
+            },
+            {
+              "first_monitor_elapsed_seconds": 0.5978356669656932,
+              "last_monitor_elapsed_seconds": 2.3623271251562983,
+              "name": "setup.clone-substrate",
+              "rss_peak_bytes": 590872576,
+              "sample_count": 268
+            },
+            {
+              "first_monitor_elapsed_seconds": 18.62695504212752,
+              "last_monitor_elapsed_seconds": 18.626962250098586,
+              "name": "setup.load-prerequisites",
+              "rss_peak_bytes": 1020182528,
+              "sample_count": 1
+            },
+            {
+              "first_monitor_elapsed_seconds": 0.5920169171877205,
+              "last_monitor_elapsed_seconds": 0.5920212080236524,
+              "name": "setup.prepare",
+              "rss_peak_bytes": 43630592,
+              "sample_count": 1
+            },
+            {
+              "first_monitor_elapsed_seconds": 15.860774625092745,
+              "last_monitor_elapsed_seconds": 16.941119542112574,
+              "name": "structure-map.load.parse",
+              "rss_peak_bytes": 1020952576,
+              "sample_count": 175
+            },
+            {
+              "first_monitor_elapsed_seconds": 15.471490292111412,
+              "last_monitor_elapsed_seconds": 15.854940416989848,
+              "name": "structure-map.load.read",
+              "rss_peak_bytes": 972046336,
+              "sample_count": 61
+            },
+            {
+              "first_monitor_elapsed_seconds": 16.947273458121344,
+              "last_monitor_elapsed_seconds": 17.65254733315669,
+              "name": "structure-map.load.tier1",
+              "rss_peak_bytes": 934559744,
+              "sample_count": 112
+            },
+            {
+              "first_monitor_elapsed_seconds": 18.28768691699952,
+              "last_monitor_elapsed_seconds": 18.621158916968852,
+              "name": "structure-map.load.tier2",
+              "rss_peak_bytes": 1019658240,
+              "sample_count": 56
+            },
+            {
+              "first_monitor_elapsed_seconds": 17.658354625105858,
+              "last_monitor_elapsed_seconds": 18.282104500103742,
+              "name": "structure-map.load.typed-build",
+              "rss_peak_bytes": 972046336,
+              "sample_count": 106
+            },
+            {
+              "first_monitor_elapsed_seconds": 36.591282500186935,
+              "last_monitor_elapsed_seconds": 37.192101542139426,
+              "name": "structure-map.write.io",
+              "rss_peak_bytes": 1478164480,
+              "sample_count": 93
+            },
+            {
+              "first_monitor_elapsed_seconds": 34.82948737498373,
+              "last_monitor_elapsed_seconds": 36.58552704215981,
+              "name": "structure-map.write.render",
+              "rss_peak_bytes": 1470300160,
+              "sample_count": 277
+            },
+            {
+              "first_monitor_elapsed_seconds": 34.33769895811565,
+              "last_monitor_elapsed_seconds": 34.823720125015825,
+              "name": "structure-map.write.tier1",
+              "rss_peak_bytes": 1392148480,
+              "sample_count": 83
+            }
+          ]
+        }
+      }
+    },
+    {
+      "event": "phase-sample-complete",
+      "progress": {
+        "atom_count": 100000,
+        "fixture_variant": null,
+        "measurement_index": 2,
+        "measurement_total": 5,
+        "phase": "load",
+        "phase_index": 2,
+        "phase_total": 5,
+        "point_step_index": 2,
+        "point_step_total": 5,
+        "repetition": 1,
+        "repetitions": 1,
+        "shape": "wide",
+        "step_coordinate": "2.1"
+      },
+      "sample": {
+        "elapsed_seconds": 15.258270957972854,
+        "incremental_peak_bytes": 833716224,
+        "ledger": {
+          "A": 100000,
+          "D": 4,
+          "K": 2500,
+          "L": 2500,
+          "T": 3600000,
+          "family": "wide-rebind-production"
+        },
+        "lifetime_peak_bytes": 1426522112,
+        "monitor_elapsed_seconds": 18.169413624797016,
+        "phase": "load",
+        "raw_ru_maxrss_bytes": 1426522112,
+        "sample_count": 2439,
+        "sample_interval_seconds": 0.005,
+        "setup_baseline_bytes": 592805888,
+        "setup_elapsed_seconds": 1.8905133749358356,
+        "span_peak_bytes": 1426522112,
+        "telemetry": {
+          "child_trace": {
+            "active_stage": "idle",
+            "schema": "engine-rebind-telemetry@v1",
+            "spans": [
+              {
+                "attributes": {},
+                "cpu_seconds": 0.966208,
+                "name": "setup.clone-substrate",
+                "parent": "setup.prepare",
+                "start_offset_seconds": 0.003417084,
+                "wall_seconds": 1.400512666
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 0.967243,
+                "name": "setup.prepare",
+                "parent": null,
+                "start_offset_seconds": 0.000143,
+                "wall_seconds": 1.403808584
+              },
+              {
+                "attributes": {
+                  "stream_count": 2
+                },
+                "cpu_seconds": 4.134277,
+                "name": "load.old-streams",
+                "parent": "named.load",
+                "start_offset_seconds": 1.4054395,
+                "wall_seconds": 5.032778042
+              },
+              {
+                "attributes": {
+                  "stream_count": 2
+                },
+                "cpu_seconds": 5.00567,
+                "name": "load.fresh-streams",
+                "parent": "named.load",
+                "start_offset_seconds": 6.438246667,
+                "wall_seconds": 6.699234917
+              },
+              {
+                "attributes": {
+                  "byte_count": 283462757
+                },
+                "cpu_seconds": 0.239291,
+                "name": "structure-map.load.read",
+                "parent": "load.structure-map",
+                "start_offset_seconds": 13.22888175,
+                "wall_seconds": 0.348170625
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 0.783516,
+                "name": "structure-map.load.parse",
+                "parent": "load.structure-map",
+                "start_offset_seconds": 13.577111667,
+                "wall_seconds": 1.267441875
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 0.643724,
+                "name": "structure-map.load.tier1",
+                "parent": "load.structure-map",
+                "start_offset_seconds": 14.847019542,
+                "wall_seconds": 0.8451935
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 0.554627,
+                "name": "structure-map.load.typed-build",
+                "parent": "load.structure-map",
+                "start_offset_seconds": 15.692406792,
+                "wall_seconds": 0.616605083
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 0.288706,
+                "name": "structure-map.load.tier2",
+                "parent": "load.structure-map",
+                "start_offset_seconds": 16.309034667,
+                "wall_seconds": 0.344637208
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 2.582306,
+                "name": "load.structure-map",
+                "parent": "named.load",
+                "start_offset_seconds": 13.137586709,
+                "wall_seconds": 3.51612675
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 11.731347,
+                "name": "named.load",
+                "parent": null,
+                "start_offset_seconds": 1.405430125,
+                "wall_seconds": 15.258176209
+              }
+            ]
+          },
+          "fixture_variant": "identical",
+          "progress_poll_interval_seconds": 5.0,
+          "schema": "s4.7-runtime-telemetry@v1",
+          "stage_rss": [
+            {
+              "first_monitor_elapsed_seconds": 0.009758541826158762,
+              "last_monitor_elapsed_seconds": 18.15094112488441,
+              "name": "idle",
+              "rss_peak_bytes": 1280311296,
+              "sample_count": 234
+            },
+            {
+              "first_monitor_elapsed_seconds": 6.926210541976616,
+              "last_monitor_elapsed_seconds": 13.621545834001154,
+              "name": "load.fresh-streams",
+              "rss_peak_bytes": 1162199040,
+              "sample_count": 1043
+            },
+            {
+              "first_monitor_elapsed_seconds": 1.8926353338174522,
+              "last_monitor_elapsed_seconds": 6.920478666899726,
+              "name": "load.old-streams",
+              "rss_peak_bytes": 955039744,
+              "sample_count": 827
+            },
+            {
+              "first_monitor_elapsed_seconds": 13.62735987501219,
+              "last_monitor_elapsed_seconds": 15.331730542005971,
+              "name": "load.structure-map",
+              "rss_peak_bytes": 1162313728,
+              "sample_count": 16
+            },
+            {
+              "first_monitor_elapsed_seconds": 17.144417208852246,
+              "last_monitor_elapsed_seconds": 17.144424416823313,
+              "name": "named.load",
+              "rss_peak_bytes": 1017004032,
+              "sample_count": 1
+            },
+            {
+              "first_monitor_elapsed_seconds": 0.4955025839153677,
+              "last_monitor_elapsed_seconds": 1.8863012089859694,
+              "name": "setup.clone-substrate",
+              "rss_peak_bytes": 592805888,
+              "sample_count": 227
+            },
+            {
+              "first_monitor_elapsed_seconds": 0.4896172499284148,
+              "last_monitor_elapsed_seconds": 0.48962108395062387,
+              "name": "setup.prepare",
+              "rss_peak_bytes": 44023808,
+              "sample_count": 1
+            },
+            {
+              "first_monitor_elapsed_seconds": 14.064233333803713,
+              "last_monitor_elapsed_seconds": 15.32440520892851,
+              "name": "structure-map.load.parse",
+              "rss_peak_bytes": 1409744896,
+              "sample_count": 197
+            },
+            {
+              "first_monitor_elapsed_seconds": 13.719738999847323,
+              "last_monitor_elapsed_seconds": 14.056563583901152,
+              "name": "structure-map.load.read",
+              "rss_peak_bytes": 1426522112,
+              "sample_count": 53
+            },
+            {
+              "first_monitor_elapsed_seconds": 15.337524166796356,
+              "last_monitor_elapsed_seconds": 16.17704787501134,
+              "name": "structure-map.load.tier1",
+              "rss_peak_bytes": 845201408,
+              "sample_count": 139
+            },
+            {
+              "first_monitor_elapsed_seconds": 16.798306416952983,
+              "last_monitor_elapsed_seconds": 17.13856741692871,
+              "name": "structure-map.load.tier2",
+              "rss_peak_bytes": 1014169600,
+              "sample_count": 57
+            },
+            {
+              "first_monitor_elapsed_seconds": 16.183015999849886,
+              "last_monitor_elapsed_seconds": 16.792557916836813,
+              "name": "structure-map.load.typed-build",
+              "rss_peak_bytes": 964362240,
+              "sample_count": 105
+            }
+          ]
+        }
+      }
+    },
+    {
+      "event": "phase-sample-complete",
+      "progress": {
+        "atom_count": 100000,
+        "fixture_variant": null,
+        "measurement_index": 3,
+        "measurement_total": 5,
+        "phase": "index",
+        "phase_index": 3,
+        "phase_total": 5,
+        "point_step_index": 3,
+        "point_step_total": 5,
+        "repetition": 1,
+        "repetitions": 1,
+        "shape": "wide",
+        "step_coordinate": "3.1"
+      },
+      "sample": {
+        "elapsed_seconds": 1.1337769168894738,
+        "incremental_peak_bytes": 521437184,
+        "ledger": {
+          "A": 100000,
+          "D": 4,
+          "K": 2500,
+          "L": 2500,
+          "T": 3600000,
+          "family": "wide-rebind-production"
+        },
+        "lifetime_peak_bytes": 1545666560,
+        "monitor_elapsed_seconds": 19.269741292111576,
+        "phase": "index",
+        "raw_ru_maxrss_bytes": 1545666560,
+        "sample_count": 191,
+        "sample_interval_seconds": 0.005,
+        "setup_baseline_bytes": 1022836736,
+        "setup_elapsed_seconds": 17.66553125018254,
+        "span_peak_bytes": 1544273920,
+        "telemetry": {
+          "child_trace": {
+            "active_stage": "idle",
+            "schema": "engine-rebind-telemetry@v1",
+            "spans": [
+              {
+                "attributes": {},
+                "cpu_seconds": 0.940817,
+                "name": "setup.clone-substrate",
+                "parent": "setup.prepare",
+                "start_offset_seconds": 0.001349292,
+                "wall_seconds": 1.299716333
+              },
+              {
+                "attributes": {
+                  "stream_count": 2
+                },
+                "cpu_seconds": 4.368066,
+                "name": "load.old-streams",
+                "parent": "setup.load-prerequisites",
+                "start_offset_seconds": 1.301099667,
+                "wall_seconds": 5.673643667
+              },
+              {
+                "attributes": {
+                  "stream_count": 2
+                },
+                "cpu_seconds": 4.84695,
+                "name": "load.fresh-streams",
+                "parent": "setup.load-prerequisites",
+                "start_offset_seconds": 6.974889834,
+                "wall_seconds": 6.598324458
+              },
+              {
+                "attributes": {
+                  "byte_count": 283462757
+                },
+                "cpu_seconds": 0.262385,
+                "name": "structure-map.load.read",
+                "parent": "load.structure-map",
+                "start_offset_seconds": 13.629325625,
+                "wall_seconds": 0.362882709
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 0.732487,
+                "name": "structure-map.load.parse",
+                "parent": "load.structure-map",
+                "start_offset_seconds": 13.9923685,
+                "wall_seconds": 1.105073792
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 0.676115,
+                "name": "structure-map.load.tier1",
+                "parent": "load.structure-map",
+                "start_offset_seconds": 15.097909625,
+                "wall_seconds": 1.032173084
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 0.607545,
+                "name": "structure-map.load.typed-build",
+                "parent": "load.structure-map",
+                "start_offset_seconds": 16.130349125,
+                "wall_seconds": 0.692795667
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 0.264169,
+                "name": "structure-map.load.tier2",
+                "parent": "load.structure-map",
+                "start_offset_seconds": 16.823182042,
+                "wall_seconds": 0.302620542
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 2.595438,
+                "name": "load.structure-map",
+                "parent": "setup.load-prerequisites",
+                "start_offset_seconds": 13.573273209,
+                "wall_seconds": 3.552618333
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 11.817608,
+                "name": "setup.load-prerequisites",
+                "parent": "setup.prepare",
+                "start_offset_seconds": 1.301094459,
+                "wall_seconds": 15.832337333
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 12.759558,
+                "name": "setup.prepare",
+                "parent": null,
+                "start_offset_seconds": 5.9709e-05,
+                "wall_seconds": 17.133513416
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 0.173444,
+                "name": "index.readers",
+                "parent": "named.index",
+                "start_offset_seconds": 17.141576334,
+                "wall_seconds": 0.202234041
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 0.779811,
+                "name": "index.validate-map",
+                "parent": "named.index",
+                "start_offset_seconds": 17.343851542,
+                "wall_seconds": 0.931273792
+              },
+              {
+                "attributes": {
+                  "fresh_included_atoms": 100000,
+                  "old_included_atoms": 100000
+                },
+                "cpu_seconds": 9e-06,
+                "name": "index.compare-cardinality",
+                "parent": "named.index",
+                "start_offset_seconds": 18.275148084,
+                "wall_seconds": 1.0666e-05
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 0.953416,
+                "name": "named.index",
+                "parent": null,
+                "start_offset_seconds": 17.141448792,
+                "wall_seconds": 1.133717792
+              }
+            ]
+          },
+          "fixture_variant": "identical",
+          "progress_poll_interval_seconds": 5.0,
+          "schema": "s4.7-runtime-telemetry@v1",
+          "stage_rss": [
+            {
+              "first_monitor_elapsed_seconds": 0.007971500046551228,
+              "last_monitor_elapsed_seconds": 19.251546417130157,
+              "name": "idle",
+              "rss_peak_bytes": 1516158976,
+              "sample_count": 166
+            },
+            {
+              "first_monitor_elapsed_seconds": 17.672798708081245,
+              "last_monitor_elapsed_seconds": 17.866591167170554,
+              "name": "index.readers",
+              "rss_peak_bytes": 1138032640,
+              "sample_count": 34
+            },
+            {
+              "first_monitor_elapsed_seconds": 17.872484792023897,
+              "last_monitor_elapsed_seconds": 18.79957575001754,
+              "name": "index.validate-map",
+              "rss_peak_bytes": 1544273920,
+              "sample_count": 157
+            },
+            {
+              "first_monitor_elapsed_seconds": 7.501761458115652,
+              "last_monitor_elapsed_seconds": 14.098541333107278,
+              "name": "load.fresh-streams",
+              "rss_peak_bytes": 1061535744,
+              "sample_count": 1045
+            },
+            {
+              "first_monitor_elapsed_seconds": 1.8284034170210361,
+              "last_monitor_elapsed_seconds": 7.495923125185072,
+              "name": "load.old-streams",
+              "rss_peak_bytes": 792805376,
+              "sample_count": 899
+            },
+            {
+              "first_monitor_elapsed_seconds": 14.104099542135373,
+              "last_monitor_elapsed_seconds": 14.15087370807305,
+              "name": "load.structure-map",
+              "rss_peak_bytes": 984875008,
+              "sample_count": 9
+            },
+            {
+              "first_monitor_elapsed_seconds": 0.5306984579656273,
+              "last_monitor_elapsed_seconds": 1.8226491671521217,
+              "name": "setup.clone-substrate",
+              "rss_peak_bytes": 591986688,
+              "sample_count": 214
+            },
+            {
+              "first_monitor_elapsed_seconds": 17.655678833136335,
+              "last_monitor_elapsed_seconds": 17.65570595813915,
+              "name": "setup.load-prerequisites",
+              "rss_peak_bytes": 1012793344,
+              "sample_count": 1
+            },
+            {
+              "first_monitor_elapsed_seconds": 14.521456917049363,
+              "last_monitor_elapsed_seconds": 15.620190792018548,
+              "name": "structure-map.load.parse",
+              "rss_peak_bytes": 1170653184,
+              "sample_count": 169
+            },
+            {
+              "first_monitor_elapsed_seconds": 14.156402375083417,
+              "last_monitor_elapsed_seconds": 14.51574695808813,
+              "name": "structure-map.load.read",
+              "rss_peak_bytes": 1209188352,
+              "sample_count": 55
+            },
+            {
+              "first_monitor_elapsed_seconds": 15.626167875016108,
+              "last_monitor_elapsed_seconds": 16.656835000030696,
+              "name": "structure-map.load.tier1",
+              "rss_peak_bytes": 942063616,
+              "sample_count": 162
+            },
+            {
+              "first_monitor_elapsed_seconds": 17.34983229218051,
+              "last_monitor_elapsed_seconds": 17.649844625033438,
+              "name": "structure-map.load.tier2",
+              "rss_peak_bytes": 1012596736,
+              "sample_count": 52
+            },
+            {
+              "first_monitor_elapsed_seconds": 16.66257558297366,
+              "last_monitor_elapsed_seconds": 17.343190000159666,
+              "name": "structure-map.load.typed-build",
+              "rss_peak_bytes": 964132864,
+              "sample_count": 116
+            }
+          ]
+        }
+      }
+    },
+    {
+      "event": "phase-sample-complete",
+      "progress": {
+        "atom_count": 100000,
+        "fixture_variant": null,
+        "measurement_index": 4,
+        "measurement_total": 5,
+        "phase": "rebind",
+        "phase_index": 4,
+        "phase_total": 5,
+        "point_step_index": 4,
+        "point_step_total": 5,
+        "repetition": 1,
+        "repetitions": 1,
+        "shape": "wide",
+        "step_coordinate": "4.1"
+      },
+      "sample": {
+        "elapsed_seconds": 171.74133562506177,
+        "incremental_peak_bytes": 189366272,
+        "ledger": {
+          "A": 100000,
+          "D": 4,
+          "K": 2500,
+          "L": 2500,
+          "T": 3600000,
+          "family": "wide-rebind-production"
+        },
+        "lifetime_peak_bytes": 1607090176,
+        "monitor_elapsed_seconds": 191.6250674170442,
+        "phase": "rebind",
+        "raw_ru_maxrss_bytes": 1607090176,
+        "sample_count": 28336,
+        "sample_interval_seconds": 0.005,
+        "setup_baseline_bytes": 1415446528,
+        "setup_elapsed_seconds": 18.98229245794937,
+        "span_peak_bytes": 1604812800,
+        "telemetry": {
+          "child_trace": {
+            "active_stage": "idle",
+            "schema": "engine-rebind-telemetry@v1",
+            "spans": [
+              {
+                "attributes": {},
+                "cpu_seconds": 0.949127,
+                "name": "setup.clone-substrate",
+                "parent": "setup.prepare",
+                "start_offset_seconds": 0.000923959,
+                "wall_seconds": 1.3443265
+              },
+              {
+                "attributes": {
+                  "stream_count": 2
+                },
+                "cpu_seconds": 4.28018,
+                "name": "load.old-streams",
+                "parent": "setup.load-prerequisites",
+                "start_offset_seconds": 1.345287875,
+                "wall_seconds": 5.504369542
+              },
+              {
+                "attributes": {
+                  "stream_count": 2
+                },
+                "cpu_seconds": 4.850435,
+                "name": "load.fresh-streams",
+                "parent": "setup.load-prerequisites",
+                "start_offset_seconds": 6.849690875,
+                "wall_seconds": 6.336907459
+              },
+              {
+                "attributes": {
+                  "byte_count": 283462757
+                },
+                "cpu_seconds": 0.248202,
+                "name": "structure-map.load.read",
+                "parent": "load.structure-map",
+                "start_offset_seconds": 13.259730625,
+                "wall_seconds": 0.381110917
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 0.703225,
+                "name": "structure-map.load.parse",
+                "parent": "load.structure-map",
+                "start_offset_seconds": 13.640942167,
+                "wall_seconds": 0.985392917
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 0.668186,
+                "name": "structure-map.load.tier1",
+                "parent": "load.structure-map",
+                "start_offset_seconds": 14.627927125,
+                "wall_seconds": 0.890656375
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 0.598366,
+                "name": "structure-map.load.typed-build",
+                "parent": "load.structure-map",
+                "start_offset_seconds": 15.518732959,
+                "wall_seconds": 0.735750791
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 0.300184,
+                "name": "structure-map.load.tier2",
+                "parent": "load.structure-map",
+                "start_offset_seconds": 16.25452125,
+                "wall_seconds": 0.364316709
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 2.580302,
+                "name": "load.structure-map",
+                "parent": "setup.load-prerequisites",
+                "start_offset_seconds": 13.186661959,
+                "wall_seconds": 3.432212375
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 11.719463,
+                "name": "setup.load-prerequisites",
+                "parent": "setup.prepare",
+                "start_offset_seconds": 1.345281834,
+                "wall_seconds": 15.286268541
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 0.183364,
+                "name": "index.readers",
+                "parent": "setup.index-prerequisites",
+                "start_offset_seconds": 16.631718584,
+                "wall_seconds": 0.244370708
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 0.883222,
+                "name": "index.validate-map",
+                "parent": "setup.index-prerequisites",
+                "start_offset_seconds": 16.876120209,
+                "wall_seconds": 1.291895208
+              },
+              {
+                "attributes": {
+                  "fresh_included_atoms": 100000,
+                  "old_included_atoms": 100000
+                },
+                "cpu_seconds": 9e-06,
+                "name": "index.compare-cardinality",
+                "parent": "setup.index-prerequisites",
+                "start_offset_seconds": 18.168037875,
+                "wall_seconds": 1.0042e-05
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 1.066694,
+                "name": "setup.index-prerequisites",
+                "parent": "setup.prepare",
+                "start_offset_seconds": 16.631688667,
+                "wall_seconds": 1.536367292
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 13.736136,
+                "name": "setup.prepare",
+                "parent": null,
+                "start_offset_seconds": 0.000102792,
+                "wall_seconds": 18.16800825
+              },
+              {
+                "attributes": {
+                  "node_count": 2503,
+                  "slot_count": 2500
+                },
+                "cpu_seconds": 0.087683,
+                "name": "rebind.enumerate-slots",
+                "parent": "named.rebind",
+                "start_offset_seconds": 19.451716084,
+                "wall_seconds": 0.112201875
+              },
+              {
+                "attributes": {
+                  "atom_count": 100000,
+                  "token_count": 3600000
+                },
+                "cpu_seconds": 1.254487,
+                "name": "rebind.materialize-old-tokens",
+                "parent": "named.rebind",
+                "start_offset_seconds": 19.563958292,
+                "wall_seconds": 1.591899167
+              },
+              {
+                "attributes": {
+                  "atom_count": 100000,
+                  "token_count": 3600000
+                },
+                "cpu_seconds": 1.424982,
+                "name": "rebind.materialize-fresh-tokens",
+                "parent": "named.rebind",
+                "start_offset_seconds": 21.155970625,
+                "wall_seconds": 1.825740959
+              },
+              {
+                "attributes": {
+                  "alignment_blocks": 1,
+                  "chained_anchors": 0,
+                  "identity_fast_path": true,
+                  "near_duplicate": true
+                },
+                "cpu_seconds": 0.04027,
+                "name": "rebind.align-tokens",
+                "parent": "named.rebind",
+                "start_offset_seconds": 23.049348292,
+                "wall_seconds": 0.062370458
+              },
+              {
+                "attributes": {
+                  "query_count": 5000,
+                  "unique_query_count": 5000
+                },
+                "cpu_seconds": 0.086226,
+                "name": "rebind.prepare-anchor-queries",
+                "parent": "named.rebind",
+                "start_offset_seconds": 23.111757917,
+                "wall_seconds": 0.140855292
+              },
+              {
+                "attributes": {
+                  "exact_resolved_queries": 5000,
+                  "exact_windows_scanned": 7199991,
+                  "fuzzy_resolved_queries": 0,
+                  "fuzzy_searched_queries": 0,
+                  "fuzzy_windows_scanned": 0,
+                  "group_count": 2,
+                  "signature_count": 0,
+                  "unresolved_queries": 0,
+                  "windows_scanned": 7199991
+                },
+                "cpu_seconds": 1.78204,
+                "name": "rebind.locate-old-anchors",
+                "parent": "named.rebind",
+                "start_offset_seconds": 23.252651542,
+                "wall_seconds": 2.201504917
+              },
+              {
+                "attributes": {
+                  "exact_resolved_queries": 5000,
+                  "exact_windows_scanned": 0,
+                  "fuzzy_resolved_queries": 0,
+                  "fuzzy_searched_queries": 0,
+                  "fuzzy_windows_scanned": 0,
+                  "reused_old_locator": true,
+                  "signature_count": 0,
+                  "tokens_identical": true,
+                  "unresolved_queries": 0,
+                  "windows_scanned": 0
+                },
+                "cpu_seconds": 9e-06,
+                "name": "rebind.locate-fresh-anchors",
+                "parent": "named.rebind",
+                "start_offset_seconds": 25.454197209,
+                "wall_seconds": 1.0208e-05
+              },
+              {
+                "attributes": {
+                  "unique_boundaries": 2501
+                },
+                "cpu_seconds": 0.002577,
+                "name": "rebind.index-boundary-owners",
+                "parent": "named.rebind",
+                "start_offset_seconds": 25.454212042,
+                "wall_seconds": 0.002632375
+              },
+              {
+                "attributes": {
+                  "analysis_skipped": true,
+                  "gram_widths_analyzed": 0,
+                  "tokens_identical": true,
+                  "unresolved_duplication": false
+                },
+                "cpu_seconds": 6e-06,
+                "name": "rebind.detect-token-duplication",
+                "parent": "named.rebind",
+                "start_offset_seconds": 25.456866709,
+                "wall_seconds": 7.166e-06
+              },
+              {
+                "attributes": {
+                  "fresh_tokenless_atoms": 0,
+                  "old_tokenless_atoms": 0,
+                  "unresolved_duplication": false
+                },
+                "cpu_seconds": 0.033753,
+                "name": "rebind.detect-tokenless-duplication",
+                "parent": "named.rebind",
+                "start_offset_seconds": 25.456877125,
+                "wall_seconds": 0.03629425
+              },
+              {
+                "attributes": {
+                  "bound_slots": 2500,
+                  "fingerprint_evaluated_slots": 2500,
+                  "fresh_fingerprint_computations": 2500,
+                  "resolved_boundaries": 5000,
+                  "slot_count": 2500,
+                  "unresolved_reasons": {}
+                },
+                "cpu_seconds": 132.235523,
+                "name": "rebind.resolve-slots",
+                "parent": "named.rebind",
+                "start_offset_seconds": 25.493243959,
+                "wall_seconds": 158.583769541
+              },
+              {
+                "attributes": {
+                  "bound_nodes": 2503,
+                  "node_count": 2503
+                },
+                "cpu_seconds": 0.002426,
+                "name": "rebind.aggregate-nodes",
+                "parent": "named.rebind",
+                "start_offset_seconds": 184.077094125,
+                "wall_seconds": 0.00242775
+              },
+              {
+                "attributes": {
+                  "node_count": 2503
+                },
+                "cpu_seconds": 1.442007,
+                "name": "rebind.migrate-projection",
+                "parent": "named.rebind",
+                "start_offset_seconds": 184.079533167,
+                "wall_seconds": 1.704137708
+              },
+              {
+                "attributes": {
+                  "all_bound_before_validation": true,
+                  "contested_nodes": 0,
+                  "map_valid": true
+                },
+                "cpu_seconds": 0.796151,
+                "name": "rebind.validate-projection",
+                "parent": "named.rebind",
+                "start_offset_seconds": 185.783693,
+                "wall_seconds": 1.0299795
+              },
+              {
+                "attributes": {
+                  "restamped_entries": 0,
+                  "stale_decisions": 0
+                },
+                "cpu_seconds": 1.4e-05,
+                "name": "rebind.restamp-evidence",
+                "parent": "named.rebind",
+                "start_offset_seconds": 186.813713542,
+                "wall_seconds": 1.4417e-05
+              },
+              {
+                "attributes": {
+                  "bound_nodes": 2503,
+                  "unresolved_nodes": 0
+                },
+                "cpu_seconds": 1.932589,
+                "name": "rebind.assemble-report",
+                "parent": "named.rebind",
+                "start_offset_seconds": 186.81373175,
+                "wall_seconds": 2.337854292
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 142.607224,
+                "name": "named.rebind",
+                "parent": null,
+                "start_offset_seconds": 18.174248417,
+                "wall_seconds": 171.741196583
+              }
+            ]
+          },
+          "fixture_variant": "identical",
+          "progress_poll_interval_seconds": 5.0,
+          "schema": "s4.7-runtime-telemetry@v1",
+          "stage_rss": [
+            {
+              "first_monitor_elapsed_seconds": 0.00737483287230134,
+              "last_monitor_elapsed_seconds": 191.61258941702545,
+              "name": "idle",
+              "rss_peak_bytes": 1415741440,
+              "sample_count": 281
+            },
+            {
+              "first_monitor_elapsed_seconds": 17.44726458285004,
+              "last_monitor_elapsed_seconds": 17.682658958015963,
+              "name": "index.readers",
+              "rss_peak_bytes": 1140670464,
+              "sample_count": 37
+            },
+            {
+              "first_monitor_elapsed_seconds": 17.688731707865372,
+              "last_monitor_elapsed_seconds": 18.975291542010382,
+              "name": "index.validate-map",
+              "rss_peak_bytes": 1607090176,
+              "sample_count": 201
+            },
+            {
+              "first_monitor_elapsed_seconds": 7.662347292061895,
+              "last_monitor_elapsed_seconds": 13.99681029189378,
+              "name": "load.fresh-streams",
+              "rss_peak_bytes": 1192820736,
+              "sample_count": 1011
+            },
+            {
+              "first_monitor_elapsed_seconds": 2.1580578749999404,
+              "last_monitor_elapsed_seconds": 7.657067332882434,
+              "name": "load.old-streams",
+              "rss_peak_bytes": 971620352,
+              "sample_count": 882
+            },
+            {
+              "first_monitor_elapsed_seconds": 14.002964957850054,
+              "last_monitor_elapsed_seconds": 14.068300749873742,
+              "name": "load.structure-map",
+              "rss_peak_bytes": 1167998976,
+              "sample_count": 12
+            },
+            {
+              "first_monitor_elapsed_seconds": 19.005992708029225,
+              "last_monitor_elapsed_seconds": 190.72590312501416,
+              "name": "named.rebind",
+              "rss_peak_bytes": 1456340992,
+              "sample_count": 332
+            },
+            {
+              "first_monitor_elapsed_seconds": 23.861796583049,
+              "last_monitor_elapsed_seconds": 23.919485749909654,
+              "name": "rebind.align-tokens",
+              "rss_peak_bytes": 1243070464,
+              "sample_count": 10
+            },
+            {
+              "first_monitor_elapsed_seconds": 187.62932112487033,
+              "last_monitor_elapsed_seconds": 189.96179737499915,
+              "name": "rebind.assemble-report",
+              "rss_peak_bytes": 1604812800,
+              "sample_count": 395
+            },
+            {
+              "first_monitor_elapsed_seconds": 26.272765457862988,
+              "last_monitor_elapsed_seconds": 26.301833957899362,
+              "name": "rebind.detect-tokenless-duplication",
+              "rss_peak_bytes": 1272315904,
+              "sample_count": 6
+            },
+            {
+              "first_monitor_elapsed_seconds": 20.265815041959286,
+              "last_monitor_elapsed_seconds": 20.371727916877717,
+              "name": "rebind.enumerate-slots",
+              "rss_peak_bytes": 1424015360,
+              "sample_count": 18
+            },
+            {
+              "first_monitor_elapsed_seconds": 26.26688424986787,
+              "last_monitor_elapsed_seconds": 26.266890791943297,
+              "name": "rebind.index-boundary-owners",
+              "rss_peak_bytes": 1272315904,
+              "sample_count": 1
+            },
+            {
+              "first_monitor_elapsed_seconds": 24.069443041924387,
+              "last_monitor_elapsed_seconds": 26.261087500024587,
+              "name": "rebind.locate-old-anchors",
+              "rss_peak_bytes": 1276428288,
+              "sample_count": 359
+            },
+            {
+              "first_monitor_elapsed_seconds": 21.972217167029157,
+              "last_monitor_elapsed_seconds": 23.79299300001003,
+              "name": "rebind.materialize-fresh-tokens",
+              "rss_peak_bytes": 1243021312,
+              "sample_count": 299
+            },
+            {
+              "first_monitor_elapsed_seconds": 20.377489167032763,
+              "last_monitor_elapsed_seconds": 21.966408374952152,
+              "name": "rebind.materialize-old-tokens",
+              "rss_peak_bytes": 1509900288,
+              "sample_count": 260
+            },
+            {
+              "first_monitor_elapsed_seconds": 184.89120074990205,
+              "last_monitor_elapsed_seconds": 186.59496495802887,
+              "name": "rebind.migrate-projection",
+              "rss_peak_bytes": 802930688,
+              "sample_count": 292
+            },
+            {
+              "first_monitor_elapsed_seconds": 23.92649916699156,
+              "last_monitor_elapsed_seconds": 24.06274883286096,
+              "name": "rebind.prepare-anchor-queries",
+              "rss_peak_bytes": 1273102336,
+              "sample_count": 22
+            },
+            {
+              "first_monitor_elapsed_seconds": 26.30758991697803,
+              "last_monitor_elapsed_seconds": 184.8852492920123,
+              "name": "rebind.resolve-slots",
+              "rss_peak_bytes": 1272823808,
+              "sample_count": 26169
+            },
+            {
+              "first_monitor_elapsed_seconds": 186.60042641707696,
+              "last_monitor_elapsed_seconds": 187.62355216685683,
+              "name": "rebind.validate-projection",
+              "rss_peak_bytes": 1349058560,
+              "sample_count": 173
+            },
+            {
+              "first_monitor_elapsed_seconds": 0.8133327919058502,
+              "last_monitor_elapsed_seconds": 2.152236874913797,
+              "name": "setup.clone-substrate",
+              "rss_peak_bytes": 592658432,
+              "sample_count": 214
+            },
+            {
+              "first_monitor_elapsed_seconds": 17.435110250022262,
+              "last_monitor_elapsed_seconds": 17.4414599169977,
+              "name": "setup.load-prerequisites",
+              "rss_peak_bytes": 1025638400,
+              "sample_count": 2
+            },
+            {
+              "first_monitor_elapsed_seconds": 14.45719137485139,
+              "last_monitor_elapsed_seconds": 15.439101374940947,
+              "name": "structure-map.load.parse",
+              "rss_peak_bytes": 1366147072,
+              "sample_count": 161
+            },
+            {
+              "first_monitor_elapsed_seconds": 14.074881499866024,
+              "last_monitor_elapsed_seconds": 14.451066832989454,
+              "name": "structure-map.load.read",
+              "rss_peak_bytes": 1366900736,
+              "sample_count": 62
+            },
+            {
+              "first_monitor_elapsed_seconds": 15.44495362485759,
+              "last_monitor_elapsed_seconds": 16.323801500024274,
+              "name": "structure-map.load.tier1",
+              "rss_peak_bytes": 1008353280,
+              "sample_count": 145
+            },
+            {
+              "first_monitor_elapsed_seconds": 17.069946500007063,
+              "last_monitor_elapsed_seconds": 17.429218417033553,
+              "name": "structure-map.load.tier2",
+              "rss_peak_bytes": 1017200640,
+              "sample_count": 58
+            },
+            {
+              "first_monitor_elapsed_seconds": 16.331418291898444,
+              "last_monitor_elapsed_seconds": 17.064163916977122,
+              "name": "structure-map.load.typed-build",
+              "rss_peak_bytes": 969703424,
+              "sample_count": 120
+            }
+          ]
+        }
+      }
+    },
+    {
+      "event": "phase-sample-complete",
+      "progress": {
+        "atom_count": 100000,
+        "fixture_variant": null,
+        "measurement_index": 5,
+        "measurement_total": 5,
+        "phase": "end_to_end",
+        "phase_index": 5,
+        "phase_total": 5,
+        "point_step_index": 5,
+        "point_step_total": 5,
+        "repetition": 1,
+        "repetitions": 1,
+        "shape": "wide",
+        "step_coordinate": "5.1"
+      },
+      "sample": {
+        "elapsed_seconds": 212.23263433296233,
+        "incremental_peak_bytes": 462225408,
+        "ledger": {
+          "A": 100000,
+          "D": 4,
+          "K": 2500,
+          "L": 2500,
+          "T": 3600000,
+          "family": "wide-rebind-production"
+        },
+        "lifetime_peak_bytes": 1534656512,
+        "monitor_elapsed_seconds": 274.7854388328269,
+        "phase": "end_to_end",
+        "raw_ru_maxrss_bytes": 1534656512,
+        "sample_count": 33277,
+        "sample_interval_seconds": 0.005,
+        "setup_baseline_bytes": 1068859392,
+        "setup_elapsed_seconds": 61.26745595782995,
+        "span_peak_bytes": 1531084800,
+        "telemetry": {
+          "child_trace": {
+            "active_stage": "idle",
+            "schema": "engine-rebind-telemetry@v1",
+            "spans": [
+              {
+                "attributes": {},
+                "cpu_seconds": 52.170459,
+                "name": "setup.materialize-fixture",
+                "parent": "setup.prepare",
+                "start_offset_seconds": 0.000958708,
+                "wall_seconds": 60.809327125
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 52.171439,
+                "name": "setup.prepare",
+                "parent": null,
+                "start_offset_seconds": 5.0375e-05,
+                "wall_seconds": 60.810548583
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 0.00142,
+                "name": "persist.prepare-workspaces",
+                "parent": "named.end-to-end",
+                "start_offset_seconds": 60.81301075,
+                "wall_seconds": 0.002075833
+              },
+              {
+                "attributes": {
+                  "stream_count": 2
+                },
+                "cpu_seconds": 5.407632,
+                "name": "persist.old-streams",
+                "parent": "named.end-to-end",
+                "start_offset_seconds": 60.815171583,
+                "wall_seconds": 6.743037958
+              },
+              {
+                "attributes": {
+                  "stream_count": 2
+                },
+                "cpu_seconds": 5.538794,
+                "name": "persist.fresh-streams",
+                "parent": "named.end-to-end",
+                "start_offset_seconds": 67.558300291,
+                "wall_seconds": 7.473202417
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 0.725438,
+                "name": "structure-map.write.tier1",
+                "parent": "persist.structure-map",
+                "start_offset_seconds": 75.034300208,
+                "wall_seconds": 1.079259333
+              },
+              {
+                "attributes": {
+                  "character_count": 283462757
+                },
+                "cpu_seconds": 1.16559,
+                "name": "structure-map.write.render",
+                "parent": "persist.structure-map",
+                "start_offset_seconds": 76.113751875,
+                "wall_seconds": 1.440329208
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 0.210769,
+                "name": "structure-map.write.io",
+                "parent": "persist.structure-map",
+                "start_offset_seconds": 77.555098375,
+                "wall_seconds": 0.4534705
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 2.103101,
+                "name": "persist.structure-map",
+                "parent": "named.end-to-end",
+                "start_offset_seconds": 75.034118083,
+                "wall_seconds": 2.974494667
+              },
+              {
+                "attributes": {
+                  "stream_count": 2
+                },
+                "cpu_seconds": 4.909544,
+                "name": "load.old-streams",
+                "parent": "named.end-to-end",
+                "start_offset_seconds": 78.008696458,
+                "wall_seconds": 6.069814667
+              },
+              {
+                "attributes": {
+                  "stream_count": 2
+                },
+                "cpu_seconds": 6.52446,
+                "name": "load.fresh-streams",
+                "parent": "named.end-to-end",
+                "start_offset_seconds": 84.078577625,
+                "wall_seconds": 8.509317625
+              },
+              {
+                "attributes": {
+                  "byte_count": 283462757
+                },
+                "cpu_seconds": 0.303647,
+                "name": "structure-map.load.read",
+                "parent": "load.structure-map",
+                "start_offset_seconds": 92.657760208,
+                "wall_seconds": 0.472348
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 0.686501,
+                "name": "structure-map.load.parse",
+                "parent": "load.structure-map",
+                "start_offset_seconds": 93.130309125,
+                "wall_seconds": 0.907440541
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 0.487157,
+                "name": "structure-map.load.tier1",
+                "parent": "load.structure-map",
+                "start_offset_seconds": 94.037950583,
+                "wall_seconds": 0.694389583
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 0.500738,
+                "name": "structure-map.load.typed-build",
+                "parent": "load.structure-map",
+                "start_offset_seconds": 94.732382916,
+                "wall_seconds": 0.567567792
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 0.279824,
+                "name": "structure-map.load.tier2",
+                "parent": "load.structure-map",
+                "start_offset_seconds": 95.299979083,
+                "wall_seconds": 0.316093875
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 2.320372,
+                "name": "load.structure-map",
+                "parent": "named.end-to-end",
+                "start_offset_seconds": 92.587971083,
+                "wall_seconds": 3.028349125
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 0.155585,
+                "name": "index.readers",
+                "parent": "named.end-to-end",
+                "start_offset_seconds": 95.625540458,
+                "wall_seconds": 0.197122667
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 0.185909,
+                "name": "index.validate-map",
+                "parent": "named.end-to-end",
+                "start_offset_seconds": 95.822727458,
+                "wall_seconds": 0.193012958
+              },
+              {
+                "attributes": {
+                  "fresh_included_atoms": 100000,
+                  "old_included_atoms": 100000
+                },
+                "cpu_seconds": 1.4e-05,
+                "name": "index.compare-cardinality",
+                "parent": "named.end-to-end",
+                "start_offset_seconds": 96.01577,
+                "wall_seconds": 1.4833e-05
+              },
+              {
+                "attributes": {
+                  "node_count": 2503,
+                  "slot_count": 2500
+                },
+                "cpu_seconds": 0.066424,
+                "name": "rebind.enumerate-slots",
+                "parent": "named.end-to-end",
+                "start_offset_seconds": 96.9883525,
+                "wall_seconds": 0.073704041
+              },
+              {
+                "attributes": {
+                  "atom_count": 100000,
+                  "token_count": 3600000
+                },
+                "cpu_seconds": 1.180806,
+                "name": "rebind.materialize-old-tokens",
+                "parent": "named.end-to-end",
+                "start_offset_seconds": 97.062118875,
+                "wall_seconds": 1.5014885
+              },
+              {
+                "attributes": {
+                  "atom_count": 100000,
+                  "token_count": 3600000
+                },
+                "cpu_seconds": 1.254983,
+                "name": "rebind.materialize-fresh-tokens",
+                "parent": "named.end-to-end",
+                "start_offset_seconds": 98.566478291,
+                "wall_seconds": 1.62573775
+              },
+              {
+                "attributes": {
+                  "alignment_blocks": 1,
+                  "chained_anchors": 0,
+                  "identity_fast_path": true,
+                  "near_duplicate": true
+                },
+                "cpu_seconds": 0.039503,
+                "name": "rebind.align-tokens",
+                "parent": "named.end-to-end",
+                "start_offset_seconds": 100.383276833,
+                "wall_seconds": 0.043415042
+              },
+              {
+                "attributes": {
+                  "query_count": 5000,
+                  "unique_query_count": 5000
+                },
+                "cpu_seconds": 0.0812,
+                "name": "rebind.prepare-anchor-queries",
+                "parent": "named.end-to-end",
+                "start_offset_seconds": 100.426712125,
+                "wall_seconds": 0.093383041
+              },
+              {
+                "attributes": {
+                  "exact_resolved_queries": 5000,
+                  "exact_windows_scanned": 7199991,
+                  "fuzzy_resolved_queries": 0,
+                  "fuzzy_searched_queries": 0,
+                  "fuzzy_windows_scanned": 0,
+                  "group_count": 2,
+                  "signature_count": 0,
+                  "unresolved_queries": 0,
+                  "windows_scanned": 7199991
+                },
+                "cpu_seconds": 1.749347,
+                "name": "rebind.locate-old-anchors",
+                "parent": "named.end-to-end",
+                "start_offset_seconds": 100.5201225,
+                "wall_seconds": 2.298924833
+              },
+              {
+                "attributes": {
+                  "exact_resolved_queries": 5000,
+                  "exact_windows_scanned": 0,
+                  "fuzzy_resolved_queries": 0,
+                  "fuzzy_searched_queries": 0,
+                  "fuzzy_windows_scanned": 0,
+                  "reused_old_locator": true,
+                  "signature_count": 0,
+                  "tokens_identical": true,
+                  "unresolved_queries": 0,
+                  "windows_scanned": 0
+                },
+                "cpu_seconds": 2.4e-05,
+                "name": "rebind.locate-fresh-anchors",
+                "parent": "named.end-to-end",
+                "start_offset_seconds": 102.819260583,
+                "wall_seconds": 2.4375e-05
+              },
+              {
+                "attributes": {
+                  "unique_boundaries": 2501
+                },
+                "cpu_seconds": 0.0054,
+                "name": "rebind.index-boundary-owners",
+                "parent": "named.end-to-end",
+                "start_offset_seconds": 102.819294458,
+                "wall_seconds": 0.005644125
+              },
+              {
+                "attributes": {
+                  "analysis_skipped": true,
+                  "gram_widths_analyzed": 0,
+                  "tokens_identical": true,
+                  "unresolved_duplication": false
+                },
+                "cpu_seconds": 1.6e-05,
+                "name": "rebind.detect-token-duplication",
+                "parent": "named.end-to-end",
+                "start_offset_seconds": 102.82498125,
+                "wall_seconds": 1.625e-05
+              },
+              {
+                "attributes": {
+                  "fresh_tokenless_atoms": 0,
+                  "old_tokenless_atoms": 0,
+                  "unresolved_duplication": false
+                },
+                "cpu_seconds": 0.167816,
+                "name": "rebind.detect-tokenless-duplication",
+                "parent": "named.end-to-end",
+                "start_offset_seconds": 102.825001625,
+                "wall_seconds": 0.212117458
+              },
+              {
+                "attributes": {
+                  "bound_slots": 2500,
+                  "fingerprint_evaluated_slots": 2500,
+                  "fresh_fingerprint_computations": 2500,
+                  "resolved_boundaries": 5000,
+                  "slot_count": 2500,
+                  "unresolved_reasons": {}
+                },
+                "cpu_seconds": 131.759998,
+                "name": "rebind.resolve-slots",
+                "parent": "named.end-to-end",
+                "start_offset_seconds": 103.037202958,
+                "wall_seconds": 157.77400625
+              },
+              {
+                "attributes": {
+                  "bound_nodes": 2503,
+                  "node_count": 2503
+                },
+                "cpu_seconds": 0.003102,
+                "name": "rebind.aggregate-nodes",
+                "parent": "named.end-to-end",
+                "start_offset_seconds": 260.81146925,
+                "wall_seconds": 0.003158916
+              },
+              {
+                "attributes": {
+                  "node_count": 2503
+                },
+                "cpu_seconds": 3.588292,
+                "name": "rebind.migrate-projection",
+                "parent": "named.end-to-end",
+                "start_offset_seconds": 260.814637208,
+                "wall_seconds": 6.180567167
+              },
+              {
+                "attributes": {
+                  "all_bound_before_validation": true,
+                  "contested_nodes": 0,
+                  "map_valid": true
+                },
+                "cpu_seconds": 0.181846,
+                "name": "rebind.validate-projection",
+                "parent": "named.end-to-end",
+                "start_offset_seconds": 266.995355208,
+                "wall_seconds": 0.219603917
+              },
+              {
+                "attributes": {
+                  "restamped_entries": 0,
+                  "stale_decisions": 0
+                },
+                "cpu_seconds": 1.8e-05,
+                "name": "rebind.restamp-evidence",
+                "parent": "named.end-to-end",
+                "start_offset_seconds": 267.214982666,
+                "wall_seconds": 1.8334e-05
+              },
+              {
+                "attributes": {
+                  "bound_nodes": 2503,
+                  "unresolved_nodes": 0
+                },
+                "cpu_seconds": 1.746086,
+                "name": "rebind.assemble-report",
+                "parent": "named.end-to-end",
+                "start_offset_seconds": 267.21500425,
+                "wall_seconds": 3.112492125
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 171.17991,
+                "name": "named.end-to-end",
+                "parent": null,
+                "start_offset_seconds": 60.812937625,
+                "wall_seconds": 212.232374166
+              }
+            ]
+          },
+          "fixture_variant": "identical",
+          "progress_poll_interval_seconds": 5.0,
+          "schema": "s4.7-runtime-telemetry@v1",
+          "stage_rss": [
+            {
+              "first_monitor_elapsed_seconds": 0.007035082904621959,
+              "last_monitor_elapsed_seconds": 274.7699102498591,
+              "name": "idle",
+              "rss_peak_bytes": 1721303040,
+              "sample_count": 275
+            },
+            {
+              "first_monitor_elapsed_seconds": 96.08597566583194,
+              "last_monitor_elapsed_seconds": 96.27817308297381,
+              "name": "index.readers",
+              "rss_peak_bytes": 1059160064,
+              "sample_count": 34
+            },
+            {
+              "first_monitor_elapsed_seconds": 96.28395224991255,
+              "last_monitor_elapsed_seconds": 96.46917662490159,
+              "name": "index.validate-map",
+              "rss_peak_bytes": 864403456,
+              "sample_count": 33
+            },
+            {
+              "first_monitor_elapsed_seconds": 84.53465491579846,
+              "last_monitor_elapsed_seconds": 93.04278008290567,
+              "name": "load.fresh-streams",
+              "rss_peak_bytes": 1457340416,
+              "sample_count": 1437
+            },
+            {
+              "first_monitor_elapsed_seconds": 78.46906349994242,
+              "last_monitor_elapsed_seconds": 84.52890349994414,
+              "name": "load.old-streams",
+              "rss_peak_bytes": 1531084800,
+              "sample_count": 1024
+            },
+            {
+              "first_monitor_elapsed_seconds": 93.04883558279835,
+              "last_monitor_elapsed_seconds": 93.10838087485172,
+              "name": "load.structure-map",
+              "rss_peak_bytes": 1156792320,
+              "sample_count": 11
+            },
+            {
+              "first_monitor_elapsed_seconds": 75.48967649997212,
+              "last_monitor_elapsed_seconds": 273.4993359998334,
+              "name": "named.end-to-end",
+              "rss_peak_bytes": 1155203072,
+              "sample_count": 583
+            },
+            {
+              "first_monitor_elapsed_seconds": 68.01904933294281,
+              "last_monitor_elapsed_seconds": 75.48445983300917,
+              "name": "persist.fresh-streams",
+              "rss_peak_bytes": 1022377984,
+              "sample_count": 1204
+            },
+            {
+              "first_monitor_elapsed_seconds": 61.27638274990022,
+              "last_monitor_elapsed_seconds": 68.01329237502068,
+              "name": "persist.old-streams",
+              "rss_peak_bytes": 1060421632,
+              "sample_count": 1127
+            },
+            {
+              "first_monitor_elapsed_seconds": 61.270610332954675,
+              "last_monitor_elapsed_seconds": 61.27061237487942,
+              "name": "persist.prepare-workspaces",
+              "rss_peak_bytes": 1072267264,
+              "sample_count": 1
+            },
+            {
+              "first_monitor_elapsed_seconds": 261.2699272078462,
+              "last_monitor_elapsed_seconds": 261.26993366586976,
+              "name": "rebind.aggregate-nodes",
+              "rss_peak_bytes": 331546624,
+              "sample_count": 1
+            },
+            {
+              "first_monitor_elapsed_seconds": 100.84227583301254,
+              "last_monitor_elapsed_seconds": 100.88248024997301,
+              "name": "rebind.align-tokens",
+              "rss_peak_bytes": 689913856,
+              "sample_count": 8
+            },
+            {
+              "first_monitor_elapsed_seconds": 267.6729877910111,
+              "last_monitor_elapsed_seconds": 270.7804367078934,
+              "name": "rebind.assemble-report",
+              "rss_peak_bytes": 842465280,
+              "sample_count": 413
+            },
+            {
+              "first_monitor_elapsed_seconds": 103.28595024999231,
+              "last_monitor_elapsed_seconds": 103.49145295796916,
+              "name": "rebind.detect-tokenless-duplication",
+              "rss_peak_bytes": 810926080,
+              "sample_count": 35
+            },
+            {
+              "first_monitor_elapsed_seconds": 97.44960279087536,
+              "last_monitor_elapsed_seconds": 97.51369074988179,
+              "name": "rebind.enumerate-slots",
+              "rss_peak_bytes": 620363776,
+              "sample_count": 12
+            },
+            {
+              "first_monitor_elapsed_seconds": 103.27998029091395,
+              "last_monitor_elapsed_seconds": 103.27998570795171,
+              "name": "rebind.index-boundary-owners",
+              "rss_peak_bytes": 429457408,
+              "sample_count": 1
+            },
+            {
+              "first_monitor_elapsed_seconds": 100.9772164998576,
+              "last_monitor_elapsed_seconds": 103.27421383280307,
+              "name": "rebind.locate-old-anchors",
+              "rss_peak_bytes": 794542080,
+              "sample_count": 371
+            },
+            {
+              "first_monitor_elapsed_seconds": 99.02720129094087,
+              "last_monitor_elapsed_seconds": 100.644194124965,
+              "name": "rebind.materialize-fresh-tokens",
+              "rss_peak_bytes": 794935296,
+              "sample_count": 274
+            },
+            {
+              "first_monitor_elapsed_seconds": 97.51941995788366,
+              "last_monitor_elapsed_seconds": 99.0214558748994,
+              "name": "rebind.materialize-old-tokens",
+              "rss_peak_bytes": 796114944,
+              "sample_count": 259
+            },
+            {
+              "first_monitor_elapsed_seconds": 261.27812341600657,
+              "last_monitor_elapsed_seconds": 267.4478947909083,
+              "name": "rebind.migrate-projection",
+              "rss_peak_bytes": 1101398016,
+              "sample_count": 938
+            },
+            {
+              "first_monitor_elapsed_seconds": 100.88835183298215,
+              "last_monitor_elapsed_seconds": 100.97148887487128,
+              "name": "rebind.prepare-anchor-queries",
+              "rss_peak_bytes": 777666560,
+              "sample_count": 15
+            },
+            {
+              "first_monitor_elapsed_seconds": 103.49748658295721,
+              "last_monitor_elapsed_seconds": 261.26351654087193,
+              "name": "rebind.resolve-slots",
+              "rss_peak_bytes": 823590912,
+              "sample_count": 24460
+            },
+            {
+              "first_monitor_elapsed_seconds": 267.45371595793404,
+              "last_monitor_elapsed_seconds": 267.66647024988197,
+              "name": "rebind.validate-projection",
+              "rss_peak_bytes": 901185536,
+              "sample_count": 35
+            },
+            {
+              "first_monitor_elapsed_seconds": 0.4604452499188483,
+              "last_monitor_elapsed_seconds": 61.26146233291365,
+              "name": "setup.materialize-fixture",
+              "rss_peak_bytes": 1534410752,
+              "sample_count": 10243
+            },
+            {
+              "first_monitor_elapsed_seconds": 93.58904270781204,
+              "last_monitor_elapsed_seconds": 94.48810299998149,
+              "name": "structure-map.load.parse",
+              "rss_peak_bytes": 989790208,
+              "sample_count": 154
+            },
+            {
+              "first_monitor_elapsed_seconds": 93.11411224980839,
+              "last_monitor_elapsed_seconds": 93.58334312494844,
+              "name": "structure-map.load.read",
+              "rss_peak_bytes": 1179762688,
+              "sample_count": 81
+            },
+            {
+              "first_monitor_elapsed_seconds": 94.49397579091601,
+              "last_monitor_elapsed_seconds": 95.18419337482192,
+              "name": "structure-map.load.tier1",
+              "rss_peak_bytes": 996605952,
+              "sample_count": 110
+            },
+            {
+              "first_monitor_elapsed_seconds": 95.75950541580096,
+              "last_monitor_elapsed_seconds": 96.0684745409526,
+              "name": "structure-map.load.tier2",
+              "rss_peak_bytes": 1088225280,
+              "sample_count": 54
+            },
+            {
+              "first_monitor_elapsed_seconds": 95.18991524982266,
+              "last_monitor_elapsed_seconds": 95.75357829080895,
+              "name": "structure-map.load.typed-build",
+              "rss_peak_bytes": 1050034176,
+              "sample_count": 97
+            },
+            {
+              "first_monitor_elapsed_seconds": 78.01304591586813,
+              "last_monitor_elapsed_seconds": 78.46331966598518,
+              "name": "structure-map.write.io",
+              "rss_peak_bytes": 1065140224,
+              "sample_count": 78
+            },
+            {
+              "first_monitor_elapsed_seconds": 76.57443004101515,
+              "last_monitor_elapsed_seconds": 78.00751579087228,
+              "name": "structure-map.write.render",
+              "rss_peak_bytes": 1408876544,
+              "sample_count": 244
+            },
+            {
+              "first_monitor_elapsed_seconds": 75.4954527078662,
+              "last_monitor_elapsed_seconds": 76.5686778749805,
+              "name": "structure-map.write.tier1",
+              "rss_peak_bytes": 908247040,
+              "sample_count": 182
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "last_event": {
+    "event": "phase-sample-complete",
+    "progress": {
+      "atom_count": 100000,
+      "fixture_variant": null,
+      "measurement_index": 5,
+      "measurement_total": 5,
+      "phase": "end_to_end",
+      "phase_index": 5,
+      "phase_total": 5,
+      "point_step_index": 5,
+      "point_step_total": 5,
+      "repetition": 1,
+      "repetitions": 1,
+      "shape": "wide",
+      "step_coordinate": "5.1"
+    },
+    "sample": {
+      "elapsed_seconds": 212.23263433296233,
+      "incremental_peak_bytes": 462225408,
+      "ledger": {
+        "A": 100000,
+        "D": 4,
+        "K": 2500,
+        "L": 2500,
+        "T": 3600000,
+        "family": "wide-rebind-production"
+      },
+      "lifetime_peak_bytes": 1534656512,
+      "monitor_elapsed_seconds": 274.7854388328269,
+      "phase": "end_to_end",
+      "raw_ru_maxrss_bytes": 1534656512,
+      "sample_count": 33277,
+      "sample_interval_seconds": 0.005,
+      "setup_baseline_bytes": 1068859392,
+      "setup_elapsed_seconds": 61.26745595782995,
+      "span_peak_bytes": 1531084800,
+      "telemetry": {
+        "child_trace": {
+          "active_stage": "idle",
+          "schema": "engine-rebind-telemetry@v1",
+          "spans": [
+            {
+              "attributes": {},
+              "cpu_seconds": 52.170459,
+              "name": "setup.materialize-fixture",
+              "parent": "setup.prepare",
+              "start_offset_seconds": 0.000958708,
+              "wall_seconds": 60.809327125
+            },
+            {
+              "attributes": {},
+              "cpu_seconds": 52.171439,
+              "name": "setup.prepare",
+              "parent": null,
+              "start_offset_seconds": 5.0375e-05,
+              "wall_seconds": 60.810548583
+            },
+            {
+              "attributes": {},
+              "cpu_seconds": 0.00142,
+              "name": "persist.prepare-workspaces",
+              "parent": "named.end-to-end",
+              "start_offset_seconds": 60.81301075,
+              "wall_seconds": 0.002075833
+            },
+            {
+              "attributes": {
+                "stream_count": 2
+              },
+              "cpu_seconds": 5.407632,
+              "name": "persist.old-streams",
+              "parent": "named.end-to-end",
+              "start_offset_seconds": 60.815171583,
+              "wall_seconds": 6.743037958
+            },
+            {
+              "attributes": {
+                "stream_count": 2
+              },
+              "cpu_seconds": 5.538794,
+              "name": "persist.fresh-streams",
+              "parent": "named.end-to-end",
+              "start_offset_seconds": 67.558300291,
+              "wall_seconds": 7.473202417
+            },
+            {
+              "attributes": {},
+              "cpu_seconds": 0.725438,
+              "name": "structure-map.write.tier1",
+              "parent": "persist.structure-map",
+              "start_offset_seconds": 75.034300208,
+              "wall_seconds": 1.079259333
+            },
+            {
+              "attributes": {
+                "character_count": 283462757
+              },
+              "cpu_seconds": 1.16559,
+              "name": "structure-map.write.render",
+              "parent": "persist.structure-map",
+              "start_offset_seconds": 76.113751875,
+              "wall_seconds": 1.440329208
+            },
+            {
+              "attributes": {},
+              "cpu_seconds": 0.210769,
+              "name": "structure-map.write.io",
+              "parent": "persist.structure-map",
+              "start_offset_seconds": 77.555098375,
+              "wall_seconds": 0.4534705
+            },
+            {
+              "attributes": {},
+              "cpu_seconds": 2.103101,
+              "name": "persist.structure-map",
+              "parent": "named.end-to-end",
+              "start_offset_seconds": 75.034118083,
+              "wall_seconds": 2.974494667
+            },
+            {
+              "attributes": {
+                "stream_count": 2
+              },
+              "cpu_seconds": 4.909544,
+              "name": "load.old-streams",
+              "parent": "named.end-to-end",
+              "start_offset_seconds": 78.008696458,
+              "wall_seconds": 6.069814667
+            },
+            {
+              "attributes": {
+                "stream_count": 2
+              },
+              "cpu_seconds": 6.52446,
+              "name": "load.fresh-streams",
+              "parent": "named.end-to-end",
+              "start_offset_seconds": 84.078577625,
+              "wall_seconds": 8.509317625
+            },
+            {
+              "attributes": {
+                "byte_count": 283462757
+              },
+              "cpu_seconds": 0.303647,
+              "name": "structure-map.load.read",
+              "parent": "load.structure-map",
+              "start_offset_seconds": 92.657760208,
+              "wall_seconds": 0.472348
+            },
+            {
+              "attributes": {},
+              "cpu_seconds": 0.686501,
+              "name": "structure-map.load.parse",
+              "parent": "load.structure-map",
+              "start_offset_seconds": 93.130309125,
+              "wall_seconds": 0.907440541
+            },
+            {
+              "attributes": {},
+              "cpu_seconds": 0.487157,
+              "name": "structure-map.load.tier1",
+              "parent": "load.structure-map",
+              "start_offset_seconds": 94.037950583,
+              "wall_seconds": 0.694389583
+            },
+            {
+              "attributes": {},
+              "cpu_seconds": 0.500738,
+              "name": "structure-map.load.typed-build",
+              "parent": "load.structure-map",
+              "start_offset_seconds": 94.732382916,
+              "wall_seconds": 0.567567792
+            },
+            {
+              "attributes": {},
+              "cpu_seconds": 0.279824,
+              "name": "structure-map.load.tier2",
+              "parent": "load.structure-map",
+              "start_offset_seconds": 95.299979083,
+              "wall_seconds": 0.316093875
+            },
+            {
+              "attributes": {},
+              "cpu_seconds": 2.320372,
+              "name": "load.structure-map",
+              "parent": "named.end-to-end",
+              "start_offset_seconds": 92.587971083,
+              "wall_seconds": 3.028349125
+            },
+            {
+              "attributes": {},
+              "cpu_seconds": 0.155585,
+              "name": "index.readers",
+              "parent": "named.end-to-end",
+              "start_offset_seconds": 95.625540458,
+              "wall_seconds": 0.197122667
+            },
+            {
+              "attributes": {},
+              "cpu_seconds": 0.185909,
+              "name": "index.validate-map",
+              "parent": "named.end-to-end",
+              "start_offset_seconds": 95.822727458,
+              "wall_seconds": 0.193012958
+            },
+            {
+              "attributes": {
+                "fresh_included_atoms": 100000,
+                "old_included_atoms": 100000
+              },
+              "cpu_seconds": 1.4e-05,
+              "name": "index.compare-cardinality",
+              "parent": "named.end-to-end",
+              "start_offset_seconds": 96.01577,
+              "wall_seconds": 1.4833e-05
+            },
+            {
+              "attributes": {
+                "node_count": 2503,
+                "slot_count": 2500
+              },
+              "cpu_seconds": 0.066424,
+              "name": "rebind.enumerate-slots",
+              "parent": "named.end-to-end",
+              "start_offset_seconds": 96.9883525,
+              "wall_seconds": 0.073704041
+            },
+            {
+              "attributes": {
+                "atom_count": 100000,
+                "token_count": 3600000
+              },
+              "cpu_seconds": 1.180806,
+              "name": "rebind.materialize-old-tokens",
+              "parent": "named.end-to-end",
+              "start_offset_seconds": 97.062118875,
+              "wall_seconds": 1.5014885
+            },
+            {
+              "attributes": {
+                "atom_count": 100000,
+                "token_count": 3600000
+              },
+              "cpu_seconds": 1.254983,
+              "name": "rebind.materialize-fresh-tokens",
+              "parent": "named.end-to-end",
+              "start_offset_seconds": 98.566478291,
+              "wall_seconds": 1.62573775
+            },
+            {
+              "attributes": {
+                "alignment_blocks": 1,
+                "chained_anchors": 0,
+                "identity_fast_path": true,
+                "near_duplicate": true
+              },
+              "cpu_seconds": 0.039503,
+              "name": "rebind.align-tokens",
+              "parent": "named.end-to-end",
+              "start_offset_seconds": 100.383276833,
+              "wall_seconds": 0.043415042
+            },
+            {
+              "attributes": {
+                "query_count": 5000,
+                "unique_query_count": 5000
+              },
+              "cpu_seconds": 0.0812,
+              "name": "rebind.prepare-anchor-queries",
+              "parent": "named.end-to-end",
+              "start_offset_seconds": 100.426712125,
+              "wall_seconds": 0.093383041
+            },
+            {
+              "attributes": {
+                "exact_resolved_queries": 5000,
+                "exact_windows_scanned": 7199991,
+                "fuzzy_resolved_queries": 0,
+                "fuzzy_searched_queries": 0,
+                "fuzzy_windows_scanned": 0,
+                "group_count": 2,
+                "signature_count": 0,
+                "unresolved_queries": 0,
+                "windows_scanned": 7199991
+              },
+              "cpu_seconds": 1.749347,
+              "name": "rebind.locate-old-anchors",
+              "parent": "named.end-to-end",
+              "start_offset_seconds": 100.5201225,
+              "wall_seconds": 2.298924833
+            },
+            {
+              "attributes": {
+                "exact_resolved_queries": 5000,
+                "exact_windows_scanned": 0,
+                "fuzzy_resolved_queries": 0,
+                "fuzzy_searched_queries": 0,
+                "fuzzy_windows_scanned": 0,
+                "reused_old_locator": true,
+                "signature_count": 0,
+                "tokens_identical": true,
+                "unresolved_queries": 0,
+                "windows_scanned": 0
+              },
+              "cpu_seconds": 2.4e-05,
+              "name": "rebind.locate-fresh-anchors",
+              "parent": "named.end-to-end",
+              "start_offset_seconds": 102.819260583,
+              "wall_seconds": 2.4375e-05
+            },
+            {
+              "attributes": {
+                "unique_boundaries": 2501
+              },
+              "cpu_seconds": 0.0054,
+              "name": "rebind.index-boundary-owners",
+              "parent": "named.end-to-end",
+              "start_offset_seconds": 102.819294458,
+              "wall_seconds": 0.005644125
+            },
+            {
+              "attributes": {
+                "analysis_skipped": true,
+                "gram_widths_analyzed": 0,
+                "tokens_identical": true,
+                "unresolved_duplication": false
+              },
+              "cpu_seconds": 1.6e-05,
+              "name": "rebind.detect-token-duplication",
+              "parent": "named.end-to-end",
+              "start_offset_seconds": 102.82498125,
+              "wall_seconds": 1.625e-05
+            },
+            {
+              "attributes": {
+                "fresh_tokenless_atoms": 0,
+                "old_tokenless_atoms": 0,
+                "unresolved_duplication": false
+              },
+              "cpu_seconds": 0.167816,
+              "name": "rebind.detect-tokenless-duplication",
+              "parent": "named.end-to-end",
+              "start_offset_seconds": 102.825001625,
+              "wall_seconds": 0.212117458
+            },
+            {
+              "attributes": {
+                "bound_slots": 2500,
+                "fingerprint_evaluated_slots": 2500,
+                "fresh_fingerprint_computations": 2500,
+                "resolved_boundaries": 5000,
+                "slot_count": 2500,
+                "unresolved_reasons": {}
+              },
+              "cpu_seconds": 131.759998,
+              "name": "rebind.resolve-slots",
+              "parent": "named.end-to-end",
+              "start_offset_seconds": 103.037202958,
+              "wall_seconds": 157.77400625
+            },
+            {
+              "attributes": {
+                "bound_nodes": 2503,
+                "node_count": 2503
+              },
+              "cpu_seconds": 0.003102,
+              "name": "rebind.aggregate-nodes",
+              "parent": "named.end-to-end",
+              "start_offset_seconds": 260.81146925,
+              "wall_seconds": 0.003158916
+            },
+            {
+              "attributes": {
+                "node_count": 2503
+              },
+              "cpu_seconds": 3.588292,
+              "name": "rebind.migrate-projection",
+              "parent": "named.end-to-end",
+              "start_offset_seconds": 260.814637208,
+              "wall_seconds": 6.180567167
+            },
+            {
+              "attributes": {
+                "all_bound_before_validation": true,
+                "contested_nodes": 0,
+                "map_valid": true
+              },
+              "cpu_seconds": 0.181846,
+              "name": "rebind.validate-projection",
+              "parent": "named.end-to-end",
+              "start_offset_seconds": 266.995355208,
+              "wall_seconds": 0.219603917
+            },
+            {
+              "attributes": {
+                "restamped_entries": 0,
+                "stale_decisions": 0
+              },
+              "cpu_seconds": 1.8e-05,
+              "name": "rebind.restamp-evidence",
+              "parent": "named.end-to-end",
+              "start_offset_seconds": 267.214982666,
+              "wall_seconds": 1.8334e-05
+            },
+            {
+              "attributes": {
+                "bound_nodes": 2503,
+                "unresolved_nodes": 0
+              },
+              "cpu_seconds": 1.746086,
+              "name": "rebind.assemble-report",
+              "parent": "named.end-to-end",
+              "start_offset_seconds": 267.21500425,
+              "wall_seconds": 3.112492125
+            },
+            {
+              "attributes": {},
+              "cpu_seconds": 171.17991,
+              "name": "named.end-to-end",
+              "parent": null,
+              "start_offset_seconds": 60.812937625,
+              "wall_seconds": 212.232374166
+            }
+          ]
+        },
+        "fixture_variant": "identical",
+        "progress_poll_interval_seconds": 5.0,
+        "schema": "s4.7-runtime-telemetry@v1",
+        "stage_rss": [
+          {
+            "first_monitor_elapsed_seconds": 0.007035082904621959,
+            "last_monitor_elapsed_seconds": 274.7699102498591,
+            "name": "idle",
+            "rss_peak_bytes": 1721303040,
+            "sample_count": 275
+          },
+          {
+            "first_monitor_elapsed_seconds": 96.08597566583194,
+            "last_monitor_elapsed_seconds": 96.27817308297381,
+            "name": "index.readers",
+            "rss_peak_bytes": 1059160064,
+            "sample_count": 34
+          },
+          {
+            "first_monitor_elapsed_seconds": 96.28395224991255,
+            "last_monitor_elapsed_seconds": 96.46917662490159,
+            "name": "index.validate-map",
+            "rss_peak_bytes": 864403456,
+            "sample_count": 33
+          },
+          {
+            "first_monitor_elapsed_seconds": 84.53465491579846,
+            "last_monitor_elapsed_seconds": 93.04278008290567,
+            "name": "load.fresh-streams",
+            "rss_peak_bytes": 1457340416,
+            "sample_count": 1437
+          },
+          {
+            "first_monitor_elapsed_seconds": 78.46906349994242,
+            "last_monitor_elapsed_seconds": 84.52890349994414,
+            "name": "load.old-streams",
+            "rss_peak_bytes": 1531084800,
+            "sample_count": 1024
+          },
+          {
+            "first_monitor_elapsed_seconds": 93.04883558279835,
+            "last_monitor_elapsed_seconds": 93.10838087485172,
+            "name": "load.structure-map",
+            "rss_peak_bytes": 1156792320,
+            "sample_count": 11
+          },
+          {
+            "first_monitor_elapsed_seconds": 75.48967649997212,
+            "last_monitor_elapsed_seconds": 273.4993359998334,
+            "name": "named.end-to-end",
+            "rss_peak_bytes": 1155203072,
+            "sample_count": 583
+          },
+          {
+            "first_monitor_elapsed_seconds": 68.01904933294281,
+            "last_monitor_elapsed_seconds": 75.48445983300917,
+            "name": "persist.fresh-streams",
+            "rss_peak_bytes": 1022377984,
+            "sample_count": 1204
+          },
+          {
+            "first_monitor_elapsed_seconds": 61.27638274990022,
+            "last_monitor_elapsed_seconds": 68.01329237502068,
+            "name": "persist.old-streams",
+            "rss_peak_bytes": 1060421632,
+            "sample_count": 1127
+          },
+          {
+            "first_monitor_elapsed_seconds": 61.270610332954675,
+            "last_monitor_elapsed_seconds": 61.27061237487942,
+            "name": "persist.prepare-workspaces",
+            "rss_peak_bytes": 1072267264,
+            "sample_count": 1
+          },
+          {
+            "first_monitor_elapsed_seconds": 261.2699272078462,
+            "last_monitor_elapsed_seconds": 261.26993366586976,
+            "name": "rebind.aggregate-nodes",
+            "rss_peak_bytes": 331546624,
+            "sample_count": 1
+          },
+          {
+            "first_monitor_elapsed_seconds": 100.84227583301254,
+            "last_monitor_elapsed_seconds": 100.88248024997301,
+            "name": "rebind.align-tokens",
+            "rss_peak_bytes": 689913856,
+            "sample_count": 8
+          },
+          {
+            "first_monitor_elapsed_seconds": 267.6729877910111,
+            "last_monitor_elapsed_seconds": 270.7804367078934,
+            "name": "rebind.assemble-report",
+            "rss_peak_bytes": 842465280,
+            "sample_count": 413
+          },
+          {
+            "first_monitor_elapsed_seconds": 103.28595024999231,
+            "last_monitor_elapsed_seconds": 103.49145295796916,
+            "name": "rebind.detect-tokenless-duplication",
+            "rss_peak_bytes": 810926080,
+            "sample_count": 35
+          },
+          {
+            "first_monitor_elapsed_seconds": 97.44960279087536,
+            "last_monitor_elapsed_seconds": 97.51369074988179,
+            "name": "rebind.enumerate-slots",
+            "rss_peak_bytes": 620363776,
+            "sample_count": 12
+          },
+          {
+            "first_monitor_elapsed_seconds": 103.27998029091395,
+            "last_monitor_elapsed_seconds": 103.27998570795171,
+            "name": "rebind.index-boundary-owners",
+            "rss_peak_bytes": 429457408,
+            "sample_count": 1
+          },
+          {
+            "first_monitor_elapsed_seconds": 100.9772164998576,
+            "last_monitor_elapsed_seconds": 103.27421383280307,
+            "name": "rebind.locate-old-anchors",
+            "rss_peak_bytes": 794542080,
+            "sample_count": 371
+          },
+          {
+            "first_monitor_elapsed_seconds": 99.02720129094087,
+            "last_monitor_elapsed_seconds": 100.644194124965,
+            "name": "rebind.materialize-fresh-tokens",
+            "rss_peak_bytes": 794935296,
+            "sample_count": 274
+          },
+          {
+            "first_monitor_elapsed_seconds": 97.51941995788366,
+            "last_monitor_elapsed_seconds": 99.0214558748994,
+            "name": "rebind.materialize-old-tokens",
+            "rss_peak_bytes": 796114944,
+            "sample_count": 259
+          },
+          {
+            "first_monitor_elapsed_seconds": 261.27812341600657,
+            "last_monitor_elapsed_seconds": 267.4478947909083,
+            "name": "rebind.migrate-projection",
+            "rss_peak_bytes": 1101398016,
+            "sample_count": 938
+          },
+          {
+            "first_monitor_elapsed_seconds": 100.88835183298215,
+            "last_monitor_elapsed_seconds": 100.97148887487128,
+            "name": "rebind.prepare-anchor-queries",
+            "rss_peak_bytes": 777666560,
+            "sample_count": 15
+          },
+          {
+            "first_monitor_elapsed_seconds": 103.49748658295721,
+            "last_monitor_elapsed_seconds": 261.26351654087193,
+            "name": "rebind.resolve-slots",
+            "rss_peak_bytes": 823590912,
+            "sample_count": 24460
+          },
+          {
+            "first_monitor_elapsed_seconds": 267.45371595793404,
+            "last_monitor_elapsed_seconds": 267.66647024988197,
+            "name": "rebind.validate-projection",
+            "rss_peak_bytes": 901185536,
+            "sample_count": 35
+          },
+          {
+            "first_monitor_elapsed_seconds": 0.4604452499188483,
+            "last_monitor_elapsed_seconds": 61.26146233291365,
+            "name": "setup.materialize-fixture",
+            "rss_peak_bytes": 1534410752,
+            "sample_count": 10243
+          },
+          {
+            "first_monitor_elapsed_seconds": 93.58904270781204,
+            "last_monitor_elapsed_seconds": 94.48810299998149,
+            "name": "structure-map.load.parse",
+            "rss_peak_bytes": 989790208,
+            "sample_count": 154
+          },
+          {
+            "first_monitor_elapsed_seconds": 93.11411224980839,
+            "last_monitor_elapsed_seconds": 93.58334312494844,
+            "name": "structure-map.load.read",
+            "rss_peak_bytes": 1179762688,
+            "sample_count": 81
+          },
+          {
+            "first_monitor_elapsed_seconds": 94.49397579091601,
+            "last_monitor_elapsed_seconds": 95.18419337482192,
+            "name": "structure-map.load.tier1",
+            "rss_peak_bytes": 996605952,
+            "sample_count": 110
+          },
+          {
+            "first_monitor_elapsed_seconds": 95.75950541580096,
+            "last_monitor_elapsed_seconds": 96.0684745409526,
+            "name": "structure-map.load.tier2",
+            "rss_peak_bytes": 1088225280,
+            "sample_count": 54
+          },
+          {
+            "first_monitor_elapsed_seconds": 95.18991524982266,
+            "last_monitor_elapsed_seconds": 95.75357829080895,
+            "name": "structure-map.load.typed-build",
+            "rss_peak_bytes": 1050034176,
+            "sample_count": 97
+          },
+          {
+            "first_monitor_elapsed_seconds": 78.01304591586813,
+            "last_monitor_elapsed_seconds": 78.46331966598518,
+            "name": "structure-map.write.io",
+            "rss_peak_bytes": 1065140224,
+            "sample_count": 78
+          },
+          {
+            "first_monitor_elapsed_seconds": 76.57443004101515,
+            "last_monitor_elapsed_seconds": 78.00751579087228,
+            "name": "structure-map.write.render",
+            "rss_peak_bytes": 1408876544,
+            "sample_count": 244
+          },
+          {
+            "first_monitor_elapsed_seconds": 75.4954527078662,
+            "last_monitor_elapsed_seconds": 76.5686778749805,
+            "name": "structure-map.write.tier1",
+            "rss_peak_bytes": 908247040,
+            "sample_count": 182
+          }
+        ]
+      }
+    }
+  },
+  "named_measurement_total": 5,
+  "progress_log": "/Users/ben_mpa/LLM/PER_LA_LIBERTA/engine/docs/probes/s4_7_scale_cycle_optimized_wide_a100000.progress.ndjson",
+  "progress_log_sha256": "a571614d04c864e5c33263fac6ef7d01b8cca8643ed22af2aaa137e224f47b42",
+  "progress_poll_interval_seconds": 5.0,
+  "recipe": {
+    "atom_count": 100000,
+    "shape": "wide",
+    "tokens_per_atom": 36
+  },
+  "run_id": "d09b8c57-b10b-4fb7-b75e-3350c85bfacc",
+  "schema": "s4.7-production-scale-cycle-checkpoint@v1",
+  "status": "COMPLETE",
+  "updated_at": "2026-07-18T21:42:06.696656+00:00"
+}

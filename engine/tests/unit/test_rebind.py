@@ -11,11 +11,19 @@ literal — so a default change cannot silently pass a stale hardcoded number (�
 
 from __future__ import annotations
 
+import dataclasses
+import hashlib
+import json
+
 import pytest
 
 from engine.errors import CaptureError, StaleArtifactError
 from engine.structure.atom_store import AtomStream
 from engine.structure.atoms import Atom, AtomDerivation, Geom
+from engine.structure.boundary_anchor import (
+    DeterministicBoundaryAnchorFamily,
+    derive_boundary_anchor,
+)
 from engine.structure.evidence import (
     AuthoringEvidence,
     build_evidence_entry,
@@ -28,7 +36,12 @@ from engine.structure.rebind import (
     REBIND_UNRESOLVED_REASONS,
     RebindContext,
     RebindError,
+    RebindNotConsumableError,
     RebindPolicy,
+    NodeOutcome,
+    SlotOutcome,
+    _contested_nodes,
+    _runtime_fingerprint_slot,
     assert_all_bound,
     fingerprint_slot,
     normalized_slot_tokens,
@@ -36,6 +49,7 @@ from engine.structure.rebind import (
     resolve_mode,
     slot_similarity,
 )
+from engine.structure.rebind_telemetry import RebindTelemetry
 from engine.structure.roundtrip import hash_raw
 from engine.structure.structure_map import (
     STRUCTURE_MAP_SCHEMA_VERSION,
@@ -72,6 +86,22 @@ def test_fingerprint_slot_empty_is_none_never_empty_set():
     # fingerprint that could score a spurious 1.0 against another empty window. Mutant
     # (hunt_rebind): return an empty-shingle SlotFingerprint → this reds.
     assert fingerprint_slot([], k=3) is None
+
+
+@pytest.mark.parametrize(
+    ("tokens", "k"),
+    [([], 3), (["solo"], 3), (["one", "two"], 3), (["a", "b", "a", "b"], 2)],
+)
+def test_runtime_fingerprint_is_set_equivalent_to_persisted_producer(tokens, k):
+    persisted = fingerprint_slot(tokens, k=k)
+    runtime = _runtime_fingerprint_slot(tokens, k=k)
+    if persisted is None:
+        assert runtime is None
+        return
+    assert runtime is not None
+    assert runtime.k == persisted.k
+    assert runtime.token_count == persisted.token_count
+    assert runtime.shingles == frozenset(persisted.shingles)
 
 
 def test_slot_similarity_identity_disjoint_and_fuzzy():
@@ -138,6 +168,16 @@ def test_policy_inverted_ordering_is_rejected_at_construction():
     # (the mutant that inverts the defaults reds here). feedback_no_cheating_results.
     with pytest.raises(ValueError, match="default-ordering"):
         RebindPolicy(tau_primary=0.9, tau_tie_break=0.8, tau_no_geometry=0.7)
+
+
+@pytest.mark.parametrize("invalid", [-0.01, 1.01, float("inf"), float("nan"), True])
+def test_policy_thresholds_are_finite_unit_interval_scores(invalid):
+    with pytest.raises(ValueError, match=r"finite in \[0, 1\]"):
+        RebindPolicy(
+            tau_primary=invalid,
+            tau_tie_break=invalid,
+            tau_no_geometry=invalid,
+        )
 
 
 # ================================================================================================== #
@@ -207,6 +247,44 @@ def _leaf(node_id, body_ids, texts, *, with_fp=True, region_page=None):
 
 
 def _map(nodes, canonical_stream):
+    included = list(canonical_stream.atoms)
+    stream_tokens: list[str] = []
+    atom_ranges: dict[str, tuple[int, int]] = {}
+    for atom in included:
+        start = len(stream_tokens)
+        stream_tokens.extend(normalized_slot_tokens((atom.text,)))
+        atom_ranges[atom.atom_id] = (start, len(stream_tokens))
+    family = DeterministicBoundaryAnchorFamily()
+    for node in nodes:
+        for slot_name, key in (
+            ("body", "body_atoms"),
+            ("heading", "heading_atoms"),
+            ("signature", "signature_atoms"),
+        ):
+            atom_ids = node.get(key, [])
+            anchors = node.get("rebind_anchors", {})
+            if not atom_ids or slot_name not in anchors.get("content_fingerprint", {}):
+                continue
+            tokened = [atom_id for atom_id in atom_ids if atom_ranges[atom_id][0] != atom_ranges[atom_id][1]]
+            start = atom_ranges[tokened[0]][0]
+            end = atom_ranges[tokened[-1]][1]
+
+            def payload(anchor):
+                return {
+                    "prefix": list(anchor.prefix),
+                    "exact": list(anchor.exact),
+                    "suffix": list(anchor.suffix),
+                }
+
+            anchors.setdefault("boundary_anchors", {})[slot_name] = {
+                "start": payload(
+                    derive_boundary_anchor(family, stream_tokens, start, side="start")
+                ),
+                "end": payload(
+                    derive_boundary_anchor(family, stream_tokens, end, side="end")
+                ),
+            }
+            node["rebind_anchors"] = anchors
     doc = {
         "schema_version": STRUCTURE_MAP_SCHEMA_VERSION,
         "root_id": nodes[0]["node_id"],
@@ -250,10 +328,203 @@ def _happy_case(page=3):
     return old_map, old_streams, specs
 
 
+def _complete_result_digest(result) -> str:
+    """Hash every ordered result field so the optimization cannot narrow equivalence."""
+    payload = {
+        "migrated_doc": result.migrated_doc,
+        "report": dataclasses.asdict(result.report),
+        "restamped_evidence": [
+            dataclasses.asdict(entry) for entry in result.restamped_evidence
+        ],
+    }
+    encoded = json.dumps(
+        payload, sort_keys=True, separators=(",", ":")
+    ).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def _fingerprint_characterization_cases():
+    happy_map, happy_streams, happy_specs = _happy_case()
+
+    diverged_specs = [("a0", _A0, 3), ("a1", _A1, 3)]
+    diverged_streams = _streams(diverged_specs)
+    diverged_map = _map(
+        [
+            _root(["l0", "l1"]),
+            _leaf("l0", ["a0"], [_A0]),
+            _leaf("l1", ["a1"], [_A1]),
+        ],
+        diverged_streams["canonical"],
+    )
+
+    missing_streams = _streams(diverged_specs)
+    missing_map = _map(
+        [
+            _root(["l0", "l1"]),
+            _leaf(
+                "l0",
+                ["a0"],
+                [_A0],
+                with_fp=False,
+                region_page=3,
+            ),
+            _leaf("l1", ["a1"], [_A1]),
+        ],
+        missing_streams["canonical"],
+    )
+
+    scored_below_streams = _streams([("a0", _A0, 3)])
+    scored_below_map = _map(
+        [
+            _root(["l0"]),
+            _leaf("l0", ["a0"], [_A0], region_page=3),
+        ],
+        scored_below_streams["canonical"],
+    )
+
+    mismatch_map, mismatch_streams, mismatch_fresh = _region_mismatch_case()
+
+    superstring_specs = [("a0", _A0, 3)]
+    superstring_streams = _streams(superstring_specs)
+    superstring_map = _map(
+        [_root(["l0"]), _leaf("l0", ["a0"], [_A0])],
+        superstring_streams["canonical"],
+    )
+
+    return {
+        "happy": (
+            happy_map,
+            happy_streams,
+            _streams(_fresh_specs(happy_specs)),
+            MODE_TIE_BREAK,
+            2,
+        ),
+        "below-threshold": (
+            diverged_map,
+            diverged_streams,
+            _streams(
+                [("f_a0", "kappa lambda mu nu", 3), ("f_a1", _A1, 3)]
+            ),
+            MODE_TIE_BREAK,
+            1,
+        ),
+        "scored-below-threshold": (
+            scored_below_map,
+            scored_below_streams,
+            _streams([("f_a0", "alpha beta gamma nu", 3)]),
+            MODE_TIE_BREAK,
+            1,
+        ),
+        "missing-anchor": (
+            missing_map,
+            missing_streams,
+            _streams(_fresh_specs(diverged_specs)),
+            MODE_PRIMARY,
+            1,
+        ),
+        "page-mismatch": (
+            mismatch_map,
+            mismatch_streams,
+            mismatch_fresh,
+            MODE_PRIMARY,
+            1,
+        ),
+        "superstring-ambiguous": (
+            superstring_map,
+            superstring_streams,
+            _streams([("f_a0", _A0 + " iota kappa lambda mu", 3)]),
+            MODE_NO_GEOMETRY,
+            0,
+        ),
+    }
+
+
+def test_fingerprint_reuse_preserves_complete_ordered_result_characterizations():
+    expected = {
+        "happy": "581dd92eb551eb74d989b4ac40068527325afeefb90de33e13797c52a4c353b9",
+        "below-threshold": "7756e18e78d6091da4be5b2d798bb599da0b9144c252248a261e2cc0b515440c",
+        "scored-below-threshold": "bc11fb7e4f7a56036380c62caf8737b51be43fd0ec9f0bf9704d30b5a76b6da0",
+        "missing-anchor": "8f2b2972e6853887ffdd2ade0292b110b9996ed6e618f2dece0052fa86e976aa",
+        "page-mismatch": "f2d264ad09911c1910e96f6dacd4f1aed221eba42aad51aab6be964d8d8e3123",
+        "superstring-ambiguous": "749d96cda2e02e10ba181cc49bb2530bae6944fa8cc167f058909853951df6ca",
+    }
+    for name, (old_map, old_streams, fresh, mode, _) in (
+        _fingerprint_characterization_cases().items()
+    ):
+        result = rebind(
+            RebindContext(
+                old_map,
+                old_streams,
+                fresh,
+                geometry_mode=mode,
+            )
+        )
+        assert _complete_result_digest(result) == expected[name]
+
+
+@pytest.mark.parametrize(
+    ("case_name", "expected_computations"),
+    [
+        ("happy", 2),
+        ("below-threshold", 1),
+        ("scored-below-threshold", 1),
+        ("missing-anchor", 1),
+        ("page-mismatch", 1),
+        ("superstring-ambiguous", 0),
+    ],
+)
+def test_slot_resolution_constructs_one_fresh_fingerprint_per_evaluated_slot(
+    monkeypatch, case_name, expected_computations
+):
+    import engine.structure.rebind as rebind_module
+
+    old_map, old_streams, fresh, mode, expected_evaluated = (
+        _fingerprint_characterization_cases()[case_name]
+    )
+    original = rebind_module._runtime_fingerprint_slot
+    actual_computations = 0
+
+    def counted_fingerprint(tokens, *, k=3):
+        nonlocal actual_computations
+        actual_computations += 1
+        return original(tokens, k=k)
+
+    monkeypatch.setattr(
+        rebind_module, "_runtime_fingerprint_slot", counted_fingerprint
+    )
+    telemetry = RebindTelemetry()
+    rebind(
+        RebindContext(
+            old_map,
+            old_streams,
+            fresh,
+            geometry_mode=mode,
+            telemetry=telemetry,
+        )
+    )
+    span = next(
+        record
+        for record in telemetry.to_json()["spans"]
+        if record["name"] == "rebind.resolve-slots"
+    )
+    assert span["attributes"]["fingerprint_evaluated_slots"] == expected_evaluated
+    assert (
+        span["attributes"]["fresh_fingerprint_computations"]
+        == expected_computations
+        == actual_computations
+    )
+
+
 def test_happy_rebind_binds_every_node_on_an_id_permuted_stream():
     old_map, old_streams, specs = _happy_case()
     fresh = _streams(_fresh_specs(specs))
-    ctx = RebindContext(old_map, old_streams, fresh, geometry_mode=MODE_TIE_BREAK)
+    ctx = RebindContext(
+        old_map,
+        old_streams,
+        fresh,
+        geometry_mode=MODE_TIE_BREAK,
+        policy=RebindPolicy(identity="test-calibration@v1"),
+    )
     result = rebind(ctx)
     assert set(result.report.bound_node_ids) == {"n-0", "l0", "l1"}
     assert result.report.unresolved == ()
@@ -261,7 +532,32 @@ def test_happy_rebind_binds_every_node_on_an_id_permuted_stream():
     l0 = next(n for n in result.report.nodes if n.node_id == "l0")
     assert l0.slots[0].fresh_atom_ids == ("f_a0",)
     assert l0.slots[0].score == 1.0
+    assert l0.slots[0].boundary_classes == (
+        "clean-candidate",
+        "clean-candidate",
+    )
+    assert l0.slots[0].located_by == (
+        "anchor-projected",
+        "anchor-projected",
+    )
+    assert result.report.alignment_backend.startswith(
+        "rapidfuzz@3.14.5:Levenshtein.opcodes"
+    )
+    assert result.report.policy_identity == "test-calibration@v1"
+    assert result.report.consumable
     assert_all_bound(result)  # strict complement does not raise
+
+
+def test_fully_bound_uncalibrated_result_is_explicitly_not_for_consumption():
+    old_map, old_streams, specs = _happy_case()
+    fresh = _streams(_fresh_specs(specs))
+    result = rebind(
+        RebindContext(old_map, old_streams, fresh, geometry_mode=MODE_TIE_BREAK)
+    )
+    assert result.report.unresolved == ()
+    assert not result.report.consumable and result.report.policy_identity is None
+    with pytest.raises(RebindNotConsumableError, match="not-for-consumption"):
+        assert_all_bound(result)
 
 
 def test_happy_rebind_restamps_extent_bottom_up_and_carries_the_decision_digest():
@@ -370,7 +666,11 @@ def test_below_threshold_when_fresh_content_diverges():
     result = rebind(RebindContext(old_map, old_streams, fresh, geometry_mode=MODE_TIE_BREAK))
     l0 = next(n for n in result.report.nodes if n.node_id == "l0")
     assert not l0.bound and l0.reason == "below-threshold"
-    assert next(n for n in result.report.nodes if n.node_id == "l1").bound
+    # The neighbouring slot touches the replace edge but its stored anchor independently confirms
+    # the projected seam, so the production confirmation-in-churn path may bind it.
+    l1 = next(n for n in result.report.nodes if n.node_id == "l1")
+    assert l1.bound and l1.reason is None
+    assert l1.slots[0].boundary_classes[0] == "edge-candidate"
 
 
 def test_ambiguous_repeated_content_fails_loud():
@@ -398,7 +698,9 @@ def test_no_rescue_geometry_does_not_lift_a_subtau_fingerprint():
     # tie-break, never additive to the score. Mutant (hunt): OR the region-page hit into the ≥τ gate.
     old_streams = _streams([("a0", _A0, 3)])
     old_map = _map([_root(["l0"]), _leaf("l0", ["a0"], [_A0], region_page=3)], old_streams["canonical"])
-    fresh = _streams([("f_a0", "kappa lambda mu nu", 3)])  # on page 3 (region-hit) but content diverged
+    # One boundary-local substitution leaves the six-token anchor at τ while the stored 3-gram
+    # fingerprint falls below τ. Geometry is on-page but still cannot rescue that content failure.
+    fresh = _streams([("f_a0", "alpha beta gamma nu", 3)])
     result = rebind(RebindContext(old_map, old_streams, fresh, geometry_mode=MODE_TIE_BREAK))
     l0 = next(n for n in result.report.nodes if n.node_id == "l0")
     assert not l0.bound and l0.reason == "below-threshold"
@@ -420,7 +722,8 @@ def test_r2_superstring_does_not_auto_bind_at_full_score():
     fresh = _streams([("f_a0", _A0 + " iota kappa lambda mu", 3)])
     result = rebind(RebindContext(old_map, old_streams, fresh, geometry_mode=MODE_NO_GEOMETRY))
     l0 = next(n for n in result.report.nodes if n.node_id == "l0")
-    assert not l0.bound and l0.reason == "below-threshold"
+    assert not l0.bound and l0.reason == "ambiguous"
+    assert l0.slots[0].boundary_classes[1] == "two-candidate"
     assert (l0.slots[0].score or 0.0) < 1.0
 
 
@@ -443,6 +746,37 @@ def test_primary_mode_hard_pin_excludes_a_wrong_page_and_yields_zero_candidate()
     old_map, old_streams, fresh = _region_mismatch_case()
     result = rebind(RebindContext(old_map, old_streams, fresh, geometry_mode=MODE_PRIMARY))
     l0 = next(n for n in result.report.nodes if n.node_id == "l0")
+    assert not l0.bound and l0.reason == "zero-candidate"
+
+
+def test_primary_mode_pin_checks_every_atom_not_only_boundary_pages():
+    specs = [
+        ("a0", "alpha beta", 3),
+        ("a1", "gamma delta", 9),
+        ("a2", "epsilon zeta", 3),
+    ]
+    old_streams = _streams(specs)
+    old_map = _map(
+        [
+            _root(["l0"]),
+            _leaf(
+                "l0",
+                ["a0", "a1", "a2"],
+                [text for _, text, _ in specs],
+                region_page=3,
+            ),
+        ],
+        old_streams["canonical"],
+    )
+    result = rebind(
+        RebindContext(
+            old_map,
+            old_streams,
+            _streams(_fresh_specs(specs)),
+            geometry_mode=MODE_PRIMARY,
+        )
+    )
+    l0 = next(node for node in result.report.nodes if node.node_id == "l0")
     assert not l0.bound and l0.reason == "zero-candidate"
 
 
@@ -527,10 +861,35 @@ def test_partial_rebind_never_silently_double_claims_a_fresh_atom():
                     claimed.setdefault(aid, []).append(n.node_id)
     doubles = {aid: owners for aid, owners in claimed.items() if len(owners) > 1}
     assert not doubles, f"silent double-bind of fresh atom(s): {doubles}"
-    # the two conflicting leaves fail loud as global-conflict, not a silent bind
+    # The anchored projector can abstain before tentative overlap reaches the global backstop;
+    # either way no conflicting candidate is exposed as bound.
     unresolved = dict(result.report.unresolved)
-    assert unresolved.get("l0") == "global-conflict"
-    assert unresolved.get("l1") == "global-conflict"
+    assert unresolved.get("l0") in REBIND_UNRESOLVED_REASONS
+    assert unresolved.get("l1") in REBIND_UNRESOLVED_REASONS
+
+
+def test_bound_subset_disjointness_backstop_names_both_contested_nodes():
+    def node(node_id: str) -> NodeOutcome:
+        return NodeOutcome(
+            node_id=node_id,
+            bound=True,
+            reason=None,
+            slots=(
+                SlotOutcome(
+                    slot_name="body",
+                    bound=True,
+                    reason=None,
+                    score=1.0,
+                    fresh_atom_ids=("shared",),
+                    ambiguity_candidates=1,
+                    region_page=None,
+                    containment=1.0,
+                    token_count_ratio=1.0,
+                ),
+            ),
+        )
+
+    assert _contested_nodes([node("left"), node("right")]) == {"left", "right"}
 
 
 def test_empty_container_makes_the_rebound_map_fail_global_validation():

@@ -1,0 +1,1951 @@
+{
+  "schema": "s4.7-production-scale-checkpoint@v1",
+  "status": "IN_PROGRESS",
+  "started_at": "2026-07-18T12:03:00.499506+00:00",
+  "updated_at": "2026-07-18T12:39:18.088732+00:00",
+  "profile": "full",
+  "artifact": "/Users/ben_mpa/LLM/PER_LA_LIBERTA/engine/docs/probes/s4_7_scale.json",
+  "progress_poll_interval_seconds": 15.0,
+  "completed_event_count": 69,
+  "events": [
+    {
+      "event": "density-point-complete",
+      "density_point_index": 1,
+      "density_point_total": 18,
+      "point": {
+        "requested_unique_fraction": 0.71,
+        "measured_anchor_density": 0.7291666666666666,
+        "slots": 24,
+        "tokens": 192,
+        "repetitions": 3,
+        "median_seconds": 0.002930999966338277,
+        "bound_correct": 17,
+        "abstained": 7,
+        "wrong": 0
+      }
+    },
+    {
+      "event": "density-point-complete",
+      "density_point_index": 2,
+      "density_point_total": 18,
+      "point": {
+        "requested_unique_fraction": 0.6,
+        "measured_anchor_density": 0.6041666666666666,
+        "slots": 24,
+        "tokens": 192,
+        "repetitions": 3,
+        "median_seconds": 0.0025512499269098043,
+        "bound_correct": 14,
+        "abstained": 10,
+        "wrong": 0
+      }
+    },
+    {
+      "event": "density-point-complete",
+      "density_point_index": 3,
+      "density_point_total": 18,
+      "point": {
+        "requested_unique_fraction": 0.48,
+        "measured_anchor_density": 0.5208333333333334,
+        "slots": 24,
+        "tokens": 192,
+        "repetitions": 3,
+        "median_seconds": 0.002594166900962591,
+        "bound_correct": 12,
+        "abstained": 12,
+        "wrong": 0
+      }
+    },
+    {
+      "event": "density-point-complete",
+      "density_point_index": 4,
+      "density_point_total": 18,
+      "point": {
+        "requested_unique_fraction": 0.36,
+        "measured_anchor_density": 0.3958333333333333,
+        "slots": 24,
+        "tokens": 192,
+        "repetitions": 3,
+        "median_seconds": 0.002924750093370676,
+        "bound_correct": 9,
+        "abstained": 15,
+        "wrong": 0
+      }
+    },
+    {
+      "event": "density-point-complete",
+      "density_point_index": 5,
+      "density_point_total": 18,
+      "point": {
+        "requested_unique_fraction": 0.24,
+        "measured_anchor_density": 0.2708333333333333,
+        "slots": 24,
+        "tokens": 192,
+        "repetitions": 3,
+        "median_seconds": 0.0025422920007258654,
+        "bound_correct": 6,
+        "abstained": 18,
+        "wrong": 0
+      }
+    },
+    {
+      "event": "density-point-complete",
+      "density_point_index": 6,
+      "density_point_total": 18,
+      "point": {
+        "requested_unique_fraction": 0.12,
+        "measured_anchor_density": 0.14583333333333334,
+        "slots": 24,
+        "tokens": 192,
+        "repetitions": 3,
+        "median_seconds": 0.0027288750279694796,
+        "bound_correct": 3,
+        "abstained": 21,
+        "wrong": 0
+      }
+    },
+    {
+      "event": "density-point-complete",
+      "density_point_index": 7,
+      "density_point_total": 18,
+      "point": {
+        "requested_unique_fraction": 0.71,
+        "measured_anchor_density": 0.7104166666666667,
+        "slots": 240,
+        "tokens": 1920,
+        "repetitions": 3,
+        "median_seconds": 0.045845374930649996,
+        "bound_correct": 170,
+        "abstained": 70,
+        "wrong": 0
+      }
+    },
+    {
+      "event": "density-point-complete",
+      "density_point_index": 8,
+      "density_point_total": 18,
+      "point": {
+        "requested_unique_fraction": 0.6,
+        "measured_anchor_density": 0.6020833333333333,
+        "slots": 240,
+        "tokens": 1920,
+        "repetitions": 3,
+        "median_seconds": 0.04494445910677314,
+        "bound_correct": 144,
+        "abstained": 96,
+        "wrong": 0
+      }
+    },
+    {
+      "event": "density-point-complete",
+      "density_point_index": 9,
+      "density_point_total": 18,
+      "point": {
+        "requested_unique_fraction": 0.48,
+        "measured_anchor_density": 0.48125,
+        "slots": 240,
+        "tokens": 1920,
+        "repetitions": 3,
+        "median_seconds": 0.039074167143553495,
+        "bound_correct": 115,
+        "abstained": 125,
+        "wrong": 0
+      }
+    },
+    {
+      "event": "density-point-complete",
+      "density_point_index": 10,
+      "density_point_total": 18,
+      "point": {
+        "requested_unique_fraction": 0.36,
+        "measured_anchor_density": 0.36041666666666666,
+        "slots": 240,
+        "tokens": 1920,
+        "repetitions": 3,
+        "median_seconds": 0.03475316590629518,
+        "bound_correct": 86,
+        "abstained": 154,
+        "wrong": 0
+      }
+    },
+    {
+      "event": "density-point-complete",
+      "density_point_index": 11,
+      "density_point_total": 18,
+      "point": {
+        "requested_unique_fraction": 0.24,
+        "measured_anchor_density": 0.24375,
+        "slots": 240,
+        "tokens": 1920,
+        "repetitions": 3,
+        "median_seconds": 0.03560524992644787,
+        "bound_correct": 58,
+        "abstained": 182,
+        "wrong": 0
+      }
+    },
+    {
+      "event": "density-point-complete",
+      "density_point_index": 12,
+      "density_point_total": 18,
+      "point": {
+        "requested_unique_fraction": 0.12,
+        "measured_anchor_density": 0.12291666666666666,
+        "slots": 240,
+        "tokens": 1920,
+        "repetitions": 3,
+        "median_seconds": 0.02670808299444616,
+        "bound_correct": 29,
+        "abstained": 211,
+        "wrong": 0
+      }
+    },
+    {
+      "event": "density-point-complete",
+      "density_point_index": 13,
+      "density_point_total": 18,
+      "point": {
+        "requested_unique_fraction": 0.71,
+        "measured_anchor_density": 0.7102083333333333,
+        "slots": 2400,
+        "tokens": 19200,
+        "repetitions": 3,
+        "median_seconds": 0.7310193749144673,
+        "bound_correct": 1704,
+        "abstained": 696,
+        "wrong": 0
+      }
+    },
+    {
+      "event": "density-point-complete",
+      "density_point_index": 14,
+      "density_point_total": 18,
+      "point": {
+        "requested_unique_fraction": 0.6,
+        "measured_anchor_density": 0.6002083333333333,
+        "slots": 2400,
+        "tokens": 19200,
+        "repetitions": 3,
+        "median_seconds": 0.6577556249685585,
+        "bound_correct": 1440,
+        "abstained": 960,
+        "wrong": 0
+      }
+    },
+    {
+      "event": "density-point-complete",
+      "density_point_index": 15,
+      "density_point_total": 18,
+      "point": {
+        "requested_unique_fraction": 0.48,
+        "measured_anchor_density": 0.48020833333333335,
+        "slots": 2400,
+        "tokens": 19200,
+        "repetitions": 3,
+        "median_seconds": 0.5450460829306394,
+        "bound_correct": 1152,
+        "abstained": 1248,
+        "wrong": 0
+      }
+    },
+    {
+      "event": "density-point-complete",
+      "density_point_index": 16,
+      "density_point_total": 18,
+      "point": {
+        "requested_unique_fraction": 0.36,
+        "measured_anchor_density": 0.36020833333333335,
+        "slots": 2400,
+        "tokens": 19200,
+        "repetitions": 3,
+        "median_seconds": 0.433525790926069,
+        "bound_correct": 864,
+        "abstained": 1536,
+        "wrong": 0
+      }
+    },
+    {
+      "event": "density-point-complete",
+      "density_point_index": 17,
+      "density_point_total": 18,
+      "point": {
+        "requested_unique_fraction": 0.24,
+        "measured_anchor_density": 0.24020833333333333,
+        "slots": 2400,
+        "tokens": 19200,
+        "repetitions": 3,
+        "median_seconds": 0.35168404201976955,
+        "bound_correct": 576,
+        "abstained": 1824,
+        "wrong": 0
+      }
+    },
+    {
+      "event": "density-point-complete",
+      "density_point_index": 18,
+      "density_point_total": 18,
+      "point": {
+        "requested_unique_fraction": 0.12,
+        "measured_anchor_density": 0.12020833333333333,
+        "slots": 2400,
+        "tokens": 19200,
+        "repetitions": 3,
+        "median_seconds": 0.2886116658337414,
+        "bound_correct": 288,
+        "abstained": 2112,
+        "wrong": 0
+      }
+    },
+    {
+      "event": "phase-sample-complete",
+      "progress": {
+        "shape": "wide",
+        "atom_count": 1000,
+        "phase": "serialize",
+        "repetition": 1,
+        "repetitions": 5,
+        "measurement_index": 1,
+        "measurement_total": 150
+      },
+      "sample": {
+        "ledger": {
+          "family": "wide-rebind-production",
+          "L": 25,
+          "K": 25,
+          "A": 1000,
+          "T": 36000,
+          "D": 4
+        },
+        "phase": "serialize",
+        "elapsed_seconds": 0.4440054160077125,
+        "raw_ru_maxrss_bytes": 59244544,
+        "lifetime_peak_bytes": 59244544,
+        "span_peak_bytes": 58048512,
+        "setup_baseline_bytes": 56655872,
+        "incremental_peak_bytes": 1392640,
+        "sample_interval_seconds": 0.005,
+        "sample_count": 68
+      }
+    },
+    {
+      "event": "phase-sample-complete",
+      "progress": {
+        "shape": "wide",
+        "atom_count": 1000,
+        "phase": "serialize",
+        "repetition": 2,
+        "repetitions": 5,
+        "measurement_index": 2,
+        "measurement_total": 150
+      },
+      "sample": {
+        "ledger": {
+          "family": "wide-rebind-production",
+          "L": 25,
+          "K": 25,
+          "A": 1000,
+          "T": 36000,
+          "D": 4
+        },
+        "phase": "serialize",
+        "elapsed_seconds": 0.8020199579186738,
+        "raw_ru_maxrss_bytes": 58998784,
+        "lifetime_peak_bytes": 58998784,
+        "span_peak_bytes": 55590912,
+        "setup_baseline_bytes": 55197696,
+        "incremental_peak_bytes": 393216,
+        "sample_interval_seconds": 0.005,
+        "sample_count": 130
+      }
+    },
+    {
+      "event": "phase-sample-complete",
+      "progress": {
+        "shape": "wide",
+        "atom_count": 1000,
+        "phase": "serialize",
+        "repetition": 3,
+        "repetitions": 5,
+        "measurement_index": 3,
+        "measurement_total": 150
+      },
+      "sample": {
+        "ledger": {
+          "family": "wide-rebind-production",
+          "L": 25,
+          "K": 25,
+          "A": 1000,
+          "T": 36000,
+          "D": 4
+        },
+        "phase": "serialize",
+        "elapsed_seconds": 0.9561927919276059,
+        "raw_ru_maxrss_bytes": 58589184,
+        "lifetime_peak_bytes": 58589184,
+        "span_peak_bytes": 58540032,
+        "setup_baseline_bytes": 55640064,
+        "incremental_peak_bytes": 2899968,
+        "sample_interval_seconds": 0.005,
+        "sample_count": 140
+      }
+    },
+    {
+      "event": "phase-sample-complete",
+      "progress": {
+        "shape": "wide",
+        "atom_count": 1000,
+        "phase": "serialize",
+        "repetition": 4,
+        "repetitions": 5,
+        "measurement_index": 4,
+        "measurement_total": 150
+      },
+      "sample": {
+        "ledger": {
+          "family": "wide-rebind-production",
+          "L": 25,
+          "K": 25,
+          "A": 1000,
+          "T": 36000,
+          "D": 4
+        },
+        "phase": "serialize",
+        "elapsed_seconds": 0.9270175420679152,
+        "raw_ru_maxrss_bytes": 58146816,
+        "lifetime_peak_bytes": 58146816,
+        "span_peak_bytes": 58146816,
+        "setup_baseline_bytes": 52412416,
+        "incremental_peak_bytes": 5734400,
+        "sample_interval_seconds": 0.005,
+        "sample_count": 139
+      }
+    },
+    {
+      "event": "phase-sample-complete",
+      "progress": {
+        "shape": "wide",
+        "atom_count": 1000,
+        "phase": "serialize",
+        "repetition": 5,
+        "repetitions": 5,
+        "measurement_index": 5,
+        "measurement_total": 150
+      },
+      "sample": {
+        "ledger": {
+          "family": "wide-rebind-production",
+          "L": 25,
+          "K": 25,
+          "A": 1000,
+          "T": 36000,
+          "D": 4
+        },
+        "phase": "serialize",
+        "elapsed_seconds": 0.7833307499531657,
+        "raw_ru_maxrss_bytes": 60227584,
+        "lifetime_peak_bytes": 60227584,
+        "span_peak_bytes": 60227584,
+        "setup_baseline_bytes": 56524800,
+        "incremental_peak_bytes": 3702784,
+        "sample_interval_seconds": 0.005,
+        "sample_count": 126
+      }
+    },
+    {
+      "event": "phase-sample-complete",
+      "progress": {
+        "shape": "wide",
+        "atom_count": 1000,
+        "phase": "load",
+        "repetition": 1,
+        "repetitions": 5,
+        "measurement_index": 6,
+        "measurement_total": 150
+      },
+      "sample": {
+        "ledger": {
+          "family": "wide-rebind-production",
+          "L": 25,
+          "K": 25,
+          "A": 1000,
+          "T": 36000,
+          "D": 4
+        },
+        "phase": "load",
+        "elapsed_seconds": 0.696442374959588,
+        "raw_ru_maxrss_bytes": 68747264,
+        "lifetime_peak_bytes": 68747264,
+        "span_peak_bytes": 68747264,
+        "setup_baseline_bytes": 63569920,
+        "incremental_peak_bytes": 5177344,
+        "sample_interval_seconds": 0.005,
+        "sample_count": 111
+      }
+    },
+    {
+      "event": "phase-sample-complete",
+      "progress": {
+        "shape": "wide",
+        "atom_count": 1000,
+        "phase": "load",
+        "repetition": 2,
+        "repetitions": 5,
+        "measurement_index": 7,
+        "measurement_total": 150
+      },
+      "sample": {
+        "ledger": {
+          "family": "wide-rebind-production",
+          "L": 25,
+          "K": 25,
+          "A": 1000,
+          "T": 36000,
+          "D": 4
+        },
+        "phase": "load",
+        "elapsed_seconds": 0.6454420001246035,
+        "raw_ru_maxrss_bytes": 67256320,
+        "lifetime_peak_bytes": 67256320,
+        "span_peak_bytes": 67158016,
+        "setup_baseline_bytes": 54738944,
+        "incremental_peak_bytes": 12419072,
+        "sample_interval_seconds": 0.005,
+        "sample_count": 106
+      }
+    },
+    {
+      "event": "phase-sample-complete",
+      "progress": {
+        "shape": "wide",
+        "atom_count": 1000,
+        "phase": "load",
+        "repetition": 3,
+        "repetitions": 5,
+        "measurement_index": 8,
+        "measurement_total": 150
+      },
+      "sample": {
+        "ledger": {
+          "family": "wide-rebind-production",
+          "L": 25,
+          "K": 25,
+          "A": 1000,
+          "T": 36000,
+          "D": 4
+        },
+        "phase": "load",
+        "elapsed_seconds": 0.7394600829575211,
+        "raw_ru_maxrss_bytes": 71024640,
+        "lifetime_peak_bytes": 71024640,
+        "span_peak_bytes": 71024640,
+        "setup_baseline_bytes": 63176704,
+        "incremental_peak_bytes": 7847936,
+        "sample_interval_seconds": 0.005,
+        "sample_count": 120
+      }
+    },
+    {
+      "event": "phase-sample-complete",
+      "progress": {
+        "shape": "wide",
+        "atom_count": 1000,
+        "phase": "load",
+        "repetition": 4,
+        "repetitions": 5,
+        "measurement_index": 9,
+        "measurement_total": 150
+      },
+      "sample": {
+        "ledger": {
+          "family": "wide-rebind-production",
+          "L": 25,
+          "K": 25,
+          "A": 1000,
+          "T": 36000,
+          "D": 4
+        },
+        "phase": "load",
+        "elapsed_seconds": 0.9394693749491125,
+        "raw_ru_maxrss_bytes": 68272128,
+        "lifetime_peak_bytes": 68272128,
+        "span_peak_bytes": 68272128,
+        "setup_baseline_bytes": 56426496,
+        "incremental_peak_bytes": 11845632,
+        "sample_interval_seconds": 0.005,
+        "sample_count": 142
+      }
+    },
+    {
+      "event": "phase-sample-complete",
+      "progress": {
+        "shape": "wide",
+        "atom_count": 1000,
+        "phase": "load",
+        "repetition": 5,
+        "repetitions": 5,
+        "measurement_index": 10,
+        "measurement_total": 150
+      },
+      "sample": {
+        "ledger": {
+          "family": "wide-rebind-production",
+          "L": 25,
+          "K": 25,
+          "A": 1000,
+          "T": 36000,
+          "D": 4
+        },
+        "phase": "load",
+        "elapsed_seconds": 0.7463132499251515,
+        "raw_ru_maxrss_bytes": 68665344,
+        "lifetime_peak_bytes": 68665344,
+        "span_peak_bytes": 68616192,
+        "setup_baseline_bytes": 62816256,
+        "incremental_peak_bytes": 5799936,
+        "sample_interval_seconds": 0.005,
+        "sample_count": 111
+      }
+    },
+    {
+      "event": "phase-sample-complete",
+      "progress": {
+        "shape": "wide",
+        "atom_count": 1000,
+        "phase": "index",
+        "repetition": 1,
+        "repetitions": 5,
+        "measurement_index": 11,
+        "measurement_total": 150
+      },
+      "sample": {
+        "ledger": {
+          "family": "wide-rebind-production",
+          "L": 25,
+          "K": 25,
+          "A": 1000,
+          "T": 36000,
+          "D": 4
+        },
+        "phase": "index",
+        "elapsed_seconds": 0.004282250069081783,
+        "raw_ru_maxrss_bytes": 71876608,
+        "lifetime_peak_bytes": 71876608,
+        "span_peak_bytes": 70483968,
+        "setup_baseline_bytes": 70434816,
+        "incremental_peak_bytes": 49152,
+        "sample_interval_seconds": 0.005,
+        "sample_count": 1
+      }
+    },
+    {
+      "event": "phase-sample-complete",
+      "progress": {
+        "shape": "wide",
+        "atom_count": 1000,
+        "phase": "index",
+        "repetition": 2,
+        "repetitions": 5,
+        "measurement_index": 12,
+        "measurement_total": 150
+      },
+      "sample": {
+        "ledger": {
+          "family": "wide-rebind-production",
+          "L": 25,
+          "K": 25,
+          "A": 1000,
+          "T": 36000,
+          "D": 4
+        },
+        "phase": "index",
+        "elapsed_seconds": 0.0057223339099437,
+        "raw_ru_maxrss_bytes": 72695808,
+        "lifetime_peak_bytes": 72695808,
+        "span_peak_bytes": 72695808,
+        "setup_baseline_bytes": 72630272,
+        "incremental_peak_bytes": 65536,
+        "sample_interval_seconds": 0.005,
+        "sample_count": 2
+      }
+    },
+    {
+      "event": "phase-sample-complete",
+      "progress": {
+        "shape": "wide",
+        "atom_count": 1000,
+        "phase": "index",
+        "repetition": 3,
+        "repetitions": 5,
+        "measurement_index": 13,
+        "measurement_total": 150
+      },
+      "sample": {
+        "ledger": {
+          "family": "wide-rebind-production",
+          "L": 25,
+          "K": 25,
+          "A": 1000,
+          "T": 36000,
+          "D": 4
+        },
+        "phase": "index",
+        "elapsed_seconds": 0.0024242079816758633,
+        "raw_ru_maxrss_bytes": 67272704,
+        "lifetime_peak_bytes": 67272704,
+        "span_peak_bytes": 67239936,
+        "setup_baseline_bytes": 66879488,
+        "incremental_peak_bytes": 360448,
+        "sample_interval_seconds": 0.005,
+        "sample_count": 1
+      }
+    },
+    {
+      "event": "phase-sample-complete",
+      "progress": {
+        "shape": "wide",
+        "atom_count": 1000,
+        "phase": "index",
+        "repetition": 4,
+        "repetitions": 5,
+        "measurement_index": 14,
+        "measurement_total": 150
+      },
+      "sample": {
+        "ledger": {
+          "family": "wide-rebind-production",
+          "L": 25,
+          "K": 25,
+          "A": 1000,
+          "T": 36000,
+          "D": 4
+        },
+        "phase": "index",
+        "elapsed_seconds": 0.005215541925281286,
+        "raw_ru_maxrss_bytes": 68698112,
+        "lifetime_peak_bytes": 68698112,
+        "span_peak_bytes": 68681728,
+        "setup_baseline_bytes": 68567040,
+        "incremental_peak_bytes": 114688,
+        "sample_interval_seconds": 0.005,
+        "sample_count": 1
+      }
+    },
+    {
+      "event": "phase-sample-complete",
+      "progress": {
+        "shape": "wide",
+        "atom_count": 1000,
+        "phase": "index",
+        "repetition": 5,
+        "repetitions": 5,
+        "measurement_index": 15,
+        "measurement_total": 150
+      },
+      "sample": {
+        "ledger": {
+          "family": "wide-rebind-production",
+          "L": 25,
+          "K": 25,
+          "A": 1000,
+          "T": 36000,
+          "D": 4
+        },
+        "phase": "index",
+        "elapsed_seconds": 0.004129167180508375,
+        "raw_ru_maxrss_bytes": 69124096,
+        "lifetime_peak_bytes": 69124096,
+        "span_peak_bytes": 68632576,
+        "setup_baseline_bytes": 68517888,
+        "incremental_peak_bytes": 114688,
+        "sample_interval_seconds": 0.005,
+        "sample_count": 1
+      }
+    },
+    {
+      "event": "phase-sample-complete",
+      "progress": {
+        "shape": "wide",
+        "atom_count": 1000,
+        "phase": "rebind",
+        "repetition": 1,
+        "repetitions": 5,
+        "measurement_index": 16,
+        "measurement_total": 150
+      },
+      "sample": {
+        "ledger": {
+          "family": "wide-rebind-production",
+          "L": 25,
+          "K": 25,
+          "A": 1000,
+          "T": 36000,
+          "D": 4
+        },
+        "phase": "rebind",
+        "elapsed_seconds": 0.6440777499228716,
+        "raw_ru_maxrss_bytes": 98664448,
+        "lifetime_peak_bytes": 98664448,
+        "span_peak_bytes": 98648064,
+        "setup_baseline_bytes": 68747264,
+        "incremental_peak_bytes": 29900800,
+        "sample_interval_seconds": 0.005,
+        "sample_count": 111
+      }
+    },
+    {
+      "event": "phase-sample-complete",
+      "progress": {
+        "shape": "wide",
+        "atom_count": 1000,
+        "phase": "rebind",
+        "repetition": 2,
+        "repetitions": 5,
+        "measurement_index": 17,
+        "measurement_total": 150
+      },
+      "sample": {
+        "ledger": {
+          "family": "wide-rebind-production",
+          "L": 25,
+          "K": 25,
+          "A": 1000,
+          "T": 36000,
+          "D": 4
+        },
+        "phase": "rebind",
+        "elapsed_seconds": 0.5472481669858098,
+        "raw_ru_maxrss_bytes": 99975168,
+        "lifetime_peak_bytes": 99975168,
+        "span_peak_bytes": 99975168,
+        "setup_baseline_bytes": 68321280,
+        "incremental_peak_bytes": 31653888,
+        "sample_interval_seconds": 0.005,
+        "sample_count": 95
+      }
+    },
+    {
+      "event": "phase-sample-complete",
+      "progress": {
+        "shape": "wide",
+        "atom_count": 1000,
+        "phase": "rebind",
+        "repetition": 3,
+        "repetitions": 5,
+        "measurement_index": 18,
+        "measurement_total": 150
+      },
+      "sample": {
+        "ledger": {
+          "family": "wide-rebind-production",
+          "L": 25,
+          "K": 25,
+          "A": 1000,
+          "T": 36000,
+          "D": 4
+        },
+        "phase": "rebind",
+        "elapsed_seconds": 0.5628373329527676,
+        "raw_ru_maxrss_bytes": 95207424,
+        "lifetime_peak_bytes": 95207424,
+        "span_peak_bytes": 95207424,
+        "setup_baseline_bytes": 69238784,
+        "incremental_peak_bytes": 25968640,
+        "sample_interval_seconds": 0.005,
+        "sample_count": 96
+      }
+    },
+    {
+      "event": "phase-sample-complete",
+      "progress": {
+        "shape": "wide",
+        "atom_count": 1000,
+        "phase": "rebind",
+        "repetition": 4,
+        "repetitions": 5,
+        "measurement_index": 19,
+        "measurement_total": 150
+      },
+      "sample": {
+        "ledger": {
+          "family": "wide-rebind-production",
+          "L": 25,
+          "K": 25,
+          "A": 1000,
+          "T": 36000,
+          "D": 4
+        },
+        "phase": "rebind",
+        "elapsed_seconds": 0.5866801668889821,
+        "raw_ru_maxrss_bytes": 98140160,
+        "lifetime_peak_bytes": 98140160,
+        "span_peak_bytes": 98140160,
+        "setup_baseline_bytes": 73646080,
+        "incremental_peak_bytes": 24494080,
+        "sample_interval_seconds": 0.005,
+        "sample_count": 100
+      }
+    },
+    {
+      "event": "phase-sample-complete",
+      "progress": {
+        "shape": "wide",
+        "atom_count": 1000,
+        "phase": "rebind",
+        "repetition": 5,
+        "repetitions": 5,
+        "measurement_index": 20,
+        "measurement_total": 150
+      },
+      "sample": {
+        "ledger": {
+          "family": "wide-rebind-production",
+          "L": 25,
+          "K": 25,
+          "A": 1000,
+          "T": 36000,
+          "D": 4
+        },
+        "phase": "rebind",
+        "elapsed_seconds": 0.5654239158611745,
+        "raw_ru_maxrss_bytes": 99205120,
+        "lifetime_peak_bytes": 99205120,
+        "span_peak_bytes": 99139584,
+        "setup_baseline_bytes": 73809920,
+        "incremental_peak_bytes": 25329664,
+        "sample_interval_seconds": 0.005,
+        "sample_count": 98
+      }
+    },
+    {
+      "event": "phase-sample-complete",
+      "progress": {
+        "shape": "wide",
+        "atom_count": 1000,
+        "phase": "end_to_end",
+        "repetition": 1,
+        "repetitions": 5,
+        "measurement_index": 21,
+        "measurement_total": 150
+      },
+      "sample": {
+        "ledger": {
+          "family": "wide-rebind-production",
+          "L": 25,
+          "K": 25,
+          "A": 1000,
+          "T": 36000,
+          "D": 4
+        },
+        "phase": "end_to_end",
+        "elapsed_seconds": 1.7837497498840094,
+        "raw_ru_maxrss_bytes": 99565568,
+        "lifetime_peak_bytes": 99565568,
+        "span_peak_bytes": 99565568,
+        "setup_baseline_bytes": 57851904,
+        "incremental_peak_bytes": 41713664,
+        "sample_interval_seconds": 0.005,
+        "sample_count": 304
+      }
+    },
+    {
+      "event": "phase-sample-complete",
+      "progress": {
+        "shape": "wide",
+        "atom_count": 1000,
+        "phase": "end_to_end",
+        "repetition": 2,
+        "repetitions": 5,
+        "measurement_index": 22,
+        "measurement_total": 150
+      },
+      "sample": {
+        "ledger": {
+          "family": "wide-rebind-production",
+          "L": 25,
+          "K": 25,
+          "A": 1000,
+          "T": 36000,
+          "D": 4
+        },
+        "phase": "end_to_end",
+        "elapsed_seconds": 1.9277391671203077,
+        "raw_ru_maxrss_bytes": 98746368,
+        "lifetime_peak_bytes": 98746368,
+        "span_peak_bytes": 98746368,
+        "setup_baseline_bytes": 57999360,
+        "incremental_peak_bytes": 40747008,
+        "sample_interval_seconds": 0.005,
+        "sample_count": 324
+      }
+    },
+    {
+      "event": "phase-sample-complete",
+      "progress": {
+        "shape": "wide",
+        "atom_count": 1000,
+        "phase": "end_to_end",
+        "repetition": 3,
+        "repetitions": 5,
+        "measurement_index": 23,
+        "measurement_total": 150
+      },
+      "sample": {
+        "ledger": {
+          "family": "wide-rebind-production",
+          "L": 25,
+          "K": 25,
+          "A": 1000,
+          "T": 36000,
+          "D": 4
+        },
+        "phase": "end_to_end",
+        "elapsed_seconds": 2.1661465410143137,
+        "raw_ru_maxrss_bytes": 100024320,
+        "lifetime_peak_bytes": 100024320,
+        "span_peak_bytes": 100024320,
+        "setup_baseline_bytes": 56229888,
+        "incremental_peak_bytes": 43794432,
+        "sample_interval_seconds": 0.005,
+        "sample_count": 355
+      }
+    },
+    {
+      "event": "phase-sample-complete",
+      "progress": {
+        "shape": "wide",
+        "atom_count": 1000,
+        "phase": "end_to_end",
+        "repetition": 4,
+        "repetitions": 5,
+        "measurement_index": 24,
+        "measurement_total": 150
+      },
+      "sample": {
+        "ledger": {
+          "family": "wide-rebind-production",
+          "L": 25,
+          "K": 25,
+          "A": 1000,
+          "T": 36000,
+          "D": 4
+        },
+        "phase": "end_to_end",
+        "elapsed_seconds": 1.954547292087227,
+        "raw_ru_maxrss_bytes": 99188736,
+        "lifetime_peak_bytes": 99188736,
+        "span_peak_bytes": 99188736,
+        "setup_baseline_bytes": 51642368,
+        "incremental_peak_bytes": 47546368,
+        "sample_interval_seconds": 0.005,
+        "sample_count": 329
+      }
+    },
+    {
+      "event": "phase-sample-complete",
+      "progress": {
+        "shape": "wide",
+        "atom_count": 1000,
+        "phase": "end_to_end",
+        "repetition": 5,
+        "repetitions": 5,
+        "measurement_index": 25,
+        "measurement_total": 150
+      },
+      "sample": {
+        "ledger": {
+          "family": "wide-rebind-production",
+          "L": 25,
+          "K": 25,
+          "A": 1000,
+          "T": 36000,
+          "D": 4
+        },
+        "phase": "end_to_end",
+        "elapsed_seconds": 2.240581833058968,
+        "raw_ru_maxrss_bytes": 99172352,
+        "lifetime_peak_bytes": 99172352,
+        "span_peak_bytes": 99172352,
+        "setup_baseline_bytes": 50872320,
+        "incremental_peak_bytes": 48300032,
+        "sample_interval_seconds": 0.005,
+        "sample_count": 367
+      }
+    },
+    {
+      "event": "phase-sample-complete",
+      "progress": {
+        "shape": "wide",
+        "atom_count": 10000,
+        "phase": "serialize",
+        "repetition": 1,
+        "repetitions": 5,
+        "measurement_index": 26,
+        "measurement_total": 150
+      },
+      "sample": {
+        "ledger": {
+          "family": "wide-rebind-production",
+          "L": 250,
+          "K": 250,
+          "A": 10000,
+          "T": 360000,
+          "D": 4
+        },
+        "phase": "serialize",
+        "elapsed_seconds": 4.393479249905795,
+        "raw_ru_maxrss_bytes": 188792832,
+        "lifetime_peak_bytes": 188792832,
+        "span_peak_bytes": 146784256,
+        "setup_baseline_bytes": 137527296,
+        "incremental_peak_bytes": 9256960,
+        "sample_interval_seconds": 0.005,
+        "sample_count": 767
+      }
+    },
+    {
+      "event": "phase-sample-complete",
+      "progress": {
+        "shape": "wide",
+        "atom_count": 10000,
+        "phase": "serialize",
+        "repetition": 2,
+        "repetitions": 5,
+        "measurement_index": 27,
+        "measurement_total": 150
+      },
+      "sample": {
+        "ledger": {
+          "family": "wide-rebind-production",
+          "L": 250,
+          "K": 250,
+          "A": 10000,
+          "T": 360000,
+          "D": 4
+        },
+        "phase": "serialize",
+        "elapsed_seconds": 3.748250083066523,
+        "raw_ru_maxrss_bytes": 189808640,
+        "lifetime_peak_bytes": 189808640,
+        "span_peak_bytes": 164577280,
+        "setup_baseline_bytes": 164216832,
+        "incremental_peak_bytes": 360448,
+        "sample_interval_seconds": 0.005,
+        "sample_count": 661
+      }
+    },
+    {
+      "event": "phase-sample-complete",
+      "progress": {
+        "shape": "wide",
+        "atom_count": 10000,
+        "phase": "serialize",
+        "repetition": 3,
+        "repetitions": 5,
+        "measurement_index": 28,
+        "measurement_total": 150
+      },
+      "sample": {
+        "ledger": {
+          "family": "wide-rebind-production",
+          "L": 250,
+          "K": 250,
+          "A": 10000,
+          "T": 360000,
+          "D": 4
+        },
+        "phase": "serialize",
+        "elapsed_seconds": 2.572472207946703,
+        "raw_ru_maxrss_bytes": 191856640,
+        "lifetime_peak_bytes": 191856640,
+        "span_peak_bytes": 188956672,
+        "setup_baseline_bytes": 143933440,
+        "incremental_peak_bytes": 45023232,
+        "sample_interval_seconds": 0.005,
+        "sample_count": 457
+      }
+    },
+    {
+      "event": "phase-sample-complete",
+      "progress": {
+        "shape": "wide",
+        "atom_count": 10000,
+        "phase": "serialize",
+        "repetition": 4,
+        "repetitions": 5,
+        "measurement_index": 29,
+        "measurement_total": 150
+      },
+      "sample": {
+        "ledger": {
+          "family": "wide-rebind-production",
+          "L": 250,
+          "K": 250,
+          "A": 10000,
+          "T": 360000,
+          "D": 4
+        },
+        "phase": "serialize",
+        "elapsed_seconds": 2.7494963330682367,
+        "raw_ru_maxrss_bytes": 199852032,
+        "lifetime_peak_bytes": 199852032,
+        "span_peak_bytes": 199720960,
+        "setup_baseline_bytes": 171917312,
+        "incremental_peak_bytes": 27803648,
+        "sample_interval_seconds": 0.005,
+        "sample_count": 481
+      }
+    },
+    {
+      "event": "phase-sample-complete",
+      "progress": {
+        "shape": "wide",
+        "atom_count": 10000,
+        "phase": "serialize",
+        "repetition": 5,
+        "repetitions": 5,
+        "measurement_index": 30,
+        "measurement_total": 150
+      },
+      "sample": {
+        "ledger": {
+          "family": "wide-rebind-production",
+          "L": 250,
+          "K": 250,
+          "A": 10000,
+          "T": 360000,
+          "D": 4
+        },
+        "phase": "serialize",
+        "elapsed_seconds": 2.8813910831231624,
+        "raw_ru_maxrss_bytes": 217612288,
+        "lifetime_peak_bytes": 217612288,
+        "span_peak_bytes": 217464832,
+        "setup_baseline_bytes": 166395904,
+        "incremental_peak_bytes": 51068928,
+        "sample_interval_seconds": 0.005,
+        "sample_count": 511
+      }
+    },
+    {
+      "event": "phase-sample-complete",
+      "progress": {
+        "shape": "wide",
+        "atom_count": 10000,
+        "phase": "load",
+        "repetition": 1,
+        "repetitions": 5,
+        "measurement_index": 31,
+        "measurement_total": 150
+      },
+      "sample": {
+        "ledger": {
+          "family": "wide-rebind-production",
+          "L": 250,
+          "K": 250,
+          "A": 10000,
+          "T": 360000,
+          "D": 4
+        },
+        "phase": "load",
+        "elapsed_seconds": 2.4750735408160836,
+        "raw_ru_maxrss_bytes": 353632256,
+        "lifetime_peak_bytes": 353632256,
+        "span_peak_bytes": 353271808,
+        "setup_baseline_bytes": 203128832,
+        "incremental_peak_bytes": 150142976,
+        "sample_interval_seconds": 0.005,
+        "sample_count": 439
+      }
+    },
+    {
+      "event": "phase-sample-complete",
+      "progress": {
+        "shape": "wide",
+        "atom_count": 10000,
+        "phase": "load",
+        "repetition": 2,
+        "repetitions": 5,
+        "measurement_index": 32,
+        "measurement_total": 150
+      },
+      "sample": {
+        "ledger": {
+          "family": "wide-rebind-production",
+          "L": 250,
+          "K": 250,
+          "A": 10000,
+          "T": 360000,
+          "D": 4
+        },
+        "phase": "load",
+        "elapsed_seconds": 2.7369237921666354,
+        "raw_ru_maxrss_bytes": 352321536,
+        "lifetime_peak_bytes": 352321536,
+        "span_peak_bytes": 352321536,
+        "setup_baseline_bytes": 145473536,
+        "incremental_peak_bytes": 206848000,
+        "sample_interval_seconds": 0.005,
+        "sample_count": 484
+      }
+    },
+    {
+      "event": "phase-sample-complete",
+      "progress": {
+        "shape": "wide",
+        "atom_count": 10000,
+        "phase": "load",
+        "repetition": 3,
+        "repetitions": 5,
+        "measurement_index": 33,
+        "measurement_total": 150
+      },
+      "sample": {
+        "ledger": {
+          "family": "wide-rebind-production",
+          "L": 250,
+          "K": 250,
+          "A": 10000,
+          "T": 360000,
+          "D": 4
+        },
+        "phase": "load",
+        "elapsed_seconds": 2.764096749946475,
+        "raw_ru_maxrss_bytes": 339869696,
+        "lifetime_peak_bytes": 339869696,
+        "span_peak_bytes": 339869696,
+        "setup_baseline_bytes": 185647104,
+        "incremental_peak_bytes": 154222592,
+        "sample_interval_seconds": 0.005,
+        "sample_count": 490
+      }
+    },
+    {
+      "event": "phase-sample-complete",
+      "progress": {
+        "shape": "wide",
+        "atom_count": 10000,
+        "phase": "load",
+        "repetition": 4,
+        "repetitions": 5,
+        "measurement_index": 34,
+        "measurement_total": 150
+      },
+      "sample": {
+        "ledger": {
+          "family": "wide-rebind-production",
+          "L": 250,
+          "K": 250,
+          "A": 10000,
+          "T": 360000,
+          "D": 4
+        },
+        "phase": "load",
+        "elapsed_seconds": 2.985485790995881,
+        "raw_ru_maxrss_bytes": 357285888,
+        "lifetime_peak_bytes": 357285888,
+        "span_peak_bytes": 357285888,
+        "setup_baseline_bytes": 203735040,
+        "incremental_peak_bytes": 153550848,
+        "sample_interval_seconds": 0.005,
+        "sample_count": 528
+      }
+    },
+    {
+      "event": "phase-sample-complete",
+      "progress": {
+        "shape": "wide",
+        "atom_count": 10000,
+        "phase": "load",
+        "repetition": 5,
+        "repetitions": 5,
+        "measurement_index": 35,
+        "measurement_total": 150
+      },
+      "sample": {
+        "ledger": {
+          "family": "wide-rebind-production",
+          "L": 250,
+          "K": 250,
+          "A": 10000,
+          "T": 360000,
+          "D": 4
+        },
+        "phase": "load",
+        "elapsed_seconds": 3.9879327081143856,
+        "raw_ru_maxrss_bytes": 327729152,
+        "lifetime_peak_bytes": 327729152,
+        "span_peak_bytes": 327712768,
+        "setup_baseline_bytes": 204865536,
+        "incremental_peak_bytes": 122847232,
+        "sample_interval_seconds": 0.005,
+        "sample_count": 692
+      }
+    },
+    {
+      "event": "phase-sample-complete",
+      "progress": {
+        "shape": "wide",
+        "atom_count": 10000,
+        "phase": "index",
+        "repetition": 1,
+        "repetitions": 5,
+        "measurement_index": 36,
+        "measurement_total": 150
+      },
+      "sample": {
+        "ledger": {
+          "family": "wide-rebind-production",
+          "L": 250,
+          "K": 250,
+          "A": 10000,
+          "T": 360000,
+          "D": 4
+        },
+        "phase": "index",
+        "elapsed_seconds": 0.08365687518380582,
+        "raw_ru_maxrss_bytes": 355926016,
+        "lifetime_peak_bytes": 355926016,
+        "span_peak_bytes": 308428800,
+        "setup_baseline_bytes": 308363264,
+        "incremental_peak_bytes": 65536,
+        "sample_interval_seconds": 0.005,
+        "sample_count": 15
+      }
+    },
+    {
+      "event": "phase-sample-complete",
+      "progress": {
+        "shape": "wide",
+        "atom_count": 10000,
+        "phase": "index",
+        "repetition": 2,
+        "repetitions": 5,
+        "measurement_index": 37,
+        "measurement_total": 150
+      },
+      "sample": {
+        "ledger": {
+          "family": "wide-rebind-production",
+          "L": 250,
+          "K": 250,
+          "A": 10000,
+          "T": 360000,
+          "D": 4
+        },
+        "phase": "index",
+        "elapsed_seconds": 0.09808299993164837,
+        "raw_ru_maxrss_bytes": 363872256,
+        "lifetime_peak_bytes": 363872256,
+        "span_peak_bytes": 324288512,
+        "setup_baseline_bytes": 324190208,
+        "incremental_peak_bytes": 98304,
+        "sample_interval_seconds": 0.005,
+        "sample_count": 17
+      }
+    },
+    {
+      "event": "phase-sample-complete",
+      "progress": {
+        "shape": "wide",
+        "atom_count": 10000,
+        "phase": "index",
+        "repetition": 3,
+        "repetitions": 5,
+        "measurement_index": 38,
+        "measurement_total": 150
+      },
+      "sample": {
+        "ledger": {
+          "family": "wide-rebind-production",
+          "L": 250,
+          "K": 250,
+          "A": 10000,
+          "T": 360000,
+          "D": 4
+        },
+        "phase": "index",
+        "elapsed_seconds": 0.08421008288860321,
+        "raw_ru_maxrss_bytes": 329351168,
+        "lifetime_peak_bytes": 329351168,
+        "span_peak_bytes": 195723264,
+        "setup_baseline_bytes": 191217664,
+        "incremental_peak_bytes": 4505600,
+        "sample_interval_seconds": 0.005,
+        "sample_count": 15
+      }
+    },
+    {
+      "event": "phase-sample-complete",
+      "progress": {
+        "shape": "wide",
+        "atom_count": 10000,
+        "phase": "index",
+        "repetition": 4,
+        "repetitions": 5,
+        "measurement_index": 39,
+        "measurement_total": 150
+      },
+      "sample": {
+        "ledger": {
+          "family": "wide-rebind-production",
+          "L": 250,
+          "K": 250,
+          "A": 10000,
+          "T": 360000,
+          "D": 4
+        },
+        "phase": "index",
+        "elapsed_seconds": 0.06719149998389184,
+        "raw_ru_maxrss_bytes": 356188160,
+        "lifetime_peak_bytes": 356188160,
+        "span_peak_bytes": 313753600,
+        "setup_baseline_bytes": 312786944,
+        "incremental_peak_bytes": 966656,
+        "sample_interval_seconds": 0.005,
+        "sample_count": 12
+      }
+    },
+    {
+      "event": "phase-sample-complete",
+      "progress": {
+        "shape": "wide",
+        "atom_count": 10000,
+        "phase": "index",
+        "repetition": 5,
+        "repetitions": 5,
+        "measurement_index": 40,
+        "measurement_total": 150
+      },
+      "sample": {
+        "ledger": {
+          "family": "wide-rebind-production",
+          "L": 250,
+          "K": 250,
+          "A": 10000,
+          "T": 360000,
+          "D": 4
+        },
+        "phase": "index",
+        "elapsed_seconds": 0.16324737505055964,
+        "raw_ru_maxrss_bytes": 340443136,
+        "lifetime_peak_bytes": 340443136,
+        "span_peak_bytes": 256655360,
+        "setup_baseline_bytes": 255737856,
+        "incremental_peak_bytes": 917504,
+        "sample_interval_seconds": 0.005,
+        "sample_count": 26
+      }
+    },
+    {
+      "event": "phase-sample-complete",
+      "progress": {
+        "shape": "wide",
+        "atom_count": 10000,
+        "phase": "rebind",
+        "repetition": 1,
+        "repetitions": 5,
+        "measurement_index": 41,
+        "measurement_total": 150
+      },
+      "sample": {
+        "ledger": {
+          "family": "wide-rebind-production",
+          "L": 250,
+          "K": 250,
+          "A": 10000,
+          "T": 360000,
+          "D": 4
+        },
+        "phase": "rebind",
+        "elapsed_seconds": 4.372136791935191,
+        "raw_ru_maxrss_bytes": 560513024,
+        "lifetime_peak_bytes": 560513024,
+        "span_peak_bytes": 560513024,
+        "setup_baseline_bytes": 214089728,
+        "incremental_peak_bytes": 346423296,
+        "sample_interval_seconds": 0.005,
+        "sample_count": 770
+      }
+    },
+    {
+      "event": "phase-sample-complete",
+      "progress": {
+        "shape": "wide",
+        "atom_count": 10000,
+        "phase": "rebind",
+        "repetition": 2,
+        "repetitions": 5,
+        "measurement_index": 42,
+        "measurement_total": 150
+      },
+      "sample": {
+        "ledger": {
+          "family": "wide-rebind-production",
+          "L": 250,
+          "K": 250,
+          "A": 10000,
+          "T": 360000,
+          "D": 4
+        },
+        "phase": "rebind",
+        "elapsed_seconds": 4.122689833166078,
+        "raw_ru_maxrss_bytes": 594640896,
+        "lifetime_peak_bytes": 594640896,
+        "span_peak_bytes": 594264064,
+        "setup_baseline_bytes": 316981248,
+        "incremental_peak_bytes": 277282816,
+        "sample_interval_seconds": 0.005,
+        "sample_count": 728
+      }
+    },
+    {
+      "event": "phase-sample-complete",
+      "progress": {
+        "shape": "wide",
+        "atom_count": 10000,
+        "phase": "rebind",
+        "repetition": 3,
+        "repetitions": 5,
+        "measurement_index": 43,
+        "measurement_total": 150
+      },
+      "sample": {
+        "ledger": {
+          "family": "wide-rebind-production",
+          "L": 250,
+          "K": 250,
+          "A": 10000,
+          "T": 360000,
+          "D": 4
+        },
+        "phase": "rebind",
+        "elapsed_seconds": 4.777788250008598,
+        "raw_ru_maxrss_bytes": 560906240,
+        "lifetime_peak_bytes": 560906240,
+        "span_peak_bytes": 560873472,
+        "setup_baseline_bytes": 276955136,
+        "incremental_peak_bytes": 283918336,
+        "sample_interval_seconds": 0.005,
+        "sample_count": 835
+      }
+    },
+    {
+      "event": "phase-sample-complete",
+      "progress": {
+        "shape": "wide",
+        "atom_count": 10000,
+        "phase": "rebind",
+        "repetition": 4,
+        "repetitions": 5,
+        "measurement_index": 44,
+        "measurement_total": 150
+      },
+      "sample": {
+        "ledger": {
+          "family": "wide-rebind-production",
+          "L": 250,
+          "K": 250,
+          "A": 10000,
+          "T": 360000,
+          "D": 4
+        },
+        "phase": "rebind",
+        "elapsed_seconds": 4.122670499840751,
+        "raw_ru_maxrss_bytes": 564019200,
+        "lifetime_peak_bytes": 564019200,
+        "span_peak_bytes": 564019200,
+        "setup_baseline_bytes": 265011200,
+        "incremental_peak_bytes": 299008000,
+        "sample_interval_seconds": 0.005,
+        "sample_count": 727
+      }
+    },
+    {
+      "event": "phase-sample-complete",
+      "progress": {
+        "shape": "wide",
+        "atom_count": 10000,
+        "phase": "rebind",
+        "repetition": 5,
+        "repetitions": 5,
+        "measurement_index": 45,
+        "measurement_total": 150
+      },
+      "sample": {
+        "ledger": {
+          "family": "wide-rebind-production",
+          "L": 250,
+          "K": 250,
+          "A": 10000,
+          "T": 360000,
+          "D": 4
+        },
+        "phase": "rebind",
+        "elapsed_seconds": 4.124685792019591,
+        "raw_ru_maxrss_bytes": 549339136,
+        "lifetime_peak_bytes": 549339136,
+        "span_peak_bytes": 549339136,
+        "setup_baseline_bytes": 324288512,
+        "incremental_peak_bytes": 225050624,
+        "sample_interval_seconds": 0.005,
+        "sample_count": 723
+      }
+    },
+    {
+      "event": "phase-sample-complete",
+      "progress": {
+        "shape": "wide",
+        "atom_count": 10000,
+        "phase": "end_to_end",
+        "repetition": 1,
+        "repetitions": 5,
+        "measurement_index": 46,
+        "measurement_total": 150
+      },
+      "sample": {
+        "ledger": {
+          "family": "wide-rebind-production",
+          "L": 250,
+          "K": 250,
+          "A": 10000,
+          "T": 360000,
+          "D": 4
+        },
+        "phase": "end_to_end",
+        "elapsed_seconds": 10.492161334026605,
+        "raw_ru_maxrss_bytes": 560250880,
+        "lifetime_peak_bytes": 560250880,
+        "span_peak_bytes": 559742976,
+        "setup_baseline_bytes": 143540224,
+        "incremental_peak_bytes": 416202752,
+        "sample_interval_seconds": 0.005,
+        "sample_count": 1848
+      }
+    },
+    {
+      "event": "phase-sample-complete",
+      "progress": {
+        "shape": "wide",
+        "atom_count": 10000,
+        "phase": "end_to_end",
+        "repetition": 2,
+        "repetitions": 5,
+        "measurement_index": 47,
+        "measurement_total": 150
+      },
+      "sample": {
+        "ledger": {
+          "family": "wide-rebind-production",
+          "L": 250,
+          "K": 250,
+          "A": 10000,
+          "T": 360000,
+          "D": 4
+        },
+        "phase": "end_to_end",
+        "elapsed_seconds": 10.56493395799771,
+        "raw_ru_maxrss_bytes": 565837824,
+        "lifetime_peak_bytes": 565837824,
+        "span_peak_bytes": 565837824,
+        "setup_baseline_bytes": 168099840,
+        "incremental_peak_bytes": 397737984,
+        "sample_interval_seconds": 0.005,
+        "sample_count": 1855
+      }
+    },
+    {
+      "event": "phase-sample-complete",
+      "progress": {
+        "shape": "wide",
+        "atom_count": 10000,
+        "phase": "end_to_end",
+        "repetition": 3,
+        "repetitions": 5,
+        "measurement_index": 48,
+        "measurement_total": 150
+      },
+      "sample": {
+        "ledger": {
+          "family": "wide-rebind-production",
+          "L": 250,
+          "K": 250,
+          "A": 10000,
+          "T": 360000,
+          "D": 4
+        },
+        "phase": "end_to_end",
+        "elapsed_seconds": 14.307094082934782,
+        "raw_ru_maxrss_bytes": 539377664,
+        "lifetime_peak_bytes": 539377664,
+        "span_peak_bytes": 539361280,
+        "setup_baseline_bytes": 166658048,
+        "incremental_peak_bytes": 372703232,
+        "sample_interval_seconds": 0.005,
+        "sample_count": 2474
+      }
+    },
+    {
+      "event": "phase-sample-complete",
+      "progress": {
+        "shape": "wide",
+        "atom_count": 10000,
+        "phase": "end_to_end",
+        "repetition": 4,
+        "repetitions": 5,
+        "measurement_index": 49,
+        "measurement_total": 150
+      },
+      "sample": {
+        "ledger": {
+          "family": "wide-rebind-production",
+          "L": 250,
+          "K": 250,
+          "A": 10000,
+          "T": 360000,
+          "D": 4
+        },
+        "phase": "end_to_end",
+        "elapsed_seconds": 10.068240541033447,
+        "raw_ru_maxrss_bytes": 578584576,
+        "lifetime_peak_bytes": 578584576,
+        "span_peak_bytes": 569212928,
+        "setup_baseline_bytes": 164593664,
+        "incremental_peak_bytes": 404619264,
+        "sample_interval_seconds": 0.005,
+        "sample_count": 1781
+      }
+    },
+    {
+      "event": "phase-sample-complete",
+      "progress": {
+        "shape": "wide",
+        "atom_count": 10000,
+        "phase": "end_to_end",
+        "repetition": 5,
+        "repetitions": 5,
+        "measurement_index": 50,
+        "measurement_total": 150
+      },
+      "sample": {
+        "ledger": {
+          "family": "wide-rebind-production",
+          "L": 250,
+          "K": 250,
+          "A": 10000,
+          "T": 360000,
+          "D": 4
+        },
+        "phase": "end_to_end",
+        "elapsed_seconds": 10.918440000154078,
+        "raw_ru_maxrss_bytes": 561299456,
+        "lifetime_peak_bytes": 561299456,
+        "span_peak_bytes": 561299456,
+        "setup_baseline_bytes": 168083456,
+        "incremental_peak_bytes": 393216000,
+        "sample_interval_seconds": 0.005,
+        "sample_count": 1917
+      }
+    },
+    {
+      "event": "phase-sample-complete",
+      "progress": {
+        "shape": "wide",
+        "atom_count": 100000,
+        "phase": "serialize",
+        "repetition": 1,
+        "repetitions": 5,
+        "measurement_index": 51,
+        "measurement_total": 150
+      },
+      "sample": {
+        "ledger": {
+          "family": "wide-rebind-production",
+          "L": 2500,
+          "K": 2500,
+          "A": 100000,
+          "T": 3600000,
+          "D": 4
+        },
+        "phase": "serialize",
+        "elapsed_seconds": 27.938272333936766,
+        "raw_ru_maxrss_bytes": 1415741440,
+        "lifetime_peak_bytes": 1415741440,
+        "span_peak_bytes": 1196916736,
+        "setup_baseline_bytes": 1041924096,
+        "incremental_peak_bytes": 154992640,
+        "sample_interval_seconds": 0.005,
+        "sample_count": 4513
+      }
+    }
+  ],
+  "command": [
+    "/Users/ben_mpa/LLM/PER_LA_LIBERTA/engine/.venv/bin/python3",
+    "/Users/ben_mpa/LLM/PER_LA_LIBERTA/engine/tools/s4_7_scale.py",
+    "--profile",
+    "full",
+    "--artifact",
+    "docs/probes/s4_7_scale.json",
+    "--checkpoint",
+    "docs/probes/s4_7_scale.checkpoint.json"
+  ],
+  "git": {
+    "head": "6b65a4fd975ce27bb8216aff799764c50bb7ee09",
+    "branch": "spike/s4_7",
+    "status": "M ../.github/workflows/engine.yml\n M .github/workflows/ci.yml\n M docs/ENGINE_STRUCTURE_TASKS.md\n M docs/probes/s4_7_item2_prereg.md\n M pyproject.toml\n M src/engine/structure/__init__.py\n M src/engine/structure/artifacts.py\n M src/engine/structure/projection.py\n M src/engine/structure/rebind.py\n M src/engine/structure/schema/structure_map.schema.json\n M src/engine/structure/structure_map.py\n M tests/fixtures/structure/conforming_structure_map.json\n M tests/fixtures/structure/differ_structure_map.json\n M tests/fixtures/structure/invalid/alias_collision.json\n M tests/fixtures/structure/invalid/empty_container.json\n M tests/fixtures/structure/invalid/empty_map.json\n M tests/fixtures/structure/invalid/leaf_only.json\n M tests/fixtures/structure/invalid/malformed_manifest.json\n M tests/fixtures/structure/invalid/non_container_root.json\n M tests/fixtures/structure/rebind_positive_structure_map.json\n M tests/harness/relation.py\n M tests/hunts/hunt_rebind.py\n M tests/unit/test_authoring_evidence.py\n M tests/unit/test_harness_relation_laws.py\n M tests/unit/test_rebind.py\n M tests/unit/test_structure_artifacts.py\n M tests/unit/test_structure_born_gate.py\n M tests/unit/test_structure_map.py\n M uv.lock\n?? docs/probes/s4_7_priority1_component0_audit.md\n?? docs/probes/s4_7_priority2_inv1_inv2_audit.md\n?? docs/probes/s4_7_priority2_red_manifest.json\n?? docs/probes/s4_7_priority3_inv3_inv5_audit.md\n?? docs/probes/s4_7_priority3_red_manifest.json\n?? docs/probes/s4_7_priority4_inv6_inv7_audit.md\n?? docs/probes/s4_7_priority4_perf_baseline.json\n?? docs/probes/s4_7_priority4_red_manifest.json\n?? docs/probes/s4_7_priority5_item3_audit.md\n?? docs/probes/s4_7_priority5_mutation_manifest.json\n?? docs/probes/s4_7_priority5_perf_baseline.json\n?? docs/probes/s4_7_priority6_prereg.md\n?? src/engine/structure/boundary_anchor.py\n?? src/engine/structure/reanchor.py\n?? tests/harness/boundary.py\n?? tests/harness/invariants_3_5.py\n?? tests/harness/materialize.py\n?? tests/harness/oracle.py\n?? tests/harness/scale.py\n?? tests/harness/scale_production.py\n?? tests/scale/\n?? tests/unit/test_harness_materialize.py\n?? tests/unit/test_s4_7_inv1_inv2.py\n?? tests/unit/test_s4_7_inv3_inv5.py\n?? tests/unit/test_s4_7_inv6_inv7.py\n?? tests/unit/test_s4_7_reanchor.py\n?? tests/unit/test_s4_7_scale_production.py\n?? tools/s4_7_hunt_manifest.py\n?? tools/s4_7_perf_baseline.py\n?? tools/s4_7_scale.py"
+  },
+  "environment": {
+    "python": "3.13.0",
+    "python_executable": "/Users/ben_mpa/LLM/PER_LA_LIBERTA/engine/.venv/bin/python3",
+    "platform": "macOS-26.5.1-arm64-arm-64bit-Mach-O",
+    "machine": "arm64",
+    "processor": "arm"
+  },
+  "source_identity": {
+    "pyproject.toml": "05e86a97085ef3e27aee8ba421044a6e677c907212885ebf39fafd83d49678a3",
+    "docs/probes/s4_7_priority6_prereg.md": "f1f9c3ab9e3a935fa50dd1bda2c9da65495453f4bd3807cac47e08cc815935e6",
+    "src/engine/structure/atom_store.py": "34fe7eb9c0de2e83d0fcd6764c73952c15f87c5162d5934fff473dcbd6e5d0e6",
+    "src/engine/structure/boundary_anchor.py": "92ffa4a82227981514ad4023ffe81686ceaaa6ef9b8c1d6b6e54e88bb5536b08",
+    "src/engine/structure/reanchor.py": "9693e370e4f46a379cec05299243b7d765a473304117e8999bd8b662e2179fe8",
+    "src/engine/structure/rebind.py": "1e600ee7e553e9bc025907a1c0bb190efd6bc43bad1a49252a07fee25406de60",
+    "src/engine/structure/structure_map.py": "26268e6635c2630468977614eee83b6319ab9e2c99f9e4a7bb06d0e982d9b44c",
+    "tests/harness/materialize.py": "754eb0d1e79161dc03ddad7c1b44973285a6493e599c478126d81e4852722b35",
+    "tests/harness/oracle.py": "5fc5245b950362639874c7871e16bba6e4bd43c1daafa58840fd7c3f561e0712",
+    "tests/harness/scale.py": "61df6eed2e0acd9a059c410c1fe8c90cc0f7808dee4b30bd8629a8b95995fc40",
+    "tests/harness/scale_production.py": "258840bafaac5d2a6325b120f8af3fad9d3396ad3ada700d08065c91e66a3a35",
+    "tests/scale/test_s4_7_production_scale.py": "cde61f487cd4f3c467fc7f3c772b3bf09f0eef598c8e49a517708250462f8d55",
+    "tests/unit/test_s4_7_scale_production.py": "5d2dbe322a38207d79096d1c4ddb49c7ea29bfebdc4f3b8d487f405042bfba71",
+    "tools/s4_7_scale.py": "e5e7ebe209f327ecddaa5cd5b10754e016b96ae98e01e168a5a8d9ba2296715c",
+    "uv.lock": "7c6e9b61e324e19325d085b00596a2e863e8ed97e18d2396dc95982b30620bb4"
+  },
+  "last_event": {
+    "event": "phase-sample-complete",
+    "progress": {
+      "shape": "wide",
+      "atom_count": 100000,
+      "phase": "serialize",
+      "repetition": 1,
+      "repetitions": 5,
+      "measurement_index": 51,
+      "measurement_total": 150
+    },
+    "sample": {
+      "ledger": {
+        "family": "wide-rebind-production",
+        "L": 2500,
+        "K": 2500,
+        "A": 100000,
+        "T": 3600000,
+        "D": 4
+      },
+      "phase": "serialize",
+      "elapsed_seconds": 27.938272333936766,
+      "raw_ru_maxrss_bytes": 1415741440,
+      "lifetime_peak_bytes": 1415741440,
+      "span_peak_bytes": 1196916736,
+      "setup_baseline_bytes": 1041924096,
+      "incremental_peak_bytes": 154992640,
+      "sample_interval_seconds": 0.005,
+      "sample_count": 4513
+    }
+  }
+}

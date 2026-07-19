@@ -3,9 +3,8 @@
 
 The shared mutation runner owns patch/test/restore safety and structured liveness.  This wrapper
 streams its operator messages to stderr while retaining the exact invocation output, binds its JSON
-and progress log to the table and runner bytes, inlines normalized patches, demonstrates the strict
-carried reds with ``--runxfail``, records the named green command, and verifies the hunted source set
-is byte-identical afterward.
+and progress log to the table and runner bytes, inlines normalized patches, records any still-carried
+reds plus the named green command, and verifies the hunted source set is byte-identical afterward.
 """
 
 from __future__ import annotations
@@ -41,6 +40,7 @@ LOCK_FILES = (
     "tests/unit/test_s4_7_inv3_inv5.py",
     "tests/harness/scale.py",
     "tests/unit/test_s4_7_inv6_inv7.py",
+    "tests/unit/test_authoring_evidence.py",
     "tools/s4_7_perf_baseline.py",
     "docs/probes/s4_7_item2_prereg.md",
     "docs/probes/s4_7_priority4_perf_baseline.json",
@@ -99,9 +99,7 @@ PRIORITY4_RED_SCOPES = (
     "test_inv6_shipped_end_to_end_wall_growth_exceeds_the_preregistered_bar",
     "test_inv7_deep_evidence_wall_clock_exceeds_the_preregistered_ceiling",
 )
-PRIORITY5_RESIDUAL_SCOPES = (
-    "test_inv7_deep_evidence_wall_clock_exceeds_the_preregistered_ceiling",
-)
+PRIORITY5_RESIDUAL_SCOPES: tuple[str, ...] = ()
 
 
 def _sha256(path: Path) -> str:
@@ -299,6 +297,7 @@ def main(argv: list[str] | None = None) -> int:
             "tests/unit/test_s4_7_reanchor.py",
             "tests/unit/test_s4_7_inv6_inv7.py",
             "tests/unit/test_s4_7_mutation_progress.py",
+            "tests/unit/test_authoring_evidence.py",
         ),
     }[args.profile]
     red_scopes = {
@@ -643,7 +642,7 @@ def priority4_manifest_data() -> tuple[list[str], list[dict], list[int]]:
 
 
 def priority5_manifest_data() -> tuple[list[str], list[dict], list[int]]:
-    """Read the final #48 baseline and expose every measured phase plus the INV-7 residual."""
+    """Read the final S4.7 baseline and expose every registered measured phase."""
     baseline_path = ENGINE_ROOT / "docs/probes/s4_7_priority5_perf_baseline.json"
     baseline = json.loads(baseline_path.read_text(encoding="utf-8"))
     if baseline.get("schema") != "s4.7-perf-baseline@v2":
@@ -674,8 +673,7 @@ def priority5_manifest_data() -> tuple[list[str], list[dict], list[int]]:
     )
     rows.append(
         {
-            "family": "inv7-registered-residual",
-            "tracker": "S4.7-E",
+            "family": "inv7-registered-passing",
             "ledger": baseline["inv7"]["ledger"],
             "limits": baseline["inv7"]["limits"],
             "preflight": baseline["inv7"]["preflight"],

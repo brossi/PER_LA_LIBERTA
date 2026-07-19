@@ -1,5 +1,10 @@
 # S4.7 Priority 5 adversarial audit — #48 production re-anchoring
 
+> **Follow-up — 2026-07-18:** the historical INV-7 residual recorded below is resolved by
+> `S4.7-E`. The unchanged depth-3,000 source-locked measurement is now 0.148400 seconds median and
+> 1,285,736 bytes peak; the strict xfail is an ordinary passing regression test. See the current
+> `s4_7_priority5_perf_baseline.json` and the closing section of `s4_7_priority6_prereg.md`.
+
 **Date:** 2026-07-18  
 **Branch:** `spike/s4_7`  
 **Result:** CLEAN after remediation for item 3; INV-1…INV-6 are green. INV-7 remains one

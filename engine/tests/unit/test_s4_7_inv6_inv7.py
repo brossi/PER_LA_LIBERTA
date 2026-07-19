@@ -26,7 +26,6 @@ from harness.scale import (
 )
 
 TRACKER = "S5.1-R/#48 (S4.7 item 3)"
-INV7_TRACKER = "S4.7-E — deep-evidence composite traversal wall-clock follow-up"
 
 # Structural corruption or a stale/missing ladder is a collection error, never an expected
 # performance failure. Source identity is checked in its own green test so mutation scopes can
@@ -197,10 +196,10 @@ def test_inv7_deep_evidence_python_allocation_peak_is_within_the_registered_ceil
     assert BASELINE["inv7"]["within_tracemalloc_ceiling"] is True
 
 
-@pytest.mark.xfail(strict=True, reason=INV7_TRACKER)
-def test_inv7_deep_evidence_wall_clock_exceeds_the_preregistered_ceiling():
+def test_inv7_deep_evidence_wall_clock_is_within_the_preregistered_ceiling():
     observed = BASELINE["inv7"]["evidence_findings"]["median_seconds"]
     assert observed <= INV7_MAX_SECONDS, (
         f"INV-7 evidence_findings median {observed:.6f}s exceeds preregistered "
         f"{INV7_MAX_SECONDS:.1f}s"
     )
+    assert BASELINE["inv7"]["within_wall_clock_ceiling"] is True

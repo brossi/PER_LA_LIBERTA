@@ -1,6 +1,6 @@
 {
   "schema": "s4.7-perf-baseline@v2",
-  "created_at": "2026-07-19T01:46:13.832943+00:00",
+  "created_at": "2026-07-19T02:04:40.419782+00:00",
   "command": [
     "/Users/ben_mpa/LLM/PER_LA_LIBERTA/engine/.venv/bin/python3",
     "/Users/ben_mpa/LLM/PER_LA_LIBERTA/engine/tools/s4_7_perf_baseline.py",
@@ -9,9 +9,9 @@
   ],
   "repo": "/Users/ben_mpa/LLM/PER_LA_LIBERTA/engine",
   "git": {
-    "head": "6b65a4fd975ce27bb8216aff799764c50bb7ee09",
+    "head": "27cbf182cd1f97b67e039ddf231872163d8c799e",
     "branch": "spike/s4_7",
-    "status": "M ../.github/workflows/engine.yml\n M .github/workflows/ci.yml\n M docs/ENGINE_STRUCTURE_TASKS.md\n M docs/probes/s4_7_item2_prereg.md\n M pyproject.toml\n M src/engine/structure/__init__.py\n M src/engine/structure/artifacts.py\n M src/engine/structure/handles.py\n M src/engine/structure/projection.py\n M src/engine/structure/rebind.py\n M src/engine/structure/schema/structure_map.schema.json\n M src/engine/structure/structure_map.py\n M tests/fixtures/structure/conforming_structure_map.json\n M tests/fixtures/structure/differ_structure_map.json\n M tests/fixtures/structure/invalid/alias_collision.json\n M tests/fixtures/structure/invalid/empty_container.json\n M tests/fixtures/structure/invalid/empty_map.json\n M tests/fixtures/structure/invalid/leaf_only.json\n M tests/fixtures/structure/invalid/malformed_manifest.json\n M tests/fixtures/structure/invalid/non_container_root.json\n M tests/fixtures/structure/rebind_positive_structure_map.json\n M tests/harness/relation.py\n M tests/hunts/hunt_rebind.py\n M tests/unit/test_authoring_evidence.py\n M tests/unit/test_harness_relation_laws.py\n M tests/unit/test_rebind.py\n M tests/unit/test_structure_artifacts.py\n M tests/unit/test_structure_born_gate.py\n M tests/unit/test_structure_handles.py\n M tests/unit/test_structure_map.py\n M uv.lock\n?? docs/probes/s4_7_mutation_runner_self_hunt.json\n?? docs/probes/s4_7_mutation_runner_self_hunt.progress.ndjson\n?? docs/probes/s4_7_priority1_component0_audit.md\n?? docs/probes/s4_7_priority2_inv1_inv2_audit.md\n?? docs/probes/s4_7_priority2_red_manifest.json\n?? docs/probes/s4_7_priority3_inv3_inv5_audit.md\n?? docs/probes/s4_7_priority3_red_manifest.json\n?? docs/probes/s4_7_priority4_inv6_inv7_audit.md\n?? docs/probes/s4_7_priority4_perf_baseline.json\n?? docs/probes/s4_7_priority4_red_manifest.json\n?? docs/probes/s4_7_priority5_item3_audit.md\n?? docs/probes/s4_7_priority5_mutation_manifest.json\n?? docs/probes/s4_7_priority5_mutation_manifest.progress.ndjson\n?? docs/probes/s4_7_priority5_perf_baseline.json\n?? docs/probes/s4_7_priority6_prereg.md\n?? docs/probes/s4_7_rebind_boundary_index_a10000.json\n?? docs/probes/s4_7_rebind_boundary_index_a10000.progress.ndjson\n?? docs/probes/s4_7_rebind_boundary_index_wide_a100000.json\n?? docs/probes/s4_7_rebind_boundary_index_wide_a100000.progress.ndjson\n?? docs/probes/s4_7_rebind_boundary_lookup_linear_a10000.json\n?? docs/probes/s4_7_rebind_boundary_lookup_linear_a10000.progress.ndjson\n?? docs/probes/s4_7_rebind_duplication_skip_a10000.json\n?? docs/probes/s4_7_rebind_duplication_skip_a10000.progress.ndjson\n?? docs/probes/s4_7_rebind_exact_first_a10000.json\n?? docs/probes/s4_7_rebind_exact_first_a10000.progress.ndjson\n?? docs/probes/s4_7_rebind_exact_first_wide_a100000.json\n?? docs/probes/s4_7_rebind_exact_first_wide_a100000.progress.ndjson\n?? docs/probes/s4_7_rebind_fingerprint_reuse_a10000.json\n?? docs/probes/s4_7_rebind_fingerprint_reuse_a10000.progress.ndjson\n?? docs/probes/s4_7_rebind_fingerprint_reuse_wide_a100000.json\n?? docs/probes/s4_7_rebind_fingerprint_reuse_wide_a100000.progress.ndjson\n?? docs/probes/s4_7_rebind_identity_alignment_a10000.json\n?? docs/probes/s4_7_rebind_identity_alignment_a10000.progress.ndjson\n?? docs/probes/s4_7_rebind_runtime_fingerprint_a10000.json\n?? docs/probes/s4_7_rebind_runtime_fingerprint_a10000.progress.ndjson\n?? docs/probes/s4_7_rebind_runtime_fingerprint_wide_a100000.json\n?? docs/probes/s4_7_rebind_runtime_fingerprint_wide_a100000.progress.ndjson\n?? docs/probes/s4_7_rebind_telemetry_baseline.json\n?? docs/probes/s4_7_scale.checkpoint.json\n?? docs/probes/s4_7_scale.json\n?? docs/probes/s4_7_scale_cycle_boundary_index_fingerprint_wide_a100000.active.json\n?? docs/probes/s4_7_scale_cycle_boundary_index_fingerprint_wide_a100000.checkpoint.json\n?? docs/probes/s4_7_scale_cycle_boundary_index_fingerprint_wide_a100000.json\n?? docs/probes/s4_7_scale_cycle_boundary_index_fingerprint_wide_a100000.progress.ndjson\n?? docs/probes/s4_7_scale_cycle_optimized_wide_a100000.active.json\n?? docs/probes/s4_7_scale_cycle_optimized_wide_a100000.checkpoint.json\n?? docs/probes/s4_7_scale_cycle_optimized_wide_a100000.interrupted-before-telemetry-refinement.active.json\n?? docs/probes/s4_7_scale_cycle_optimized_wide_a100000.interrupted-before-telemetry-refinement.checkpoint.json\n?? docs/probes/s4_7_scale_cycle_optimized_wide_a100000.interrupted-before-telemetry-refinement.progress.ndjson\n?? docs/probes/s4_7_scale_cycle_optimized_wide_a100000.json\n?? docs/probes/s4_7_scale_cycle_optimized_wide_a100000.progress.ndjson\n?? docs/probes/s4_7_scale_cycle_wide_a100000.active.json\n?? docs/probes/s4_7_scale_cycle_wide_a100000.checkpoint.json\n?? docs/probes/s4_7_scale_cycle_wide_a100000.json\n?? docs/probes/s4_7_scale_cycle_wide_a100000.progress.ndjson\n?? docs/probes/s4_7_scale_failed_index_growth.checkpoint.json\n?? docs/probes/s4_7_scale_failed_index_growth.json\n?? docs/probes/s4_7_scale_infeasible_setup.checkpoint.json\n?? docs/probes/s4_7_scale_registered_boundary_index_fingerprint.active.json\n?? docs/probes/s4_7_scale_registered_boundary_index_fingerprint.checkpoint.json\n?? docs/probes/s4_7_scale_registered_boundary_index_fingerprint.json\n?? docs/probes/s4_7_scale_registered_boundary_index_fingerprint.progress.ndjson\n?? docs/probes/s4_7_scale_registered_optimized.active.json\n?? docs/probes/s4_7_scale_registered_optimized.checkpoint.json\n?? docs/probes/s4_7_scale_registered_optimized.json\n?? docs/probes/s4_7_scale_registered_optimized.progress.ndjson\n?? docs/probes/s4_7_scale_relation_quadratic.checkpoint.json\n?? docs/probes/s4_7_structure_map_native_validator_wide_a10000.json\n?? docs/probes/s4_7_structure_map_native_validator_wide_a10000.progress.ndjson\n?? docs/probes/s4_7_structure_map_profile_wide_a10000.json\n?? docs/probes/s4_7_structure_map_profile_wide_a10000.progress.ndjson\n?? src/engine/structure/boundary_anchor.py\n?? src/engine/structure/reanchor.py\n?? src/engine/structure/rebind_telemetry.py\n?? tests/harness/boundary.py\n?? tests/harness/invariants_3_5.py\n?? tests/harness/materialize.py\n?? tests/harness/oracle.py\n?? tests/harness/scale.py\n?? tests/harness/scale_production.py\n?? tests/scale/\n?? tests/unit/test_harness_materialize.py\n?? tests/unit/test_s4_7_inv1_inv2.py\n?? tests/unit/test_s4_7_inv3_inv5.py\n?? tests/unit/test_s4_7_inv6_inv7.py\n?? tests/unit/test_s4_7_mutation_progress.py\n?? tests/unit/test_s4_7_reanchor.py\n?? tests/unit/test_s4_7_scale_production.py\n?? tools/s4_7_hunt_manifest.py\n?? tools/s4_7_perf_baseline.py\n?? tools/s4_7_rebind_telemetry.py\n?? tools/s4_7_scale.py\n?? tools/s4_7_scale_cycle.py"
+    "status": "M src/engine/structure/evidence.py\n M tests/unit/test_authoring_evidence.py"
   },
   "environment": {
     "python": "3.13.0",
@@ -23,7 +23,7 @@
   },
   "repetitions": 5,
   "source_identity": {
-    "src/engine/structure/evidence.py": "8990f7756180c4d28dc0eceee2a69911ecf959a64946ab713040a1b3fa49bfa8",
+    "src/engine/structure/evidence.py": "e403d0f1e39b0fb3add96334de79ddb103e76bd470c6da668b9d29daadd21d7b",
     "src/engine/structure/artifacts.py": "a1236b1b3e6c00bdbb88385d16b7072d5270ae25c7b3c83b832d6540e3abd970",
     "src/engine/structure/boundary_anchor.py": "02dcd6ccef59eccedbd416493dc8b6395529e7fb0c1ce96ae77f392af57ade9a",
     "src/engine/structure/rebind.py": "f008d5cd2138ebb052dfff6f9705520be50e8d95c5beda1da4e60e097c286d7e",
@@ -69,11 +69,11 @@
         "phases": {
           "serialize": {
             "elapsed_seconds": [
-              0.00030520791187882423,
-              0.00026754196733236313,
-              0.00024766684509813786,
-              0.0002371249720454216,
-              0.0002260841429233551
+              0.0003640830982476473,
+              0.0003885000478476286,
+              0.00022729206830263138,
+              0.00020058290101587772,
+              0.0001972089521586895
             ],
             "peak_bytes": [
               68964,
@@ -82,34 +82,34 @@
               68964,
               68964
             ],
-            "median_seconds": 0.00024766684509813786,
+            "median_seconds": 0.00022729206830263138,
             "median_peak_bytes": 68964.0
           },
           "load": {
             "elapsed_seconds": [
-              0.02026054193265736,
-              0.020411124918609858,
-              0.08049262501299381,
-              0.04857608280144632,
-              0.03702350007370114
+              0.021929166978225112,
+              0.019658083096146584,
+              0.019146832870319486,
+              0.01911849994212389,
+              0.018774457974359393
             ],
             "peak_bytes": [
-              140748,
-              140325,
-              139620,
-              139432,
-              139620
+              141403,
+              140839,
+              140651,
+              140463,
+              140181
             ],
-            "median_seconds": 0.03702350007370114,
-            "median_peak_bytes": 139620.0
+            "median_seconds": 0.019146832870319486,
+            "median_peak_bytes": 140651.0
           },
           "index": {
             "elapsed_seconds": [
-              8.866703137755394e-05,
-              4.1499966755509377e-05,
-              3.4041935577988625e-05,
-              2.8875190764665604e-05,
-              2.908310852944851e-05
+              7.225014269351959e-05,
+              3.941706381738186e-05,
+              3.3250078558921814e-05,
+              2.9124785214662552e-05,
+              2.687494270503521e-05
             ],
             "peak_bytes": [
               6471,
@@ -118,16 +118,16 @@
               6359,
               6335
             ],
-            "median_seconds": 3.4041935577988625e-05,
+            "median_seconds": 3.3250078558921814e-05,
             "median_peak_bytes": 6391.0
           },
           "rebind": {
             "elapsed_seconds": [
-              0.0016989170107990503,
-              0.0014309999532997608,
-              0.0008223748300224543,
-              0.000683666905388236,
-              0.0006096248980611563
+              0.0007368340156972408,
+              0.0006028749048709869,
+              0.0005864580161869526,
+              0.0005912911146879196,
+              0.0005853748880326748
             ],
             "peak_bytes": [
               106884,
@@ -136,26 +136,26 @@
               106828,
               106812
             ],
-            "median_seconds": 0.0008223748300224543,
+            "median_seconds": 0.0005912911146879196,
             "median_peak_bytes": 106844.0
           },
           "end_to_end": {
             "elapsed_seconds": [
-              0.06986016593873501,
-              0.05157812498509884,
-              0.034696292132139206,
-              0.03911529085598886,
-              0.041966916993260384
+              0.021343749947845936,
+              0.019926332868635654,
+              0.019715999951586127,
+              0.021624207962304354,
+              0.0215358748100698
             ],
             "peak_bytes": [
-              218410,
-              218645,
-              217364,
-              217517,
-              217658
+              218034,
+              217752,
+              218034,
+              217646,
+              217364
             ],
-            "median_seconds": 0.041966916993260384,
-            "median_peak_bytes": 217658.0
+            "median_seconds": 0.021343749947845936,
+            "median_peak_bytes": 217752.0
           }
         }
       },
@@ -180,11 +180,11 @@
         "phases": {
           "serialize": {
             "elapsed_seconds": [
-              0.000935874879360199,
-              0.0015123749617487192,
-              0.0017082919366657734,
-              0.0015010840725153685,
-              0.0006645419634878635
+              0.000568541930988431,
+              0.0005015421193093061,
+              0.00047920900397002697,
+              0.00045475014485418797,
+              0.00043420796282589436
             ],
             "peak_bytes": [
               129603,
@@ -193,34 +193,34 @@
               129603,
               129603
             ],
-            "median_seconds": 0.0015010840725153685,
+            "median_seconds": 0.00047920900397002697,
             "median_peak_bytes": 129603.0
           },
           "load": {
             "elapsed_seconds": [
-              0.05374233308248222,
-              0.02924758312292397,
-              0.03387649985961616,
-              0.046212041983380914,
-              0.043995667016133666
+              0.023092499934136868,
+              0.0239978339523077,
+              0.021711249835789204,
+              0.02112079202197492,
+              0.020714832935482264
             ],
             "peak_bytes": [
-              205280,
-              204058,
-              203917,
-              204105,
-              203917
+              204152,
+              203964,
+              204152,
+              203964,
+              203964
             ],
-            "median_seconds": 0.043995667016133666,
-            "median_peak_bytes": 204058.0
+            "median_seconds": 0.021711249835789204,
+            "median_peak_bytes": 203964.0
           },
           "index": {
             "elapsed_seconds": [
-              0.0002762919757515192,
-              0.00012962520122528076,
-              0.0001862498465925455,
-              0.0007760410662740469,
-              0.00021820818074047565
+              8.312496356666088e-05,
+              4.837499000132084e-05,
+              4.012486897408962e-05,
+              3.7499936297535896e-05,
+              3.600004129111767e-05
             ],
             "peak_bytes": [
               8138,
@@ -229,16 +229,16 @@
               8138,
               8138
             ],
-            "median_seconds": 0.00021820818074047565,
+            "median_seconds": 4.012486897408962e-05,
             "median_peak_bytes": 8138.0
           },
           "rebind": {
             "elapsed_seconds": [
-              0.0014507081359624863,
-              0.0013350839726626873,
-              0.0011587911285459995,
-              0.001119124935939908,
-              0.0018976249266415834
+              0.0011784168891608715,
+              0.0009720418602228165,
+              0.0009505830239504576,
+              0.0009576671291142702,
+              0.0009247078560292721
             ],
             "peak_bytes": [
               258900,
@@ -247,26 +247,26 @@
               258900,
               258900
             ],
-            "median_seconds": 0.0013350839726626873,
+            "median_seconds": 0.0009576671291142702,
             "median_peak_bytes": 258900.0
           },
           "end_to_end": {
             "elapsed_seconds": [
-              0.041877834126353264,
-              0.04854375007562339,
-              0.03096704208292067,
-              0.03417158406227827,
-              0.03782729199156165
+              0.022526999935507774,
+              0.02265262510627508,
+              0.023587082978338003,
+              0.02267062501050532,
+              0.02261433401145041
             ],
             "peak_bytes": [
-              449482,
+              449670,
               448213,
-              447790,
-              447931,
-              448025
+              448213,
+              448072,
+              448119
             ],
-            "median_seconds": 0.03782729199156165,
-            "median_peak_bytes": 448025.0
+            "median_seconds": 0.02265262510627508,
+            "median_peak_bytes": 448213.0
           }
         }
       },
@@ -291,11 +291,11 @@
         "phases": {
           "serialize": {
             "elapsed_seconds": [
-              0.0016153331380337477,
-              0.003177165985107422,
-              0.0010050830896943808,
-              0.0009752090554684401,
-              0.0009254578035324812
+              0.0008738338947296143,
+              0.0008217920549213886,
+              0.0007998328655958176,
+              0.0007844159845262766,
+              0.0007893750444054604
             ],
             "peak_bytes": [
               244130,
@@ -304,34 +304,34 @@
               244130,
               244130
             ],
-            "median_seconds": 0.0010050830896943808,
+            "median_seconds": 0.0007998328655958176,
             "median_peak_bytes": 244130.0
           },
           "load": {
             "elapsed_seconds": [
-              0.06339387502521276,
-              0.08274904196150601,
-              0.0639069580938667,
-              0.05414400016888976,
-              0.05042650015093386
+              0.024934749817475677,
+              0.024841124890372157,
+              0.024605457903817296,
+              0.024693417130038142,
+              0.024244791129603982
             ],
             "peak_bytes": [
-              365880,
-              365128,
-              364705,
-              364705,
-              365034
+              367807,
+              365833,
+              365457,
+              365927,
+              365786
             ],
-            "median_seconds": 0.06339387502521276,
-            "median_peak_bytes": 365034.0
+            "median_seconds": 0.024693417130038142,
+            "median_peak_bytes": 365833.0
           },
           "index": {
             "elapsed_seconds": [
-              0.0001250840723514557,
-              6.412481889128685e-05,
-              5.587493069469929e-05,
-              5.224999040365219e-05,
-              4.854099825024605e-05
+              0.00010895892046391964,
+              6.387499161064625e-05,
+              5.5167125537991524e-05,
+              5.2582938224077225e-05,
+              5.024997517466545e-05
             ],
             "peak_bytes": [
               13098,
@@ -340,16 +340,16 @@
               13098,
               13098
             ],
-            "median_seconds": 5.587493069469929e-05,
+            "median_seconds": 5.5167125537991524e-05,
             "median_peak_bytes": 13098.0
           },
           "rebind": {
             "elapsed_seconds": [
-              0.002140207914635539,
-              0.0020748330280184746,
-              0.0017976670060306787,
-              0.0017389170825481415,
-              0.0017225828487426043
+              0.0019145829137414694,
+              0.001828417181968689,
+              0.0018947089556604624,
+              0.001917166169732809,
+              0.0018631250131875277
             ],
             "peak_bytes": [
               402692,
@@ -358,26 +358,26 @@
               402692,
               402692
             ],
-            "median_seconds": 0.0017976670060306787,
+            "median_seconds": 0.0018947089556604624,
             "median_peak_bytes": 402692.0
           },
           "end_to_end": {
             "elapsed_seconds": [
-              0.03159366617910564,
-              0.03581358399242163,
-              0.039585999911651015,
-              0.03366045793518424,
-              0.033582207979634404
+              0.0273239160887897,
+              0.027188792126253247,
+              0.028292208909988403,
+              0.02794083417393267,
+              0.02773116691969335
             ],
             "peak_bytes": [
-              740691,
-              740456,
+              743323,
+              740080,
+              741584,
               739751,
-              739845,
-              739986
+              740115
             ],
-            "median_seconds": 0.03366045793518424,
-            "median_peak_bytes": 739986.0
+            "median_seconds": 0.02773116691969335,
+            "median_peak_bytes": 740115.0
           }
         }
       },
@@ -402,11 +402,11 @@
         "phases": {
           "serialize": {
             "elapsed_seconds": [
-              0.0017128749750554562,
-              0.0016894589643925428,
-              0.0017476659268140793,
-              0.0018227919936180115,
-              0.0017058749217540026
+              0.001559416064992547,
+              0.001593416091054678,
+              0.0016180409584194422,
+              0.0015897080302238464,
+              0.0014662910252809525
             ],
             "peak_bytes": [
               467161,
@@ -415,34 +415,34 @@
               467161,
               467161
             ],
-            "median_seconds": 0.0017128749750554562,
+            "median_seconds": 0.0015897080302238464,
             "median_peak_bytes": 467161.0
           },
           "load": {
             "elapsed_seconds": [
-              0.034065791172906756,
-              0.0352999169845134,
-              0.04083916707895696,
-              0.037066540913656354,
-              0.03642637515440583
+              0.03210333292372525,
+              0.033236749935895205,
+              0.032462958013638854,
+              0.031774125061929226,
+              0.031991916010156274
             ],
             "peak_bytes": [
-              704215,
-              702617,
-              702852,
-              702664,
-              702476
+              703416,
+              706236,
+              704685,
+              704262,
+              702053
             ],
-            "median_seconds": 0.03642637515440583,
-            "median_peak_bytes": 702664.0
+            "median_seconds": 0.03210333292372525,
+            "median_peak_bytes": 704262.0
           },
           "index": {
             "elapsed_seconds": [
-              0.00017383298836648464,
-              0.00011458294466137886,
-              9.508384391665459e-05,
-              0.0003004590980708599,
-              9.816698729991913e-05
+              0.0001579581294208765,
+              0.00010337494313716888,
+              0.00013641593977808952,
+              0.0001966250129044056,
+              0.0001438329927623272
             ],
             "peak_bytes": [
               23182,
@@ -451,16 +451,16 @@
               23182,
               23182
             ],
-            "median_seconds": 0.00011458294466137886,
+            "median_seconds": 0.0001438329927623272,
             "median_peak_bytes": 23182.0
           },
           "rebind": {
             "elapsed_seconds": [
-              0.004393999930471182,
-              0.004336167126893997,
-              0.0034668331500142813,
-              0.003432624973356724,
-              0.0039408328011631966
+              0.0037131248973309994,
+              0.003333916887640953,
+              0.003256749827414751,
+              0.003219874808564782,
+              0.0036008749157190323
             ],
             "peak_bytes": [
               603836,
@@ -469,26 +469,26 @@
               603836,
               603836
             ],
-            "median_seconds": 0.0039408328011631966,
+            "median_seconds": 0.003333916887640953,
             "median_peak_bytes": 603836.0
           },
           "end_to_end": {
             "elapsed_seconds": [
-              0.04242858290672302,
-              0.04607495805248618,
-              0.040459209121763706,
-              0.03819749993272126,
-              0.0420312499627471
+              0.038585291942581534,
+              0.0396480830386281,
+              0.03737345803529024,
+              0.0377417909912765,
+              0.037531582871451974
             ],
             "peak_bytes": [
-              1250022,
-              1249787,
-              1252372,
-              1249834,
-              1249834
+              1254957,
+              1251949,
+              1253406,
+              1249505,
+              1250398
             ],
-            "median_seconds": 0.0420312499627471,
-            "median_peak_bytes": 1249834.0
+            "median_seconds": 0.0377417909912765,
+            "median_peak_bytes": 1251949.0
           }
         }
       },
@@ -513,11 +513,11 @@
         "phases": {
           "serialize": {
             "elapsed_seconds": [
-              0.0030382091645151377,
-              0.003201457904651761,
-              0.004407041007652879,
-              0.003052084008231759,
-              0.0028792908415198326
+              0.0030827911105006933,
+              0.0030830830801278353,
+              0.0028690840117633343,
+              0.0028067498933523893,
+              0.0027861660346388817
             ],
             "peak_bytes": [
               923023,
@@ -526,34 +526,34 @@
               923023,
               923023
             ],
-            "median_seconds": 0.003052084008231759,
+            "median_seconds": 0.0028690840117633343,
             "median_peak_bytes": 923023.0
           },
           "load": {
             "elapsed_seconds": [
-              0.06821504095569253,
-              0.050372625002637506,
-              0.06586725008673966,
-              0.0781913329847157,
-              0.06681450014002621
+              0.04646599991247058,
+              0.047701874980702996,
+              0.04733804194256663,
+              0.04725470906123519,
+              0.047210291028022766
             ],
             "peak_bytes": [
-              1383995,
-              1379671,
-              1387050,
-              1383372,
-              1380282
+              1386239,
+              1380329,
+              1380000,
+              1386392,
+              1383619
             ],
-            "median_seconds": 0.06681450014002621,
-            "median_peak_bytes": 1383372.0
+            "median_seconds": 0.04725470906123519,
+            "median_peak_bytes": 1383619.0
           },
           "index": {
             "elapsed_seconds": [
-              0.0002692500129342079,
-              0.0005899998359382153,
-              0.0002450409810990095,
-              0.0001746669877320528,
-              0.0001623749267309904
+              0.00024962518364191055,
+              0.00017841695807874203,
+              0.00015983288176357746,
+              0.00014958297833800316,
+              0.0001447501126676798
             ],
             "peak_bytes": [
               43458,
@@ -562,16 +562,16 @@
               43458,
               43458
             ],
-            "median_seconds": 0.0002450409810990095,
+            "median_seconds": 0.00015983288176357746,
             "median_peak_bytes": 43458.0
           },
           "rebind": {
             "elapsed_seconds": [
-              0.00852120784111321,
-              0.007419666973873973,
-              0.0080825409386307,
-              0.00881279120221734,
-              0.008768958039581776
+              0.007221832871437073,
+              0.006927624810487032,
+              0.0066292500123381615,
+              0.007083916803821921,
+              0.006809583865106106
             ],
             "peak_bytes": [
               1322388,
@@ -580,26 +580,26 @@
               1322388,
               1322388
             ],
-            "median_seconds": 0.00852120784111321,
+            "median_seconds": 0.006927624810487032,
             "median_peak_bytes": 1322388.0
           },
           "end_to_end": {
             "elapsed_seconds": [
-              0.06933491607196629,
-              0.06487200013361871,
-              0.06527187512256205,
-              0.06484345812350512,
-              0.0635998749639839
+              0.05735666700638831,
+              0.05848116707056761,
+              0.056697041960433125,
+              0.057699166936799884,
+              0.057822832837700844
             ],
             "peak_bytes": [
-              2589806,
-              2588208,
-              2589900,
-              2590605,
-              2588666
+              2588631,
+              2594929,
+              2589994,
+              2592344,
+              2589101
             ],
-            "median_seconds": 0.06487200013361871,
-            "median_peak_bytes": 2589806.0
+            "median_seconds": 0.057699166936799884,
+            "median_peak_bytes": 2589994.0
           }
         }
       }
@@ -607,12 +607,12 @@
     "growth_by_phase": {
       "serialize": {
         "wall_clock": {
-          "slope": 0.7437059105959618,
+          "slope": 0.9045976836611154,
           "adjacent_ratios": [
-            6.060900367671598,
-            0.6695714837678357,
-            1.7042123110202723,
-            1.7818486770366557
+            2.108340196596641,
+            1.6690689427151177,
+            1.9875502728180956,
+            1.8047867641200372
           ],
           "max_slope": 1.5,
           "max_adjacent_ratio": 50.0
@@ -631,23 +631,23 @@
       },
       "load": {
         "wall_clock": {
-          "slope": 0.143106187784031,
+          "slope": 0.3170984971278374,
           "adjacent_ratios": [
-            1.188317337057634,
-            1.4409117834709853,
-            0.5746040156074774,
-            1.8342341190088163
+            1.1339342638460566,
+            1.13735585545762,
+            1.3000765651293098,
+            1.4719564841914796
           ],
           "max_slope": 1.5,
           "max_adjacent_ratio": 50.0
         },
         "tracemalloc_peak": {
-          "slope": 0.8401078992945036,
+          "slope": 0.8384307734822061,
           "adjacent_ratios": [
-            1.4615241369431313,
-            1.788873751580433,
-            1.9249275409961812,
-            1.9687532020994387
+            1.4501425514216038,
+            1.7936155399972544,
+            1.925091503500231,
+            1.9646367403040346
           ],
           "max_slope": 1.5,
           "max_adjacent_ratio": 50.0
@@ -655,12 +655,12 @@
       },
       "index": {
         "wall_clock": {
-          "slope": 0.4765963277443574,
+          "slope": 0.6372095224731422,
           "adjacent_ratios": [
-            6.409981601679787,
-            0.25606249273098397,
-            2.0507040140677804,
-            2.13854672545872
+            1.2067601254831661,
+            1.374886122958192,
+            2.6072228951511134,
+            1.1112393526267568
           ],
           "max_slope": 1.5,
           "max_adjacent_ratio": 50.0
@@ -679,12 +679,12 @@
       },
       "rebind": {
         "wall_clock": {
-          "slope": 0.8307949906583421,
+          "slope": 0.8900462540494242,
           "adjacent_ratios": [
-            1.623449458717303,
-            1.346482350803311,
-            2.1921928743993107,
-            2.162286062630733
+            1.6196203618241785,
+            1.9784629732596606,
+            1.759593143675625,
+            2.0779236687537677
           ],
           "max_slope": 1.5,
           "max_adjacent_ratio": 50.0
@@ -703,23 +703,23 @@
       },
       "end_to_end": {
         "wall_clock": {
-          "slope": 0.1408721737847883,
+          "slope": 0.36059582777055116,
           "adjacent_ratios": [
-            0.9013598019991907,
-            0.8898458272586118,
-            1.248683248566655,
-            1.5434230528741282
+            1.0613235800469656,
+            1.224192198016443,
+            1.3609882014908679,
+            1.528787199053067
           ],
           "max_slope": 1.5,
           "max_adjacent_ratio": 50.0
         },
         "tracemalloc_peak": {
-          "slope": 0.8625503506887537,
+          "slope": 0.8626301156454819,
           "adjacent_ratios": [
-            2.058389767433313,
-            1.6516622956308242,
-            1.6889968188587352,
-            2.0721199775330166
+            2.058364561519527,
+            1.6512573263158365,
+            1.6915600953905812,
+            2.0687695744794716
           ],
           "max_slope": 1.5,
           "max_adjacent_ratio": 50.0
@@ -753,23 +753,23 @@
     },
     "evidence_findings": {
       "elapsed_seconds": [
-        4.850296708056703,
-        7.846454125130549,
-        9.037825000006706,
-        8.772243958897889,
-        7.879499416099861
+        0.16382112493738532,
+        0.15669862506911159,
+        0.14629237493500113,
+        0.14611816685646772,
+        0.14839962497353554
       ],
       "peak_bytes": [
-        934592,
-        934592,
-        934592,
-        934592,
-        934592
+        1285736,
+        1285736,
+        1285736,
+        1285736,
+        1285736
       ],
-      "median_seconds": 7.879499416099861,
-      "median_peak_bytes": 934592.0
+      "median_seconds": 0.14839962497353554,
+      "median_peak_bytes": 1285736.0
     },
-    "within_wall_clock_ceiling": false,
+    "within_wall_clock_ceiling": true,
     "within_tracemalloc_ceiling": true
   }
 }

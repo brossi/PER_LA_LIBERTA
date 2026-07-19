@@ -35,6 +35,7 @@ import json
 import pytest
 
 import engine.errors as engine_errors
+import engine.structure.evidence as evidence_module
 from engine.errors import EngineError, MissingInputError, StaleArtifactError
 from engine.structure import (
     AUTHORING_EVIDENCE_FILENAME,
@@ -570,6 +571,186 @@ def test_gate_green_on_a_fresh_complete_pair_returns_none():
     projection = _projection(*_nodes())
     assert assert_evidence_gate(_fresh_evidence(projection), projection) is None
     assert evidence_findings(_fresh_evidence(projection), projection) == ()
+
+
+def test_gate_batch_extent_pass_visits_each_node_and_edge_once_and_reuses_fresh_witnesses():
+    projection = _projection(*_nodes())
+    evidence = _fresh_evidence(projection)
+
+    batch = evidence_module._batch_extent_digests(evidence.entries, projection)
+
+    assert batch is not None
+    assert batch.node_visits == len(projection.nodes) == 4
+    assert batch.edge_visits == sum(
+        len(node.children) for node in projection.nodes if isinstance(node, ContainerNode)
+    ) == 3
+    assert batch.witness_reuses == len(evidence.entries) == 2
+    assert batch.live_hashes == 0
+    assert batch.by_node == {entry.node_id: entry.extent_digest for entry in evidence.entries}
+
+
+def test_gate_batch_path_never_calls_the_per_entry_scalar_extent_walk(monkeypatch):
+    projection = _projection(*_nodes())
+    evidence = _fresh_evidence(projection)
+
+    def unexpected_scalar_call(*_args, **_kwargs):
+        raise AssertionError("valid evidence gate regressed to one descendant walk per entry")
+
+    monkeypatch.setattr(evidence_module, "extent_digest", unexpected_scalar_call)
+    assert evidence_findings(evidence, projection) == ()
+
+
+def test_gate_batch_findings_are_bit_for_bit_equal_to_the_scalar_reference(monkeypatch):
+    projection = _projection(*_nodes())
+    fresh = _fresh_evidence(projection)
+    _, _, leaf_a, _ = _nodes()
+    evidence = AuthoringEvidence(
+        book=BOOK,
+        entries=(
+            fresh.by_node["n-sec"],
+            _entry("n-ghost", evidence="orphan", revision=1),
+            EvidenceEntry(
+                node_id="n-leaf-a",
+                decision_digest=decision_digest(leaf_a),
+                extent_digest=extent_digest(leaf_a, projection),
+                evidence="misbound leaf",
+                authored_at_revision=1,
+                decision_payload=decision_payload(leaf_a),
+                extent_payload=extent_payload(leaf_a, projection),
+            ),
+        ),
+    )
+    changed = _replace_node(
+        projection,
+        "n-sec",
+        node_class="part",
+        heading_atoms=("canonical_00009",),
+    )
+
+    optimized = evidence_findings(evidence, changed)
+    monkeypatch.setattr(evidence_module, "_batch_extent_digests", lambda *_args: None)
+    scalar_reference = evidence_findings(evidence, changed)
+
+    # Exact tuple equality pins every kind, message field, digest, and ordering decision.
+    assert optimized == scalar_reference
+    assert [kind for kind, _ in optimized] == [
+        "missing",
+        "stale-decision",
+        "stale-extent",
+        "orphaned",
+        "misbound",
+    ]
+
+
+def test_gate_batch_malformed_map_falls_back_to_the_scalar_error_verbatim():
+    valid_root = ContainerNode(
+        node_id="n-root", node_class="volume", minted_by=MINTED_BY_HUMAN
+    )
+    valid = ProjectionMap(root_id="n-root", nodes=(valid_root,))
+    evidence = AuthoringEvidence(
+        book=BOOK,
+        entries=(
+            build_evidence_entry(
+                valid_root, valid, evidence="valid before corruption", authored_at_revision=1
+            ),
+        ),
+    )
+    dangling_root = dataclasses.replace(valid_root, children=("n-ghost",))
+    malformed = ProjectionMap(root_id="n-root", nodes=(dangling_root,))
+
+    assert evidence_module._batch_extent_digests(evidence.entries, malformed) is None
+    with pytest.raises(ValueError) as scalar_error:
+        extent_digest(dangling_root, malformed)
+    with pytest.raises(ValueError) as gate_error:
+        evidence_findings(evidence, malformed)
+    assert str(gate_error.value) == str(scalar_error.value)
+
+
+def test_gate_batch_cycle_and_multi_parent_maps_preserve_scalar_errors_verbatim():
+    cycle_root = ContainerNode(
+        node_id="n-cycle-root",
+        node_class="volume",
+        minted_by=MINTED_BY_HUMAN,
+        children=("n-cycle-child",),
+    )
+    cycle_child = ContainerNode(
+        node_id="n-cycle-child", node_class="section", minted_by=MINTED_BY_HUMAN
+    )
+    cycle_valid = ProjectionMap(
+        root_id=cycle_root.node_id, nodes=(cycle_root, cycle_child)
+    )
+    cycle_evidence = AuthoringEvidence(
+        book=BOOK,
+        entries=(
+            build_evidence_entry(
+                cycle_root, cycle_valid, evidence="valid before cycle", authored_at_revision=1
+            ),
+        ),
+    )
+    cycle_projection = ProjectionMap(
+        root_id=cycle_root.node_id,
+        nodes=(
+            cycle_root,
+            dataclasses.replace(cycle_child, children=(cycle_root.node_id,)),
+        ),
+    )
+
+    diamond_leaf = LeafNode(
+        node_id="n-shared",
+        node_class="block",
+        minted_by=MINTED_BY_MACHINE,
+        body_atoms=("canonical_00001",),
+    )
+    diamond_a = ContainerNode(
+        node_id="n-a",
+        node_class="section",
+        minted_by=MINTED_BY_HUMAN,
+        children=(diamond_leaf.node_id,),
+    )
+    diamond_b = ContainerNode(
+        node_id="n-b", node_class="section", minted_by=MINTED_BY_HUMAN
+    )
+    diamond_root = ContainerNode(
+        node_id="n-diamond-root",
+        node_class="volume",
+        minted_by=MINTED_BY_HUMAN,
+        children=(diamond_a.node_id, diamond_b.node_id),
+    )
+    diamond_valid = ProjectionMap(
+        root_id=diamond_root.node_id,
+        nodes=(diamond_root, diamond_a, diamond_b, diamond_leaf),
+    )
+    diamond_evidence = AuthoringEvidence(
+        book=BOOK,
+        entries=(
+            build_evidence_entry(
+                diamond_root,
+                diamond_valid,
+                evidence="valid before multi-parent edge",
+                authored_at_revision=1,
+            ),
+        ),
+    )
+    diamond_projection = ProjectionMap(
+        root_id=diamond_root.node_id,
+        nodes=(
+            diamond_root,
+            diamond_a,
+            dataclasses.replace(diamond_b, children=(diamond_leaf.node_id,)),
+            diamond_leaf,
+        ),
+    )
+
+    for root, projection, evidence in (
+        (cycle_root, cycle_projection, cycle_evidence),
+        (diamond_root, diamond_projection, diamond_evidence),
+    ):
+        assert evidence_module._batch_extent_digests(evidence.entries, projection) is None
+        with pytest.raises(ValueError) as scalar_error:
+            extent_digest(root, projection)
+        with pytest.raises(ValueError) as gate_error:
+            evidence_findings(evidence, projection)
+        assert str(gate_error.value) == str(scalar_error.value)
 
 
 def test_the_raise_carries_exactly_the_producers_findings():

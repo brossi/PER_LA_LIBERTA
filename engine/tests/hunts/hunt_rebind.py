@@ -65,6 +65,8 @@ THANDLES = "tests/unit/test_structure_handles.py"
 REBIN_TELEMETRY = "src/engine/structure/rebind_telemetry.py"
 MUTATION_TOOL = "tools/s4_7_hunt_manifest.py"
 TMUTATION = "tests/unit/test_s4_7_mutation_progress.py"
+EVIDENCE = "src/engine/structure/evidence.py"
+TEVIDENCE = "tests/unit/test_authoring_evidence.py"
 
 
 def m(label, old, new, test_id, *, file=R, test_file=TR):
@@ -408,9 +410,25 @@ MUTANTS = [
         "s4-7-inv7-wall-ceiling-relaxed-after-measurement",
         "INV7_MAX_SECONDS = 2.0\n",
         "INV7_MAX_SECONDS = 20.0\n",
-        "test_inv7_deep_evidence_wall_clock_exceeds_the_preregistered_ceiling",
+        "test_priority4_preregistered_constants_and_upward_only_ladder_are_pinned",
         file=SCALE,
         test_file=TS67,
+    ),
+    m(
+        "s4-7-inv7-shared-extent-pass-disabled",
+        "    extent_batch = _batch_extent_digests(extent_entries, projection)\n",
+        "    extent_batch = None\n",
+        "test_gate_batch_path_never_calls_the_per_entry_scalar_extent_walk",
+        file=EVIDENCE,
+        test_file=TEVIDENCE,
+    ),
+    m(
+        "s4-7-inv7-fresh-witness-reuse-disabled",
+        '            if entry.extent_payload["own"] == own and beneath == set(stored_beneath):\n',
+        '            if False and entry.extent_payload["own"] == own and beneath == set(stored_beneath):\n',
+        "test_gate_batch_extent_pass_visits_each_node_and_edge_once_and_reuses_fresh_witnesses",
+        file=EVIDENCE,
+        test_file=TEVIDENCE,
     ),
     m(
         "s4-7-perf-baseline-source-identity-check-disabled",

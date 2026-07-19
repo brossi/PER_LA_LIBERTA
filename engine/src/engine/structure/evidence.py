@@ -471,20 +471,30 @@ def extent_digest(node: Node, projection: ProjectionMap) -> str:
     return _hash_canonical(extent_payload(node, projection))
 
 
+def _own_extent_payload(node: Node) -> dict[str, tuple[str, ...]]:
+    """The canonical ``own`` half of an extent payload.
+
+    Kept separate from the descendant walk so the evidence gate's batch path and the scalar
+    producer cannot drift on slot names, sorting, or node-kind dispatch.
+    """
+    if isinstance(node, ContainerNode):
+        return {
+            "heading": tuple(sorted(node.heading_atoms)),
+            "signature": tuple(sorted(node.signature_atoms)),
+        }
+    return {"body": tuple(sorted(node.body_atoms))}
+
+
 def extent_payload(node: Node, projection: ProjectionMap) -> dict:
     """THE extent payload — what :func:`extent_digest` hashes, and (run-encoded on the wire) the
     DT-4 witness an entry stores beside that digest: the node's ``own`` per-slot binding plus the
     flat sorted ``beneath`` union (tuples — the stored-witness interior form, identical
     canonical-JSON bytes). One producer for digest and witness. Same validated-map precondition
     as the digest (fails loud on dangling/revisited nodes)."""
-    if isinstance(node, ContainerNode):
-        own = {
-            "heading": tuple(sorted(node.heading_atoms)),
-            "signature": tuple(sorted(node.signature_atoms)),
-        }
-    else:
-        own = {"body": tuple(sorted(node.body_atoms))}
-    return {"own": own, "beneath": tuple(sorted(_beneath_atom_ids(node, projection)))}
+    return {
+        "own": _own_extent_payload(node),
+        "beneath": tuple(sorted(_beneath_atom_ids(node, projection))),
+    }
 
 
 def _require_child(child_id: str, parent_id: str, projection: ProjectionMap) -> Node:
@@ -526,6 +536,108 @@ def _beneath_atom_ids(node: Node, projection: ProjectionMap) -> set[str]:
         else:
             coverage.update(current.body_atoms)
     return coverage
+
+
+@dataclass(frozen=True, slots=True)
+class _ExtentDigestBatch:
+    """Internal result and deterministic work counters for the gate's shared extent pass."""
+
+    by_node: Mapping[str, str]
+    node_visits: int
+    edge_visits: int
+    witness_reuses: int
+    live_hashes: int
+
+
+def _batch_extent_digests(
+    entries: tuple[EvidenceEntry, ...], projection: ProjectionMap
+) -> _ExtentDigestBatch | None:
+    """Compute requested live extent digests in one iterative bottom-up projection pass.
+
+    A validated projection is a tree, so after a child's digest has been decided its subtree set
+    can become its parent's accumulator. That removes the old independent descendant walk for
+    every evidence entry. The persisted extent witness is explanation data, but it is also an
+    exact, constructor-verified copy of the payload behind ``entry.extent_digest``: when live
+    ``own`` and ``beneath`` are exactly equal to that witness, reusing the entry digest is
+    byte-identical to hashing the same canonical JSON again. A changed payload is always hashed
+    through THE producer, preserving even the theoretical SHA-collision behavior of the scalar
+    comparison and producing the same live digest in a stale finding.
+
+    Return ``None`` if the flat table is not a tree (dangling edge, duplicate/multi-parent edge,
+    or cycle). The caller then uses the scalar producer in sidecar order, retaining its existing
+    fail-loud message and malformed-map behavior. Validated production maps stay on this path.
+    """
+    requested = {entry.node_id: entry for entry in entries}
+    if not requested:
+        return _ExtentDigestBatch({}, 0, 0, 0, 0)
+
+    children_by_node: dict[str, tuple[str, ...]] = {}
+    parent_by_node: dict[str, str] = {}
+    edge_visits = 0
+    for node in projection.nodes:
+        children = node.children if isinstance(node, ContainerNode) else ()
+        children_by_node[node.node_id] = children
+        for child_id in children:
+            edge_visits += 1
+            if child_id not in projection.by_id or child_id in parent_by_node:
+                return None
+            parent_by_node[child_id] = node.node_id
+
+    pending = {node_id: len(children) for node_id, children in children_by_node.items()}
+    ready = [node_id for node_id, count in pending.items() if count == 0]
+    subtree_atoms: dict[str, set[str]] = {}
+    digests: dict[str, str] = {}
+    node_visits = 0
+    witness_reuses = 0
+    live_hashes = 0
+
+    while ready:
+        node_id = ready.pop()
+        node = projection.by_id[node_id]
+        children = children_by_node[node_id]
+        child_sets = [subtree_atoms.pop(child_id) for child_id in children]
+        if child_sets:
+            beneath = max(child_sets, key=len)
+            for child_set in child_sets:
+                if child_set is not beneath:
+                    beneath.update(child_set)
+        else:
+            beneath = set()
+
+        entry = requested.get(node_id)
+        own = _own_extent_payload(node)
+        if entry is not None:
+            stored_beneath = entry.extent_payload["beneath"]
+            if entry.extent_payload["own"] == own and beneath == set(stored_beneath):
+                # EvidenceEntry.__post_init__ proved this witness hashes to the stored digest.
+                digests[node_id] = entry.extent_digest
+                witness_reuses += 1
+            else:
+                digests[node_id] = _hash_canonical(
+                    {"own": own, "beneath": tuple(sorted(beneath))}
+                )
+                live_hashes += 1
+
+        for atom_ids in own.values():
+            beneath.update(atom_ids)
+        subtree_atoms[node_id] = beneath
+        node_visits += 1
+
+        parent_id = parent_by_node.get(node_id)
+        if parent_id is not None:
+            pending[parent_id] -= 1
+            if pending[parent_id] == 0:
+                ready.append(parent_id)
+
+    if node_visits != len(projection.nodes):
+        return None
+    return _ExtentDigestBatch(
+        digests,
+        node_visits=node_visits,
+        edge_visits=edge_visits,
+        witness_reuses=witness_reuses,
+        live_hashes=live_hashes,
+    )
 
 
 # --- load boundary (total contract) ------------------------------------------------------------ #
@@ -702,6 +814,10 @@ def _attributed_findings(
         for node in projection.nodes
         if isinstance(node, ContainerNode) and node.minted_by == MINTED_BY_HUMAN
     }
+    extent_entries = tuple(
+        entry for entry in evidence.entries if entry.node_id in human_containers
+    )
+    extent_batch = _batch_extent_digests(extent_entries, projection)
     for node in projection.nodes:  # map reading order, not lexicographic id order
         if node.node_id in human_containers and node.node_id not in evidence.by_node:
             findings.append(
@@ -743,7 +859,11 @@ def _attributed_findings(
                     f"or child topology changed; re-verify the authoring decision and re-stamp",
                 )
             )
-        live_extent = extent_digest(node, projection)
+        live_extent = (
+            extent_batch.by_node[entry.node_id]
+            if extent_batch is not None
+            else extent_digest(node, projection)
+        )
         if entry.extent_digest != live_extent:
             findings.append(
                 (

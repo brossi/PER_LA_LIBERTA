@@ -467,7 +467,7 @@ state are both `COMPLETE` at `5.1`.
 | `4.1` | rebind | 14.103 s | 10.987 s | 1,573,765,120 B |
 | `5.1` | cold end-to-end | 59.211 s | 42.443 s | 1,558,839,296 B |
 
-The final performance source lock is `s4_7_priority5_perf_baseline.json` (SHA-256
+The issue-#86-close performance source lock was `s4_7_priority5_perf_baseline.json` (SHA-256
 `689b9e044e729198406301e1a71ead05dc8017af970e1dbe961e5fedeff71113`). The completed mutation
 manifest is `s4_7_priority5_mutation_manifest.json` (SHA-256
 `1117bdbc1d65caf3f9191bf10964c434462d689681e5b81160419bddef0aef90`): 131/131 mutants were
@@ -476,6 +476,7 @@ restored the linear range walk, discarded aggregate telemetry, added a second ru
 left terminal status in progress, relaxed the mutation heartbeat, disabled its live tee, and exposed
 an interrupt traceback; each failed before restoration. Ruff is clean, and the full default suite
 passes with 1,974 passed, one deselected, and the preregistered strict timing xfail.
+That snapshot is historical; S4.7-E regenerates the governed files and removes the residual below.
 
 ## Final registered verdict — issue #86 acceptance
 
@@ -545,3 +546,42 @@ interrupt during development retained terminal `INTERRUPTED` with `restore_verif
 that visible liveness does not weaken the existing restoration contract. This observability follow-up
 does not change production rebind code, registered scale metrics, or the completed 300-second / 6-GiB
 verdict.
+
+## S4.7-E deep-evidence traversal resolution
+
+The final carried INV-7 residual was resolved after issue #86 stability without changing its
+fixture, measured operation, repetitions, statistic, or ceilings. The depth remains 3,000; the
+fixture still contains 3,000 evidence entries, 6,000 projection nodes, and 4,501,500 decoded
+witness references. The registered operation remains production `evidence_findings()` and the
+acceptance limits remain a median of five at or below 2.0 seconds and a Python-allocation peak at
+or below 512 MiB.
+
+The former gate path independently walked every entry's descendants. The replacement performs one
+iterative bottom-up projection pass, examining every node and child edge once and transferring a
+completed child subtree set into its parent accumulator. For a fresh entry, exact equality of the
+live `own` and `beneath` payload with the constructor-verified stored witness permits reuse of the
+stored digest; this is byte-identical to rehashing the same canonical payload. Any unequal payload
+is still hashed through THE canonical producer, preserving stale findings, live digest text,
+ordering, diagnostics, and even hash-collision comparison behavior. Dangling, cyclic,
+duplicate-edge, and multi-parent maps decline the batch path and retain the scalar error verbatim.
+
+The regenerated source-locked artifact is `s4_7_priority5_perf_baseline.json` (SHA-256
+`65e8c9a4b283ab4b299524bb717ec02df492dc8bf82a32653cfbefa1ca7bc412`). Its five wall samples are
+0.163821, 0.156699, 0.146292, 0.146118, and 0.148400 seconds, for a 0.148400-second median. Every
+allocation sample is 1,285,736 bytes. Both registered verdict fields are `true`, giving more than
+13x wall-clock margin and using under 0.25% of the memory ceiling. Exact batch-versus-scalar
+findings, one-visit work counts, scalar-walk exclusion, fresh-witness reuse, and all malformed-map
+fallback classes are directly tested. The strict xfail is removed; INV-7 is now an ordinary passing
+regression assertion.
+
+The refreshed production mutation manifest is `s4_7_priority5_mutation_manifest.json` (SHA-256
+`a89f2fc74b227041e5d16aab8c279eb8cf68d771f382fd62a033250610e37922`) and its five-second
+progress log is SHA-256
+`cd4db58a0d42766a86ae38b84a5b5c4de1a9154acfacd86ca89739a7d73454b1`. All 133/133 mutants
+were detected with zero survivors or errors, including attacks that restore the per-entry scalar
+walk, disable fresh-witness reuse, shrink the depth, and relax the ceiling. Restoration is
+byte-identical, post-verification is green, 45 heartbeats were retained, and the sole terminal event
+is `COMPLETE`. With no carried red remaining, the focused manifest command passes 438 tests and the
+repository-wide default gate passes 1,980 tests with one registered scale test deselected, zero
+xfails, and only the five pre-existing SWIG deprecation warnings. Ruff and `git diff --check` are
+clean.

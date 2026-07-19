@@ -97,6 +97,19 @@ from engine.structure.authoring import (
     stamp_evidence,
     validate_authoring,
 )
+from engine.structure.structural_contents import (
+    STRUCTURAL_CONTENTS_SCHEMA_VERSION,
+    STRUCTURAL_CONTENTS_STALE_CLASS,
+    SourceSpec,
+    StructuralExpectation,
+    load_structural_contents_report,
+    load_structural_contents_schema,
+    load_source_bytes,
+    observe_structural_contents,
+    structural_contents_schema_version_const,
+    validate_structural_contents_report,
+    write_structural_contents_report,
+)
 from engine.structure.atom_store import (
     CANONICAL,
     WITNESS,
@@ -442,4 +455,17 @@ __all__ = [
     "explain_evidence_drift",
     "stamp_evidence",
     "validate_authoring",
+    # S4.6c/#90 — source-locked advisory structural-content observations; factual sightings and
+    # candidate loci only, with no structure-map or evidence mutation route
+    "STRUCTURAL_CONTENTS_SCHEMA_VERSION",
+    "STRUCTURAL_CONTENTS_STALE_CLASS",
+    "SourceSpec",
+    "StructuralExpectation",
+    "load_structural_contents_report",
+    "load_structural_contents_schema",
+    "load_source_bytes",
+    "observe_structural_contents",
+    "structural_contents_schema_version_const",
+    "validate_structural_contents_report",
+    "write_structural_contents_report",
 ]

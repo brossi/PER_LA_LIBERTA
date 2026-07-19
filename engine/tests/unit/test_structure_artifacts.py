@@ -145,6 +145,13 @@ PUBLIC_SURFACE_BY_CONCERN = {
     "reader_glue": ("load_workspace_streams", "workspace_reader"),
     "authoring": ("assert_authoring_integrity", "authoring_status", "explain_evidence_drift",
                   "stamp_evidence", "validate_authoring"),
+    "structural_contents": (
+        "STRUCTURAL_CONTENTS_SCHEMA_VERSION", "STRUCTURAL_CONTENTS_STALE_CLASS",
+        "SourceSpec", "StructuralExpectation", "load_structural_contents_report",
+        "load_structural_contents_schema", "load_source_bytes", "observe_structural_contents",
+        "structural_contents_schema_version_const", "validate_structural_contents_report",
+        "write_structural_contents_report",
+    ),
 }
 
 
@@ -166,6 +173,7 @@ STALE_CLASS_NAMES = (
     "RESOURCE_STALE_CLASS",
     "NORMALIZER_STALE_CLASS",
     "AUTHORING_EVIDENCE_STALE_CLASS",
+    "STRUCTURAL_CONTENTS_STALE_CLASS",
 )
 
 # The relation surface S4 is *allowed* to expose: two inert layer-identity constants + the path
@@ -421,6 +429,18 @@ EXPECTED_PUBLIC_SURFACE = frozenset(
         "explain_evidence_drift",
         "stamp_evidence",
         "validate_authoring",
+        # S4.6c/#90 — advisory source observations before human evidence stamping
+        "STRUCTURAL_CONTENTS_SCHEMA_VERSION",
+        "STRUCTURAL_CONTENTS_STALE_CLASS",
+        "SourceSpec",
+        "StructuralExpectation",
+        "load_structural_contents_report",
+        "load_structural_contents_schema",
+        "load_source_bytes",
+        "observe_structural_contents",
+        "structural_contents_schema_version_const",
+        "validate_structural_contents_report",
+        "write_structural_contents_report",
     }
 )
 

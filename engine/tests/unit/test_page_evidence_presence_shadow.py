@@ -57,7 +57,7 @@ def _ledger(tmp_path):
     return ws, ledger_path
 
 
-def test_presence_shadow_consumes_request_v4_without_routing_policy(tmp_path):
+def test_presence_shadow_consumes_request_v5_without_routing_policy(tmp_path):
     ws, ledger_path = _ledger(tmp_path)
 
     result = presence.observe_page_evidence_presence(
@@ -87,7 +87,7 @@ def test_presence_shadow_consumes_request_v4_without_routing_policy(tmp_path):
     page = read_json(
         presence.page_observation_path(ws, witness_id="copy1", page=3)
     )
-    assert page["request"]["request_version"] == 4
+    assert page["request"]["request_version"] == 5
     assert page["request"]["input_artifacts"] == [
         {
                 "kind": "page_evidence_ledger",
@@ -161,7 +161,7 @@ def test_presence_shadow_revalidates_cache_and_provider_identity(tmp_path):
 
     ws, ledger_path = _ledger(tmp_path)
     previous = CoreAssessmentProvider(
-        identity=ProviderIdentity("book_layout_sidecar", "0.1.2")
+        identity=ProviderIdentity("book_layout_sidecar", "0.1.4")
     )
     presence.observe_page_evidence_presence(
         workspace=ws,
@@ -194,7 +194,7 @@ def test_presence_shadow_revalidates_cache_and_provider_identity(tmp_path):
 
     assert provider.calls == 4
     assert result["cached_pages"] == 0
-    assert result["provider"]["provider_version"] == "0.1.4"
+    assert result["provider"]["provider_version"] == "0.1.5"
 
     class ExplodingProvider:
         identity = current.identity

@@ -32,7 +32,7 @@ def _assessment(page: int) -> dict:
         "status": "available",
         "provider": {
             "provider_id": "book_layout_sidecar",
-            "provider_version": "0.1.4",
+            "provider_version": "0.1.5",
         },
         "bundle": {
             "results": [

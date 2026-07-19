@@ -142,7 +142,7 @@ def test_valid_shadow_observation_persists_and_revalidates_exact_request(tmp_pat
     assert envelope["request"]["subject"]["source_sha256"] == "a" * 64
     assert envelope["provider"] == {
         "provider_id": "book_layout_sidecar",
-        "provider_version": "0.1.4",
+        "provider_version": "0.1.5",
     }
 
     request = assessment_request_from_dict(envelope["request"])
@@ -182,7 +182,7 @@ def test_previous_provider_version_invalidates_cache_without_refresh(tmp_path):
 
     ws = BookWorkspace.for_book("synthetic", tmp_path).ensure()
     previous = CoreAssessmentProvider(
-        identity=ProviderIdentity("book_layout_sidecar", "0.1.2")
+        identity=ProviderIdentity("book_layout_sidecar", "0.1.4")
     )
     first = _observe(ws, provider_factory=lambda: previous, refresh=True)
     current = CoreAssessmentProvider()
@@ -200,12 +200,12 @@ def test_previous_provider_version_invalidates_cache_without_refresh(tmp_path):
     provider = _CountingProvider()
     second = _observe(ws, provider_factory=lambda: provider)
 
-    assert first.bundle.provider.provider_version == "0.1.2"
+    assert first.bundle.provider.provider_version == "0.1.4"
     assert second.status == shadow.STATUS_AVAILABLE
     assert second.cached is False
     assert provider.calls == 1
-    assert second.bundle.provider.provider_version == "0.1.4"
-    assert read_json(second.path)["provider"]["provider_version"] == "0.1.4"
+    assert second.bundle.provider.provider_version == "0.1.5"
+    assert read_json(second.path)["provider"]["provider_version"] == "0.1.5"
 
 
 @requires_sidecar
@@ -505,11 +505,105 @@ def test_installed_provider_conformance_packet_passes():
     from book_layout_sidecar.contracts.conformance import run_conformance_matrix
 
     assert run_conformance_matrix() == {
-        "matrix_version": 3,
-        "cases": 45,
-        "boundary_valid": 22,
-        "boundary_unavailable": 23,
+        "matrix_version": 4,
+        "cases": 58,
+        "boundary_valid": 29,
+        "boundary_unavailable": 29,
         "status": "ok",
+    }
+
+
+@requires_sidecar
+def test_installed_spatial_contract_requires_explicit_bound_box_input(tmp_path):
+    from book_layout_sidecar.core import (
+        AssessmentEvidence,
+        AssessmentInputArtifact,
+        AssessmentSubject,
+        BoundingBox,
+        CoreAssessmentProvider,
+        GeometryOcrBoxSet,
+        build_assessment_request,
+        build_geometry_ocr_spatial_input,
+    )
+    from book_layout_sidecar.core.assessment import (
+        CAPABILITY_EFFECTIVE_GEOMETRY_BOXES_HAVE_OCR_SPATIAL_SUPPORT,
+    )
+    from book_layout_sidecar.core.modules import (
+        INPUT_KIND_EFFECTIVE_GEOMETRY_BOXES,
+        INPUT_KIND_OCR_BOXES,
+        EffectiveGeometryOcrSpatialSupportModule,
+    )
+
+    boxes = (
+        BoundingBox(0, 0, 10, 10),
+        BoundingBox(20, 0, 30, 10),
+        BoundingBox(40, 0, 50, 10),
+    )
+    geometry = GeometryOcrBoxSet(
+        page=1,
+        width=100,
+        height=100,
+        boxes=boxes,
+        source_ref="geometry:consumer-fixture/page-1",
+        source_sha256="b" * 64,
+        source_selector="$.effective_geometry.boxes",
+        coordinate_space_id="source:consumer-fixture#page=1:full",
+    )
+    ocr = GeometryOcrBoxSet(
+        page=1,
+        width=100,
+        height=100,
+        boxes=boxes,
+        source_ref="ocr:consumer-fixture/page-1",
+        source_sha256="c" * 64,
+        source_selector="$.ocr_geometry.boxes",
+        coordinate_space_id="source:consumer-fixture#page=1:full",
+    )
+    evidence = AssessmentEvidence(
+        subject=AssessmentSubject(
+            book_id="consumer_fixture",
+            source_ref="source:consumer-fixture",
+            source_sha256="a" * 64,
+            page=1,
+        ),
+        input_artifacts=(
+            AssessmentInputArtifact(
+                INPUT_KIND_EFFECTIVE_GEOMETRY_BOXES,
+                geometry.source_ref,
+                geometry.source_sha256,
+            ),
+            AssessmentInputArtifact(
+                INPUT_KIND_OCR_BOXES,
+                ocr.source_ref,
+                ocr.source_sha256,
+            ),
+        ),
+        geometry_ocr_spatial_input=build_geometry_ocr_spatial_input(
+            geometry=geometry,
+            ocr=ocr,
+            geometry_detector_producer="tesseract@consumer-fixture",
+            geometry_detector_family="tesseract",
+            ocr_detector_producer="abbyy@consumer-fixture",
+            ocr_detector_family="abbyy",
+        ),
+    )
+    request = build_assessment_request(
+        evidence=evidence,
+        modules=(EffectiveGeometryOcrSpatialSupportModule(),),
+    )
+    result = CoreAssessmentProvider().assess(request).results[0]
+
+    assert request.request_version == 5
+    assert result.capability == (
+        CAPABILITY_EFFECTIVE_GEOMETRY_BOXES_HAVE_OCR_SPATIAL_SUPPORT
+    )
+    assert result.assessment == "supported"
+    assert result.metrics["support_class"] == "sufficient"
+
+    workspace = BookWorkspace.for_book("synthetic", tmp_path).ensure()
+    ordinary_observation = _observe(workspace)
+    assert CAPABILITY_EFFECTIVE_GEOMETRY_BOXES_HAVE_OCR_SPATIAL_SUPPORT not in {
+        item.capability for item in ordinary_observation.bundle.results
     }
 
 

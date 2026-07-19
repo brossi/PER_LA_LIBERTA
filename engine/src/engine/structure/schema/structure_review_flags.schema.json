@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/engine/structure-review-flags-v1.schema.json",
+  "title": "Advisory structure-review flags v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "stale_class", "book", "producer", "seed_identity", "flags"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "stale_class": {"const": "structure-review-flags"},
+    "book": {"type": "string", "minLength": 1},
+    "producer": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "version"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "version": {"type": "integer", "minimum": 1}
+      }
+    },
+    "seed_identity": {
+      "type": "object", "additionalProperties": false,
+      "required": ["candidate_semantics_sha256", "freeze_sha256"],
+      "properties": {
+        "candidate_semantics_sha256": {"$ref": "#/$defs/sha256"},
+        "freeze_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "flags": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/flag"}
+    }
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "engineHash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "flag": {
+      "type": "object", "additionalProperties": false,
+      "required": [
+        "flag_id", "kind", "message", "target_node_id", "cited_atom_ids",
+        "seed_decision_digest", "seed_extent_digest", "resolution_posture",
+        "corroborating_observation_ids"
+      ],
+      "properties": {
+        "flag_id": {"type": "string", "pattern": "^flag-[0-9a-f]{20}$"},
+        "kind": {"enum": ["duplicate-heading", "out-of-order-heading", "fuzzy-heading", "missing-heading", "unsegmented-content", "source-anomaly"]},
+        "message": {"type": "string", "minLength": 1},
+        "target_node_id": {"type": ["string", "null"], "minLength": 1},
+        "cited_atom_ids": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+        "seed_decision_digest": {"oneOf": [{"$ref": "#/$defs/engineHash"}, {"type": "null"}]},
+        "seed_extent_digest": {"oneOf": [{"$ref": "#/$defs/engineHash"}, {"type": "null"}]},
+        "resolution_posture": {"enum": ["review-required", "correction-required"]},
+        "corroborating_observation_ids": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true}
+      }
+    }
+  }
+}

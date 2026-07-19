@@ -590,6 +590,67 @@ def test_happy_rebind_restamps_extent_bottom_up_and_carries_the_decision_digest(
     assert restamped.extent_digest == extent_digest(migrated.by_id["n-0"], migrated)
 
 
+@pytest.mark.parametrize(
+    ("case", "evidence_supplied", "fresh_specs", "expected_restamped"),
+    (
+        ("absent", False, _fresh_specs([("a0", _A0, 3), ("a1", _A1, 3)]), 0),
+        (
+            "supplied-unqualified",
+            True,
+            [("f_a0", "kappa lambda mu nu", 3), ("f_a1", _A1, 3)],
+            0,
+        ),
+        ("supplied-restamped", True, _fresh_specs([("a0", _A0, 3), ("a1", _A1, 3)]), 1),
+    ),
+)
+def test_restamp_telemetry_distinguishes_absent_unqualified_and_restamped_evidence(
+    case, evidence_supplied, fresh_specs, expected_restamped
+):
+    old_map, old_streams, _ = _happy_case()
+    root = old_map.projection.by_id["n-0"]
+    evidence = (
+        AuthoringEvidence(
+            book="fixture",
+            entries=(
+                build_evidence_entry(
+                    root,
+                    old_map.projection,
+                    evidence="root rationale",
+                    authored_at_revision=1,
+                ),
+            ),
+        )
+        if evidence_supplied
+        else None
+    )
+    telemetry = RebindTelemetry()
+
+    result = rebind(
+        RebindContext(
+            old_map,
+            old_streams,
+            _streams(fresh_specs),
+            evidence,
+            geometry_mode=MODE_TIE_BREAK,
+            telemetry=telemetry,
+        )
+    )
+
+    assert len(result.restamped_evidence) == expected_restamped, case
+    serialized = json.loads(json.dumps(telemetry.to_json()))
+    span = next(
+        record
+        for record in serialized["spans"]
+        if record["name"] == "rebind.restamp-evidence"
+    )
+    assert span["attributes"] == {
+        "evidence_supplied": evidence_supplied,
+        "stale_decisions": 0,
+        "restamped_entries": expected_restamped,
+    }
+    assert span["attributes"]["evidence_supplied"] is evidence_supplied
+
+
 # --- baseline binding (§4: baseline-binding) ------------------------------------------------------- #
 
 

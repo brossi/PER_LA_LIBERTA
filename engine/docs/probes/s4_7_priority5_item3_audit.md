@@ -1,5 +1,14 @@
 # S4.7 Priority 5 adversarial audit — #48 production re-anchoring
 
+> **Follow-up — 2026-07-19 / #88:** the `rebind.restamp-evidence` span now reports
+> `evidence_supplied: false` only when `RebindContext.old_evidence is None`; supplied empty or
+> unqualified evidence reports `true` while retaining `restamped_entries: 0`. Exact three-state
+> tests pin the JSON boolean and restamp counts, and a hard-coded-false mutant proves the distinction
+> is maintained. The refreshed mutation profile kills **136/136** with byte-identical restoration
+> and **449 focused tests passing**. The complete default suite reports **1991 passed, 1 scale test
+> deselected**; the source-locked INV-7 baseline remains green at **0.143184 s** median and
+> **1,417,936 bytes** peak.
+>
 > **Follow-up — 2026-07-19 / #87:** rebind evidence restamping now shares the focused bottom-up
 > extent reduction introduced by `S4.7-E`. On the purpose-built all-bound depth-3,000 production
 > `_restamp_evidence()` diagnostic, the exact-equivalent median moved from **18.027 s wall / 17.911

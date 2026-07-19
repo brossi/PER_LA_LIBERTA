@@ -491,6 +491,12 @@ MUTANTS = [
         ),
     },
     m(
+        "restamp-telemetry-evidence-supplied-hard-coded-false",
+        "            evidence_supplied=context.old_evidence is not None,\n",
+        "            evidence_supplied=False,\n",
+        "test_restamp_telemetry_distinguishes_absent_unqualified_and_restamped_evidence",
+    ),
+    m(
         "stale-decision-never-detected",
         "        and entry.decision_digest != decision_digest(node)",
         "        and False",

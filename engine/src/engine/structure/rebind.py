@@ -1651,7 +1651,9 @@ def rebind(context: RebindContext) -> RebindResult:
             context.old_evidence, migrated_projection, bound_node_ids
         )
         span.update(
-            stale_decisions=len(stale_decisions), restamped_entries=len(restamped)
+            evidence_supplied=context.old_evidence is not None,
+            stale_decisions=len(stale_decisions),
+            restamped_entries=len(restamped),
         )
 
     with telemetry.span("rebind.assemble-report") as span:

@@ -143,8 +143,8 @@ exploration; lowering is a visible, diffed change, never silent.
 
 The DR-3 confidence gate is **locked** by the item-3 run manifest at
 `docs/probes/s4_7_priority5_mutation_manifest.json`, SHA-256
-`841b03b3867afcac7588e07a7c66cb63b2693943cd44af7de30932712e3fafa2`. The hashes, fixture
-matrix, seeds, modes, normalized 117-mutant table, raw residual demonstration, and green command live
+`fd4ac7f1d00063f8a5535f782f6b46aa857546ec8809cf33765711b6768dc4db`. The hashes, fixture
+matrix, seeds, modes, normalized 135-mutant table, zero carried residuals, and green command live
 once in that manifest (spec §0); this document records only the immutable pointer. The manifest
 intentionally excludes this pointer document from its own source-identity set to avoid a circular
 content hash.

@@ -69,10 +69,11 @@ the schema JSON beside it.
 from __future__ import annotations
 
 import json
-from collections.abc import Iterable, Mapping
+from collections.abc import Callable, Iterable, Mapping
 from dataclasses import dataclass, field
 from pathlib import Path
 from types import MappingProxyType
+from typing import Generic, TypeVar
 
 import jsonschema
 
@@ -538,38 +539,44 @@ def _beneath_atom_ids(node: Node, projection: ProjectionMap) -> set[str]:
     return coverage
 
 
-@dataclass(frozen=True, slots=True)
-class _ExtentDigestBatch:
-    """Internal result and deterministic work counters for the gate's shared extent pass."""
+_ExtentValue = TypeVar("_ExtentValue")
+_ExtentPayloadFactory = Callable[[], dict]
 
-    by_node: Mapping[str, str]
+
+@dataclass(frozen=True, slots=True)
+class _ExtentReduction(Generic[_ExtentValue]):
+    """One private extent-specific tree reduction and its deterministic work counts."""
+
+    by_node: dict[str, _ExtentValue]
     node_visits: int
     edge_visits: int
-    witness_reuses: int
-    live_hashes: int
+    payload_constructions: int
 
 
-def _batch_extent_digests(
-    entries: tuple[EvidenceEntry, ...], projection: ProjectionMap
-) -> _ExtentDigestBatch | None:
-    """Compute requested live extent digests in one iterative bottom-up projection pass.
+def _reduce_extents_bottom_up(
+    requested_node_ids: Iterable[str],
+    projection: ProjectionMap,
+    consume: Callable[
+        [str, dict[str, tuple[str, ...]], set[str], _ExtentPayloadFactory],
+        _ExtentValue,
+    ],
+    *,
+    included_node_ids: set[str] | None = None,
+) -> _ExtentReduction[_ExtentValue] | None:
+    """Reduce live extents once, capturing only requested complete subtrees.
 
-    A validated projection is a tree, so after a child's digest has been decided its subtree set
-    can become its parent's accumulator. That removes the old independent descendant walk for
-    every evidence entry. The persisted extent witness is explanation data, but it is also an
-    exact, constructor-verified copy of the payload behind ``entry.extent_digest``: when live
-    ``own`` and ``beneath`` are exactly equal to that witness, reusing the entry digest is
-    byte-identical to hashing the same canonical JSON again. A changed payload is always hashed
-    through THE producer, preserving even the theoretical SHA-collision behavior of the scalar
-    comparison and producing the same live digest in a stale finding.
+    This is deliberately extent-specific, not a general traversal framework. A child's live atom
+    set becomes its parent's accumulator, while an optional ``included_node_ids`` set carries the
+    rebind rule that every node in a captured subtree must be included. ``consume`` receives a
+    lazy, memoized canonical-payload factory: the gate can reuse a verified witness without sorting
+    or hashing, while restamping materializes exactly one new payload for each captured entry.
 
-    Return ``None`` if the flat table is not a tree (dangling edge, duplicate/multi-parent edge,
-    or cycle). The caller then uses the scalar producer in sidecar order, retaining its existing
-    fail-loud message and malformed-map behavior. Validated production maps stay on this path.
+    Return ``None`` when the flat table is not a tree. Callers then retain their established scalar
+    malformed-map behavior and exact diagnostics.
     """
-    requested = {entry.node_id: entry for entry in entries}
+    requested = set(requested_node_ids)
     if not requested:
-        return _ExtentDigestBatch({}, 0, 0, 0, 0)
+        return _ExtentReduction({}, 0, 0, 0)
 
     children_by_node: dict[str, tuple[str, ...]] = {}
     parent_by_node: dict[str, str] = {}
@@ -586,10 +593,10 @@ def _batch_extent_digests(
     pending = {node_id: len(children) for node_id, children in children_by_node.items()}
     ready = [node_id for node_id, count in pending.items() if count == 0]
     subtree_atoms: dict[str, set[str]] = {}
-    digests: dict[str, str] = {}
+    subtree_included: dict[str, bool] = {}
+    captured: dict[str, _ExtentValue] = {}
     node_visits = 0
-    witness_reuses = 0
-    live_hashes = 0
+    payload_constructions = 0
 
     while ready:
         node_id = ready.pop()
@@ -604,23 +611,32 @@ def _batch_extent_digests(
         else:
             beneath = set()
 
-        entry = requested.get(node_id)
+        if included_node_ids is None:
+            complete = True
+        else:
+            children_complete = tuple(
+                subtree_included.pop(child_id) for child_id in children
+            )
+            complete = node_id in included_node_ids and all(children_complete)
+
         own = _own_extent_payload(node)
-        if entry is not None:
-            stored_beneath = entry.extent_payload["beneath"]
-            if entry.extent_payload["own"] == own and beneath == set(stored_beneath):
-                # EvidenceEntry.__post_init__ proved this witness hashes to the stored digest.
-                digests[node_id] = entry.extent_digest
-                witness_reuses += 1
-            else:
-                digests[node_id] = _hash_canonical(
-                    {"own": own, "beneath": tuple(sorted(beneath))}
-                )
-                live_hashes += 1
+        if node_id in requested and complete:
+            payload: dict | None = None
+
+            def materialize_payload() -> dict:
+                nonlocal payload, payload_constructions
+                if payload is None:
+                    payload = {"own": own, "beneath": tuple(sorted(beneath))}
+                    payload_constructions += 1
+                return payload
+
+            captured[node_id] = consume(node_id, own, beneath, materialize_payload)
 
         for atom_ids in own.values():
             beneath.update(atom_ids)
         subtree_atoms[node_id] = beneath
+        if included_node_ids is not None:
+            subtree_included[node_id] = complete
         node_visits += 1
 
         parent_id = parent_by_node.get(node_id)
@@ -631,12 +647,116 @@ def _batch_extent_digests(
 
     if node_visits != len(projection.nodes):
         return None
-    return _ExtentDigestBatch(
-        digests,
+    return _ExtentReduction(
+        captured,
         node_visits=node_visits,
         edge_visits=edge_visits,
+        payload_constructions=payload_constructions,
+    )
+
+
+@dataclass(frozen=True, slots=True)
+class _ExtentDigestBatch:
+    """Internal result and deterministic work counters for the gate's shared extent pass."""
+
+    by_node: Mapping[str, str]
+    node_visits: int
+    edge_visits: int
+    witness_reuses: int
+    live_hashes: int
+
+
+def _batch_extent_digests(
+    entries: tuple[EvidenceEntry, ...], projection: ProjectionMap
+) -> _ExtentDigestBatch | None:
+    """Compute requested live extent digests in one iterative bottom-up projection pass.
+
+    The persisted extent witness is an exact, constructor-verified copy of the payload behind
+    ``entry.extent_digest``. When the live payload is equal, reuse its digest without materializing
+    or hashing. Changed payloads are built and hashed through the same canonical producer.
+
+    Return ``None`` for a malformed flat table so the caller preserves scalar errors verbatim.
+    """
+    requested = {entry.node_id: entry for entry in entries}
+    witness_reuses = 0
+    live_hashes = 0
+
+    def consume(
+        node_id: str,
+        own: dict[str, tuple[str, ...]],
+        beneath: set[str],
+        materialize_payload: _ExtentPayloadFactory,
+    ) -> str:
+        nonlocal witness_reuses, live_hashes
+        entry = requested[node_id]
+        stored_beneath = entry.extent_payload["beneath"]
+        if entry.extent_payload["own"] == own and beneath == set(stored_beneath):
+            # EvidenceEntry.__post_init__ proved this witness hashes to the stored digest.
+            witness_reuses += 1
+            return entry.extent_digest
+        live_hashes += 1
+        return _hash_canonical(materialize_payload())
+
+    reduction = _reduce_extents_bottom_up(requested, projection, consume)
+    if reduction is None:
+        return None
+    return _ExtentDigestBatch(
+        reduction.by_node,
+        node_visits=reduction.node_visits,
+        edge_visits=reduction.edge_visits,
         witness_reuses=witness_reuses,
         live_hashes=live_hashes,
+    )
+
+
+@dataclass(frozen=True, slots=True)
+class _LiveExtent:
+    """One newly materialized live canonical extent and the hash derived from that payload."""
+
+    digest: str
+    payload: Mapping
+
+
+@dataclass(frozen=True, slots=True)
+class _LiveExtentBatch:
+    """Private restamp result plus deterministic, non-telemetry work counters."""
+
+    by_node: dict[str, _LiveExtent]
+    node_visits: int
+    edge_visits: int
+    payload_constructions: int
+
+
+def _batch_live_extent_payloads(
+    requested_node_ids: Iterable[str],
+    projection: ProjectionMap,
+    *,
+    included_node_ids: set[str],
+) -> _LiveExtentBatch | None:
+    """Build one live payload per requested subtree wholly contained in ``included_node_ids``."""
+
+    def consume(
+        _node_id: str,
+        _own: dict[str, tuple[str, ...]],
+        _beneath: set[str],
+        materialize_payload: _ExtentPayloadFactory,
+    ) -> _LiveExtent:
+        payload = materialize_payload()
+        return _LiveExtent(digest=_hash_canonical(payload), payload=payload)
+
+    reduction = _reduce_extents_bottom_up(
+        requested_node_ids,
+        projection,
+        consume,
+        included_node_ids=included_node_ids,
+    )
+    if reduction is None:
+        return None
+    return _LiveExtentBatch(
+        reduction.by_node,
+        node_visits=reduction.node_visits,
+        edge_visits=reduction.edge_visits,
+        payload_constructions=reduction.payload_constructions,
     )
 
 

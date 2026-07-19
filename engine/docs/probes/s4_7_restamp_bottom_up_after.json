@@ -1,0 +1,96 @@
+{
+  "schema": "s4.7-restamp-diagnostic@v1",
+  "variant": "after",
+  "created_at": "2026-07-19T04:02:36.085244+00:00",
+  "command": [
+    "/Users/ben_mpa/LLM/PER_LA_LIBERTA/engine/.venv/bin/python3",
+    "/Users/ben_mpa/LLM/PER_LA_LIBERTA/engine/tools/s4_7_restamp_diagnostic.py",
+    "--variant",
+    "after",
+    "--artifact",
+    "docs/probes/s4_7_restamp_bottom_up_after.json",
+    "--compare-to",
+    "docs/probes/s4_7_restamp_bottom_up_before.json"
+  ],
+  "operation": "engine.structure.rebind._restamp_evidence",
+  "contract": {
+    "diagnostic_only": true,
+    "registered_gate_changed": false,
+    "depth": 3000,
+    "repetitions": 5,
+    "all_bound_success_path": true,
+    "fixture_outside_measurement": true,
+    "validation_after_every_sample": true,
+    "allocation_measured_separately": true,
+    "public_telemetry_changed": false
+  },
+  "fixture": {
+    "construction": true,
+    "source_fixture_validation": true,
+    "migrated_reference_validation": true,
+    "migrated_projection_validation": true,
+    "migrated_atom_existence_validation": true,
+    "all_bound": true,
+    "depth": 3000,
+    "projection_nodes": 6000,
+    "evidence_entries": 3000,
+    "bound_node_ids": 6000,
+    "reminted_atoms": 3000,
+    "expected_entries": 3000,
+    "expected_sha256": "2d0de569935dd2bb279d501fa0761ebc404ab3712b5478a940940f0c3e6bc2f1"
+  },
+  "measurement": {
+    "wall_seconds": [
+      9.947380583034828,
+      9.940552500076592,
+      9.908241708064452,
+      9.932897583115846,
+      10.028736999956891
+    ],
+    "cpu_seconds": [
+      9.908461000000003,
+      9.865003000000002,
+      9.873895000000005,
+      9.896624000000003,
+      9.956582999999995
+    ],
+    "peak_bytes": [
+      39450384,
+      39450384,
+      39450384,
+      39450384,
+      39450384
+    ],
+    "median_wall_seconds": 9.940552500076592,
+    "median_cpu_seconds": 9.896624000000003,
+    "median_peak_bytes": 39450384.0
+  },
+  "source_identity": {
+    "src/engine/structure/evidence.py": "60ff656f07715de3e311687aadb9c4a8a7ac251353504f107860f912337af0a7",
+    "src/engine/structure/projection.py": "85f4594df3b07c45f5f7cb44f69b9c452aa3fb4dc77dd4e582439e0b5577eb45",
+    "src/engine/structure/rebind.py": "76d94f66cddd29f4cf648e2d3f2311efb8d05dc5e527a737d0384ec0fb31ffa1",
+    "tests/harness/restamp_diagnostic.py": "5314110557d4e45dbe2b3ac6a48496a44023e51457497915fd257a267ae75d07",
+    "tests/harness/scale.py": "61df6eed2e0acd9a059c410c1fe8c90cc0f7808dee4b30bd8629a8b95995fc40",
+    "tools/s4_7_restamp_diagnostic.py": "7d62b913c907d12af6f07fa3b323100f0c48a03fdf3797fb3646247260461b43"
+  },
+  "git": {
+    "head": "ac1f4f567b24ad10a903c0acb2eb31dc87266014",
+    "branch": "spike/s4_7",
+    "status": "M src/engine/structure/evidence.py\n M src/engine/structure/rebind.py\n M tests/unit/test_rebind.py\n?? docs/probes/s4_7_restamp_bottom_up_after.json\n?? docs/probes/s4_7_restamp_bottom_up_before.json\n?? tests/harness/restamp_diagnostic.py\n?? tools/s4_7_restamp_diagnostic.py"
+  },
+  "environment": {
+    "python": "3.13.0",
+    "python_executable": "/Users/ben_mpa/LLM/PER_LA_LIBERTA/engine/.venv/bin/python3",
+    "platform": "macOS-26.5.1-arm64-arm-64bit-Mach-O",
+    "machine": "arm64",
+    "processor": "arm",
+    "uv_lock_sha256": "1223dc25295e46731d22bda20ced23890e1155118dbc5a48f5b39c3371a09258"
+  },
+  "comparison": {
+    "before_artifact": "/Users/ben_mpa/LLM/PER_LA_LIBERTA/engine/docs/probes/s4_7_restamp_bottom_up_before.json",
+    "before_sha256": "23933a13083d53312b3f52421e54d98a96e9cf0c6a8cd3675031eb5abad566bb",
+    "wall_speedup": 1.8135279368796313,
+    "cpu_speedup": 1.8097911974831002,
+    "peak_ratio_after_over_before": 1.0055564289834789
+  }
+}

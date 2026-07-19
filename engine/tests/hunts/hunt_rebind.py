@@ -424,8 +424,8 @@ MUTANTS = [
     ),
     m(
         "s4-7-inv7-fresh-witness-reuse-disabled",
-        '            if entry.extent_payload["own"] == own and beneath == set(stored_beneath):\n',
-        '            if False and entry.extent_payload["own"] == own and beneath == set(stored_beneath):\n',
+        '        if entry.extent_payload["own"] == own and beneath == set(stored_beneath):\n',
+        '        if False and entry.extent_payload["own"] == own and beneath == set(stored_beneath):\n',
         "test_gate_batch_extent_pass_visits_each_node_and_edge_once_and_reuses_fresh_witnesses",
         file=EVIDENCE,
         test_file=TEVIDENCE,
@@ -441,12 +441,55 @@ MUTANTS = [
     # --- re-stamp protocol (§1.6) -------------------------------------------------------------------
     m(
         "restamp-ignores-the-bottom-up-subtree-gate",
-        "        if not _subtree_ids(entry.node_id, migrated_projection).issubset(\n"
-        "            bound_node_ids\n"
-        "        ):\n",
-        "        if False:\n",
+        "        included_node_ids=bound_node_ids,\n",
+        "        included_node_ids=set(migrated_projection.by_id),\n",
         "test_ancestor_not_restamped_while_a_descendant_is_unresolved",
     ),
+    m(
+        "restamp-restores-per-entry-subtree-walk",
+        "        if live is None:\n"
+        "            continue\n"
+        "        restamped.append(\n",
+        "        if live is None:\n"
+        "            continue\n"
+        "        if not _subtree_ids(entry.node_id, migrated_projection).issubset(\n"
+        "            bound_node_ids\n"
+        "        ):\n"
+        "            continue\n"
+        "        restamped.append(\n",
+        "test_restamp_valid_path_never_restores_per_entry_walks_or_duplicate_payload_construction",
+    ),
+    {
+        "label": "restamp-restores-duplicate-scalar-extent-construction",
+        "scope": (
+            f"{TR}::"
+            "test_restamp_valid_path_never_restores_per_entry_walks_or_duplicate_payload_construction"
+        ),
+        "patches": (
+            {
+                "file": R,
+                "old": "        restamped.append(\n"
+                "            EvidenceEntry(\n"
+                "                node_id=entry.node_id,\n"
+                "                decision_digest=entry.decision_digest,  # carried, never machine-refreshed\n",
+                "new": "        node = migrated_projection.by_id[entry.node_id]\n"
+                "        restamped.append(\n"
+                "            EvidenceEntry(\n"
+                "                node_id=entry.node_id,\n"
+                "                decision_digest=entry.decision_digest,  # carried, never machine-refreshed\n",
+            },
+            {
+                "file": R,
+                "old": "                extent_digest=live.digest,  # mechanically re-stamped from this exact payload\n",
+                "new": "                extent_digest=extent_digest(node, migrated_projection),\n",
+            },
+            {
+                "file": R,
+                "old": "                extent_payload=live.payload,\n",
+                "new": "                extent_payload=extent_payload(node, migrated_projection),\n",
+            },
+        ),
+    },
     m(
         "stale-decision-never-detected",
         "        and entry.decision_digest != decision_digest(node)",

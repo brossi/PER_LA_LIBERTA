@@ -17,6 +17,8 @@ import json
 
 import pytest
 
+import engine.structure.evidence as evidence_module
+import engine.structure.rebind as rebind_module
 from engine.errors import CaptureError, StaleArtifactError
 from engine.structure.atom_store import AtomStream
 from engine.structure.atoms import Atom, AtomDerivation, Geom
@@ -26,11 +28,19 @@ from engine.structure.boundary_anchor import (
 )
 from engine.structure.evidence import (
     AuthoringEvidence,
+    EvidenceEntry,
     build_evidence_entry,
     extent_digest,
+    extent_payload,
 )
 from engine.structure.geom_regate import MODE_NO_GEOMETRY, MODE_PRIMARY, MODE_TIE_BREAK
-from engine.structure.projection import Region, SlotFingerprint
+from engine.structure.projection import (
+    ContainerNode,
+    LeafNode,
+    ProjectionMap,
+    Region,
+    SlotFingerprint,
+)
 from engine.structure.rebind import (
     DEFAULT_FINGERPRINT_THRESHOLD,
     REBIND_UNRESOLVED_REASONS,
@@ -41,6 +51,7 @@ from engine.structure.rebind import (
     NodeOutcome,
     SlotOutcome,
     _contested_nodes,
+    _restamp_evidence,
     _runtime_fingerprint_slot,
     assert_all_bound,
     fingerprint_slot,
@@ -787,6 +798,277 @@ def test_no_geometry_mode_ignores_the_region_and_binds_on_fingerprint():
 
 
 # --- re-stamp ordering + decision-digest staleness (§4) -------------------------------------------- #
+
+
+def _restamp_optimization_fixture():
+    old_nodes = (
+        ContainerNode(
+            node_id="n-root",
+            node_class="volume",
+            minted_by="human",
+            children=("n-section", "n-side"),
+            heading_atoms=("old-root",),
+        ),
+        ContainerNode(
+            node_id="n-section",
+            node_class="section",
+            minted_by="human",
+            children=("n-deep",),
+            heading_atoms=("old-section",),
+        ),
+        ContainerNode(
+            node_id="n-deep",
+            node_class="subsection",
+            minted_by="human",
+            children=("l-deep",),
+            signature_atoms=("old-deep",),
+        ),
+        LeafNode(
+            node_id="l-deep",
+            node_class="block",
+            minted_by="machine",
+            body_atoms=("old-body",),
+        ),
+        ContainerNode(
+            node_id="n-side",
+            node_class="section",
+            minted_by="human",
+            children=("l-side",),
+            heading_atoms=("old-side",),
+        ),
+        LeafNode(
+            node_id="l-side",
+            node_class="block",
+            minted_by="machine",
+            body_atoms=("old-side-body",),
+        ),
+    )
+    old = ProjectionMap(root_id="n-root", nodes=old_nodes)
+    migrated = ProjectionMap(
+        root_id="n-root",
+        nodes=tuple(
+            dataclasses.replace(
+                node,
+                **(
+                    {
+                        "heading_atoms": tuple(
+                            atom_id.replace("old-", "fresh-")
+                            for atom_id in node.heading_atoms
+                        ),
+                        "signature_atoms": tuple(
+                            atom_id.replace("old-", "fresh-")
+                            for atom_id in node.signature_atoms
+                        ),
+                    }
+                    if isinstance(node, ContainerNode)
+                    else {
+                        "body_atoms": tuple(
+                            atom_id.replace("old-", "fresh-")
+                            for atom_id in node.body_atoms
+                        )
+                    }
+                ),
+            )
+            for node in old.nodes
+        ),
+    )
+    ghost = ContainerNode(
+        node_id="n-missing",
+        node_class="section",
+        minted_by="human",
+    )
+    ghost_projection = ProjectionMap(root_id=ghost.node_id, nodes=(ghost,))
+    evidence = AuthoringEvidence(
+        book="fixture",
+        entries=(
+            build_evidence_entry(
+                old.by_id["n-root"],
+                old,
+                evidence="root rationale",
+                authored_at_revision=1,
+            ),
+            build_evidence_entry(
+                ghost,
+                ghost_projection,
+                evidence="now-missing rationale",
+                authored_at_revision=2,
+            ),
+            build_evidence_entry(
+                old.by_id["n-side"],
+                old,
+                evidence="side rationale",
+                authored_at_revision=3,
+            ),
+            build_evidence_entry(
+                old.by_id["n-deep"],
+                old,
+                evidence="deep rationale",
+                authored_at_revision=4,
+            ),
+        ),
+    )
+    return migrated, evidence
+
+
+def _scalar_restamp_reference(evidence, projection, bound_node_ids):
+    """The pre-#87 production algorithm, retained only as an exact test oracle."""
+    restamped = []
+    for entry in evidence.entries:
+        node = projection.by_id.get(entry.node_id)
+        if node is None or entry.node_id not in bound_node_ids:
+            continue
+        if not rebind_module._subtree_ids(entry.node_id, projection).issubset(
+            bound_node_ids
+        ):
+            continue
+        restamped.append(
+            EvidenceEntry(
+                node_id=entry.node_id,
+                decision_digest=entry.decision_digest,
+                extent_digest=extent_digest(node, projection),
+                evidence=entry.evidence,
+                authored_at_revision=entry.authored_at_revision,
+                decision_payload=dict(entry.decision_payload),
+                extent_payload=extent_payload(node, projection),
+            )
+        )
+    return tuple(restamped)
+
+
+def _all_evidence_entry_fields(entry):
+    return (
+        entry.node_id,
+        entry.decision_digest,
+        entry.extent_digest,
+        entry.evidence,
+        entry.authored_at_revision,
+        {
+            "node_class": entry.decision_payload["node_class"],
+            "children": tuple(entry.decision_payload["children"]),
+        },
+        {
+            "own": dict(entry.extent_payload["own"]),
+            "beneath": tuple(entry.extent_payload["beneath"]),
+        },
+    )
+
+
+@pytest.mark.parametrize(
+    ("case", "bound_node_ids"),
+    (
+        (
+            "fully-bound",
+            {"n-root", "n-section", "n-deep", "l-deep", "n-side", "l-side"},
+        ),
+        (
+            "partially-bound",
+            {"n-section", "n-deep", "l-deep", "n-side", "l-side"},
+        ),
+        (
+            "unresolved-descendant",
+            {"n-root", "n-section", "n-deep", "n-side", "l-side"},
+        ),
+        (
+            "missing-node",
+            {
+                "n-root",
+                "n-section",
+                "n-deep",
+                "l-deep",
+                "n-side",
+                "l-side",
+                "n-missing",
+            },
+        ),
+        (
+            "mixed-entry-order",
+            {"n-root", "n-section", "n-deep", "l-deep", "n-side"},
+        ),
+    ),
+)
+def test_restamp_bottom_up_is_every_field_and_order_equivalent_to_scalar_reference(
+    case, bound_node_ids
+):
+    projection, evidence = _restamp_optimization_fixture()
+
+    expected = _scalar_restamp_reference(evidence, projection, bound_node_ids)
+    actual = _restamp_evidence(evidence, projection, bound_node_ids)
+
+    assert actual == expected, case
+    assert [_all_evidence_entry_fields(entry) for entry in actual] == [
+        _all_evidence_entry_fields(entry) for entry in expected
+    ]
+
+
+def test_restamp_bottom_up_visits_each_node_and_edge_once_and_constructs_one_payload_per_entry():
+    projection, evidence = _restamp_optimization_fixture()
+    bound_node_ids = set(projection.by_id)
+
+    batch = evidence_module._batch_live_extent_payloads(
+        tuple(entry.node_id for entry in evidence.entries),
+        projection,
+        included_node_ids=bound_node_ids,
+    )
+
+    assert batch is not None
+    assert batch.node_visits == len(projection.nodes) == 6
+    assert batch.edge_visits == 5
+    assert batch.payload_constructions == 3
+    assert set(batch.by_node) == {"n-root", "n-side", "n-deep"}
+    expected = _scalar_restamp_reference(evidence, projection, bound_node_ids)
+    for entry in expected:
+        live = batch.by_node[entry.node_id]
+        assert live.digest == entry.extent_digest
+        assert live.payload == entry.extent_payload
+
+
+def test_restamp_valid_path_never_restores_per_entry_walks_or_duplicate_payload_construction(
+    monkeypatch,
+):
+    projection, evidence = _restamp_optimization_fixture()
+
+    def unexpected_scalar_call(*_args, **_kwargs):
+        raise AssertionError(
+            "valid restamping regressed to per-entry subtree or extent construction"
+        )
+
+    monkeypatch.setattr(rebind_module, "_subtree_ids", unexpected_scalar_call)
+    monkeypatch.setattr(rebind_module, "extent_digest", unexpected_scalar_call)
+    monkeypatch.setattr(rebind_module, "extent_payload", unexpected_scalar_call)
+
+    restamped = _restamp_evidence(evidence, projection, set(projection.by_id))
+    assert [entry.node_id for entry in restamped] == ["n-root", "n-side", "n-deep"]
+
+
+def test_restamp_malformed_map_preserves_the_scalar_error_verbatim():
+    valid_root = ContainerNode(
+        node_id="n-root",
+        node_class="volume",
+        minted_by="human",
+    )
+    valid = ProjectionMap(root_id=valid_root.node_id, nodes=(valid_root,))
+    evidence = AuthoringEvidence(
+        book="fixture",
+        entries=(
+            build_evidence_entry(
+                valid_root,
+                valid,
+                evidence="valid before corruption",
+                authored_at_revision=1,
+            ),
+        ),
+    )
+    malformed = ProjectionMap(
+        root_id=valid_root.node_id,
+        nodes=(dataclasses.replace(valid_root, children=("n-ghost",)),),
+    )
+    bound_node_ids = {"n-root", "n-ghost"}
+
+    with pytest.raises(ValueError) as scalar_error:
+        _scalar_restamp_reference(evidence, malformed, bound_node_ids)
+    with pytest.raises(ValueError) as optimized_error:
+        _restamp_evidence(evidence, malformed, bound_node_ids)
+    assert str(optimized_error.value) == str(scalar_error.value)
 
 
 def test_ancestor_not_restamped_while_a_descendant_is_unresolved():

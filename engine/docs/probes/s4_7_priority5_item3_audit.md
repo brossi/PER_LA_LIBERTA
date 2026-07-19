@@ -1,5 +1,20 @@
 # S4.7 Priority 5 adversarial audit — #48 production re-anchoring
 
+> **Follow-up — 2026-07-19 / #87:** rebind evidence restamping now shares the focused bottom-up
+> extent reduction introduced by `S4.7-E`. On the purpose-built all-bound depth-3,000 production
+> `_restamp_evidence()` diagnostic, the exact-equivalent median moved from **18.027 s wall / 17.911
+> s CPU** to **9.941 s wall / 9.897 s CPU** (1.814× / 1.810×); separately measured Python allocation
+> remained effectively flat at **39,450,384 bytes** versus **39,232,392 bytes** (+0.56%). Fixture
+> work stayed outside the measured span and every one of the five timing and five allocation samples
+> revalidated the same complete output digest. The comparison is diagnostic, not a new gate. See
+> `s4_7_restamp_bottom_up_before.json` and `s4_7_restamp_bottom_up_after.json`.
+>
+> The refreshed full mutation profile kills **135/135** with byte-identical restoration, including
+> restoration of per-entry subtree walks, duplicate scalar extent construction, and removal of the
+> whole-subtree eligibility gate. Its focused green command reports **446 passed**. The complete
+> default suite reports **1988 passed, 1 scale test deselected**, with no xfails; the registered INV-7
+> baseline remains green at **0.145460 s** median and **1,417,936 bytes** peak.
+
 > **Follow-up — 2026-07-18:** the historical INV-7 residual recorded below is resolved by
 > `S4.7-E`. The unchanged depth-3,000 source-locked measurement is now 0.148400 seconds median and
 > 1,285,736 bytes peak; the strict xfail is an ordinary passing regression test. See the current

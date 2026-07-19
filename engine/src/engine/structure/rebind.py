@@ -60,6 +60,7 @@ from engine.structure.errors import StructureValidationError
 from engine.structure.evidence import (
     AuthoringEvidence,
     EvidenceEntry,
+    _batch_live_extent_payloads,
     decision_digest,
     extent_digest,
     extent_payload,
@@ -1449,12 +1450,50 @@ def _restamp_evidence(
 
     Bottom-up gate: a node is re-stamped only when its **whole subtree is bound** (``bound_node_ids``
     already excludes ``stale-decision`` nodes, so a stale descendant blocks its ancestor — no node
-    re-stamped while a descendant is unresolved). The **extent** digest is recomputed through the
-    producer ``extent_digest(node, projection)`` (the atoms are new ids, same content); the
-    **decision** digest is **carried from the old entry, never machine-refreshed** (re-bind-stable by
-    D33)."""
+    re-stamped while a descendant is unresolved). One shared extent pass constructs each eligible
+    live payload once and hashes that same payload through the canonical producer. The **decision**
+    digest is **carried from the old entry, never machine-refreshed** (re-bind-stable by D33).
+
+    A malformed flat table falls back to the pre-optimization scalar path so its fail-loud error is
+    byte-for-byte unchanged; validated production projections stay on the shared pass.
+    """
     if evidence is None:
         return ()
+    live_batch = _batch_live_extent_payloads(
+        (entry.node_id for entry in evidence.entries),
+        migrated_projection,
+        included_node_ids=bound_node_ids,
+    )
+    if live_batch is None:
+        return _restamp_evidence_scalar(evidence, migrated_projection, bound_node_ids)
+
+    restamped: list[EvidenceEntry] = []
+    for entry in evidence.entries:
+        # Consume the private raw payload once: releasing it here prevents the batch's complete
+        # payload set from overlapping the complete tuple of frozen EvidenceEntry witnesses.
+        live = live_batch.by_node.pop(entry.node_id, None)
+        if live is None:
+            continue
+        restamped.append(
+            EvidenceEntry(
+                node_id=entry.node_id,
+                decision_digest=entry.decision_digest,  # carried, never machine-refreshed
+                extent_digest=live.digest,  # mechanically re-stamped from this exact payload
+                evidence=entry.evidence,
+                authored_at_revision=entry.authored_at_revision,
+                decision_payload=dict(entry.decision_payload),
+                extent_payload=live.payload,
+            )
+        )
+    return tuple(restamped)
+
+
+def _restamp_evidence_scalar(
+    evidence: AuthoringEvidence,
+    migrated_projection: ProjectionMap,
+    bound_node_ids: set[str],
+) -> tuple[EvidenceEntry, ...]:
+    """The established malformed-map fallback, kept verbatim for diagnostic compatibility."""
     restamped: list[EvidenceEntry] = []
     for entry in evidence.entries:
         node = migrated_projection.by_id.get(entry.node_id)
@@ -1463,14 +1502,12 @@ def _restamp_evidence(
         if not _subtree_ids(entry.node_id, migrated_projection).issubset(
             bound_node_ids
         ):
-            continue  # a descendant is unresolved — do not re-stamp this ancestor (bottom-up gate)
+            continue
         restamped.append(
             EvidenceEntry(
                 node_id=entry.node_id,
-                decision_digest=entry.decision_digest,  # carried, never machine-refreshed
-                extent_digest=extent_digest(
-                    node, migrated_projection
-                ),  # mechanically re-stamped
+                decision_digest=entry.decision_digest,
+                extent_digest=extent_digest(node, migrated_projection),
                 evidence=entry.evidence,
                 authored_at_revision=entry.authored_at_revision,
                 decision_payload=dict(entry.decision_payload),

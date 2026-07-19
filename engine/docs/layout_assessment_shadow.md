@@ -1,7 +1,7 @@
 # Layout assessment shadow boundary
 
 The engine consumes `book-layout-sidecar` only through its versioned `core` provider API. The
-dependency is optional and pinned to `v0.1.4`; install it with:
+dependency is optional and pinned to `v0.1.5`; install it with:
 
 ```sh
 uv sync --extra assessment
@@ -35,8 +35,12 @@ are persisted. The density producer also embeds the source-raster SHA-256, so eq
 values cannot detach from the pixels that produced them.
 
 A column assessment is included only when the caller supplies an already-ratified
-`ColumnAssessmentPolicy`. Geometry-match, marginal-text, and bleed-through mappings remain
-unavailable until the engine can supply their separately hashed evidence families.
+`ColumnAssessmentPolicy`. The v5 provider can independently recompute spatial support between two
+exact, normalized box sets, but this boundary does not infer or synthesize that second evidence
+family. Its spatial capability therefore remains absent from ordinary observations until a caller
+supplies both separately hashed box sets and their detector lineage. Marginal-text and
+bleed-through mappings likewise remain unavailable until the engine can supply their separately
+hashed evidence families.
 
 Every reusable observation is re-parsed and revalidated against a freshly rebuilt request and the
 current provider identity. Source hash, normalized OCR boxes, adapter version, provider version,
@@ -44,7 +48,7 @@ module configuration, or evidence-binding drift invalidates reuse. Provider/impo
 failures are persisted as `unavailable`; they are never interpreted as a blank-page finding.
 
 After `ingest_gate` writes the total page-evidence ledger, a second observation-only consumer asks
-the v4 provider for `effective_geometry_ocr_text_presence_is_consistent` on every page. This is the
+the v5 provider for `effective_geometry_ocr_text_presence_is_consistent` on every page. This is the
 first point where finalized effective geometry and canonical OCR-text presence coexist. The engine
 captures the ledger once, derives a minimal factual page-evidence projection containing only the
 source identity and six presence signals, and binds both named roles to that projection with

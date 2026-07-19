@@ -289,3 +289,16 @@ run" to "**authored + committed before any red run, judgment values disclosed**"
 commit-before-measurement is the anti-tuning mechanism, not Ben's eyes. Spec header + §0 venue
 paragraph amended with dated notes. Prior sign-offs and rulings are unaffected; this governs
 process going forward.
+
+**[Correction 2026-07-18]** The Rule-A record's "Suite state untouched (doc-only delta; no code
+changed)" was an assumption, not a run — and it was wrong: the rev-2.2 spec's mention of the hunt
+artifact's command field (a `test_`-prefixed JSON literal) tripped
+`test_governance_docs_cite_only_resolvable_test_names`, which reads governance docs. Caught by the
+first full-suite run on the item-2 build branch (2026-07-18). First fix (rewording the spec line
+to drop the literal) was reverted per Ben's ruling 2026-07-18 — it discarded an accurate field
+name to satisfy an over-broad scan; the standing resolution is Ben's `NON_TEST_IDENTIFIERS`
+self-cleaning registry in the meta-test (main-tree fix, exempting `test_cmd` as a schema
+identifier while requiring it to keep occurring and to never resolve as a test). Until that
+registry lands on the integration branch and the harness branch rebases, the harness branch
+carries the governance test red with this named reason. Lesson recorded: a docs-only delta can
+red the suite where meta-tests read docs — "no code changed" does not license skipping the run.

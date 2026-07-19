@@ -1,0 +1,815 @@
+{
+  "runner": "mutation-hunt/hunt.py",
+  "version": "1.1.0",
+  "mode": "hunt",
+  "repo": "/Users/ben_mpa/.claude/skills/mutation-hunt",
+  "test_cmd": [
+    "/usr/local/bin/python3",
+    "tests/test_hunt.py",
+    "{scope}"
+  ],
+  "timeout": 120.0,
+  "purge": true,
+  "baseline": {
+    "ran": true,
+    "results": {
+      "HuntCase.test_ambiguous_patch_refuses_before_any_run": 0,
+      "HuntCase.test_noop_patch_refused": 0,
+      "HuntCase.test_duplicate_labels_refused": 0,
+      "HuntCase.test_target_outside_repo_refused": 0,
+      "HuntCase.test_tuple_entries_normalize": 0,
+      "HuntCase.test_multi_site_same_file_patches_apply_sequentially": 0,
+      "HuntCase.test_timeout_classifies_as_killed": 0,
+      "HuntCase.test_error_is_distinct_from_survived_in_the_artifact": 0,
+      "HuntCase.test_killed_and_survived_are_classified_from_scope_exit": 0,
+      "HuntCase.test_undeclared_error_codes_stay_red_for_custom_cmd": 0,
+      "HuntCase.test_red_first_mode_vocabulary": 0,
+      "HuntCase.test_stale_pyc_control_purge_is_load_bearing": 0,
+      "HuntCase.test_child_env_pins_dont_write_bytecode": 0,
+      "HuntCase.test_child_env_strips_cache_side_doors": 0,
+      "HuntCase.test_purge_spares_virtualenv_trees": 0,
+      "HuntCase.test_repo_root_that_is_itself_a_venv_still_purges": 0,
+      "HuntCase.test_default_cmd_uses_pytest_hygiene": 0,
+      "HuntCase.test_scope_token_passes_through_verbatim": 0,
+      "HuntCase.test_multi_site_patch_applies_all_sites_and_restores_all": 0,
+      "HuntCase.test_restore_is_byte_identical_including_odd_bytes": 0,
+      "HuntCase.test_failed_restore_halts_the_hunt": 0,
+      "HuntCase.test_in_process_interrupt_returns_130_and_restores": 0,
+      "HuntCase.test_deferred_signal_fires_after_the_guarded_block_completes": 0,
+      "HuntCase.test_red_baseline_refuses_to_hunt": 0,
+      "HuntCase.test_baseline_dedupes_scopes_and_post_verify_reruns": 0,
+      "HuntCase.test_table_calling_sys_exit_refuses": 0,
+      "HuntCase.test_malformed_config_values_refuse": 0,
+      "HuntCase.test_binary_scope_output_does_not_crash": 0,
+      "HuntCase.test_timeout_kills_the_whole_process_group": 0,
+      "HuntCase.test_failed_restore_write_reports_exit_3": 0,
+      "HuntCase.test_unwritable_artifact_refuses_up_front": 0,
+      "HuntCase.test_unreadable_tree_after_failed_restore_still_exits_3": 0,
+      "HuntCase.test_self_detaching_grandchild_cannot_hang_the_drain": 0,
+      "HuntCase.test_interrupt_before_execution_returns_130": 0,
+      "HuntCase.test_five_second_policy_is_default_and_heartbeat_reports_liveness": 0,
+      "HuntCase.test_watchdog_event_is_distinct_from_heartbeat_and_timeout_result": 0,
+      "HuntCase.test_progress_events_preserve_results_and_terminal_failure": 0,
+      "HuntCase.test_interrupt_mid_scope_restores_bytes": 0,
+      "HuntCase.test_observer_thread_keeps_patch_and_restore_phases_live": 0
+    }
+  },
+  "post_verify": {
+    "ran": true,
+    "results": {
+      "HuntCase.test_ambiguous_patch_refuses_before_any_run": 0,
+      "HuntCase.test_noop_patch_refused": 0,
+      "HuntCase.test_duplicate_labels_refused": 0,
+      "HuntCase.test_target_outside_repo_refused": 0,
+      "HuntCase.test_tuple_entries_normalize": 0,
+      "HuntCase.test_multi_site_same_file_patches_apply_sequentially": 0,
+      "HuntCase.test_timeout_classifies_as_killed": 0,
+      "HuntCase.test_error_is_distinct_from_survived_in_the_artifact": 0,
+      "HuntCase.test_killed_and_survived_are_classified_from_scope_exit": 0,
+      "HuntCase.test_undeclared_error_codes_stay_red_for_custom_cmd": 0,
+      "HuntCase.test_red_first_mode_vocabulary": 0,
+      "HuntCase.test_stale_pyc_control_purge_is_load_bearing": 0,
+      "HuntCase.test_child_env_pins_dont_write_bytecode": 0,
+      "HuntCase.test_child_env_strips_cache_side_doors": 0,
+      "HuntCase.test_purge_spares_virtualenv_trees": 0,
+      "HuntCase.test_repo_root_that_is_itself_a_venv_still_purges": 0,
+      "HuntCase.test_default_cmd_uses_pytest_hygiene": 0,
+      "HuntCase.test_scope_token_passes_through_verbatim": 0,
+      "HuntCase.test_multi_site_patch_applies_all_sites_and_restores_all": 0,
+      "HuntCase.test_restore_is_byte_identical_including_odd_bytes": 0,
+      "HuntCase.test_failed_restore_halts_the_hunt": 0,
+      "HuntCase.test_in_process_interrupt_returns_130_and_restores": 0,
+      "HuntCase.test_deferred_signal_fires_after_the_guarded_block_completes": 0,
+      "HuntCase.test_red_baseline_refuses_to_hunt": 0,
+      "HuntCase.test_baseline_dedupes_scopes_and_post_verify_reruns": 0,
+      "HuntCase.test_table_calling_sys_exit_refuses": 0,
+      "HuntCase.test_malformed_config_values_refuse": 0,
+      "HuntCase.test_binary_scope_output_does_not_crash": 0,
+      "HuntCase.test_timeout_kills_the_whole_process_group": 0,
+      "HuntCase.test_failed_restore_write_reports_exit_3": 0,
+      "HuntCase.test_unwritable_artifact_refuses_up_front": 0,
+      "HuntCase.test_unreadable_tree_after_failed_restore_still_exits_3": 0,
+      "HuntCase.test_self_detaching_grandchild_cannot_hang_the_drain": 0,
+      "HuntCase.test_interrupt_before_execution_returns_130": 0,
+      "HuntCase.test_five_second_policy_is_default_and_heartbeat_reports_liveness": 0,
+      "HuntCase.test_watchdog_event_is_distinct_from_heartbeat_and_timeout_result": 0,
+      "HuntCase.test_progress_events_preserve_results_and_terminal_failure": 0,
+      "HuntCase.test_interrupt_mid_scope_restores_bytes": 0,
+      "HuntCase.test_observer_thread_keeps_patch_and_restore_phases_live": 0
+    }
+  },
+  "refusals": [],
+  "mutants": [
+    {
+      "label": "preflight-accepts-ambiguous-patch",
+      "status": "KILLED",
+      "detected": true,
+      "scope": "HuntCase.test_ambiguous_patch_refuses_before_any_run",
+      "files": [
+        "hunt.py"
+      ],
+      "rc": 1,
+      "duration_s": 0.21,
+      "test_duration_s": 0.207149
+    },
+    {
+      "label": "noop-patch-accepted",
+      "status": "KILLED",
+      "detected": true,
+      "scope": "HuntCase.test_noop_patch_refused",
+      "files": [
+        "hunt.py"
+      ],
+      "rc": 1,
+      "duration_s": 0.18,
+      "test_duration_s": 0.174554
+    },
+    {
+      "label": "duplicate-label-accepted",
+      "status": "KILLED",
+      "detected": true,
+      "scope": "HuntCase.test_duplicate_labels_refused",
+      "files": [
+        "hunt.py"
+      ],
+      "rc": 1,
+      "duration_s": 0.26,
+      "test_duration_s": 0.260745
+    },
+    {
+      "label": "containment-dropped",
+      "status": "KILLED",
+      "detected": true,
+      "scope": "HuntCase.test_target_outside_repo_refused",
+      "files": [
+        "hunt.py"
+      ],
+      "rc": 1,
+      "duration_s": 0.15,
+      "test_duration_s": 0.146566
+    },
+    {
+      "label": "tuple-sugar-dropped",
+      "status": "KILLED",
+      "detected": true,
+      "scope": "HuntCase.test_tuple_entries_normalize",
+      "files": [
+        "hunt.py"
+      ],
+      "rc": 1,
+      "duration_s": 0.13,
+      "test_duration_s": 0.124441
+    },
+    {
+      "label": "sequential-application-dropped",
+      "status": "KILLED",
+      "detected": true,
+      "scope": "HuntCase.test_multi_site_same_file_patches_apply_sequentially",
+      "files": [
+        "hunt.py"
+      ],
+      "rc": 1,
+      "duration_s": 0.14,
+      "test_duration_s": 0.139908
+    },
+    {
+      "label": "refusals-hidden-from-artifact",
+      "status": "KILLED",
+      "detected": true,
+      "scope": "HuntCase.test_ambiguous_patch_refuses_before_any_run",
+      "files": [
+        "hunt.py"
+      ],
+      "rc": 1,
+      "duration_s": 0.12,
+      "test_duration_s": 0.119639
+    },
+    {
+      "label": "timeout-not-detected",
+      "status": "KILLED",
+      "detected": true,
+      "scope": "HuntCase.test_timeout_classifies_as_killed",
+      "files": [
+        "hunt.py"
+      ],
+      "rc": 1,
+      "duration_s": 2.18,
+      "test_duration_s": 2.178359
+    },
+    {
+      "label": "error-collapses-into-red",
+      "status": "KILLED",
+      "detected": true,
+      "scope": "HuntCase.test_error_is_distinct_from_survived_in_the_artifact",
+      "files": [
+        "hunt.py"
+      ],
+      "rc": 1,
+      "duration_s": 0.2,
+      "test_duration_s": 0.199505
+    },
+    {
+      "label": "green-misread-as-red",
+      "status": "KILLED",
+      "detected": true,
+      "scope": "HuntCase.test_killed_and_survived_are_classified_from_scope_exit",
+      "files": [
+        "hunt.py"
+      ],
+      "rc": 1,
+      "duration_s": 0.2,
+      "test_duration_s": 0.197992
+    },
+    {
+      "label": "error-codes-leak-into-custom-cmd",
+      "status": "KILLED",
+      "detected": true,
+      "scope": "HuntCase.test_undeclared_error_codes_stay_red_for_custom_cmd",
+      "files": [
+        "hunt.py"
+      ],
+      "rc": 1,
+      "duration_s": 0.16,
+      "test_duration_s": 0.163765
+    },
+    {
+      "label": "red-first-vocabulary-lost",
+      "status": "KILLED",
+      "detected": true,
+      "scope": "HuntCase.test_red_first_mode_vocabulary",
+      "files": [
+        "hunt.py"
+      ],
+      "rc": 1,
+      "duration_s": 0.2,
+      "test_duration_s": 0.195504
+    },
+    {
+      "label": "clean-exit-fabricated",
+      "status": "KILLED",
+      "detected": true,
+      "scope": "HuntCase.test_killed_and_survived_are_classified_from_scope_exit",
+      "files": [
+        "hunt.py"
+      ],
+      "rc": 1,
+      "duration_s": 0.18,
+      "test_duration_s": 0.183157
+    },
+    {
+      "label": "summary-miscounts-errors",
+      "status": "KILLED",
+      "detected": true,
+      "scope": "HuntCase.test_error_is_distinct_from_survived_in_the_artifact",
+      "files": [
+        "hunt.py"
+      ],
+      "rc": 1,
+      "duration_s": 0.19,
+      "test_duration_s": 0.187639
+    },
+    {
+      "label": "mutant-loop-purge-dropped",
+      "status": "KILLED",
+      "detected": true,
+      "scope": "HuntCase.test_stale_pyc_control_purge_is_load_bearing",
+      "files": [
+        "hunt.py"
+      ],
+      "rc": 1,
+      "duration_s": 0.41,
+      "test_duration_s": 0.406585
+    },
+    {
+      "label": "env-pin-dropped",
+      "status": "KILLED",
+      "detected": true,
+      "scope": "HuntCase.test_child_env_pins_dont_write_bytecode",
+      "files": [
+        "hunt.py"
+      ],
+      "rc": 1,
+      "duration_s": 0.38,
+      "test_duration_s": 0.37773
+    },
+    {
+      "label": "pycacheprefix-strip-dropped",
+      "status": "KILLED",
+      "detected": true,
+      "scope": "HuntCase.test_child_env_strips_cache_side_doors",
+      "files": [
+        "hunt.py"
+      ],
+      "rc": 1,
+      "duration_s": 0.18,
+      "test_duration_s": 0.180786
+    },
+    {
+      "label": "addopts-strip-dropped",
+      "status": "KILLED",
+      "detected": true,
+      "scope": "HuntCase.test_child_env_strips_cache_side_doors",
+      "files": [
+        "hunt.py"
+      ],
+      "rc": 1,
+      "duration_s": 0.18,
+      "test_duration_s": 0.176129
+    },
+    {
+      "label": "env-inheritance-dropped",
+      "status": "KILLED",
+      "detected": true,
+      "scope": "HuntCase.test_child_env_strips_cache_side_doors",
+      "files": [
+        "hunt.py"
+      ],
+      "rc": 1,
+      "duration_s": 0.15,
+      "test_duration_s": 0.150324
+    },
+    {
+      "label": "venv-purge-skip-dropped",
+      "status": "KILLED",
+      "detected": true,
+      "scope": "HuntCase.test_purge_spares_virtualenv_trees",
+      "files": [
+        "hunt.py"
+      ],
+      "rc": 1,
+      "duration_s": 0.12,
+      "test_duration_s": 0.118599
+    },
+    {
+      "label": "venv-root-exemption-dropped",
+      "status": "KILLED",
+      "detected": true,
+      "scope": "HuntCase.test_repo_root_that_is_itself_a_venv_still_purges",
+      "files": [
+        "hunt.py"
+      ],
+      "rc": 1,
+      "duration_s": 0.15,
+      "test_duration_s": 0.144115
+    },
+    {
+      "label": "hygiene-flags-dropped",
+      "status": "KILLED",
+      "detected": true,
+      "scope": "HuntCase.test_default_cmd_uses_pytest_hygiene",
+      "files": [
+        "hunt.py"
+      ],
+      "rc": 1,
+      "duration_s": 0.19,
+      "test_duration_s": 0.185883
+    },
+    {
+      "label": "timeout-not-enforced",
+      "status": "KILLED",
+      "detected": true,
+      "scope": "HuntCase.test_timeout_classifies_as_killed",
+      "files": [
+        "hunt.py"
+      ],
+      "rc": 1,
+      "duration_s": 30.16,
+      "test_duration_s": 30.160704
+    },
+    {
+      "label": "scope-token-mangled",
+      "status": "KILLED",
+      "detected": true,
+      "scope": "HuntCase.test_scope_token_passes_through_verbatim",
+      "files": [
+        "hunt.py"
+      ],
+      "rc": 1,
+      "duration_s": 0.33,
+      "test_duration_s": 0.327079
+    },
+    {
+      "label": "multi-site-partial-apply",
+      "status": "KILLED",
+      "detected": true,
+      "scope": "HuntCase.test_multi_site_patch_applies_all_sites_and_restores_all",
+      "files": [
+        "hunt.py"
+      ],
+      "rc": 1,
+      "duration_s": 0.19,
+      "test_duration_s": 0.19029
+    },
+    {
+      "label": "restore-dropped",
+      "status": "KILLED",
+      "detected": true,
+      "scope": "HuntCase.test_restore_is_byte_identical_including_odd_bytes",
+      "files": [
+        "hunt.py"
+      ],
+      "rc": 1,
+      "duration_s": 0.2,
+      "test_duration_s": 0.201433
+    },
+    {
+      "label": "restore-verify-blinded",
+      "status": "KILLED",
+      "detected": true,
+      "scope": "HuntCase.test_failed_restore_halts_the_hunt",
+      "files": [
+        "hunt.py"
+      ],
+      "rc": 1,
+      "duration_s": 0.2,
+      "test_duration_s": 0.195062
+    },
+    {
+      "label": "halt-on-poisoned-tree-dropped",
+      "status": "KILLED",
+      "detected": true,
+      "scope": "HuntCase.test_failed_restore_halts_the_hunt",
+      "files": [
+        "hunt.py"
+      ],
+      "rc": 1,
+      "duration_s": 0.22,
+      "test_duration_s": 0.218753
+    },
+    {
+      "label": "interrupt-escapes-main",
+      "status": "KILLED",
+      "detected": true,
+      "scope": "HuntCase.test_in_process_interrupt_returns_130_and_restores",
+      "files": [
+        "hunt.py"
+      ],
+      "rc": 1,
+      "duration_s": 0.14,
+      "test_duration_s": 0.142691
+    },
+    {
+      "label": "deferred-signal-swallowed",
+      "status": "KILLED",
+      "detected": true,
+      "scope": "HuntCase.test_deferred_signal_fires_after_the_guarded_block_completes",
+      "files": [
+        "hunt.py"
+      ],
+      "rc": 1,
+      "duration_s": 0.18,
+      "test_duration_s": 0.177588
+    },
+    {
+      "label": "deferral-handlers-not-restored",
+      "status": "KILLED",
+      "detected": true,
+      "scope": "HuntCase.test_deferred_signal_fires_after_the_guarded_block_completes",
+      "files": [
+        "hunt.py"
+      ],
+      "rc": 1,
+      "duration_s": 0.2,
+      "test_duration_s": 0.199976
+    },
+    {
+      "label": "baseline-red-tolerated",
+      "status": "KILLED",
+      "detected": true,
+      "scope": "HuntCase.test_red_baseline_refuses_to_hunt",
+      "files": [
+        "hunt.py"
+      ],
+      "rc": 1,
+      "duration_s": 0.24,
+      "test_duration_s": 0.239006
+    },
+    {
+      "label": "baseline-skipped-silently",
+      "status": "KILLED",
+      "detected": true,
+      "scope": "HuntCase.test_red_baseline_refuses_to_hunt",
+      "files": [
+        "hunt.py"
+      ],
+      "rc": 1,
+      "duration_s": 0.2,
+      "test_duration_s": 0.202027
+    },
+    {
+      "label": "scopes-not-deduped",
+      "status": "KILLED",
+      "detected": true,
+      "scope": "HuntCase.test_baseline_dedupes_scopes_and_post_verify_reruns",
+      "files": [
+        "hunt.py"
+      ],
+      "rc": 1,
+      "duration_s": 0.34,
+      "test_duration_s": 0.33428
+    },
+    {
+      "label": "post-verify-dropped",
+      "status": "KILLED",
+      "detected": true,
+      "scope": "HuntCase.test_baseline_dedupes_scopes_and_post_verify_reruns",
+      "files": [
+        "hunt.py"
+      ],
+      "rc": 1,
+      "duration_s": 0.27,
+      "test_duration_s": 0.266126
+    },
+    {
+      "label": "table-systemexit-tolerated",
+      "status": "KILLED",
+      "detected": true,
+      "scope": "HuntCase.test_table_calling_sys_exit_refuses",
+      "files": [
+        "hunt.py"
+      ],
+      "rc": 1,
+      "duration_s": 0.16,
+      "test_duration_s": 0.159653
+    },
+    {
+      "label": "error-codes-validation-dropped",
+      "status": "KILLED",
+      "detected": true,
+      "scope": "HuntCase.test_malformed_config_values_refuse",
+      "files": [
+        "hunt.py"
+      ],
+      "rc": 1,
+      "duration_s": 0.13,
+      "test_duration_s": 0.12946
+    },
+    {
+      "label": "zero-error-code-accepted",
+      "status": "KILLED",
+      "detected": true,
+      "scope": "HuntCase.test_malformed_config_values_refuse",
+      "files": [
+        "hunt.py"
+      ],
+      "rc": 1,
+      "duration_s": 0.19,
+      "test_duration_s": 0.184582
+    },
+    {
+      "label": "timeout-floor-dropped",
+      "status": "KILLED",
+      "detected": true,
+      "scope": "HuntCase.test_malformed_config_values_refuse",
+      "files": [
+        "hunt.py"
+      ],
+      "rc": 1,
+      "duration_s": 0.16,
+      "test_duration_s": 0.160935
+    },
+    {
+      "label": "nonfinite-timeout-accepted",
+      "status": "KILLED",
+      "detected": true,
+      "scope": "HuntCase.test_malformed_config_values_refuse",
+      "files": [
+        "hunt.py"
+      ],
+      "rc": 1,
+      "duration_s": 0.19,
+      "test_duration_s": 0.187513
+    },
+    {
+      "label": "patches-shape-unchecked",
+      "status": "KILLED",
+      "detected": true,
+      "scope": "HuntCase.test_malformed_config_values_refuse",
+      "files": [
+        "hunt.py"
+      ],
+      "rc": 1,
+      "duration_s": 0.12,
+      "test_duration_s": 0.118665
+    },
+    {
+      "label": "decode-not-tolerant",
+      "status": "KILLED",
+      "detected": true,
+      "scope": "HuntCase.test_binary_scope_output_does_not_crash",
+      "files": [
+        "hunt.py"
+      ],
+      "rc": 1,
+      "duration_s": 0.15,
+      "test_duration_s": 0.146586
+    },
+    {
+      "label": "group-kill-dropped",
+      "status": "KILLED",
+      "detected": true,
+      "scope": "HuntCase.test_timeout_kills_the_whole_process_group",
+      "files": [
+        "hunt.py"
+      ],
+      "rc": 1,
+      "duration_s": 10.21,
+      "test_duration_s": 10.208809
+    },
+    {
+      "label": "harness-error-swallowed",
+      "status": "KILLED",
+      "detected": true,
+      "scope": "HuntCase.test_failed_restore_write_reports_exit_3",
+      "files": [
+        "hunt.py"
+      ],
+      "rc": 1,
+      "duration_s": 0.24,
+      "test_duration_s": 0.239505
+    },
+    {
+      "label": "artifact-probe-dropped",
+      "status": "KILLED",
+      "detected": true,
+      "scope": "HuntCase.test_unwritable_artifact_refuses_up_front",
+      "files": [
+        "hunt.py"
+      ],
+      "rc": 1,
+      "duration_s": 0.19,
+      "test_duration_s": 0.183841
+    },
+    {
+      "label": "sweep-crash-escapes",
+      "status": "KILLED",
+      "detected": true,
+      "scope": "HuntCase.test_unreadable_tree_after_failed_restore_still_exits_3",
+      "files": [
+        "hunt.py"
+      ],
+      "rc": 1,
+      "duration_s": 0.18,
+      "test_duration_s": 0.181503
+    },
+    {
+      "label": "drain-cap-dropped",
+      "status": "KILLED",
+      "detected": true,
+      "scope": "HuntCase.test_self_detaching_grandchild_cannot_hang_the_drain",
+      "files": [
+        "hunt.py"
+      ],
+      "rc": 1,
+      "duration_s": 15.25,
+      "test_duration_s": 15.251147
+    },
+    {
+      "label": "preflight-interrupt-escapes",
+      "status": "KILLED",
+      "detected": true,
+      "scope": "HuntCase.test_interrupt_before_execution_returns_130",
+      "files": [
+        "hunt.py"
+      ],
+      "rc": 1,
+      "duration_s": 0.18,
+      "test_duration_s": 0.180517
+    },
+    {
+      "label": "heartbeat-default-loses-five-second-policy",
+      "status": "KILLED",
+      "detected": true,
+      "scope": "HuntCase.test_five_second_policy_is_default_and_heartbeat_reports_liveness",
+      "files": [
+        "hunt.py"
+      ],
+      "rc": 1,
+      "duration_s": 0.43,
+      "test_duration_s": 0.432162
+    },
+    {
+      "label": "heartbeat-publication-dropped",
+      "status": "KILLED",
+      "detected": true,
+      "scope": "HuntCase.test_five_second_policy_is_default_and_heartbeat_reports_liveness",
+      "files": [
+        "hunt.py"
+      ],
+      "rc": 1,
+      "duration_s": 0.43,
+      "test_duration_s": 0.423709
+    },
+    {
+      "label": "last-output-age-never-updates",
+      "status": "KILLED",
+      "detected": true,
+      "scope": "HuntCase.test_five_second_policy_is_default_and_heartbeat_reports_liveness",
+      "files": [
+        "hunt.py"
+      ],
+      "rc": 1,
+      "duration_s": 0.64,
+      "test_duration_s": 0.639284
+    },
+    {
+      "label": "watchdog-collapses-into-ordinary-heartbeat",
+      "status": "KILLED",
+      "detected": true,
+      "scope": "HuntCase.test_watchdog_event_is_distinct_from_heartbeat_and_timeout_result",
+      "files": [
+        "hunt.py"
+      ],
+      "rc": 1,
+      "duration_s": 0.31,
+      "test_duration_s": 0.311688
+    },
+    {
+      "label": "failed-campaign-reported-complete",
+      "status": "KILLED",
+      "detected": true,
+      "scope": "HuntCase.test_progress_events_preserve_results_and_terminal_failure",
+      "files": [
+        "hunt.py"
+      ],
+      "rc": 1,
+      "duration_s": 0.2,
+      "test_duration_s": 0.20264
+    },
+    {
+      "label": "terminal-event-dropped",
+      "status": "KILLED",
+      "detected": true,
+      "scope": "HuntCase.test_progress_events_preserve_results_and_terminal_failure",
+      "files": [
+        "hunt.py"
+      ],
+      "rc": 1,
+      "duration_s": 0.23,
+      "test_duration_s": 0.229153
+    },
+    {
+      "label": "restore-failure-terminal-collapses-to-failed",
+      "status": "KILLED",
+      "detected": true,
+      "scope": "HuntCase.test_failed_restore_write_reports_exit_3",
+      "files": [
+        "hunt.py"
+      ],
+      "rc": 1,
+      "duration_s": 0.37,
+      "test_duration_s": 0.372767
+    },
+    {
+      "label": "interrupted-terminal-collapses-to-failed",
+      "status": "KILLED",
+      "detected": true,
+      "scope": "HuntCase.test_interrupt_mid_scope_restores_bytes",
+      "files": [
+        "hunt.py"
+      ],
+      "rc": 1,
+      "duration_s": 0.4,
+      "test_duration_s": 0.396862
+    },
+    {
+      "label": "patch-phase-heartbeat-mislabeled",
+      "status": "KILLED",
+      "detected": true,
+      "scope": "HuntCase.test_observer_thread_keeps_patch_and_restore_phases_live",
+      "files": [
+        "hunt.py"
+      ],
+      "rc": 1,
+      "duration_s": 0.54,
+      "test_duration_s": 0.532966
+    },
+    {
+      "label": "restore-phase-heartbeat-mislabeled",
+      "status": "KILLED",
+      "detected": true,
+      "scope": "HuntCase.test_observer_thread_keeps_patch_and_restore_phases_live",
+      "files": [
+        "hunt.py"
+      ],
+      "rc": 1,
+      "duration_s": 0.56,
+      "test_duration_s": 0.554129
+    }
+  ],
+  "summary": {
+    "total": 58,
+    "detected": 58,
+    "survived": 0,
+    "errors": 0
+  },
+  "restore_verified": true,
+  "interrupted": false,
+  "harness_error": null,
+  "progress": {
+    "schema": "mutation-hunt-progress@v1",
+    "run_id": "9f476fbc-dbf6-470a-bf6d-b7f0dd9de212",
+    "heartbeat_interval_seconds": 5.0,
+    "log_path": "/Users/ben_mpa/LLM/PER_LA_LIBERTA/engine/docs/probes/s4_7_mutation_runner_self_hunt.progress.ndjson"
+  }
+}

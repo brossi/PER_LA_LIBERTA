@@ -11,24 +11,48 @@ literal — so a default change cannot silently pass a stale hardcoded number (�
 
 from __future__ import annotations
 
+import dataclasses
+import hashlib
+import json
+
 import pytest
 
+import engine.structure.evidence as evidence_module
+import engine.structure.rebind as rebind_module
 from engine.errors import CaptureError, StaleArtifactError
 from engine.structure.atom_store import AtomStream
 from engine.structure.atoms import Atom, AtomDerivation, Geom
+from engine.structure.boundary_anchor import (
+    DeterministicBoundaryAnchorFamily,
+    derive_boundary_anchor,
+)
 from engine.structure.evidence import (
     AuthoringEvidence,
+    EvidenceEntry,
     build_evidence_entry,
     extent_digest,
+    extent_payload,
 )
 from engine.structure.geom_regate import MODE_NO_GEOMETRY, MODE_PRIMARY, MODE_TIE_BREAK
-from engine.structure.projection import Region, SlotFingerprint
+from engine.structure.projection import (
+    ContainerNode,
+    LeafNode,
+    ProjectionMap,
+    Region,
+    SlotFingerprint,
+)
 from engine.structure.rebind import (
     DEFAULT_FINGERPRINT_THRESHOLD,
     REBIND_UNRESOLVED_REASONS,
     RebindContext,
     RebindError,
+    RebindNotConsumableError,
     RebindPolicy,
+    NodeOutcome,
+    SlotOutcome,
+    _contested_nodes,
+    _restamp_evidence,
+    _runtime_fingerprint_slot,
     assert_all_bound,
     fingerprint_slot,
     normalized_slot_tokens,
@@ -36,6 +60,7 @@ from engine.structure.rebind import (
     resolve_mode,
     slot_similarity,
 )
+from engine.structure.rebind_telemetry import RebindTelemetry
 from engine.structure.roundtrip import hash_raw
 from engine.structure.structure_map import (
     STRUCTURE_MAP_SCHEMA_VERSION,
@@ -72,6 +97,22 @@ def test_fingerprint_slot_empty_is_none_never_empty_set():
     # fingerprint that could score a spurious 1.0 against another empty window. Mutant
     # (hunt_rebind): return an empty-shingle SlotFingerprint → this reds.
     assert fingerprint_slot([], k=3) is None
+
+
+@pytest.mark.parametrize(
+    ("tokens", "k"),
+    [([], 3), (["solo"], 3), (["one", "two"], 3), (["a", "b", "a", "b"], 2)],
+)
+def test_runtime_fingerprint_is_set_equivalent_to_persisted_producer(tokens, k):
+    persisted = fingerprint_slot(tokens, k=k)
+    runtime = _runtime_fingerprint_slot(tokens, k=k)
+    if persisted is None:
+        assert runtime is None
+        return
+    assert runtime is not None
+    assert runtime.k == persisted.k
+    assert runtime.token_count == persisted.token_count
+    assert runtime.shingles == frozenset(persisted.shingles)
 
 
 def test_slot_similarity_identity_disjoint_and_fuzzy():
@@ -138,6 +179,16 @@ def test_policy_inverted_ordering_is_rejected_at_construction():
     # (the mutant that inverts the defaults reds here). feedback_no_cheating_results.
     with pytest.raises(ValueError, match="default-ordering"):
         RebindPolicy(tau_primary=0.9, tau_tie_break=0.8, tau_no_geometry=0.7)
+
+
+@pytest.mark.parametrize("invalid", [-0.01, 1.01, float("inf"), float("nan"), True])
+def test_policy_thresholds_are_finite_unit_interval_scores(invalid):
+    with pytest.raises(ValueError, match=r"finite in \[0, 1\]"):
+        RebindPolicy(
+            tau_primary=invalid,
+            tau_tie_break=invalid,
+            tau_no_geometry=invalid,
+        )
 
 
 # ================================================================================================== #
@@ -207,6 +258,44 @@ def _leaf(node_id, body_ids, texts, *, with_fp=True, region_page=None):
 
 
 def _map(nodes, canonical_stream):
+    included = list(canonical_stream.atoms)
+    stream_tokens: list[str] = []
+    atom_ranges: dict[str, tuple[int, int]] = {}
+    for atom in included:
+        start = len(stream_tokens)
+        stream_tokens.extend(normalized_slot_tokens((atom.text,)))
+        atom_ranges[atom.atom_id] = (start, len(stream_tokens))
+    family = DeterministicBoundaryAnchorFamily()
+    for node in nodes:
+        for slot_name, key in (
+            ("body", "body_atoms"),
+            ("heading", "heading_atoms"),
+            ("signature", "signature_atoms"),
+        ):
+            atom_ids = node.get(key, [])
+            anchors = node.get("rebind_anchors", {})
+            if not atom_ids or slot_name not in anchors.get("content_fingerprint", {}):
+                continue
+            tokened = [atom_id for atom_id in atom_ids if atom_ranges[atom_id][0] != atom_ranges[atom_id][1]]
+            start = atom_ranges[tokened[0]][0]
+            end = atom_ranges[tokened[-1]][1]
+
+            def payload(anchor):
+                return {
+                    "prefix": list(anchor.prefix),
+                    "exact": list(anchor.exact),
+                    "suffix": list(anchor.suffix),
+                }
+
+            anchors.setdefault("boundary_anchors", {})[slot_name] = {
+                "start": payload(
+                    derive_boundary_anchor(family, stream_tokens, start, side="start")
+                ),
+                "end": payload(
+                    derive_boundary_anchor(family, stream_tokens, end, side="end")
+                ),
+            }
+            node["rebind_anchors"] = anchors
     doc = {
         "schema_version": STRUCTURE_MAP_SCHEMA_VERSION,
         "root_id": nodes[0]["node_id"],
@@ -250,10 +339,203 @@ def _happy_case(page=3):
     return old_map, old_streams, specs
 
 
+def _complete_result_digest(result) -> str:
+    """Hash every ordered result field so the optimization cannot narrow equivalence."""
+    payload = {
+        "migrated_doc": result.migrated_doc,
+        "report": dataclasses.asdict(result.report),
+        "restamped_evidence": [
+            dataclasses.asdict(entry) for entry in result.restamped_evidence
+        ],
+    }
+    encoded = json.dumps(
+        payload, sort_keys=True, separators=(",", ":")
+    ).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def _fingerprint_characterization_cases():
+    happy_map, happy_streams, happy_specs = _happy_case()
+
+    diverged_specs = [("a0", _A0, 3), ("a1", _A1, 3)]
+    diverged_streams = _streams(diverged_specs)
+    diverged_map = _map(
+        [
+            _root(["l0", "l1"]),
+            _leaf("l0", ["a0"], [_A0]),
+            _leaf("l1", ["a1"], [_A1]),
+        ],
+        diverged_streams["canonical"],
+    )
+
+    missing_streams = _streams(diverged_specs)
+    missing_map = _map(
+        [
+            _root(["l0", "l1"]),
+            _leaf(
+                "l0",
+                ["a0"],
+                [_A0],
+                with_fp=False,
+                region_page=3,
+            ),
+            _leaf("l1", ["a1"], [_A1]),
+        ],
+        missing_streams["canonical"],
+    )
+
+    scored_below_streams = _streams([("a0", _A0, 3)])
+    scored_below_map = _map(
+        [
+            _root(["l0"]),
+            _leaf("l0", ["a0"], [_A0], region_page=3),
+        ],
+        scored_below_streams["canonical"],
+    )
+
+    mismatch_map, mismatch_streams, mismatch_fresh = _region_mismatch_case()
+
+    superstring_specs = [("a0", _A0, 3)]
+    superstring_streams = _streams(superstring_specs)
+    superstring_map = _map(
+        [_root(["l0"]), _leaf("l0", ["a0"], [_A0])],
+        superstring_streams["canonical"],
+    )
+
+    return {
+        "happy": (
+            happy_map,
+            happy_streams,
+            _streams(_fresh_specs(happy_specs)),
+            MODE_TIE_BREAK,
+            2,
+        ),
+        "below-threshold": (
+            diverged_map,
+            diverged_streams,
+            _streams(
+                [("f_a0", "kappa lambda mu nu", 3), ("f_a1", _A1, 3)]
+            ),
+            MODE_TIE_BREAK,
+            1,
+        ),
+        "scored-below-threshold": (
+            scored_below_map,
+            scored_below_streams,
+            _streams([("f_a0", "alpha beta gamma nu", 3)]),
+            MODE_TIE_BREAK,
+            1,
+        ),
+        "missing-anchor": (
+            missing_map,
+            missing_streams,
+            _streams(_fresh_specs(diverged_specs)),
+            MODE_PRIMARY,
+            1,
+        ),
+        "page-mismatch": (
+            mismatch_map,
+            mismatch_streams,
+            mismatch_fresh,
+            MODE_PRIMARY,
+            1,
+        ),
+        "superstring-ambiguous": (
+            superstring_map,
+            superstring_streams,
+            _streams([("f_a0", _A0 + " iota kappa lambda mu", 3)]),
+            MODE_NO_GEOMETRY,
+            0,
+        ),
+    }
+
+
+def test_fingerprint_reuse_preserves_complete_ordered_result_characterizations():
+    expected = {
+        "happy": "581dd92eb551eb74d989b4ac40068527325afeefb90de33e13797c52a4c353b9",
+        "below-threshold": "7756e18e78d6091da4be5b2d798bb599da0b9144c252248a261e2cc0b515440c",
+        "scored-below-threshold": "bc11fb7e4f7a56036380c62caf8737b51be43fd0ec9f0bf9704d30b5a76b6da0",
+        "missing-anchor": "8f2b2972e6853887ffdd2ade0292b110b9996ed6e618f2dece0052fa86e976aa",
+        "page-mismatch": "f2d264ad09911c1910e96f6dacd4f1aed221eba42aad51aab6be964d8d8e3123",
+        "superstring-ambiguous": "749d96cda2e02e10ba181cc49bb2530bae6944fa8cc167f058909853951df6ca",
+    }
+    for name, (old_map, old_streams, fresh, mode, _) in (
+        _fingerprint_characterization_cases().items()
+    ):
+        result = rebind(
+            RebindContext(
+                old_map,
+                old_streams,
+                fresh,
+                geometry_mode=mode,
+            )
+        )
+        assert _complete_result_digest(result) == expected[name]
+
+
+@pytest.mark.parametrize(
+    ("case_name", "expected_computations"),
+    [
+        ("happy", 2),
+        ("below-threshold", 1),
+        ("scored-below-threshold", 1),
+        ("missing-anchor", 1),
+        ("page-mismatch", 1),
+        ("superstring-ambiguous", 0),
+    ],
+)
+def test_slot_resolution_constructs_one_fresh_fingerprint_per_evaluated_slot(
+    monkeypatch, case_name, expected_computations
+):
+    import engine.structure.rebind as rebind_module
+
+    old_map, old_streams, fresh, mode, expected_evaluated = (
+        _fingerprint_characterization_cases()[case_name]
+    )
+    original = rebind_module._runtime_fingerprint_slot
+    actual_computations = 0
+
+    def counted_fingerprint(tokens, *, k=3):
+        nonlocal actual_computations
+        actual_computations += 1
+        return original(tokens, k=k)
+
+    monkeypatch.setattr(
+        rebind_module, "_runtime_fingerprint_slot", counted_fingerprint
+    )
+    telemetry = RebindTelemetry()
+    rebind(
+        RebindContext(
+            old_map,
+            old_streams,
+            fresh,
+            geometry_mode=mode,
+            telemetry=telemetry,
+        )
+    )
+    span = next(
+        record
+        for record in telemetry.to_json()["spans"]
+        if record["name"] == "rebind.resolve-slots"
+    )
+    assert span["attributes"]["fingerprint_evaluated_slots"] == expected_evaluated
+    assert (
+        span["attributes"]["fresh_fingerprint_computations"]
+        == expected_computations
+        == actual_computations
+    )
+
+
 def test_happy_rebind_binds_every_node_on_an_id_permuted_stream():
     old_map, old_streams, specs = _happy_case()
     fresh = _streams(_fresh_specs(specs))
-    ctx = RebindContext(old_map, old_streams, fresh, geometry_mode=MODE_TIE_BREAK)
+    ctx = RebindContext(
+        old_map,
+        old_streams,
+        fresh,
+        geometry_mode=MODE_TIE_BREAK,
+        policy=RebindPolicy(identity="test-calibration@v1"),
+    )
     result = rebind(ctx)
     assert set(result.report.bound_node_ids) == {"n-0", "l0", "l1"}
     assert result.report.unresolved == ()
@@ -261,7 +543,32 @@ def test_happy_rebind_binds_every_node_on_an_id_permuted_stream():
     l0 = next(n for n in result.report.nodes if n.node_id == "l0")
     assert l0.slots[0].fresh_atom_ids == ("f_a0",)
     assert l0.slots[0].score == 1.0
+    assert l0.slots[0].boundary_classes == (
+        "clean-candidate",
+        "clean-candidate",
+    )
+    assert l0.slots[0].located_by == (
+        "anchor-projected",
+        "anchor-projected",
+    )
+    assert result.report.alignment_backend.startswith(
+        "rapidfuzz@3.14.5:Levenshtein.opcodes"
+    )
+    assert result.report.policy_identity == "test-calibration@v1"
+    assert result.report.consumable
     assert_all_bound(result)  # strict complement does not raise
+
+
+def test_fully_bound_uncalibrated_result_is_explicitly_not_for_consumption():
+    old_map, old_streams, specs = _happy_case()
+    fresh = _streams(_fresh_specs(specs))
+    result = rebind(
+        RebindContext(old_map, old_streams, fresh, geometry_mode=MODE_TIE_BREAK)
+    )
+    assert result.report.unresolved == ()
+    assert not result.report.consumable and result.report.policy_identity is None
+    with pytest.raises(RebindNotConsumableError, match="not-for-consumption"):
+        assert_all_bound(result)
 
 
 def test_happy_rebind_restamps_extent_bottom_up_and_carries_the_decision_digest():
@@ -281,6 +588,67 @@ def test_happy_rebind_restamps_extent_bottom_up_and_carries_the_decision_digest(
     migrated = structure_map_from_json(result.migrated_doc).projection
     # the re-stamped digest re-verifies through the producer against the rebound projection
     assert restamped.extent_digest == extent_digest(migrated.by_id["n-0"], migrated)
+
+
+@pytest.mark.parametrize(
+    ("case", "evidence_supplied", "fresh_specs", "expected_restamped"),
+    (
+        ("absent", False, _fresh_specs([("a0", _A0, 3), ("a1", _A1, 3)]), 0),
+        (
+            "supplied-unqualified",
+            True,
+            [("f_a0", "kappa lambda mu nu", 3), ("f_a1", _A1, 3)],
+            0,
+        ),
+        ("supplied-restamped", True, _fresh_specs([("a0", _A0, 3), ("a1", _A1, 3)]), 1),
+    ),
+)
+def test_restamp_telemetry_distinguishes_absent_unqualified_and_restamped_evidence(
+    case, evidence_supplied, fresh_specs, expected_restamped
+):
+    old_map, old_streams, _ = _happy_case()
+    root = old_map.projection.by_id["n-0"]
+    evidence = (
+        AuthoringEvidence(
+            book="fixture",
+            entries=(
+                build_evidence_entry(
+                    root,
+                    old_map.projection,
+                    evidence="root rationale",
+                    authored_at_revision=1,
+                ),
+            ),
+        )
+        if evidence_supplied
+        else None
+    )
+    telemetry = RebindTelemetry()
+
+    result = rebind(
+        RebindContext(
+            old_map,
+            old_streams,
+            _streams(fresh_specs),
+            evidence,
+            geometry_mode=MODE_TIE_BREAK,
+            telemetry=telemetry,
+        )
+    )
+
+    assert len(result.restamped_evidence) == expected_restamped, case
+    serialized = json.loads(json.dumps(telemetry.to_json()))
+    span = next(
+        record
+        for record in serialized["spans"]
+        if record["name"] == "rebind.restamp-evidence"
+    )
+    assert span["attributes"] == {
+        "evidence_supplied": evidence_supplied,
+        "stale_decisions": 0,
+        "restamped_entries": expected_restamped,
+    }
+    assert span["attributes"]["evidence_supplied"] is evidence_supplied
 
 
 # --- baseline binding (§4: baseline-binding) ------------------------------------------------------- #
@@ -370,7 +738,11 @@ def test_below_threshold_when_fresh_content_diverges():
     result = rebind(RebindContext(old_map, old_streams, fresh, geometry_mode=MODE_TIE_BREAK))
     l0 = next(n for n in result.report.nodes if n.node_id == "l0")
     assert not l0.bound and l0.reason == "below-threshold"
-    assert next(n for n in result.report.nodes if n.node_id == "l1").bound
+    # The neighbouring slot touches the replace edge but its stored anchor independently confirms
+    # the projected seam, so the production confirmation-in-churn path may bind it.
+    l1 = next(n for n in result.report.nodes if n.node_id == "l1")
+    assert l1.bound and l1.reason is None
+    assert l1.slots[0].boundary_classes[0] == "edge-candidate"
 
 
 def test_ambiguous_repeated_content_fails_loud():
@@ -398,7 +770,9 @@ def test_no_rescue_geometry_does_not_lift_a_subtau_fingerprint():
     # tie-break, never additive to the score. Mutant (hunt): OR the region-page hit into the ≥τ gate.
     old_streams = _streams([("a0", _A0, 3)])
     old_map = _map([_root(["l0"]), _leaf("l0", ["a0"], [_A0], region_page=3)], old_streams["canonical"])
-    fresh = _streams([("f_a0", "kappa lambda mu nu", 3)])  # on page 3 (region-hit) but content diverged
+    # One boundary-local substitution leaves the six-token anchor at τ while the stored 3-gram
+    # fingerprint falls below τ. Geometry is on-page but still cannot rescue that content failure.
+    fresh = _streams([("f_a0", "alpha beta gamma nu", 3)])
     result = rebind(RebindContext(old_map, old_streams, fresh, geometry_mode=MODE_TIE_BREAK))
     l0 = next(n for n in result.report.nodes if n.node_id == "l0")
     assert not l0.bound and l0.reason == "below-threshold"
@@ -420,7 +794,8 @@ def test_r2_superstring_does_not_auto_bind_at_full_score():
     fresh = _streams([("f_a0", _A0 + " iota kappa lambda mu", 3)])
     result = rebind(RebindContext(old_map, old_streams, fresh, geometry_mode=MODE_NO_GEOMETRY))
     l0 = next(n for n in result.report.nodes if n.node_id == "l0")
-    assert not l0.bound and l0.reason == "below-threshold"
+    assert not l0.bound and l0.reason == "ambiguous"
+    assert l0.slots[0].boundary_classes[1] == "two-candidate"
     assert (l0.slots[0].score or 0.0) < 1.0
 
 
@@ -446,6 +821,37 @@ def test_primary_mode_hard_pin_excludes_a_wrong_page_and_yields_zero_candidate()
     assert not l0.bound and l0.reason == "zero-candidate"
 
 
+def test_primary_mode_pin_checks_every_atom_not_only_boundary_pages():
+    specs = [
+        ("a0", "alpha beta", 3),
+        ("a1", "gamma delta", 9),
+        ("a2", "epsilon zeta", 3),
+    ]
+    old_streams = _streams(specs)
+    old_map = _map(
+        [
+            _root(["l0"]),
+            _leaf(
+                "l0",
+                ["a0", "a1", "a2"],
+                [text for _, text, _ in specs],
+                region_page=3,
+            ),
+        ],
+        old_streams["canonical"],
+    )
+    result = rebind(
+        RebindContext(
+            old_map,
+            old_streams,
+            _streams(_fresh_specs(specs)),
+            geometry_mode=MODE_PRIMARY,
+        )
+    )
+    l0 = next(node for node in result.report.nodes if node.node_id == "l0")
+    assert not l0.bound and l0.reason == "zero-candidate"
+
+
 def test_no_geometry_mode_ignores_the_region_and_binds_on_fingerprint():
     old_map, old_streams, fresh = _region_mismatch_case()
     result = rebind(RebindContext(old_map, old_streams, fresh, geometry_mode=MODE_NO_GEOMETRY))
@@ -453,6 +859,277 @@ def test_no_geometry_mode_ignores_the_region_and_binds_on_fingerprint():
 
 
 # --- re-stamp ordering + decision-digest staleness (§4) -------------------------------------------- #
+
+
+def _restamp_optimization_fixture():
+    old_nodes = (
+        ContainerNode(
+            node_id="n-root",
+            node_class="volume",
+            minted_by="human",
+            children=("n-section", "n-side"),
+            heading_atoms=("old-root",),
+        ),
+        ContainerNode(
+            node_id="n-section",
+            node_class="section",
+            minted_by="human",
+            children=("n-deep",),
+            heading_atoms=("old-section",),
+        ),
+        ContainerNode(
+            node_id="n-deep",
+            node_class="subsection",
+            minted_by="human",
+            children=("l-deep",),
+            signature_atoms=("old-deep",),
+        ),
+        LeafNode(
+            node_id="l-deep",
+            node_class="block",
+            minted_by="machine",
+            body_atoms=("old-body",),
+        ),
+        ContainerNode(
+            node_id="n-side",
+            node_class="section",
+            minted_by="human",
+            children=("l-side",),
+            heading_atoms=("old-side",),
+        ),
+        LeafNode(
+            node_id="l-side",
+            node_class="block",
+            minted_by="machine",
+            body_atoms=("old-side-body",),
+        ),
+    )
+    old = ProjectionMap(root_id="n-root", nodes=old_nodes)
+    migrated = ProjectionMap(
+        root_id="n-root",
+        nodes=tuple(
+            dataclasses.replace(
+                node,
+                **(
+                    {
+                        "heading_atoms": tuple(
+                            atom_id.replace("old-", "fresh-")
+                            for atom_id in node.heading_atoms
+                        ),
+                        "signature_atoms": tuple(
+                            atom_id.replace("old-", "fresh-")
+                            for atom_id in node.signature_atoms
+                        ),
+                    }
+                    if isinstance(node, ContainerNode)
+                    else {
+                        "body_atoms": tuple(
+                            atom_id.replace("old-", "fresh-")
+                            for atom_id in node.body_atoms
+                        )
+                    }
+                ),
+            )
+            for node in old.nodes
+        ),
+    )
+    ghost = ContainerNode(
+        node_id="n-missing",
+        node_class="section",
+        minted_by="human",
+    )
+    ghost_projection = ProjectionMap(root_id=ghost.node_id, nodes=(ghost,))
+    evidence = AuthoringEvidence(
+        book="fixture",
+        entries=(
+            build_evidence_entry(
+                old.by_id["n-root"],
+                old,
+                evidence="root rationale",
+                authored_at_revision=1,
+            ),
+            build_evidence_entry(
+                ghost,
+                ghost_projection,
+                evidence="now-missing rationale",
+                authored_at_revision=2,
+            ),
+            build_evidence_entry(
+                old.by_id["n-side"],
+                old,
+                evidence="side rationale",
+                authored_at_revision=3,
+            ),
+            build_evidence_entry(
+                old.by_id["n-deep"],
+                old,
+                evidence="deep rationale",
+                authored_at_revision=4,
+            ),
+        ),
+    )
+    return migrated, evidence
+
+
+def _scalar_restamp_reference(evidence, projection, bound_node_ids):
+    """The pre-#87 production algorithm, retained only as an exact test oracle."""
+    restamped = []
+    for entry in evidence.entries:
+        node = projection.by_id.get(entry.node_id)
+        if node is None or entry.node_id not in bound_node_ids:
+            continue
+        if not rebind_module._subtree_ids(entry.node_id, projection).issubset(
+            bound_node_ids
+        ):
+            continue
+        restamped.append(
+            EvidenceEntry(
+                node_id=entry.node_id,
+                decision_digest=entry.decision_digest,
+                extent_digest=extent_digest(node, projection),
+                evidence=entry.evidence,
+                authored_at_revision=entry.authored_at_revision,
+                decision_payload=dict(entry.decision_payload),
+                extent_payload=extent_payload(node, projection),
+            )
+        )
+    return tuple(restamped)
+
+
+def _all_evidence_entry_fields(entry):
+    return (
+        entry.node_id,
+        entry.decision_digest,
+        entry.extent_digest,
+        entry.evidence,
+        entry.authored_at_revision,
+        {
+            "node_class": entry.decision_payload["node_class"],
+            "children": tuple(entry.decision_payload["children"]),
+        },
+        {
+            "own": dict(entry.extent_payload["own"]),
+            "beneath": tuple(entry.extent_payload["beneath"]),
+        },
+    )
+
+
+@pytest.mark.parametrize(
+    ("case", "bound_node_ids"),
+    (
+        (
+            "fully-bound",
+            {"n-root", "n-section", "n-deep", "l-deep", "n-side", "l-side"},
+        ),
+        (
+            "partially-bound",
+            {"n-section", "n-deep", "l-deep", "n-side", "l-side"},
+        ),
+        (
+            "unresolved-descendant",
+            {"n-root", "n-section", "n-deep", "n-side", "l-side"},
+        ),
+        (
+            "missing-node",
+            {
+                "n-root",
+                "n-section",
+                "n-deep",
+                "l-deep",
+                "n-side",
+                "l-side",
+                "n-missing",
+            },
+        ),
+        (
+            "mixed-entry-order",
+            {"n-root", "n-section", "n-deep", "l-deep", "n-side"},
+        ),
+    ),
+)
+def test_restamp_bottom_up_is_every_field_and_order_equivalent_to_scalar_reference(
+    case, bound_node_ids
+):
+    projection, evidence = _restamp_optimization_fixture()
+
+    expected = _scalar_restamp_reference(evidence, projection, bound_node_ids)
+    actual = _restamp_evidence(evidence, projection, bound_node_ids)
+
+    assert actual == expected, case
+    assert [_all_evidence_entry_fields(entry) for entry in actual] == [
+        _all_evidence_entry_fields(entry) for entry in expected
+    ]
+
+
+def test_restamp_bottom_up_visits_each_node_and_edge_once_and_constructs_one_payload_per_entry():
+    projection, evidence = _restamp_optimization_fixture()
+    bound_node_ids = set(projection.by_id)
+
+    batch = evidence_module._batch_live_extent_payloads(
+        tuple(entry.node_id for entry in evidence.entries),
+        projection,
+        included_node_ids=bound_node_ids,
+    )
+
+    assert batch is not None
+    assert batch.node_visits == len(projection.nodes) == 6
+    assert batch.edge_visits == 5
+    assert batch.payload_constructions == 3
+    assert set(batch.by_node) == {"n-root", "n-side", "n-deep"}
+    expected = _scalar_restamp_reference(evidence, projection, bound_node_ids)
+    for entry in expected:
+        live = batch.by_node[entry.node_id]
+        assert live.digest == entry.extent_digest
+        assert live.payload == entry.extent_payload
+
+
+def test_restamp_valid_path_never_restores_per_entry_walks_or_duplicate_payload_construction(
+    monkeypatch,
+):
+    projection, evidence = _restamp_optimization_fixture()
+
+    def unexpected_scalar_call(*_args, **_kwargs):
+        raise AssertionError(
+            "valid restamping regressed to per-entry subtree or extent construction"
+        )
+
+    monkeypatch.setattr(rebind_module, "_subtree_ids", unexpected_scalar_call)
+    monkeypatch.setattr(rebind_module, "extent_digest", unexpected_scalar_call)
+    monkeypatch.setattr(rebind_module, "extent_payload", unexpected_scalar_call)
+
+    restamped = _restamp_evidence(evidence, projection, set(projection.by_id))
+    assert [entry.node_id for entry in restamped] == ["n-root", "n-side", "n-deep"]
+
+
+def test_restamp_malformed_map_preserves_the_scalar_error_verbatim():
+    valid_root = ContainerNode(
+        node_id="n-root",
+        node_class="volume",
+        minted_by="human",
+    )
+    valid = ProjectionMap(root_id=valid_root.node_id, nodes=(valid_root,))
+    evidence = AuthoringEvidence(
+        book="fixture",
+        entries=(
+            build_evidence_entry(
+                valid_root,
+                valid,
+                evidence="valid before corruption",
+                authored_at_revision=1,
+            ),
+        ),
+    )
+    malformed = ProjectionMap(
+        root_id=valid_root.node_id,
+        nodes=(dataclasses.replace(valid_root, children=("n-ghost",)),),
+    )
+    bound_node_ids = {"n-root", "n-ghost"}
+
+    with pytest.raises(ValueError) as scalar_error:
+        _scalar_restamp_reference(evidence, malformed, bound_node_ids)
+    with pytest.raises(ValueError) as optimized_error:
+        _restamp_evidence(evidence, malformed, bound_node_ids)
+    assert str(optimized_error.value) == str(scalar_error.value)
 
 
 def test_ancestor_not_restamped_while_a_descendant_is_unresolved():
@@ -527,10 +1204,35 @@ def test_partial_rebind_never_silently_double_claims_a_fresh_atom():
                     claimed.setdefault(aid, []).append(n.node_id)
     doubles = {aid: owners for aid, owners in claimed.items() if len(owners) > 1}
     assert not doubles, f"silent double-bind of fresh atom(s): {doubles}"
-    # the two conflicting leaves fail loud as global-conflict, not a silent bind
+    # The anchored projector can abstain before tentative overlap reaches the global backstop;
+    # either way no conflicting candidate is exposed as bound.
     unresolved = dict(result.report.unresolved)
-    assert unresolved.get("l0") == "global-conflict"
-    assert unresolved.get("l1") == "global-conflict"
+    assert unresolved.get("l0") in REBIND_UNRESOLVED_REASONS
+    assert unresolved.get("l1") in REBIND_UNRESOLVED_REASONS
+
+
+def test_bound_subset_disjointness_backstop_names_both_contested_nodes():
+    def node(node_id: str) -> NodeOutcome:
+        return NodeOutcome(
+            node_id=node_id,
+            bound=True,
+            reason=None,
+            slots=(
+                SlotOutcome(
+                    slot_name="body",
+                    bound=True,
+                    reason=None,
+                    score=1.0,
+                    fresh_atom_ids=("shared",),
+                    ambiguity_candidates=1,
+                    region_page=None,
+                    containment=1.0,
+                    token_count_ratio=1.0,
+                ),
+            ),
+        )
+
+    assert _contested_nodes([node("left"), node("right")]) == {"left", "right"}
 
 
 def test_empty_container_makes_the_rebound_map_fail_global_validation():

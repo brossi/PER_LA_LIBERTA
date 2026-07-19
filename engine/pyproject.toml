@@ -29,6 +29,7 @@ dependencies = [
     # declares only typer — and this typer resolution doesn't pull click transitively, so
     # `import spacy` fails without it. Pin click directly so the env is importable.
     "click>=8.4.1",
+    "jsonschema-rs>=0.37,<0.38",
 ]
 
 [project.scripts]
@@ -47,6 +48,7 @@ assessment = [
 
 [dependency-groups]
 dev = [
+    "psutil>=7.0",
     "pytest>=8.0",
 ]
 
@@ -67,15 +69,18 @@ packages = ["src/engine"]
 
 [tool.pytest.ini_options]
 # pythonpath = src is belt-and-suspenders alongside the editable install: it keeps
-# `import engine.*` resolving to this package even if the install is stale. testpaths
-# is scoped to engine/tests so a run launched from the parent repo never collects
-# top-level pipeline tests. Golden/integration tests are marked by purpose and scope
-# so CI and local runs can choose the right suite explicitly.
-pythonpath = ["src"]
+# `import engine.*` resolving to this package even if the install is stale. The project
+# root exposes source-locked runner modules under `tools` to their always-on contract
+# tests. testpaths is scoped to engine/tests so a run launched from the parent repo never
+# collects top-level pipeline tests. Golden/integration tests are marked by purpose and
+# scope so CI and local runs can choose the right suite explicitly.
+pythonpath = ["src", "."]
 testpaths = ["tests"]
+addopts = '-m "not scale"'
 markers = [
     "golden: reproduces a committed live PLL artifact from frozen inputs",
     "integration: exercises a full step end-to-end",
+    "scale: runs the S4.7 10^3/10^4/10^5 production scale and native-RSS gate",
 ]
 
 [tool.uv.sources]

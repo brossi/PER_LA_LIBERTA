@@ -1,0 +1,11 @@
+{
+  "emitted_at": "2026-07-18T23:13:10.474184+00:00",
+  "emitter_pid": 6524,
+  "event": "scale-campaign-complete",
+  "event_sequence": 964,
+  "measurement_total": 150,
+  "run_elapsed_seconds": 1.8e-05,
+  "run_id": "registered-optimized-20260718",
+  "status": "IN_PROGRESS",
+  "telemetry_schema": "s4.7-scale-progress@v2"
+}

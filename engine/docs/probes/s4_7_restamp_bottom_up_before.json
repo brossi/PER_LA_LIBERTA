@@ -1,0 +1,87 @@
+{
+  "schema": "s4.7-restamp-diagnostic@v1",
+  "variant": "before",
+  "created_at": "2026-07-19T03:39:44.457512+00:00",
+  "command": [
+    "/Users/ben_mpa/LLM/PER_LA_LIBERTA/engine/.venv/bin/python3",
+    "/Users/ben_mpa/LLM/PER_LA_LIBERTA/engine/tools/s4_7_restamp_diagnostic.py",
+    "--variant",
+    "before",
+    "--artifact",
+    "docs/probes/s4_7_restamp_bottom_up_before.json"
+  ],
+  "operation": "engine.structure.rebind._restamp_evidence",
+  "contract": {
+    "diagnostic_only": true,
+    "registered_gate_changed": false,
+    "depth": 3000,
+    "repetitions": 5,
+    "all_bound_success_path": true,
+    "fixture_outside_measurement": true,
+    "validation_after_every_sample": true,
+    "allocation_measured_separately": true,
+    "public_telemetry_changed": false
+  },
+  "fixture": {
+    "construction": true,
+    "source_fixture_validation": true,
+    "migrated_reference_validation": true,
+    "migrated_projection_validation": true,
+    "migrated_atom_existence_validation": true,
+    "all_bound": true,
+    "depth": 3000,
+    "projection_nodes": 6000,
+    "evidence_entries": 3000,
+    "bound_node_ids": 6000,
+    "reminted_atoms": 3000,
+    "expected_entries": 3000,
+    "expected_sha256": "2d0de569935dd2bb279d501fa0761ebc404ab3712b5478a940940f0c3e6bc2f1"
+  },
+  "measurement": {
+    "wall_seconds": [
+      18.025730208028108,
+      17.91746333311312,
+      18.8205273328349,
+      18.579796875128523,
+      18.027469666907564
+    ],
+    "cpu_seconds": [
+      17.904131,
+      17.861258999999997,
+      18.484207999999995,
+      18.360326,
+      17.910822999999993
+    ],
+    "peak_bytes": [
+      39232392,
+      39232392,
+      39232392,
+      39232392,
+      39232392
+    ],
+    "median_wall_seconds": 18.027469666907564,
+    "median_cpu_seconds": 17.910822999999993,
+    "median_peak_bytes": 39232392.0
+  },
+  "source_identity": {
+    "src/engine/structure/evidence.py": "e403d0f1e39b0fb3add96334de79ddb103e76bd470c6da668b9d29daadd21d7b",
+    "src/engine/structure/projection.py": "85f4594df3b07c45f5f7cb44f69b9c452aa3fb4dc77dd4e582439e0b5577eb45",
+    "src/engine/structure/rebind.py": "f008d5cd2138ebb052dfff6f9705520be50e8d95c5beda1da4e60e097c286d7e",
+    "tests/harness/restamp_diagnostic.py": "47ac7716e93faed63a6aefc1d244c00c4169b704309e284810b6fe32c9f1da09",
+    "tests/harness/scale.py": "61df6eed2e0acd9a059c410c1fe8c90cc0f7808dee4b30bd8629a8b95995fc40",
+    "tools/s4_7_restamp_diagnostic.py": "d63cc1ff6aa238cc5845c7cbb0cf8dc9df84f987032ed939bf26894ddfe5cebe"
+  },
+  "git": {
+    "head": "ac1f4f567b24ad10a903c0acb2eb31dc87266014",
+    "branch": "spike/s4_7",
+    "status": "?? tests/harness/restamp_diagnostic.py\n?? tools/s4_7_restamp_diagnostic.py"
+  },
+  "environment": {
+    "python": "3.13.0",
+    "python_executable": "/Users/ben_mpa/LLM/PER_LA_LIBERTA/engine/.venv/bin/python3",
+    "platform": "macOS-26.5.1-arm64-arm-64bit-Mach-O",
+    "machine": "arm64",
+    "processor": "arm",
+    "uv_lock_sha256": "1223dc25295e46731d22bda20ced23890e1155118dbc5a48f5b39c3371a09258"
+  }
+}

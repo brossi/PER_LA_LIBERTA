@@ -1,0 +1,1221 @@
+{
+  "active_state": "/Users/ben_mpa/LLM/PER_LA_LIBERTA/engine/docs/probes/s4_7_scale_cycle_optimized_wide_a100000.active.json",
+  "artifact": "/Users/ben_mpa/LLM/PER_LA_LIBERTA/engine/docs/probes/s4_7_scale_cycle_optimized_wide_a100000.json",
+  "completed_event_count": 4,
+  "created_at": "2026-07-18T21:13:49.742058+00:00",
+  "error": "KeyboardInterrupt: ",
+  "events": [
+    {
+      "event": "substrate-materialization-complete",
+      "progress": {
+        "atom_count": 100000,
+        "fixture_variant": null,
+        "measurement_index": 0,
+        "measurement_total": 5,
+        "phase": "materialize",
+        "phase_index": 0,
+        "phase_total": 5,
+        "point_step_index": 0,
+        "point_step_total": 5,
+        "repetition": 0,
+        "repetitions": 1,
+        "shape": "wide",
+        "step_coordinate": "prep"
+      },
+      "sample": {
+        "elapsed_seconds": 56.53190258285031,
+        "incremental_peak_bytes": 1388576768,
+        "ledger": {
+          "A": 100000,
+          "D": 4,
+          "K": 2500,
+          "L": 2500,
+          "T": 3600000,
+          "family": "wide-rebind-production"
+        },
+        "lifetime_peak_bytes": 1432223744,
+        "monitor_elapsed_seconds": 92.95600362494588,
+        "phase": "materialize",
+        "raw_ru_maxrss_bytes": 1432223744,
+        "sample_count": 9456,
+        "sample_interval_seconds": 0.005,
+        "setup_baseline_bytes": 43646976,
+        "setup_elapsed_seconds": 0.17889033304527402,
+        "span_peak_bytes": 1432223744,
+        "telemetry": {
+          "child_trace": {
+            "active_stage": "idle",
+            "schema": "engine-rebind-telemetry@v1",
+            "spans": [
+              {
+                "attributes": {},
+                "cpu_seconds": 2.8e-05,
+                "name": "setup.prepare",
+                "parent": null,
+                "start_offset_seconds": 9.7417e-05,
+                "wall_seconds": 2.8541e-05
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 48.311769,
+                "name": "named.materialize",
+                "parent": null,
+                "start_offset_seconds": 0.001567917,
+                "wall_seconds": 56.531793875
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 27.707034,
+                "name": "finalize.cache-substrate",
+                "parent": null,
+                "start_offset_seconds": 56.533643958,
+                "wall_seconds": 35.382888792
+              }
+            ]
+          },
+          "fixture_variant": "identical",
+          "schema": "s4.7-runtime-telemetry@v1",
+          "stage_rss": [
+            {
+              "first_monitor_elapsed_seconds": 56.72038399986923,
+              "last_monitor_elapsed_seconds": 92.09335470804945,
+              "name": "finalize.cache-substrate",
+              "rss_peak_bytes": 1818411008,
+              "sample_count": 5896
+            },
+            {
+              "first_monitor_elapsed_seconds": 0.010197249939665198,
+              "last_monitor_elapsed_seconds": 92.93687350000255,
+              "name": "idle",
+              "rss_peak_bytes": 1330757632,
+              "sample_count": 157
+            },
+            {
+              "first_monitor_elapsed_seconds": 0.18127262499183416,
+              "last_monitor_elapsed_seconds": 56.708472250029445,
+              "name": "named.materialize",
+              "rss_peak_bytes": 1432223744,
+              "sample_count": 9456
+            }
+          ]
+        }
+      }
+    },
+    {
+      "event": "phase-sample-complete",
+      "progress": {
+        "atom_count": 100000,
+        "fixture_variant": null,
+        "measurement_index": 1,
+        "measurement_total": 5,
+        "phase": "serialize",
+        "phase_index": 1,
+        "phase_total": 5,
+        "point_step_index": 1,
+        "point_step_total": 5,
+        "repetition": 1,
+        "repetitions": 1,
+        "shape": "wide",
+        "step_coordinate": "1.1"
+      },
+      "sample": {
+        "elapsed_seconds": 15.14923237496987,
+        "incremental_peak_bytes": 414334976,
+        "ledger": {
+          "A": 100000,
+          "D": 4,
+          "K": 2500,
+          "L": 2500,
+          "T": 3600000,
+          "family": "wide-rebind-production"
+        },
+        "lifetime_peak_bytes": 1765081088,
+        "monitor_elapsed_seconds": 27.502476874971762,
+        "phase": "serialize",
+        "raw_ru_maxrss_bytes": 1765081088,
+        "sample_count": 2516,
+        "sample_interval_seconds": 0.005,
+        "setup_baseline_bytes": 1350402048,
+        "setup_elapsed_seconds": 11.879214124986902,
+        "span_peak_bytes": 1764737024,
+        "telemetry": {
+          "child_trace": {
+            "active_stage": "idle",
+            "schema": "engine-rebind-telemetry@v1",
+            "spans": [
+              {
+                "attributes": {},
+                "cpu_seconds": 0.872331,
+                "name": "setup.clone-substrate",
+                "parent": "setup.prepare",
+                "start_offset_seconds": 0.001423292,
+                "wall_seconds": 1.2759045
+              },
+              {
+                "attributes": {
+                  "stream_count": 2
+                },
+                "cpu_seconds": 3.806333,
+                "name": "load.old-streams",
+                "parent": "setup.load-prerequisites",
+                "start_offset_seconds": 1.277372,
+                "wall_seconds": 4.377521625
+              },
+              {
+                "attributes": {
+                  "stream_count": 2
+                },
+                "cpu_seconds": 3.637152,
+                "name": "load.fresh-streams",
+                "parent": "setup.load-prerequisites",
+                "start_offset_seconds": 5.655130667,
+                "wall_seconds": 3.828487917
+              },
+              {
+                "attributes": {
+                  "byte_count": 283462757
+                },
+                "cpu_seconds": 0.233868,
+                "name": "structure-map.load.read",
+                "parent": "load.structure-map",
+                "start_offset_seconds": 9.520671375,
+                "wall_seconds": 0.276185167
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 0.522388,
+                "name": "structure-map.load.parse",
+                "parent": "load.structure-map",
+                "start_offset_seconds": 9.796963125,
+                "wall_seconds": 0.615078125
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 0.411724,
+                "name": "structure-map.load.tier1",
+                "parent": "load.structure-map",
+                "start_offset_seconds": 10.412088084,
+                "wall_seconds": 0.466580708
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 0.355126,
+                "name": "structure-map.load.typed-build",
+                "parent": "load.structure-map",
+                "start_offset_seconds": 10.878836042,
+                "wall_seconds": 0.360494833
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 0.16689,
+                "name": "structure-map.load.tier2",
+                "parent": "load.structure-map",
+                "start_offset_seconds": 11.239349334,
+                "wall_seconds": 0.168979291
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 1.727348,
+                "name": "load.structure-map",
+                "parent": "setup.load-prerequisites",
+                "start_offset_seconds": 9.483649667,
+                "wall_seconds": 1.924739958
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 9.177506,
+                "name": "setup.load-prerequisites",
+                "parent": "setup.prepare",
+                "start_offset_seconds": 1.277366667,
+                "wall_seconds": 10.137712833
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 10.050697,
+                "name": "setup.prepare",
+                "parent": null,
+                "start_offset_seconds": 0.000104542,
+                "wall_seconds": 11.415072875
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 0.001453,
+                "name": "persist.prepare-workspaces",
+                "parent": "named.serialize",
+                "start_offset_seconds": 11.4178925,
+                "wall_seconds": 0.001524417
+              },
+              {
+                "attributes": {
+                  "stream_count": 2
+                },
+                "cpu_seconds": 6.366758,
+                "name": "persist.old-streams",
+                "parent": "named.serialize",
+                "start_offset_seconds": 11.419436209,
+                "wall_seconds": 7.902458083
+              },
+              {
+                "attributes": {
+                  "stream_count": 2
+                },
+                "cpu_seconds": 4.893442,
+                "name": "persist.fresh-streams",
+                "parent": "named.serialize",
+                "start_offset_seconds": 19.321920959,
+                "wall_seconds": 5.753556666
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 0.309107,
+                "name": "structure-map.write.tier1",
+                "parent": "persist.structure-map",
+                "start_offset_seconds": 25.075549125,
+                "wall_seconds": 0.332360917
+              },
+              {
+                "attributes": {
+                  "character_count": 283462757
+                },
+                "cpu_seconds": 0.861682,
+                "name": "structure-map.write.render",
+                "parent": "persist.structure-map",
+                "start_offset_seconds": 25.407955709,
+                "wall_seconds": 0.909990166
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 0.08009,
+                "name": "structure-map.write.io",
+                "parent": "persist.structure-map",
+                "start_offset_seconds": 26.3183175,
+                "wall_seconds": 0.248603209
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 1.251346,
+                "name": "persist.structure-map",
+                "parent": "named.serialize",
+                "start_offset_seconds": 25.075536042,
+                "wall_seconds": 1.491405625
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 12.513256,
+                "name": "named.serialize",
+                "parent": null,
+                "start_offset_seconds": 11.4177485,
+                "wall_seconds": 15.149208292
+              }
+            ]
+          },
+          "fixture_variant": "identical",
+          "schema": "s4.7-runtime-telemetry@v1",
+          "stage_rss": [
+            {
+              "first_monitor_elapsed_seconds": 0.007033209083601832,
+              "last_monitor_elapsed_seconds": 27.49094650009647,
+              "name": "idle",
+              "rss_peak_bytes": 1713930240,
+              "sample_count": 159
+            },
+            {
+              "first_monitor_elapsed_seconds": 6.120521666947752,
+              "last_monitor_elapsed_seconds": 9.945448708953336,
+              "name": "load.fresh-streams",
+              "rss_peak_bytes": 1296744448,
+              "sample_count": 667
+            },
+            {
+              "first_monitor_elapsed_seconds": 1.7396521249320358,
+              "last_monitor_elapsed_seconds": 6.114763624966145,
+              "name": "load.old-streams",
+              "rss_peak_bytes": 1071988736,
+              "sample_count": 736
+            },
+            {
+              "first_monitor_elapsed_seconds": 9.951151084154844,
+              "last_monitor_elapsed_seconds": 9.979111334076151,
+              "name": "load.structure-map",
+              "rss_peak_bytes": 1094975488,
+              "sample_count": 6
+            },
+            {
+              "first_monitor_elapsed_seconds": 19.784159334143624,
+              "last_monitor_elapsed_seconds": 25.53290949994698,
+              "name": "persist.fresh-streams",
+              "rss_peak_bytes": 1331986432,
+              "sample_count": 953
+            },
+            {
+              "first_monitor_elapsed_seconds": 11.883938959101215,
+              "last_monitor_elapsed_seconds": 19.77868387498893,
+              "name": "persist.old-streams",
+              "rss_peak_bytes": 1764737024,
+              "sample_count": 1301
+            },
+            {
+              "first_monitor_elapsed_seconds": 0.4664809999521822,
+              "last_monitor_elapsed_seconds": 1.7339487089775503,
+              "name": "setup.clone-substrate",
+              "rss_peak_bytes": 592822272,
+              "sample_count": 214
+            },
+            {
+              "first_monitor_elapsed_seconds": 11.875016791978851,
+              "last_monitor_elapsed_seconds": 11.875034959055483,
+              "name": "setup.load-prerequisites",
+              "rss_peak_bytes": 1345241088,
+              "sample_count": 1
+            },
+            {
+              "first_monitor_elapsed_seconds": 10.26270924997516,
+              "last_monitor_elapsed_seconds": 10.873366709100083,
+              "name": "structure-map.load.parse",
+              "rss_peak_bytes": 1274806272,
+              "sample_count": 108
+            },
+            {
+              "first_monitor_elapsed_seconds": 9.98483983404003,
+              "last_monitor_elapsed_seconds": 10.257008709013462,
+              "name": "structure-map.load.read",
+              "rss_peak_bytes": 1289338880,
+              "sample_count": 48
+            },
+            {
+              "first_monitor_elapsed_seconds": 10.879110084148124,
+              "last_monitor_elapsed_seconds": 11.338477750075981,
+              "name": "structure-map.load.tier1",
+              "rss_peak_bytes": 1351270400,
+              "sample_count": 81
+            },
+            {
+              "first_monitor_elapsed_seconds": 11.703433667076752,
+              "last_monitor_elapsed_seconds": 11.869309334084392,
+              "name": "structure-map.load.tier2",
+              "rss_peak_bytes": 1339932672,
+              "sample_count": 30
+            },
+            {
+              "first_monitor_elapsed_seconds": 11.344193208962679,
+              "last_monitor_elapsed_seconds": 11.697713708970696,
+              "name": "structure-map.load.typed-build",
+              "rss_peak_bytes": 1292238848,
+              "sample_count": 63
+            },
+            {
+              "first_monitor_elapsed_seconds": 26.780512833967805,
+              "last_monitor_elapsed_seconds": 27.026087458943948,
+              "name": "structure-map.write.io",
+              "rss_peak_bytes": 1699004416,
+              "sample_count": 44
+            },
+            {
+              "first_monitor_elapsed_seconds": 25.870686375070363,
+              "last_monitor_elapsed_seconds": 26.774766250047833,
+              "name": "structure-map.write.render",
+              "rss_peak_bytes": 1685159936,
+              "sample_count": 160
+            },
+            {
+              "first_monitor_elapsed_seconds": 25.538643667008728,
+              "last_monitor_elapsed_seconds": 25.864997459109873,
+              "name": "structure-map.write.tier1",
+              "rss_peak_bytes": 1377189888,
+              "sample_count": 58
+            }
+          ]
+        }
+      }
+    },
+    {
+      "event": "phase-sample-complete",
+      "progress": {
+        "atom_count": 100000,
+        "fixture_variant": null,
+        "measurement_index": 2,
+        "measurement_total": 5,
+        "phase": "load",
+        "phase_index": 2,
+        "phase_total": 5,
+        "point_step_index": 2,
+        "point_step_total": 5,
+        "repetition": 1,
+        "repetitions": 1,
+        "shape": "wide",
+        "step_coordinate": "2.1"
+      },
+      "sample": {
+        "elapsed_seconds": 12.31328683393076,
+        "incremental_peak_bytes": 746373120,
+        "ledger": {
+          "A": 100000,
+          "D": 4,
+          "K": 2500,
+          "L": 2500,
+          "T": 3600000,
+          "family": "wide-rebind-production"
+        },
+        "lifetime_peak_bytes": 1341145088,
+        "monitor_elapsed_seconds": 14.285967000061646,
+        "phase": "load",
+        "raw_ru_maxrss_bytes": 1341145088,
+        "sample_count": 2026,
+        "sample_interval_seconds": 0.005,
+        "setup_baseline_bytes": 592789504,
+        "setup_elapsed_seconds": 1.4089101660065353,
+        "span_peak_bytes": 1339162624,
+        "telemetry": {
+          "child_trace": {
+            "active_stage": "idle",
+            "schema": "engine-rebind-telemetry@v1",
+            "spans": [
+              {
+                "attributes": {},
+                "cpu_seconds": 0.822017,
+                "name": "setup.clone-substrate",
+                "parent": "setup.prepare",
+                "start_offset_seconds": 0.000969375,
+                "wall_seconds": 1.131207416
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 0.822684,
+                "name": "setup.prepare",
+                "parent": null,
+                "start_offset_seconds": 9.6125e-05,
+                "wall_seconds": 1.132165
+              },
+              {
+                "attributes": {
+                  "stream_count": 2
+                },
+                "cpu_seconds": 4.05453,
+                "name": "load.old-streams",
+                "parent": "named.load",
+                "start_offset_seconds": 1.135999625,
+                "wall_seconds": 5.26784
+              },
+              {
+                "attributes": {
+                  "stream_count": 2
+                },
+                "cpu_seconds": 4.137899,
+                "name": "load.fresh-streams",
+                "parent": "named.load",
+                "start_offset_seconds": 6.4038935,
+                "wall_seconds": 4.747081583
+              },
+              {
+                "attributes": {
+                  "byte_count": 283462757
+                },
+                "cpu_seconds": 0.227038,
+                "name": "structure-map.load.read",
+                "parent": "load.structure-map",
+                "start_offset_seconds": 11.190419083,
+                "wall_seconds": 0.305291958
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 0.597071,
+                "name": "structure-map.load.parse",
+                "parent": "load.structure-map",
+                "start_offset_seconds": 11.495753791,
+                "wall_seconds": 0.717218625
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 0.468034,
+                "name": "structure-map.load.tier1",
+                "parent": "load.structure-map",
+                "start_offset_seconds": 12.21316525,
+                "wall_seconds": 0.551272791
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 0.440059,
+                "name": "structure-map.load.typed-build",
+                "parent": "load.structure-map",
+                "start_offset_seconds": 12.764557208,
+                "wall_seconds": 0.453476167
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 0.216057,
+                "name": "structure-map.load.tier2",
+                "parent": "load.structure-map",
+                "start_offset_seconds": 13.2180565,
+                "wall_seconds": 0.222709458
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 1.988055,
+                "name": "load.structure-map",
+                "parent": "named.load",
+                "start_offset_seconds": 11.151003541,
+                "wall_seconds": 2.289809917
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 10.188836,
+                "name": "named.load",
+                "parent": null,
+                "start_offset_seconds": 1.135970583,
+                "wall_seconds": 12.313213917
+              }
+            ]
+          },
+          "fixture_variant": "identical",
+          "schema": "s4.7-runtime-telemetry@v1",
+          "stage_rss": [
+            {
+              "first_monitor_elapsed_seconds": 0.006834625033661723,
+              "last_monitor_elapsed_seconds": 14.268145625013858,
+              "name": "idle",
+              "rss_peak_bytes": 1366425600,
+              "sample_count": 139
+            },
+            {
+              "first_monitor_elapsed_seconds": 6.685069208033383,
+              "last_monitor_elapsed_seconds": 11.423340207897127,
+              "name": "load.fresh-streams",
+              "rss_peak_bytes": 1161134080,
+              "sample_count": 801
+            },
+            {
+              "first_monitor_elapsed_seconds": 1.414763875072822,
+              "last_monitor_elapsed_seconds": 6.678828957956284,
+              "name": "load.old-streams",
+              "rss_peak_bytes": 1016659968,
+              "sample_count": 826
+            },
+            {
+              "first_monitor_elapsed_seconds": 11.429041208000854,
+              "last_monitor_elapsed_seconds": 11.462666541105136,
+              "name": "load.structure-map",
+              "rss_peak_bytes": 1167032320,
+              "sample_count": 7
+            },
+            {
+              "first_monitor_elapsed_seconds": 13.716608915943652,
+              "last_monitor_elapsed_seconds": 13.722433750052005,
+              "name": "named.load",
+              "rss_peak_bytes": 1108508672,
+              "sample_count": 2
+            },
+            {
+              "first_monitor_elapsed_seconds": 0.27888820809312165,
+              "last_monitor_elapsed_seconds": 1.4052784161176533,
+              "name": "setup.clone-substrate",
+              "rss_peak_bytes": 592789504,
+              "sample_count": 188
+            },
+            {
+              "first_monitor_elapsed_seconds": 11.773586875060573,
+              "last_monitor_elapsed_seconds": 12.484157833037898,
+              "name": "structure-map.load.parse",
+              "rss_peak_bytes": 1284276224,
+              "sample_count": 123
+            },
+            {
+              "first_monitor_elapsed_seconds": 11.468366458080709,
+              "last_monitor_elapsed_seconds": 11.767846083035693,
+              "name": "structure-map.load.read",
+              "rss_peak_bytes": 1339162624,
+              "sample_count": 53
+            },
+            {
+              "first_monitor_elapsed_seconds": 12.489854915998876,
+              "last_monitor_elapsed_seconds": 13.039762290893123,
+              "name": "structure-map.load.tier1",
+              "rss_peak_bytes": 1286275072,
+              "sample_count": 97
+            },
+            {
+              "first_monitor_elapsed_seconds": 13.498332750052214,
+              "last_monitor_elapsed_seconds": 13.710901875048876,
+              "name": "structure-map.load.tier2",
+              "rss_peak_bytes": 1101627392,
+              "sample_count": 38
+            },
+            {
+              "first_monitor_elapsed_seconds": 13.045460541034117,
+              "last_monitor_elapsed_seconds": 13.492524999892339,
+              "name": "structure-map.load.typed-build",
+              "rss_peak_bytes": 1053114368,
+              "sample_count": 79
+            }
+          ]
+        }
+      }
+    },
+    {
+      "event": "phase-sample-complete",
+      "progress": {
+        "atom_count": 100000,
+        "fixture_variant": null,
+        "measurement_index": 3,
+        "measurement_total": 5,
+        "phase": "index",
+        "phase_index": 3,
+        "phase_total": 5,
+        "point_step_index": 3,
+        "point_step_total": 5,
+        "repetition": 1,
+        "repetitions": 1,
+        "shape": "wide",
+        "step_coordinate": "3.1"
+      },
+      "sample": {
+        "elapsed_seconds": 1.0218291250057518,
+        "incremental_peak_bytes": 596951040,
+        "ledger": {
+          "A": 100000,
+          "D": 4,
+          "K": 2500,
+          "L": 2500,
+          "T": 3600000,
+          "family": "wide-rebind-production"
+        },
+        "lifetime_peak_bytes": 1623638016,
+        "monitor_elapsed_seconds": 13.499495083000511,
+        "phase": "index",
+        "raw_ru_maxrss_bytes": 1623638016,
+        "sample_count": 177,
+        "sample_interval_seconds": 0.005,
+        "setup_baseline_bytes": 1026686976,
+        "setup_elapsed_seconds": 11.656748082954437,
+        "span_peak_bytes": 1623638016,
+        "telemetry": {
+          "child_trace": {
+            "active_stage": "idle",
+            "schema": "engine-rebind-telemetry@v1",
+            "spans": [
+              {
+                "attributes": {},
+                "cpu_seconds": 0.859026,
+                "name": "setup.clone-substrate",
+                "parent": "setup.prepare",
+                "start_offset_seconds": 0.001204042,
+                "wall_seconds": 1.257472333
+              },
+              {
+                "attributes": {
+                  "stream_count": 2
+                },
+                "cpu_seconds": 3.782866,
+                "name": "load.old-streams",
+                "parent": "setup.load-prerequisites",
+                "start_offset_seconds": 1.258711333,
+                "wall_seconds": 4.328134
+              },
+              {
+                "attributes": {
+                  "stream_count": 2
+                },
+                "cpu_seconds": 3.241458,
+                "name": "load.fresh-streams",
+                "parent": "setup.load-prerequisites",
+                "start_offset_seconds": 5.58687875,
+                "wall_seconds": 3.351229917
+              },
+              {
+                "attributes": {
+                  "byte_count": 283462757
+                },
+                "cpu_seconds": 0.202343,
+                "name": "structure-map.load.read",
+                "parent": "load.structure-map",
+                "start_offset_seconds": 8.981380958,
+                "wall_seconds": 0.224071417
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 0.508768,
+                "name": "structure-map.load.parse",
+                "parent": "load.structure-map",
+                "start_offset_seconds": 9.205470625,
+                "wall_seconds": 0.577007042
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 0.535427,
+                "name": "structure-map.load.tier1",
+                "parent": "load.structure-map",
+                "start_offset_seconds": 9.782586042,
+                "wall_seconds": 0.680301958
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 0.469016,
+                "name": "structure-map.load.typed-build",
+                "parent": "load.structure-map",
+                "start_offset_seconds": 10.46293125,
+                "wall_seconds": 0.489311583
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 0.271129,
+                "name": "structure-map.load.tier2",
+                "parent": "load.structure-map",
+                "start_offset_seconds": 10.952267042,
+                "wall_seconds": 0.282884916
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 2.028651,
+                "name": "load.structure-map",
+                "parent": "setup.load-prerequisites",
+                "start_offset_seconds": 8.938147167,
+                "wall_seconds": 2.29704
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 9.058978,
+                "name": "setup.load-prerequisites",
+                "parent": "setup.prepare",
+                "start_offset_seconds": 1.258705125,
+                "wall_seconds": 9.982473708
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 9.918759,
+                "name": "setup.prepare",
+                "parent": null,
+                "start_offset_seconds": 9.2125e-05,
+                "wall_seconds": 11.241178792
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 0.15686,
+                "name": "index.readers",
+                "parent": "named.index",
+                "start_offset_seconds": 11.245626458,
+                "wall_seconds": 0.172507584
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 0.762981,
+                "name": "index.validate-map",
+                "parent": "named.index",
+                "start_offset_seconds": 11.418158333,
+                "wall_seconds": 0.849215
+              },
+              {
+                "attributes": {
+                  "fresh_included_atoms": 100000,
+                  "old_included_atoms": 100000
+                },
+                "cpu_seconds": 1.1e-05,
+                "name": "index.compare-cardinality",
+                "parent": "named.index",
+                "start_offset_seconds": 12.267400583,
+                "wall_seconds": 1.1042e-05
+              },
+              {
+                "attributes": {},
+                "cpu_seconds": 0.919941,
+                "name": "named.index",
+                "parent": null,
+                "start_offset_seconds": 11.245612542,
+                "wall_seconds": 1.021817041
+              }
+            ]
+          },
+          "fixture_variant": "identical",
+          "schema": "s4.7-runtime-telemetry@v1",
+          "stage_rss": [
+            {
+              "first_monitor_elapsed_seconds": 0.0089369579218328,
+              "last_monitor_elapsed_seconds": 13.474246416939422,
+              "name": "idle",
+              "rss_peak_bytes": 1581006848,
+              "sample_count": 184
+            },
+            {
+              "first_monitor_elapsed_seconds": 11.661655332893133,
+              "last_monitor_elapsed_seconds": 11.830018874956295,
+              "name": "index.readers",
+              "rss_peak_bytes": 1147781120,
+              "sample_count": 30
+            },
+            {
+              "first_monitor_elapsed_seconds": 11.835733416955918,
+              "last_monitor_elapsed_seconds": 12.679347625002265,
+              "name": "index.validate-map",
+              "rss_peak_bytes": 1623638016,
+              "sample_count": 147
+            },
+            {
+              "first_monitor_elapsed_seconds": 6.001081000082195,
+              "last_monitor_elapsed_seconds": 9.344925625016913,
+              "name": "load.fresh-streams",
+              "rss_peak_bytes": 1390510080,
+              "sample_count": 587
+            },
+            {
+              "first_monitor_elapsed_seconds": 1.6752869579941034,
+              "last_monitor_elapsed_seconds": 5.995302666909993,
+              "name": "load.old-streams",
+              "rss_peak_bytes": 1007271936,
+              "sample_count": 735
+            },
+            {
+              "first_monitor_elapsed_seconds": 9.350700916955248,
+              "last_monitor_elapsed_seconds": 9.390972000081092,
+              "name": "load.structure-map",
+              "rss_peak_bytes": 1384333312,
+              "sample_count": 8
+            },
+            {
+              "first_monitor_elapsed_seconds": 0.4186777079012245,
+              "last_monitor_elapsed_seconds": 1.6698032079730183,
+              "name": "setup.clone-substrate",
+              "rss_peak_bytes": 592068608,
+              "sample_count": 215
+            },
+            {
+              "first_monitor_elapsed_seconds": 11.651617541909218,
+              "last_monitor_elapsed_seconds": 11.651620457880199,
+              "name": "setup.load-prerequisites",
+              "rss_peak_bytes": 1021231104,
+              "sample_count": 1
+            },
+            {
+              "first_monitor_elapsed_seconds": 0.41295329201966524,
+              "last_monitor_elapsed_seconds": 0.4129550000652671,
+              "name": "setup.prepare",
+              "rss_peak_bytes": 43696128,
+              "sample_count": 1
+            },
+            {
+              "first_monitor_elapsed_seconds": 9.622133041964844,
+              "last_monitor_elapsed_seconds": 10.190752916969359,
+              "name": "structure-map.load.parse",
+              "rss_peak_bytes": 1527709696,
+              "sample_count": 101
+            },
+            {
+              "first_monitor_elapsed_seconds": 9.396681708050892,
+              "last_monitor_elapsed_seconds": 9.616313792066649,
+              "name": "structure-map.load.read",
+              "rss_peak_bytes": 1545355264,
+              "sample_count": 39
+            },
+            {
+              "first_monitor_elapsed_seconds": 10.19651316688396,
+              "last_monitor_elapsed_seconds": 10.872209999943152,
+              "name": "structure-map.load.tier1",
+              "rss_peak_bytes": 1232338944,
+              "sample_count": 118
+            },
+            {
+              "first_monitor_elapsed_seconds": 11.365874083014205,
+              "last_monitor_elapsed_seconds": 11.645883166929707,
+              "name": "structure-map.load.tier2",
+              "rss_peak_bytes": 1016332288,
+              "sample_count": 50
+            },
+            {
+              "first_monitor_elapsed_seconds": 10.877972292015329,
+              "last_monitor_elapsed_seconds": 11.36012062500231,
+              "name": "structure-map.load.typed-build",
+              "rss_peak_bytes": 968245248,
+              "sample_count": 85
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "last_event": {
+    "event": "phase-sample-complete",
+    "progress": {
+      "atom_count": 100000,
+      "fixture_variant": null,
+      "measurement_index": 3,
+      "measurement_total": 5,
+      "phase": "index",
+      "phase_index": 3,
+      "phase_total": 5,
+      "point_step_index": 3,
+      "point_step_total": 5,
+      "repetition": 1,
+      "repetitions": 1,
+      "shape": "wide",
+      "step_coordinate": "3.1"
+    },
+    "sample": {
+      "elapsed_seconds": 1.0218291250057518,
+      "incremental_peak_bytes": 596951040,
+      "ledger": {
+        "A": 100000,
+        "D": 4,
+        "K": 2500,
+        "L": 2500,
+        "T": 3600000,
+        "family": "wide-rebind-production"
+      },
+      "lifetime_peak_bytes": 1623638016,
+      "monitor_elapsed_seconds": 13.499495083000511,
+      "phase": "index",
+      "raw_ru_maxrss_bytes": 1623638016,
+      "sample_count": 177,
+      "sample_interval_seconds": 0.005,
+      "setup_baseline_bytes": 1026686976,
+      "setup_elapsed_seconds": 11.656748082954437,
+      "span_peak_bytes": 1623638016,
+      "telemetry": {
+        "child_trace": {
+          "active_stage": "idle",
+          "schema": "engine-rebind-telemetry@v1",
+          "spans": [
+            {
+              "attributes": {},
+              "cpu_seconds": 0.859026,
+              "name": "setup.clone-substrate",
+              "parent": "setup.prepare",
+              "start_offset_seconds": 0.001204042,
+              "wall_seconds": 1.257472333
+            },
+            {
+              "attributes": {
+                "stream_count": 2
+              },
+              "cpu_seconds": 3.782866,
+              "name": "load.old-streams",
+              "parent": "setup.load-prerequisites",
+              "start_offset_seconds": 1.258711333,
+              "wall_seconds": 4.328134
+            },
+            {
+              "attributes": {
+                "stream_count": 2
+              },
+              "cpu_seconds": 3.241458,
+              "name": "load.fresh-streams",
+              "parent": "setup.load-prerequisites",
+              "start_offset_seconds": 5.58687875,
+              "wall_seconds": 3.351229917
+            },
+            {
+              "attributes": {
+                "byte_count": 283462757
+              },
+              "cpu_seconds": 0.202343,
+              "name": "structure-map.load.read",
+              "parent": "load.structure-map",
+              "start_offset_seconds": 8.981380958,
+              "wall_seconds": 0.224071417
+            },
+            {
+              "attributes": {},
+              "cpu_seconds": 0.508768,
+              "name": "structure-map.load.parse",
+              "parent": "load.structure-map",
+              "start_offset_seconds": 9.205470625,
+              "wall_seconds": 0.577007042
+            },
+            {
+              "attributes": {},
+              "cpu_seconds": 0.535427,
+              "name": "structure-map.load.tier1",
+              "parent": "load.structure-map",
+              "start_offset_seconds": 9.782586042,
+              "wall_seconds": 0.680301958
+            },
+            {
+              "attributes": {},
+              "cpu_seconds": 0.469016,
+              "name": "structure-map.load.typed-build",
+              "parent": "load.structure-map",
+              "start_offset_seconds": 10.46293125,
+              "wall_seconds": 0.489311583
+            },
+            {
+              "attributes": {},
+              "cpu_seconds": 0.271129,
+              "name": "structure-map.load.tier2",
+              "parent": "load.structure-map",
+              "start_offset_seconds": 10.952267042,
+              "wall_seconds": 0.282884916
+            },
+            {
+              "attributes": {},
+              "cpu_seconds": 2.028651,
+              "name": "load.structure-map",
+              "parent": "setup.load-prerequisites",
+              "start_offset_seconds": 8.938147167,
+              "wall_seconds": 2.29704
+            },
+            {
+              "attributes": {},
+              "cpu_seconds": 9.058978,
+              "name": "setup.load-prerequisites",
+              "parent": "setup.prepare",
+              "start_offset_seconds": 1.258705125,
+              "wall_seconds": 9.982473708
+            },
+            {
+              "attributes": {},
+              "cpu_seconds": 9.918759,
+              "name": "setup.prepare",
+              "parent": null,
+              "start_offset_seconds": 9.2125e-05,
+              "wall_seconds": 11.241178792
+            },
+            {
+              "attributes": {},
+              "cpu_seconds": 0.15686,
+              "name": "index.readers",
+              "parent": "named.index",
+              "start_offset_seconds": 11.245626458,
+              "wall_seconds": 0.172507584
+            },
+            {
+              "attributes": {},
+              "cpu_seconds": 0.762981,
+              "name": "index.validate-map",
+              "parent": "named.index",
+              "start_offset_seconds": 11.418158333,
+              "wall_seconds": 0.849215
+            },
+            {
+              "attributes": {
+                "fresh_included_atoms": 100000,
+                "old_included_atoms": 100000
+              },
+              "cpu_seconds": 1.1e-05,
+              "name": "index.compare-cardinality",
+              "parent": "named.index",
+              "start_offset_seconds": 12.267400583,
+              "wall_seconds": 1.1042e-05
+            },
+            {
+              "attributes": {},
+              "cpu_seconds": 0.919941,
+              "name": "named.index",
+              "parent": null,
+              "start_offset_seconds": 11.245612542,
+              "wall_seconds": 1.021817041
+            }
+          ]
+        },
+        "fixture_variant": "identical",
+        "schema": "s4.7-runtime-telemetry@v1",
+        "stage_rss": [
+          {
+            "first_monitor_elapsed_seconds": 0.0089369579218328,
+            "last_monitor_elapsed_seconds": 13.474246416939422,
+            "name": "idle",
+            "rss_peak_bytes": 1581006848,
+            "sample_count": 184
+          },
+          {
+            "first_monitor_elapsed_seconds": 11.661655332893133,
+            "last_monitor_elapsed_seconds": 11.830018874956295,
+            "name": "index.readers",
+            "rss_peak_bytes": 1147781120,
+            "sample_count": 30
+          },
+          {
+            "first_monitor_elapsed_seconds": 11.835733416955918,
+            "last_monitor_elapsed_seconds": 12.679347625002265,
+            "name": "index.validate-map",
+            "rss_peak_bytes": 1623638016,
+            "sample_count": 147
+          },
+          {
+            "first_monitor_elapsed_seconds": 6.001081000082195,
+            "last_monitor_elapsed_seconds": 9.344925625016913,
+            "name": "load.fresh-streams",
+            "rss_peak_bytes": 1390510080,
+            "sample_count": 587
+          },
+          {
+            "first_monitor_elapsed_seconds": 1.6752869579941034,
+            "last_monitor_elapsed_seconds": 5.995302666909993,
+            "name": "load.old-streams",
+            "rss_peak_bytes": 1007271936,
+            "sample_count": 735
+          },
+          {
+            "first_monitor_elapsed_seconds": 9.350700916955248,
+            "last_monitor_elapsed_seconds": 9.390972000081092,
+            "name": "load.structure-map",
+            "rss_peak_bytes": 1384333312,
+            "sample_count": 8
+          },
+          {
+            "first_monitor_elapsed_seconds": 0.4186777079012245,
+            "last_monitor_elapsed_seconds": 1.6698032079730183,
+            "name": "setup.clone-substrate",
+            "rss_peak_bytes": 592068608,
+            "sample_count": 215
+          },
+          {
+            "first_monitor_elapsed_seconds": 11.651617541909218,
+            "last_monitor_elapsed_seconds": 11.651620457880199,
+            "name": "setup.load-prerequisites",
+            "rss_peak_bytes": 1021231104,
+            "sample_count": 1
+          },
+          {
+            "first_monitor_elapsed_seconds": 0.41295329201966524,
+            "last_monitor_elapsed_seconds": 0.4129550000652671,
+            "name": "setup.prepare",
+            "rss_peak_bytes": 43696128,
+            "sample_count": 1
+          },
+          {
+            "first_monitor_elapsed_seconds": 9.622133041964844,
+            "last_monitor_elapsed_seconds": 10.190752916969359,
+            "name": "structure-map.load.parse",
+            "rss_peak_bytes": 1527709696,
+            "sample_count": 101
+          },
+          {
+            "first_monitor_elapsed_seconds": 9.396681708050892,
+            "last_monitor_elapsed_seconds": 9.616313792066649,
+            "name": "structure-map.load.read",
+            "rss_peak_bytes": 1545355264,
+            "sample_count": 39
+          },
+          {
+            "first_monitor_elapsed_seconds": 10.19651316688396,
+            "last_monitor_elapsed_seconds": 10.872209999943152,
+            "name": "structure-map.load.tier1",
+            "rss_peak_bytes": 1232338944,
+            "sample_count": 118
+          },
+          {
+            "first_monitor_elapsed_seconds": 11.365874083014205,
+            "last_monitor_elapsed_seconds": 11.645883166929707,
+            "name": "structure-map.load.tier2",
+            "rss_peak_bytes": 1016332288,
+            "sample_count": 50
+          },
+          {
+            "first_monitor_elapsed_seconds": 10.877972292015329,
+            "last_monitor_elapsed_seconds": 11.36012062500231,
+            "name": "structure-map.load.typed-build",
+            "rss_peak_bytes": 968245248,
+            "sample_count": 85
+          }
+        ]
+      }
+    }
+  },
+  "named_measurement_total": 5,
+  "progress_log": "/Users/ben_mpa/LLM/PER_LA_LIBERTA/engine/docs/probes/s4_7_scale_cycle_optimized_wide_a100000.progress.ndjson",
+  "recipe": {
+    "atom_count": 100000,
+    "shape": "wide",
+    "tokens_per_atom": 36
+  },
+  "run_id": "2e1c025b-b625-4cab-b30e-24a942f74b6d",
+  "schema": "s4.7-production-scale-cycle-checkpoint@v1",
+  "status": "INTERRUPTED",
+  "updated_at": "2026-07-18T21:16:21.414601+00:00"
+}

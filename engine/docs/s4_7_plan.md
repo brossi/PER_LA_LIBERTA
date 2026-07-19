@@ -524,6 +524,20 @@ density and N), not just the timing ratio. See `s4_7_prototype_findings.md` FRAM
 correction landed (G-2); S5.1 + S4.7 tracker rows corrected; #33 closed; push `origin/spike` only.
 Commit only when Ben asks.
 
+**[Closeout 2026-07-19, Ben-approved]:** items 1–5 are satisfied by the committed red-first
+manifests, production mechanism audit, registered scale evidence, current all-killed mutation
+manifest, and green default suite. Item 6 is the dedicated closeout synchronization: the S4.7 and
+S5.1-R tracker rows are `DONE`; #84, #48, #33, and epic #85 receive their evidence and close in that
+order; `spike/s4_7` is integrated before S4.6 authoring begins. S5.1-RG remains a separate required
+post-S4.6 real-data gate and is not silently folded into #48.
+
+Ben explicitly declined a second 100,000-atom registered campaign at closeout. The retained final
+campaign remains the authoritative median-of-five result. The commits after that artifact affect the
+separate authoring-evidence gate, evidence-bearing restamp path, and observer telemetry; the
+registered production-scale contexts supply no `old_evidence`, so they do not execute the changed
+restamp path. This is a disclosed no-rerun ruling, not a claim that the old artifact was regenerated
+against the final commit.
+
 **[Amended per PR-4, 2026-07-17] INV-7 completion-state model (items 2/3):** INV-7 has exactly two
 acceptable end-states — **(a) green** (within ceiling, or an in-scope fix lands), or **(b) honestly
 UNRESOLVED** per DR-6 characterize-and-defer: the characterization artifact is the accepted

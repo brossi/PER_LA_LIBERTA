@@ -1,0 +1,1745 @@
+{
+  "schema": "s4.7-item2-priority4-red-manifest@v1",
+  "profile": "priority4",
+  "created_at": "2026-07-18T07:58:43.481818+00:00",
+  "repo": "/Users/ben_mpa/LLM/PER_LA_LIBERTA/engine",
+  "git": {
+    "head": "6b65a4fd975ce27bb8216aff799764c50bb7ee09",
+    "branch": "spike/s4_7",
+    "status": "M docs/probes/s4_7_item2_prereg.md\n M tests/harness/relation.py\n M tests/hunts/hunt_rebind.py\n M tests/unit/test_harness_relation_laws.py\n?? docs/probes/s4_7_priority1_component0_audit.md\n?? docs/probes/s4_7_priority2_inv1_inv2_audit.md\n?? docs/probes/s4_7_priority2_red_manifest.json\n?? docs/probes/s4_7_priority3_inv3_inv5_audit.md\n?? docs/probes/s4_7_priority3_red_manifest.json\n?? docs/probes/s4_7_priority4_perf_baseline.json\n?? src/engine/structure/boundary_anchor.py\n?? tests/harness/boundary.py\n?? tests/harness/invariants_3_5.py\n?? tests/harness/materialize.py\n?? tests/harness/oracle.py\n?? tests/harness/scale.py\n?? tests/unit/test_harness_materialize.py\n?? tests/unit/test_s4_7_inv1_inv2.py\n?? tests/unit/test_s4_7_inv3_inv5.py\n?? tests/unit/test_s4_7_inv6_inv7.py\n?? tools/s4_7_hunt_manifest.py\n?? tools/s4_7_perf_baseline.py"
+  },
+  "seeds": [
+    47300,
+    47600,
+    48200,
+    49400,
+    51800
+  ],
+  "modes": [
+    "no-geometry",
+    "deep-evidence-isolated-core"
+  ],
+  "case_matrix": [
+    "inv6:rebind:T=300",
+    "inv6:rebind:T=600",
+    "inv6:rebind:T=1200",
+    "inv6:rebind:T=2400",
+    "inv6:rebind:T=4800",
+    "inv7:evidence_findings:D=3000"
+  ],
+  "diagnostics": [
+    {
+      "family": "inv6-rebind",
+      "seed": 47300,
+      "ledger": {
+        "family": "wide-rebind-pll-ratio",
+        "L": 1,
+        "K": 1,
+        "A": 8,
+        "T": 300,
+        "D": 2
+      },
+      "preflight": {
+        "serialize": true,
+        "load": true,
+        "index": true,
+        "rebind": true,
+        "end_to_end": true,
+        "reported_nodes": 2
+      },
+      "rebind": {
+        "elapsed_seconds": [
+          0.0007287499029189348,
+          0.0005595420952886343,
+          0.000528666889294982,
+          0.0005137501284480095,
+          0.0005055409856140614
+        ],
+        "peak_bytes": [
+          98424,
+          98408,
+          98392,
+          98376,
+          98360
+        ],
+        "median_seconds": 0.000528666889294982,
+        "median_peak_bytes": 98392.0
+      },
+      "end_to_end": {
+        "elapsed_seconds": [
+          0.019077874952927232,
+          0.021904666908085346,
+          0.019589582923799753,
+          0.018580124946311116,
+          0.01837358297780156
+        ],
+        "peak_bytes": [
+          208260,
+          207406,
+          207210,
+          207343,
+          207484
+        ],
+        "median_seconds": 0.019077874952927232,
+        "median_peak_bytes": 207406.0
+      }
+    },
+    {
+      "family": "inv6-rebind",
+      "seed": 47600,
+      "ledger": {
+        "family": "wide-rebind-pll-ratio",
+        "L": 1,
+        "K": 1,
+        "A": 17,
+        "T": 600,
+        "D": 2
+      },
+      "preflight": {
+        "serialize": true,
+        "load": true,
+        "index": true,
+        "rebind": true,
+        "end_to_end": true,
+        "reported_nodes": 2
+      },
+      "rebind": {
+        "elapsed_seconds": [
+          0.002686458872631192,
+          0.003153833094984293,
+          0.001607875106856227,
+          0.0021924159955233335,
+          0.0019124159589409828
+        ],
+        "peak_bytes": [
+          246504,
+          246504,
+          246504,
+          246504,
+          246504
+        ],
+        "median_seconds": 0.0021924159955233335,
+        "median_peak_bytes": 246504.0
+      },
+      "end_to_end": {
+        "elapsed_seconds": [
+          0.021561125060543418,
+          0.021102500148117542,
+          0.02859787503257394,
+          0.03424350009299815,
+          0.021664915839210153
+        ],
+        "peak_bytes": [
+          433921,
+          433686,
+          433780,
+          433686,
+          433827
+        ],
+        "median_seconds": 0.021664915839210153,
+        "median_peak_bytes": 433780.0
+      }
+    },
+    {
+      "family": "inv6-rebind",
+      "seed": 48200,
+      "ledger": {
+        "family": "wide-rebind-pll-ratio",
+        "L": 1,
+        "K": 1,
+        "A": 33,
+        "T": 1200,
+        "D": 2
+      },
+      "preflight": {
+        "serialize": true,
+        "load": true,
+        "index": true,
+        "rebind": true,
+        "end_to_end": true,
+        "reported_nodes": 2
+      },
+      "rebind": {
+        "elapsed_seconds": [
+          0.0023298340383917093,
+          0.0021016248501837254,
+          0.002174000022932887,
+          0.002159042051061988,
+          0.0025665410794317722
+        ],
+        "peak_bytes": [
+          381784,
+          381784,
+          381784,
+          381784,
+          381784
+        ],
+        "median_seconds": 0.002174000022932887,
+        "median_peak_bytes": 381784.0
+      },
+      "end_to_end": {
+        "elapsed_seconds": [
+          0.026477792067453265,
+          0.026415250031277537,
+          0.02830599993467331,
+          0.027114749886095524,
+          0.02614737511612475
+        ],
+        "peak_bytes": [
+          719203,
+          717652,
+          717464,
+          718075,
+          716853
+        ],
+        "median_seconds": 0.026477792067453265,
+        "median_peak_bytes": 717652.0
+      }
+    },
+    {
+      "family": "inv6-rebind",
+      "seed": 49400,
+      "ledger": {
+        "family": "wide-rebind-pll-ratio",
+        "L": 2,
+        "K": 2,
+        "A": 67,
+        "T": 2400,
+        "D": 2
+      },
+      "preflight": {
+        "serialize": true,
+        "load": true,
+        "index": true,
+        "rebind": true,
+        "end_to_end": true,
+        "reported_nodes": 3
+      },
+      "rebind": {
+        "elapsed_seconds": [
+          0.06701570795848966,
+          0.06632674997672439,
+          0.06502975011244416,
+          0.06516304216347635,
+          0.06525941588915884
+        ],
+        "peak_bytes": [
+          782594,
+          782594,
+          782594,
+          782594,
+          782594
+        ],
+        "median_seconds": 0.06525941588915884,
+        "median_peak_bytes": 782594.0
+      },
+      "end_to_end": {
+        "elapsed_seconds": [
+          0.12747841700911522,
+          0.09886695886962116,
+          0.09753454197198153,
+          0.0974831657949835,
+          0.09798979200422764
+        ],
+        "peak_bytes": [
+          1423337,
+          1423807,
+          1424277,
+          1423149,
+          1423619
+        ],
+        "median_seconds": 0.09798979200422764,
+        "median_peak_bytes": 1423619.0
+      }
+    },
+    {
+      "family": "inv6-rebind",
+      "seed": 51800,
+      "ledger": {
+        "family": "wide-rebind-pll-ratio",
+        "L": 3,
+        "K": 3,
+        "A": 133,
+        "T": 4800,
+        "D": 2
+      },
+      "preflight": {
+        "serialize": true,
+        "load": true,
+        "index": true,
+        "rebind": true,
+        "end_to_end": true,
+        "reported_nodes": 4
+      },
+      "rebind": {
+        "elapsed_seconds": [
+          6.097217082977295,
+          6.121822041925043,
+          6.0985419161152095,
+          6.10504737496376,
+          6.196832332992926
+        ],
+        "peak_bytes": [
+          1691696,
+          1691696,
+          1691696,
+          1691696,
+          1691696
+        ],
+        "median_seconds": 6.10504737496376,
+        "median_peak_bytes": 1691696.0
+      },
+      "end_to_end": {
+        "elapsed_seconds": [
+          6.220325375208631,
+          6.15443154098466,
+          6.150003042072058,
+          6.1618392909877,
+          6.216161124873906
+        ],
+        "peak_bytes": [
+          2952967,
+          2950993,
+          2955552,
+          2951651,
+          2952779
+        ],
+        "median_seconds": 6.1618392909877,
+        "median_peak_bytes": 2952779.0
+      }
+    },
+    {
+      "family": "inv7-evidence",
+      "ledger": {
+        "family": "deep-evidence-isolated-core",
+        "L": 3000,
+        "K": 3000,
+        "A": 3000,
+        "T": 3000,
+        "D": 3000
+      },
+      "preflight": {
+        "construction": true,
+        "schema_validation": true,
+        "serialization": true,
+        "iterative_beyond_recursion_limit": true,
+        "persisted_decode_feasible": false,
+        "decode_budget": 1000000,
+        "decoded_witness_ids": 4501500,
+        "input_bytes": 3376845,
+        "node_count": 6000
+      },
+      "evidence_findings": {
+        "elapsed_seconds": [
+          4.135136083001271,
+          4.116274458123371,
+          4.091492250096053,
+          4.092459207866341,
+          4.109154375037178
+        ],
+        "peak_bytes": [
+          934592,
+          934592,
+          934592,
+          934592,
+          934592
+        ],
+        "median_seconds": 4.109154375037178,
+        "median_peak_bytes": 934592.0
+      },
+      "within_wall_clock_ceiling": false,
+      "within_tracemalloc_ceiling": true
+    }
+  ],
+  "environment": {
+    "python": "3.13.0",
+    "python_executable": "/Users/ben_mpa/LLM/PER_LA_LIBERTA/engine/.venv/bin/python",
+    "platform": "macOS-26.5.1-arm64-arm-64bit-Mach-O",
+    "machine": "arm64",
+    "processor": "arm",
+    "uv_lock_sha256": "d56c32c65aa5c185d35f8bb75024ccb0a57939025ba11b3d7d93cc553ffffd27"
+  },
+  "imported_module": {
+    "module": "engine.structure.rebind",
+    "path": "/Users/ben_mpa/LLM/PER_LA_LIBERTA/engine/src/engine/structure/rebind.py"
+  },
+  "source_identity": {
+    "files": [
+      "docs/probes/s4_7_item2_prereg.md",
+      "docs/probes/s4_7_priority4_perf_baseline.json",
+      "src/engine/structure/artifacts.py",
+      "src/engine/structure/boundary_anchor.py",
+      "src/engine/structure/projection.py",
+      "src/engine/structure/rebind.py",
+      "src/engine/structure/structure_map.py",
+      "tests/harness/boundary.py",
+      "tests/harness/invariants_3_5.py",
+      "tests/harness/materialize.py",
+      "tests/harness/oracle.py",
+      "tests/harness/relation.py",
+      "tests/harness/scale.py",
+      "tests/unit/test_s4_7_inv1_inv2.py",
+      "tests/unit/test_s4_7_inv3_inv5.py",
+      "tests/unit/test_s4_7_inv6_inv7.py",
+      "tools/s4_7_hunt_manifest.py",
+      "tools/s4_7_perf_baseline.py"
+    ],
+    "pre": {
+      "docs/probes/s4_7_item2_prereg.md": "98b1b06287f64a8459e4ec64ff94eb724304345678b003932966c4bb5acc8d9b",
+      "docs/probes/s4_7_priority4_perf_baseline.json": "6eb8ed5c12b2272adb538cb62c7ce3ba082a7559b0093188cd4d6927b45408f7",
+      "src/engine/structure/artifacts.py": "dc136b7e69ace830f6795093cc72d009e7c1e1c00185cb0ea1d06fac297ec9c0",
+      "src/engine/structure/boundary_anchor.py": "2c361a379f033f32f69fca8fdd9e9bba179f3f25932c18ac9fca465d01b69d92",
+      "src/engine/structure/projection.py": "39f510f7e7490e5c99f25ed084b6b687adfdf9b79ed7b0f5be13bb923f698623",
+      "src/engine/structure/rebind.py": "7e7e9cdc9fb233d7be824ca1ab53f9a98ae516aaa4d36d5e722b55f465b67d2c",
+      "src/engine/structure/structure_map.py": "cb18a88a2f8d148da6a78f3f10538659e61e053957d7ab2f05803012acf72015",
+      "tests/harness/boundary.py": "6e0184612c1aa787eecbcdef977de8647abb05be9308afaf7f2e0b7990da4704",
+      "tests/harness/invariants_3_5.py": "084da84855f71d706380404cf257f422051165ec8ec2798858ad56b0cbd0e6b1",
+      "tests/harness/materialize.py": "159adc3b0056e7b3d29a6555c40306e7f9befe31f87d5659f8264eb35de947c6",
+      "tests/harness/oracle.py": "5fc5245b950362639874c7871e16bba6e4bd43c1daafa58840fd7c3f561e0712",
+      "tests/harness/relation.py": "4f778a2d9dfff66dd4be1b8d55fc3de9bdbf3b4b0161146edd07f37fd0647594",
+      "tests/harness/scale.py": "b624e397cd83d20b85595da5dd3e76b4a2287255fe543c44db22a3f3760a1f25",
+      "tests/unit/test_s4_7_inv1_inv2.py": "bda167b09eb2f3f9d1df47e7d646449689855fa70be819c0a639c492052aca18",
+      "tests/unit/test_s4_7_inv3_inv5.py": "bf4fec8a8fc002b6d8636e67cd1f923b7e6edf99f3c317a2f5b73fe6beb0da5b",
+      "tests/unit/test_s4_7_inv6_inv7.py": "7dba0bd5a8252de282f1041f7c3dc72f67a6b98e498ff2baf8650630f9e962e4",
+      "tools/s4_7_hunt_manifest.py": "0ed648cba619fa31febe82bb3b0e195e68e1a60ac91a43457f46506e696ad07b",
+      "tools/s4_7_perf_baseline.py": "8f56d1feeec5b93c7fb77c069c11bda6f58330c097b99154973ec03e17e74dd1"
+    },
+    "post": {
+      "docs/probes/s4_7_item2_prereg.md": "98b1b06287f64a8459e4ec64ff94eb724304345678b003932966c4bb5acc8d9b",
+      "docs/probes/s4_7_priority4_perf_baseline.json": "6eb8ed5c12b2272adb538cb62c7ce3ba082a7559b0093188cd4d6927b45408f7",
+      "src/engine/structure/artifacts.py": "dc136b7e69ace830f6795093cc72d009e7c1e1c00185cb0ea1d06fac297ec9c0",
+      "src/engine/structure/boundary_anchor.py": "2c361a379f033f32f69fca8fdd9e9bba179f3f25932c18ac9fca465d01b69d92",
+      "src/engine/structure/projection.py": "39f510f7e7490e5c99f25ed084b6b687adfdf9b79ed7b0f5be13bb923f698623",
+      "src/engine/structure/rebind.py": "7e7e9cdc9fb233d7be824ca1ab53f9a98ae516aaa4d36d5e722b55f465b67d2c",
+      "src/engine/structure/structure_map.py": "cb18a88a2f8d148da6a78f3f10538659e61e053957d7ab2f05803012acf72015",
+      "tests/harness/boundary.py": "6e0184612c1aa787eecbcdef977de8647abb05be9308afaf7f2e0b7990da4704",
+      "tests/harness/invariants_3_5.py": "084da84855f71d706380404cf257f422051165ec8ec2798858ad56b0cbd0e6b1",
+      "tests/harness/materialize.py": "159adc3b0056e7b3d29a6555c40306e7f9befe31f87d5659f8264eb35de947c6",
+      "tests/harness/oracle.py": "5fc5245b950362639874c7871e16bba6e4bd43c1daafa58840fd7c3f561e0712",
+      "tests/harness/relation.py": "4f778a2d9dfff66dd4be1b8d55fc3de9bdbf3b4b0161146edd07f37fd0647594",
+      "tests/harness/scale.py": "b624e397cd83d20b85595da5dd3e76b4a2287255fe543c44db22a3f3760a1f25",
+      "tests/unit/test_s4_7_inv1_inv2.py": "bda167b09eb2f3f9d1df47e7d646449689855fa70be819c0a639c492052aca18",
+      "tests/unit/test_s4_7_inv3_inv5.py": "bf4fec8a8fc002b6d8636e67cd1f923b7e6edf99f3c317a2f5b73fe6beb0da5b",
+      "tests/unit/test_s4_7_inv6_inv7.py": "7dba0bd5a8252de282f1041f7c3dc72f67a6b98e498ff2baf8650630f9e962e4",
+      "tools/s4_7_hunt_manifest.py": "0ed648cba619fa31febe82bb3b0e195e68e1a60ac91a43457f46506e696ad07b",
+      "tools/s4_7_perf_baseline.py": "8f56d1feeec5b93c7fb77c069c11bda6f58330c097b99154973ec03e17e74dd1"
+    },
+    "pre_aggregate_sha256": "00dcbb28fc67ac531f91384efb0e9883c62ddb7b67dd8bef100142e92f263ca4",
+    "post_aggregate_sha256": "00dcbb28fc67ac531f91384efb0e9883c62ddb7b67dd8bef100142e92f263ca4",
+    "byte_identical_after": true
+  },
+  "mutant_table": {
+    "path": "tests/hunts/hunt_rebind.py",
+    "sha256": "8860017f8966574cb55c00e1bada6ebbb6ecba1004d68012b7934522d471ca5c",
+    "normalized_mutants": [
+      {
+        "label": "empty-slot-returns-empty-shingle-fingerprint",
+        "scope": "tests/unit/test_rebind.py::test_fingerprint_slot_empty_is_none_never_empty_set",
+        "patches": [
+          {
+            "file": "src/engine/structure/rebind.py",
+            "old": "    if not toks:\n        return None",
+            "new": "    if not toks:\n        return SlotFingerprint(algo_id=FINGERPRINT_ALGO_ID, normalizer_id=FINGERPRINT_NORMALIZER_ID, k=1, token_count=0, shingles=())"
+          }
+        ]
+      },
+      {
+        "label": "short-slot-no-k-fallback",
+        "scope": "tests/unit/test_rebind.py::test_fingerprint_slot_short_slot_falls_back_to_available_k",
+        "patches": [
+          {
+            "file": "src/engine/structure/rebind.py",
+            "old": "    k_eff = min(k, len(toks)) if k >= 1 else 1",
+            "new": "    k_eff = k"
+          }
+        ]
+      },
+      {
+        "label": "empty-window-scores-one-not-zero",
+        "scope": "tests/unit/test_rebind.py::test_slot_similarity_empty_window_scores_zero",
+        "patches": [
+          {
+            "file": "src/engine/structure/rebind.py",
+            "old": "    if fresh is None:\n        return 0.0",
+            "new": "    if fresh is None:\n        return 1.0"
+          }
+        ]
+      },
+      {
+        "label": "jaccard-collapses-to-all-or-nothing-substring",
+        "scope": "tests/unit/test_rebind.py::test_r2_superstring_does_not_auto_bind_at_full_score",
+        "patches": [
+          {
+            "file": "src/engine/structure/rebind.py",
+            "old": "    return len(a & b) / len(union)",
+            "new": "    return 1.0 if (a & b) else 0.0"
+          }
+        ]
+      },
+      {
+        "label": "unknown-mode-defaults-instead-of-failing-loud",
+        "scope": "tests/unit/test_rebind.py::test_resolve_mode_unknown_fails_loud",
+        "patches": [
+          {
+            "file": "src/engine/structure/rebind.py",
+            "old": "    if geometry_mode in GEOMETRY_MODES:",
+            "new": "    if True:"
+          }
+        ]
+      },
+      {
+        "label": "none-mode-reported-as-manifest-not-fallback",
+        "scope": "tests/unit/test_rebind.py::test_resolve_mode_none_is_conditional_primary_fallback",
+        "patches": [
+          {
+            "file": "src/engine/structure/rebind.py",
+            "old": "        return (MODE_TIE_BREAK, FALLBACK_REPORTED_MODE, \"fallback\")",
+            "new": "        return (MODE_TIE_BREAK, MODE_TIE_BREAK, \"manifest\")"
+          }
+        ]
+      },
+      {
+        "label": "policy-ordering-guard-dropped",
+        "scope": "tests/unit/test_rebind.py::test_policy_inverted_ordering_is_rejected_at_construction",
+        "patches": [
+          {
+            "file": "src/engine/structure/rebind.py",
+            "old": "        if not (self.tau_no_geometry >= self.tau_tie_break >= self.tau_primary):",
+            "new": "        if False:"
+          }
+        ]
+      },
+      {
+        "label": "policy-default-primary-margin-inverted",
+        "scope": "tests/unit/test_rebind.py::test_policy_default_ordering_holds_on_the_named_default",
+        "patches": [
+          {
+            "file": "src/engine/structure/rebind.py",
+            "old": "    tau_primary: float = DEFAULT_FINGERPRINT_THRESHOLD - _DEFAULT_MODE_MARGIN",
+            "new": "    tau_primary: float = DEFAULT_FINGERPRINT_THRESHOLD + _DEFAULT_MODE_MARGIN"
+          }
+        ]
+      },
+      {
+        "label": "baseline-content-hash-gate-dropped",
+        "scope": "tests/unit/test_rebind.py::test_rebind_context_refuses_a_content_hash_mismatch",
+        "patches": [
+          {
+            "file": "src/engine/structure/rebind.py",
+            "old": "        if live_content != manifest.get(\"canonical_content_hash\"):",
+            "new": "        if False:"
+          }
+        ]
+      },
+      {
+        "label": "fingerprint-less-slot-binds-instead-of-missing-anchor",
+        "scope": "tests/unit/test_rebind.py::test_missing_anchor_node_never_binds_on_geometry_alone",
+        "patches": [
+          {
+            "file": "src/engine/structure/rebind.py",
+            "old": "                slot_name=slot.slot_name, bound=False, reason=\"missing-anchor\", score=None,",
+            "new": "                slot_name=slot.slot_name, bound=True, reason=None, score=None,"
+          }
+        ]
+      },
+      {
+        "label": "below-threshold-binds-any-score",
+        "scope": "tests/unit/test_rebind.py::test_below_threshold_when_fresh_content_diverges",
+        "patches": [
+          {
+            "file": "src/engine/structure/rebind.py",
+            "old": "                if score >= self.tau:",
+            "new": "                if score >= 0.0:"
+          }
+        ]
+      },
+      {
+        "label": "no-rescue-geometry-lifts-subtau-over-tau",
+        "scope": "tests/unit/test_rebind.py::test_no_rescue_geometry_does_not_lift_a_subtau_fingerprint",
+        "patches": [
+          {
+            "file": "src/engine/structure/rebind.py",
+            "old": "                if score >= self.tau:",
+            "new": "                if score >= self.tau or self._on_region_page(slot, a, b):"
+          }
+        ]
+      },
+      {
+        "label": "ambiguous-picks-first-candidate",
+        "scope": "tests/unit/test_rebind.py::test_ambiguous_repeated_content_fails_loud",
+        "patches": [
+          {
+            "file": "src/engine/structure/rebind.py",
+            "old": "        if len(chosen) == 1:",
+            "new": "        if len(chosen) >= 1:"
+          }
+        ]
+      },
+      {
+        "label": "primary-pin-ignores-mode",
+        "scope": "tests/unit/test_rebind.py::test_primary_mode_hard_pin_excludes_a_wrong_page_and_yields_zero_candidate",
+        "patches": [
+          {
+            "file": "src/engine/structure/rebind.py",
+            "old": "        if self.dp_mode == MODE_PRIMARY and slot.region is not None:",
+            "new": "        if False and slot.region is not None:"
+          }
+        ]
+      },
+      {
+        "label": "global-validate-gate-disabled",
+        "scope": "tests/unit/test_rebind.py::test_empty_container_makes_the_rebound_map_fail_global_validation",
+        "patches": [
+          {
+            "file": "src/engine/structure/rebind.py",
+            "old": "    if all_bound and not _map_validates(migrated_projection, context):",
+            "new": "    if False and not _map_validates(migrated_projection, context):"
+          }
+        ]
+      },
+      {
+        "label": "bound-subset-disjointness-disabled",
+        "scope": "tests/unit/test_rebind.py::test_partial_rebind_never_silently_double_claims_a_fresh_atom",
+        "patches": [
+          {
+            "file": "src/engine/structure/rebind.py",
+            "old": "    return {nid for owners in claims.values() if len(owners) > 1 for nid in owners}",
+            "new": "    return set()"
+          }
+        ]
+      },
+      {
+        "label": "s4-7-inv1-oracle-pairwise-disabled",
+        "scope": "tests/unit/test_s4_7_inv1_inv2.py::test_inv1_shipped_rebind_bound_set_is_subset_of_shared_corpus_oracle",
+        "patches": [
+          {
+            "file": "tests/harness/oracle.py",
+            "old": "    if unexpected:\n",
+            "new": "    if False and unexpected:\n"
+          }
+        ]
+      },
+      {
+        "label": "s4-7-repeated-passage-uniqueness-guard-disabled",
+        "scope": "tests/unit/test_s4_7_inv1_inv2.py::test_inv1_anchor_poor_sentinels_abstain_within_and_cross_container",
+        "patches": [
+          {
+            "file": "tests/harness/oracle.py",
+            "old": "    if unexpected:\n",
+            "new": "    if False and unexpected:\n"
+          }
+        ]
+      },
+      {
+        "label": "s4-7-inv1-oracle-global-disjointness-disabled",
+        "scope": "tests/unit/test_s4_7_inv1_inv2.py::test_oracle_global_conjunct_rejects_two_pairwise_allowed_claims_of_one_atom",
+        "patches": [
+          {
+            "file": "tests/harness/oracle.py",
+            "old": "    if contested:\n",
+            "new": "    if False and contested:\n"
+          }
+        ]
+      },
+      {
+        "label": "s4-7-inv1-duplicate-slot-outcome-guard-disabled",
+        "scope": "tests/unit/test_s4_7_inv1_inv2.py::test_oracle_rejects_duplicate_outcome_records_for_one_slot",
+        "patches": [
+          {
+            "file": "tests/harness/oracle.py",
+            "old": "    if len(observed_slots) != len(set(observed_slots)):\n",
+            "new": "    if False:\n"
+          }
+        ]
+      },
+      {
+        "label": "s4-7-positional-confirmation-accepts-maps-far",
+        "scope": "tests/unit/test_s4_7_inv1_inv2.py::test_unique_anchor_that_maps_far_is_not_confirmed",
+        "patches": [
+          {
+            "file": "src/engine/structure/boundary_anchor.py",
+            "old": "            and self.located_fresh_boundary == self.projected_fresh_boundary\n",
+            "new": "            and self.located_fresh_boundary is not None\n"
+          }
+        ]
+      },
+      {
+        "label": "s4-7-anchor-footprint-widened-without-lock-rerun",
+        "scope": "tests/unit/test_s4_7_inv1_inv2.py::test_anchor_interface_is_content_only_bounded_and_has_separate_confidence_hook",
+        "patches": [
+          {
+            "file": "src/engine/structure/boundary_anchor.py",
+            "old": "BOUNDARY_ANCHOR_FOOTPRINT_W = 24\n",
+            "new": "BOUNDARY_ANCHOR_FOOTPRINT_W = 240\n"
+          }
+        ]
+      },
+      {
+        "label": "s4-7-anchor-determinism-contract-disabled",
+        "scope": "tests/unit/test_s4_7_inv1_inv2.py::test_anchor_interface_wrapper_enforces_determinism_and_content_contiguity",
+        "patches": [
+          {
+            "file": "src/engine/structure/boundary_anchor.py",
+            "old": "    if first != second:\n",
+            "new": "    if False:\n"
+          }
+        ]
+      },
+      {
+        "label": "s4-7-anchor-content-only-contract-disabled",
+        "scope": "tests/unit/test_s4_7_inv1_inv2.py::test_anchor_interface_wrapper_enforces_determinism_and_content_contiguity",
+        "patches": [
+          {
+            "file": "src/engine/structure/boundary_anchor.py",
+            "old": "    if not matches_boundary:\n",
+            "new": "    if False:\n"
+          }
+        ]
+      },
+      {
+        "label": "s4-7-seam-insert-silent-drop-guard-disabled",
+        "scope": "tests/unit/test_s4_7_inv1_inv2.py::test_shared_seam_insert_cannot_be_silently_dropped_when_both_owners_bind",
+        "patches": [
+          {
+            "file": "tests/harness/oracle.py",
+            "old": "        if legal_slots and legal_slots.isdisjoint(observed.unresolved_slots):\n",
+            "new": "        if False:\n"
+          }
+        ]
+      },
+      {
+        "label": "s4-7-inv3-planted-destination-guard-disabled",
+        "scope": "tests/unit/test_s4_7_inv3_inv5.py::test_inv3_planted_greedy_wrong_span_is_rejected",
+        "patches": [
+          {
+            "file": "tests/harness/invariants_3_5.py",
+            "old": "        if observation.fresh_atom_ids not in planted:\n",
+            "new": "        if False:\n"
+          }
+        ]
+      },
+      {
+        "label": "s4-7-inv3-duplicate-observation-guard-disabled",
+        "scope": "tests/unit/test_s4_7_inv3_inv5.py::test_inv3_duplicate_observation_for_one_moved_slot_is_rejected",
+        "patches": [
+          {
+            "file": "tests/harness/invariants_3_5.py",
+            "old": "    if len(by_slot) != len(observations):\n",
+            "new": "    if False:\n"
+          }
+        ]
+      },
+      {
+        "label": "s4-7-inv3-global-map-validity-guard-disabled",
+        "scope": "tests/unit/test_s4_7_inv3_inv5.py::test_inv3_destination_atom_bind_with_invalid_map_is_rejected",
+        "patches": [
+          {
+            "file": "tests/harness/invariants_3_5.py",
+            "old": "        if not observation.map_globally_valid:\n",
+            "new": "        if False:\n"
+          }
+        ]
+      },
+      {
+        "label": "s4-7-inv4-insert-precedence-disabled",
+        "scope": "tests/unit/test_s4_7_inv3_inv5.py::test_inv4_analytic_half_open_boundary_classes[insert-at-gap]",
+        "patches": [
+          {
+            "file": "tests/harness/boundary.py",
+            "old": "    if any(block.tag == \"insert\" and block.old_lo == boundary for block in blocks):\n",
+            "new": "    if False:\n"
+          }
+        ]
+      },
+      {
+        "label": "s4-7-inv4-strict-interior-class-disabled",
+        "scope": "tests/unit/test_s4_7_inv3_inv5.py::test_inv4_analytic_half_open_boundary_classes[replace-interior]",
+        "patches": [
+          {
+            "file": "tests/harness/boundary.py",
+            "old": "        and block.old_lo < boundary < block.old_hi\n",
+            "new": "        and False\n"
+          }
+        ]
+      },
+      {
+        "label": "s4-7-inv4-capped-gap-interior-class-disabled",
+        "scope": "tests/unit/test_s4_7_inv3_inv5.py::test_inv4_analytic_half_open_boundary_classes[capped-gap]",
+        "patches": [
+          {
+            "file": "tests/harness/boundary.py",
+            "old": "        and block.old_lo < boundary < block.old_hi\n",
+            "new": "        and False\n"
+          }
+        ]
+      },
+      {
+        "label": "s4-7-inv4-edge-class-disabled",
+        "scope": "tests/unit/test_s4_7_inv3_inv5.py::test_inv4_analytic_half_open_boundary_classes[replace-edge]",
+        "patches": [
+          {
+            "file": "tests/harness/boundary.py",
+            "old": "    if token_tag(boundary - 1) != \"equal\" or token_tag(boundary) != \"equal\":\n",
+            "new": "    if False:\n"
+          }
+        ]
+      },
+      {
+        "label": "s4-7-inv4-adjacent-non-equal-tiling-accepted",
+        "scope": "tests/unit/test_s4_7_inv3_inv5.py::test_inv4_analytic_tiling_rejects_adjacent_non_equal_blocks",
+        "patches": [
+          {
+            "file": "tests/harness/boundary.py",
+            "old": "        if left.tag != \"equal\" and right.tag != \"equal\":\n",
+            "new": "        if False:\n"
+          }
+        ]
+      },
+      {
+        "label": "s4-7-inv4-clean-class-corrupted",
+        "scope": "tests/unit/test_s4_7_inv3_inv5.py::test_inv4_analytic_half_open_boundary_classes[clean]",
+        "patches": [
+          {
+            "file": "tests/harness/boundary.py",
+            "old": "    return \"clean-candidate\"\n",
+            "new": "    return \"edge-candidate\"\n"
+          }
+        ]
+      },
+      {
+        "label": "s4-7-inv5-tie-break-branch-disabled",
+        "scope": "tests/unit/test_s4_7_inv3_inv5.py::test_inv5_tie_break_uses_page_only_to_reduce_an_above_tau_tie",
+        "patches": [
+          {
+            "file": "src/engine/structure/rebind.py",
+            "old": "        if len(chosen) >= 2 and self.dp_mode == MODE_TIE_BREAK and slot.region is not None:\n",
+            "new": "        if False:\n"
+          }
+        ]
+      },
+      {
+        "label": "s4-7-inv5-no-geometry-illegally-hard-pins-region",
+        "scope": "tests/unit/test_rebind.py::test_no_geometry_mode_ignores_the_region_and_binds_on_fingerprint",
+        "patches": [
+          {
+            "file": "src/engine/structure/rebind.py",
+            "old": "        if self.dp_mode == MODE_PRIMARY and slot.region is not None:\n",
+            "new": "        if self.dp_mode in (MODE_PRIMARY, MODE_NO_GEOMETRY) and slot.region is not None:\n"
+          }
+        ]
+      },
+      {
+        "label": "s4-7-inv6-slope-estimator-forced-linear",
+        "scope": "tests/unit/test_s4_7_inv6_inv7.py::test_growth_estimator_distinguishes_linear_from_quadratic_and_keeps_ratios",
+        "patches": [
+          {
+            "file": "tests/harness/scale.py",
+            "old": "    logs_y = tuple(math.log(value) for value in ys)\n",
+            "new": "    logs_y = logs_x\n"
+          }
+        ]
+      },
+      {
+        "label": "s4-7-inv6-adjacent-ratios-erased",
+        "scope": "tests/unit/test_s4_7_inv6_inv7.py::test_growth_estimator_distinguishes_linear_from_quadratic_and_keeps_ratios",
+        "patches": [
+          {
+            "file": "tests/harness/scale.py",
+            "old": "    return tuple(right / left for left, right in zip(values, values[1:]))\n",
+            "new": "    return tuple(1.0 for left, right in zip(values, values[1:]))\n"
+          }
+        ]
+      },
+      {
+        "label": "s4-7-perf-time-phase-completion-validation-dropped",
+        "scope": "tests/unit/test_s4_7_inv6_inv7.py::test_perf_measurement_validates_every_run_and_observes_python_allocations",
+        "patches": [
+          {
+            "file": "tests/harness/scale.py",
+            "old": "        validate(result)\n        samples.append(elapsed)\n",
+            "new": "        if False:\n            validate(result)\n        samples.append(elapsed)\n"
+          }
+        ]
+      },
+      {
+        "label": "s4-7-perf-tracemalloc-peak-forced-zero",
+        "scope": "tests/unit/test_s4_7_inv6_inv7.py::test_perf_measurement_validates_every_run_and_observes_python_allocations",
+        "patches": [
+          {
+            "file": "tests/harness/scale.py",
+            "old": "            _, peak = tracemalloc.get_traced_memory()\n",
+            "new": "            _, peak = (0, 0)\n"
+          }
+        ]
+      },
+      {
+        "label": "s4-7-inv6-growth-budget-guard-disabled",
+        "scope": "tests/unit/test_s4_7_inv6_inv7.py::test_inv6_shipped_rebind_wall_growth_exceeds_the_preregistered_bar",
+        "patches": [
+          {
+            "file": "tests/harness/scale.py",
+            "old": "def assert_growth_within_limits(summary: Mapping[str, object], *, metric: str) -> None:\n    slope = float(summary[\"slope\"])\n",
+            "new": "def assert_growth_within_limits(summary: Mapping[str, object], *, metric: str) -> None:\n    return\n    slope = float(summary[\"slope\"])\n"
+          }
+        ]
+      },
+      {
+        "label": "s4-7-inv7-depth-shrunk-after-preregistration",
+        "scope": "tests/unit/test_s4_7_inv6_inv7.py::test_priority4_preregistered_constants_and_upward_only_ladder_are_pinned",
+        "patches": [
+          {
+            "file": "tests/harness/scale.py",
+            "old": "INV7_DEPTH = 3_000\n",
+            "new": "INV7_DEPTH = 300\n"
+          }
+        ]
+      },
+      {
+        "label": "s4-7-inv7-wall-ceiling-relaxed-after-measurement",
+        "scope": "tests/unit/test_s4_7_inv6_inv7.py::test_inv7_deep_evidence_wall_clock_exceeds_the_preregistered_ceiling",
+        "patches": [
+          {
+            "file": "tests/harness/scale.py",
+            "old": "INV7_MAX_SECONDS = 2.0\n",
+            "new": "INV7_MAX_SECONDS = 20.0\n"
+          }
+        ]
+      },
+      {
+        "label": "s4-7-perf-baseline-source-identity-check-disabled",
+        "scope": "tests/unit/test_s4_7_inv6_inv7.py::test_priority4_baseline_rejects_stale_source_identity",
+        "patches": [
+          {
+            "file": "tests/harness/scale.py",
+            "old": "    if verify_source_identity:\n",
+            "new": "    if False:\n"
+          }
+        ]
+      },
+      {
+        "label": "restamp-ignores-the-bottom-up-subtree-gate",
+        "scope": "tests/unit/test_rebind.py::test_ancestor_not_restamped_while_a_descendant_is_unresolved",
+        "patches": [
+          {
+            "file": "src/engine/structure/rebind.py",
+            "old": "        if not _subtree_ids(entry.node_id, migrated_projection).issubset(bound_node_ids):",
+            "new": "        if False:"
+          }
+        ]
+      },
+      {
+        "label": "stale-decision-never-detected",
+        "scope": "tests/unit/test_rebind.py::test_stale_decision_is_a_finding_not_a_restamp",
+        "patches": [
+          {
+            "file": "src/engine/structure/rebind.py",
+            "old": "        and entry.decision_digest != decision_digest(node)",
+            "new": "        and False"
+          }
+        ]
+      },
+      {
+        "label": "stale-decision-node-kept-bound",
+        "scope": "tests/unit/test_rebind.py::test_stale_decision_is_a_finding_not_a_restamp",
+        "patches": [
+          {
+            "file": "src/engine/structure/rebind.py",
+            "old": "        bound_node_ids -= stale_decisions",
+            "new": "        bound_node_ids -= set()"
+          }
+        ]
+      },
+      {
+        "label": "typed-anchor-dropped-on-load",
+        "scope": "tests/unit/test_structure_map.py::test_v2_map_exposes_typed_rebind_anchors_to_readers",
+        "patches": [
+          {
+            "file": "src/engine/structure/structure_map.py",
+            "old": "        rebind_anchors=_rebind_anchors_from_json(data.get(\"rebind_anchors\")),",
+            "new": "        rebind_anchors=None,"
+          }
+        ]
+      },
+      {
+        "label": "region-page-floor-allows-zero",
+        "scope": "tests/unit/test_rebind.py::test_region_model_rejects_a_page_below_one",
+        "patches": [
+          {
+            "file": "src/engine/structure/projection.py",
+            "old": "        if isinstance(self.page, bool) or not isinstance(self.page, int) or self.page < 1:",
+            "new": "        if isinstance(self.page, bool) or not isinstance(self.page, int) or self.page < 0:"
+          }
+        ]
+      },
+      {
+        "label": "v2-schema-not-born",
+        "scope": "tests/unit/test_structure_born_gate.py::test_v2_fingerprint_fixture_validates_and_v2_is_born",
+        "patches": [
+          {
+            "file": "src/engine/structure/artifacts.py",
+            "old": "STRUCTURE_MAP_SCHEMA_STATUS: dict[int, str] = {1: SCHEMA_STATUS_BORN, 2: SCHEMA_STATUS_BORN}",
+            "new": "STRUCTURE_MAP_SCHEMA_STATUS: dict[int, str] = {1: SCHEMA_STATUS_BORN, 2: SCHEMA_STATUS_PROVISIONAL}"
+          }
+        ]
+      }
+    ]
+  },
+  "runner": {
+    "path": "/Users/ben_mpa/.claude/skills/mutation-hunt/hunt.py",
+    "sha256": "698b60f6d3e892963c8a0d2da18ec586a8c85d780f01ea698bccbfae0d73d1c4",
+    "invocation": {
+      "argv": [
+        "/Users/ben_mpa/LLM/PER_LA_LIBERTA/engine/.venv/bin/python",
+        "/Users/ben_mpa/.claude/skills/mutation-hunt/hunt.py",
+        "--table",
+        "/Users/ben_mpa/LLM/PER_LA_LIBERTA/engine/tests/hunts/hunt_rebind.py",
+        "--artifact",
+        "/var/folders/zm/_hwkfvc13wbcq1b08lk_lz0h0000gn/T/s4_7_runner_6mrc0rsw.json"
+      ],
+      "rc": 0,
+      "output": "KILLED           empty-slot-returns-empty-shingle-fingerprint\nKILLED           short-slot-no-k-fallback\nKILLED           empty-window-scores-one-not-zero\nKILLED           jaccard-collapses-to-all-or-nothing-substring\nKILLED           unknown-mode-defaults-instead-of-failing-loud\nKILLED           none-mode-reported-as-manifest-not-fallback\nKILLED           policy-ordering-guard-dropped\nKILLED           policy-default-primary-margin-inverted\nKILLED           baseline-content-hash-gate-dropped\nKILLED           fingerprint-less-slot-binds-instead-of-missing-anchor\nKILLED           below-threshold-binds-any-score\nKILLED           no-rescue-geometry-lifts-subtau-over-tau\nKILLED           ambiguous-picks-first-candidate\nKILLED           primary-pin-ignores-mode\nKILLED           global-validate-gate-disabled\nKILLED           bound-subset-disjointness-disabled\nKILLED           s4-7-inv1-oracle-pairwise-disabled\nKILLED           s4-7-repeated-passage-uniqueness-guard-disabled\nKILLED           s4-7-inv1-oracle-global-disjointness-disabled\nKILLED           s4-7-inv1-duplicate-slot-outcome-guard-disabled\nKILLED           s4-7-positional-confirmation-accepts-maps-far\nKILLED           s4-7-anchor-footprint-widened-without-lock-rerun\nKILLED           s4-7-anchor-determinism-contract-disabled\nKILLED           s4-7-anchor-content-only-contract-disabled\nKILLED           s4-7-seam-insert-silent-drop-guard-disabled\nKILLED           s4-7-inv3-planted-destination-guard-disabled\nKILLED           s4-7-inv3-duplicate-observation-guard-disabled\nKILLED           s4-7-inv3-global-map-validity-guard-disabled\nKILLED           s4-7-inv4-insert-precedence-disabled\nKILLED           s4-7-inv4-strict-interior-class-disabled\nKILLED           s4-7-inv4-capped-gap-interior-class-disabled\nKILLED           s4-7-inv4-edge-class-disabled\nKILLED           s4-7-inv4-adjacent-non-equal-tiling-accepted\nKILLED           s4-7-inv4-clean-class-corrupted\nKILLED           s4-7-inv5-tie-break-branch-disabled\nKILLED           s4-7-inv5-no-geometry-illegally-hard-pins-region\nKILLED           s4-7-inv6-slope-estimator-forced-linear\nKILLED           s4-7-inv6-adjacent-ratios-erased\nKILLED           s4-7-perf-time-phase-completion-validation-dropped\nKILLED           s4-7-perf-tracemalloc-peak-forced-zero\nKILLED           s4-7-inv6-growth-budget-guard-disabled\nKILLED           s4-7-inv7-depth-shrunk-after-preregistration\nKILLED           s4-7-inv7-wall-ceiling-relaxed-after-measurement\nKILLED           s4-7-perf-baseline-source-identity-check-disabled\nKILLED           restamp-ignores-the-bottom-up-subtree-gate\nKILLED           stale-decision-never-detected\nKILLED           stale-decision-node-kept-bound\nKILLED           typed-anchor-dropped-on-load\nKILLED           region-page-floor-allows-zero\nKILLED           v2-schema-not-born\n\n50/50 detected; undetected: none\n"
+    },
+    "artifact": {
+      "runner": "mutation-hunt/hunt.py",
+      "version": "1.0.0",
+      "mode": "hunt",
+      "repo": "/Users/ben_mpa/LLM/PER_LA_LIBERTA/engine",
+      "test_cmd": [
+        "/Users/ben_mpa/LLM/PER_LA_LIBERTA/engine/.venv/bin/python",
+        "-m",
+        "pytest",
+        "{scope}",
+        "-q",
+        "--no-header",
+        "-x",
+        "-p",
+        "no:cacheprovider"
+      ],
+      "timeout": 300.0,
+      "purge": true,
+      "baseline": {
+        "ran": true,
+        "results": {
+          "tests/unit/test_rebind.py::test_fingerprint_slot_empty_is_none_never_empty_set": 0,
+          "tests/unit/test_rebind.py::test_fingerprint_slot_short_slot_falls_back_to_available_k": 0,
+          "tests/unit/test_rebind.py::test_slot_similarity_empty_window_scores_zero": 0,
+          "tests/unit/test_rebind.py::test_r2_superstring_does_not_auto_bind_at_full_score": 0,
+          "tests/unit/test_rebind.py::test_resolve_mode_unknown_fails_loud": 0,
+          "tests/unit/test_rebind.py::test_resolve_mode_none_is_conditional_primary_fallback": 0,
+          "tests/unit/test_rebind.py::test_policy_inverted_ordering_is_rejected_at_construction": 0,
+          "tests/unit/test_rebind.py::test_policy_default_ordering_holds_on_the_named_default": 0,
+          "tests/unit/test_rebind.py::test_rebind_context_refuses_a_content_hash_mismatch": 0,
+          "tests/unit/test_rebind.py::test_missing_anchor_node_never_binds_on_geometry_alone": 0,
+          "tests/unit/test_rebind.py::test_below_threshold_when_fresh_content_diverges": 0,
+          "tests/unit/test_rebind.py::test_no_rescue_geometry_does_not_lift_a_subtau_fingerprint": 0,
+          "tests/unit/test_rebind.py::test_ambiguous_repeated_content_fails_loud": 0,
+          "tests/unit/test_rebind.py::test_primary_mode_hard_pin_excludes_a_wrong_page_and_yields_zero_candidate": 0,
+          "tests/unit/test_rebind.py::test_empty_container_makes_the_rebound_map_fail_global_validation": 0,
+          "tests/unit/test_rebind.py::test_partial_rebind_never_silently_double_claims_a_fresh_atom": 0,
+          "tests/unit/test_s4_7_inv1_inv2.py::test_inv1_shipped_rebind_bound_set_is_subset_of_shared_corpus_oracle": 0,
+          "tests/unit/test_s4_7_inv1_inv2.py::test_inv1_anchor_poor_sentinels_abstain_within_and_cross_container": 0,
+          "tests/unit/test_s4_7_inv1_inv2.py::test_oracle_global_conjunct_rejects_two_pairwise_allowed_claims_of_one_atom": 0,
+          "tests/unit/test_s4_7_inv1_inv2.py::test_oracle_rejects_duplicate_outcome_records_for_one_slot": 0,
+          "tests/unit/test_s4_7_inv1_inv2.py::test_unique_anchor_that_maps_far_is_not_confirmed": 0,
+          "tests/unit/test_s4_7_inv1_inv2.py::test_anchor_interface_is_content_only_bounded_and_has_separate_confidence_hook": 0,
+          "tests/unit/test_s4_7_inv1_inv2.py::test_anchor_interface_wrapper_enforces_determinism_and_content_contiguity": 0,
+          "tests/unit/test_s4_7_inv1_inv2.py::test_shared_seam_insert_cannot_be_silently_dropped_when_both_owners_bind": 0,
+          "tests/unit/test_s4_7_inv3_inv5.py::test_inv3_planted_greedy_wrong_span_is_rejected": 0,
+          "tests/unit/test_s4_7_inv3_inv5.py::test_inv3_duplicate_observation_for_one_moved_slot_is_rejected": 0,
+          "tests/unit/test_s4_7_inv3_inv5.py::test_inv3_destination_atom_bind_with_invalid_map_is_rejected": 0,
+          "tests/unit/test_s4_7_inv3_inv5.py::test_inv4_analytic_half_open_boundary_classes[insert-at-gap]": 0,
+          "tests/unit/test_s4_7_inv3_inv5.py::test_inv4_analytic_half_open_boundary_classes[replace-interior]": 0,
+          "tests/unit/test_s4_7_inv3_inv5.py::test_inv4_analytic_half_open_boundary_classes[capped-gap]": 0,
+          "tests/unit/test_s4_7_inv3_inv5.py::test_inv4_analytic_half_open_boundary_classes[replace-edge]": 0,
+          "tests/unit/test_s4_7_inv3_inv5.py::test_inv4_analytic_tiling_rejects_adjacent_non_equal_blocks": 0,
+          "tests/unit/test_s4_7_inv3_inv5.py::test_inv4_analytic_half_open_boundary_classes[clean]": 0,
+          "tests/unit/test_s4_7_inv3_inv5.py::test_inv5_tie_break_uses_page_only_to_reduce_an_above_tau_tie": 0,
+          "tests/unit/test_rebind.py::test_no_geometry_mode_ignores_the_region_and_binds_on_fingerprint": 0,
+          "tests/unit/test_s4_7_inv6_inv7.py::test_growth_estimator_distinguishes_linear_from_quadratic_and_keeps_ratios": 0,
+          "tests/unit/test_s4_7_inv6_inv7.py::test_perf_measurement_validates_every_run_and_observes_python_allocations": 0,
+          "tests/unit/test_s4_7_inv6_inv7.py::test_inv6_shipped_rebind_wall_growth_exceeds_the_preregistered_bar": 0,
+          "tests/unit/test_s4_7_inv6_inv7.py::test_priority4_preregistered_constants_and_upward_only_ladder_are_pinned": 0,
+          "tests/unit/test_s4_7_inv6_inv7.py::test_inv7_deep_evidence_wall_clock_exceeds_the_preregistered_ceiling": 0,
+          "tests/unit/test_s4_7_inv6_inv7.py::test_priority4_baseline_rejects_stale_source_identity": 0,
+          "tests/unit/test_rebind.py::test_ancestor_not_restamped_while_a_descendant_is_unresolved": 0,
+          "tests/unit/test_rebind.py::test_stale_decision_is_a_finding_not_a_restamp": 0,
+          "tests/unit/test_structure_map.py::test_v2_map_exposes_typed_rebind_anchors_to_readers": 0,
+          "tests/unit/test_rebind.py::test_region_model_rejects_a_page_below_one": 0,
+          "tests/unit/test_structure_born_gate.py::test_v2_fingerprint_fixture_validates_and_v2_is_born": 0
+        }
+      },
+      "post_verify": {
+        "ran": true,
+        "results": {
+          "tests/unit/test_rebind.py::test_fingerprint_slot_empty_is_none_never_empty_set": 0,
+          "tests/unit/test_rebind.py::test_fingerprint_slot_short_slot_falls_back_to_available_k": 0,
+          "tests/unit/test_rebind.py::test_slot_similarity_empty_window_scores_zero": 0,
+          "tests/unit/test_rebind.py::test_r2_superstring_does_not_auto_bind_at_full_score": 0,
+          "tests/unit/test_rebind.py::test_resolve_mode_unknown_fails_loud": 0,
+          "tests/unit/test_rebind.py::test_resolve_mode_none_is_conditional_primary_fallback": 0,
+          "tests/unit/test_rebind.py::test_policy_inverted_ordering_is_rejected_at_construction": 0,
+          "tests/unit/test_rebind.py::test_policy_default_ordering_holds_on_the_named_default": 0,
+          "tests/unit/test_rebind.py::test_rebind_context_refuses_a_content_hash_mismatch": 0,
+          "tests/unit/test_rebind.py::test_missing_anchor_node_never_binds_on_geometry_alone": 0,
+          "tests/unit/test_rebind.py::test_below_threshold_when_fresh_content_diverges": 0,
+          "tests/unit/test_rebind.py::test_no_rescue_geometry_does_not_lift_a_subtau_fingerprint": 0,
+          "tests/unit/test_rebind.py::test_ambiguous_repeated_content_fails_loud": 0,
+          "tests/unit/test_rebind.py::test_primary_mode_hard_pin_excludes_a_wrong_page_and_yields_zero_candidate": 0,
+          "tests/unit/test_rebind.py::test_empty_container_makes_the_rebound_map_fail_global_validation": 0,
+          "tests/unit/test_rebind.py::test_partial_rebind_never_silently_double_claims_a_fresh_atom": 0,
+          "tests/unit/test_s4_7_inv1_inv2.py::test_inv1_shipped_rebind_bound_set_is_subset_of_shared_corpus_oracle": 0,
+          "tests/unit/test_s4_7_inv1_inv2.py::test_inv1_anchor_poor_sentinels_abstain_within_and_cross_container": 0,
+          "tests/unit/test_s4_7_inv1_inv2.py::test_oracle_global_conjunct_rejects_two_pairwise_allowed_claims_of_one_atom": 0,
+          "tests/unit/test_s4_7_inv1_inv2.py::test_oracle_rejects_duplicate_outcome_records_for_one_slot": 0,
+          "tests/unit/test_s4_7_inv1_inv2.py::test_unique_anchor_that_maps_far_is_not_confirmed": 0,
+          "tests/unit/test_s4_7_inv1_inv2.py::test_anchor_interface_is_content_only_bounded_and_has_separate_confidence_hook": 0,
+          "tests/unit/test_s4_7_inv1_inv2.py::test_anchor_interface_wrapper_enforces_determinism_and_content_contiguity": 0,
+          "tests/unit/test_s4_7_inv1_inv2.py::test_shared_seam_insert_cannot_be_silently_dropped_when_both_owners_bind": 0,
+          "tests/unit/test_s4_7_inv3_inv5.py::test_inv3_planted_greedy_wrong_span_is_rejected": 0,
+          "tests/unit/test_s4_7_inv3_inv5.py::test_inv3_duplicate_observation_for_one_moved_slot_is_rejected": 0,
+          "tests/unit/test_s4_7_inv3_inv5.py::test_inv3_destination_atom_bind_with_invalid_map_is_rejected": 0,
+          "tests/unit/test_s4_7_inv3_inv5.py::test_inv4_analytic_half_open_boundary_classes[insert-at-gap]": 0,
+          "tests/unit/test_s4_7_inv3_inv5.py::test_inv4_analytic_half_open_boundary_classes[replace-interior]": 0,
+          "tests/unit/test_s4_7_inv3_inv5.py::test_inv4_analytic_half_open_boundary_classes[capped-gap]": 0,
+          "tests/unit/test_s4_7_inv3_inv5.py::test_inv4_analytic_half_open_boundary_classes[replace-edge]": 0,
+          "tests/unit/test_s4_7_inv3_inv5.py::test_inv4_analytic_tiling_rejects_adjacent_non_equal_blocks": 0,
+          "tests/unit/test_s4_7_inv3_inv5.py::test_inv4_analytic_half_open_boundary_classes[clean]": 0,
+          "tests/unit/test_s4_7_inv3_inv5.py::test_inv5_tie_break_uses_page_only_to_reduce_an_above_tau_tie": 0,
+          "tests/unit/test_rebind.py::test_no_geometry_mode_ignores_the_region_and_binds_on_fingerprint": 0,
+          "tests/unit/test_s4_7_inv6_inv7.py::test_growth_estimator_distinguishes_linear_from_quadratic_and_keeps_ratios": 0,
+          "tests/unit/test_s4_7_inv6_inv7.py::test_perf_measurement_validates_every_run_and_observes_python_allocations": 0,
+          "tests/unit/test_s4_7_inv6_inv7.py::test_inv6_shipped_rebind_wall_growth_exceeds_the_preregistered_bar": 0,
+          "tests/unit/test_s4_7_inv6_inv7.py::test_priority4_preregistered_constants_and_upward_only_ladder_are_pinned": 0,
+          "tests/unit/test_s4_7_inv6_inv7.py::test_inv7_deep_evidence_wall_clock_exceeds_the_preregistered_ceiling": 0,
+          "tests/unit/test_s4_7_inv6_inv7.py::test_priority4_baseline_rejects_stale_source_identity": 0,
+          "tests/unit/test_rebind.py::test_ancestor_not_restamped_while_a_descendant_is_unresolved": 0,
+          "tests/unit/test_rebind.py::test_stale_decision_is_a_finding_not_a_restamp": 0,
+          "tests/unit/test_structure_map.py::test_v2_map_exposes_typed_rebind_anchors_to_readers": 0,
+          "tests/unit/test_rebind.py::test_region_model_rejects_a_page_below_one": 0,
+          "tests/unit/test_structure_born_gate.py::test_v2_fingerprint_fixture_validates_and_v2_is_born": 0
+        }
+      },
+      "refusals": [],
+      "mutants": [
+        {
+          "label": "empty-slot-returns-empty-shingle-fingerprint",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_rebind.py::test_fingerprint_slot_empty_is_none_never_empty_set",
+          "files": [
+            "src/engine/structure/rebind.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.31
+        },
+        {
+          "label": "short-slot-no-k-fallback",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_rebind.py::test_fingerprint_slot_short_slot_falls_back_to_available_k",
+          "files": [
+            "src/engine/structure/rebind.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.31
+        },
+        {
+          "label": "empty-window-scores-one-not-zero",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_rebind.py::test_slot_similarity_empty_window_scores_zero",
+          "files": [
+            "src/engine/structure/rebind.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.3
+        },
+        {
+          "label": "jaccard-collapses-to-all-or-nothing-substring",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_rebind.py::test_r2_superstring_does_not_auto_bind_at_full_score",
+          "files": [
+            "src/engine/structure/rebind.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.34
+        },
+        {
+          "label": "unknown-mode-defaults-instead-of-failing-loud",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_rebind.py::test_resolve_mode_unknown_fails_loud",
+          "files": [
+            "src/engine/structure/rebind.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.8
+        },
+        {
+          "label": "none-mode-reported-as-manifest-not-fallback",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_rebind.py::test_resolve_mode_none_is_conditional_primary_fallback",
+          "files": [
+            "src/engine/structure/rebind.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.7
+        },
+        {
+          "label": "policy-ordering-guard-dropped",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_rebind.py::test_policy_inverted_ordering_is_rejected_at_construction",
+          "files": [
+            "src/engine/structure/rebind.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.75
+        },
+        {
+          "label": "policy-default-primary-margin-inverted",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_rebind.py::test_policy_default_ordering_holds_on_the_named_default",
+          "files": [
+            "src/engine/structure/rebind.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.74
+        },
+        {
+          "label": "baseline-content-hash-gate-dropped",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_rebind.py::test_rebind_context_refuses_a_content_hash_mismatch",
+          "files": [
+            "src/engine/structure/rebind.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.74
+        },
+        {
+          "label": "fingerprint-less-slot-binds-instead-of-missing-anchor",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_rebind.py::test_missing_anchor_node_never_binds_on_geometry_alone",
+          "files": [
+            "src/engine/structure/rebind.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.74
+        },
+        {
+          "label": "below-threshold-binds-any-score",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_rebind.py::test_below_threshold_when_fresh_content_diverges",
+          "files": [
+            "src/engine/structure/rebind.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.82
+        },
+        {
+          "label": "no-rescue-geometry-lifts-subtau-over-tau",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_rebind.py::test_no_rescue_geometry_does_not_lift_a_subtau_fingerprint",
+          "files": [
+            "src/engine/structure/rebind.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.89
+        },
+        {
+          "label": "ambiguous-picks-first-candidate",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_rebind.py::test_ambiguous_repeated_content_fails_loud",
+          "files": [
+            "src/engine/structure/rebind.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.75
+        },
+        {
+          "label": "primary-pin-ignores-mode",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_rebind.py::test_primary_mode_hard_pin_excludes_a_wrong_page_and_yields_zero_candidate",
+          "files": [
+            "src/engine/structure/rebind.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.68
+        },
+        {
+          "label": "global-validate-gate-disabled",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_rebind.py::test_empty_container_makes_the_rebound_map_fail_global_validation",
+          "files": [
+            "src/engine/structure/rebind.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.67
+        },
+        {
+          "label": "bound-subset-disjointness-disabled",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_rebind.py::test_partial_rebind_never_silently_double_claims_a_fresh_atom",
+          "files": [
+            "src/engine/structure/rebind.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.8
+        },
+        {
+          "label": "s4-7-inv1-oracle-pairwise-disabled",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_s4_7_inv1_inv2.py::test_inv1_shipped_rebind_bound_set_is_subset_of_shared_corpus_oracle",
+          "files": [
+            "tests/harness/oracle.py"
+          ],
+          "rc": 1,
+          "duration_s": 3.93
+        },
+        {
+          "label": "s4-7-repeated-passage-uniqueness-guard-disabled",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_s4_7_inv1_inv2.py::test_inv1_anchor_poor_sentinels_abstain_within_and_cross_container",
+          "files": [
+            "tests/harness/oracle.py"
+          ],
+          "rc": 1,
+          "duration_s": 2.59
+        },
+        {
+          "label": "s4-7-inv1-oracle-global-disjointness-disabled",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_s4_7_inv1_inv2.py::test_oracle_global_conjunct_rejects_two_pairwise_allowed_claims_of_one_atom",
+          "files": [
+            "tests/harness/oracle.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.53
+        },
+        {
+          "label": "s4-7-inv1-duplicate-slot-outcome-guard-disabled",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_s4_7_inv1_inv2.py::test_oracle_rejects_duplicate_outcome_records_for_one_slot",
+          "files": [
+            "tests/harness/oracle.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.55
+        },
+        {
+          "label": "s4-7-positional-confirmation-accepts-maps-far",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_s4_7_inv1_inv2.py::test_unique_anchor_that_maps_far_is_not_confirmed",
+          "files": [
+            "src/engine/structure/boundary_anchor.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.74
+        },
+        {
+          "label": "s4-7-anchor-footprint-widened-without-lock-rerun",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_s4_7_inv1_inv2.py::test_anchor_interface_is_content_only_bounded_and_has_separate_confidence_hook",
+          "files": [
+            "src/engine/structure/boundary_anchor.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.58
+        },
+        {
+          "label": "s4-7-anchor-determinism-contract-disabled",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_s4_7_inv1_inv2.py::test_anchor_interface_wrapper_enforces_determinism_and_content_contiguity",
+          "files": [
+            "src/engine/structure/boundary_anchor.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.69
+        },
+        {
+          "label": "s4-7-anchor-content-only-contract-disabled",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_s4_7_inv1_inv2.py::test_anchor_interface_wrapper_enforces_determinism_and_content_contiguity",
+          "files": [
+            "src/engine/structure/boundary_anchor.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.7
+        },
+        {
+          "label": "s4-7-seam-insert-silent-drop-guard-disabled",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_s4_7_inv1_inv2.py::test_shared_seam_insert_cannot_be_silently_dropped_when_both_owners_bind",
+          "files": [
+            "tests/harness/oracle.py"
+          ],
+          "rc": 1,
+          "duration_s": 2.64
+        },
+        {
+          "label": "s4-7-inv3-planted-destination-guard-disabled",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_s4_7_inv3_inv5.py::test_inv3_planted_greedy_wrong_span_is_rejected",
+          "files": [
+            "tests/harness/invariants_3_5.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.38
+        },
+        {
+          "label": "s4-7-inv3-duplicate-observation-guard-disabled",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_s4_7_inv3_inv5.py::test_inv3_duplicate_observation_for_one_moved_slot_is_rejected",
+          "files": [
+            "tests/harness/invariants_3_5.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.46
+        },
+        {
+          "label": "s4-7-inv3-global-map-validity-guard-disabled",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_s4_7_inv3_inv5.py::test_inv3_destination_atom_bind_with_invalid_map_is_rejected",
+          "files": [
+            "tests/harness/invariants_3_5.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.64
+        },
+        {
+          "label": "s4-7-inv4-insert-precedence-disabled",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_s4_7_inv3_inv5.py::test_inv4_analytic_half_open_boundary_classes[insert-at-gap]",
+          "files": [
+            "tests/harness/boundary.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.68
+        },
+        {
+          "label": "s4-7-inv4-strict-interior-class-disabled",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_s4_7_inv3_inv5.py::test_inv4_analytic_half_open_boundary_classes[replace-interior]",
+          "files": [
+            "tests/harness/boundary.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.6
+        },
+        {
+          "label": "s4-7-inv4-capped-gap-interior-class-disabled",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_s4_7_inv3_inv5.py::test_inv4_analytic_half_open_boundary_classes[capped-gap]",
+          "files": [
+            "tests/harness/boundary.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.6
+        },
+        {
+          "label": "s4-7-inv4-edge-class-disabled",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_s4_7_inv3_inv5.py::test_inv4_analytic_half_open_boundary_classes[replace-edge]",
+          "files": [
+            "tests/harness/boundary.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.61
+        },
+        {
+          "label": "s4-7-inv4-adjacent-non-equal-tiling-accepted",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_s4_7_inv3_inv5.py::test_inv4_analytic_tiling_rejects_adjacent_non_equal_blocks",
+          "files": [
+            "tests/harness/boundary.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.57
+        },
+        {
+          "label": "s4-7-inv4-clean-class-corrupted",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_s4_7_inv3_inv5.py::test_inv4_analytic_half_open_boundary_classes[clean]",
+          "files": [
+            "tests/harness/boundary.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.58
+        },
+        {
+          "label": "s4-7-inv5-tie-break-branch-disabled",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_s4_7_inv3_inv5.py::test_inv5_tie_break_uses_page_only_to_reduce_an_above_tau_tie",
+          "files": [
+            "src/engine/structure/rebind.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.61
+        },
+        {
+          "label": "s4-7-inv5-no-geometry-illegally-hard-pins-region",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_rebind.py::test_no_geometry_mode_ignores_the_region_and_binds_on_fingerprint",
+          "files": [
+            "src/engine/structure/rebind.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.58
+        },
+        {
+          "label": "s4-7-inv6-slope-estimator-forced-linear",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_s4_7_inv6_inv7.py::test_growth_estimator_distinguishes_linear_from_quadratic_and_keeps_ratios",
+          "files": [
+            "tests/harness/scale.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.57
+        },
+        {
+          "label": "s4-7-inv6-adjacent-ratios-erased",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_s4_7_inv6_inv7.py::test_growth_estimator_distinguishes_linear_from_quadratic_and_keeps_ratios",
+          "files": [
+            "tests/harness/scale.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.65
+        },
+        {
+          "label": "s4-7-perf-time-phase-completion-validation-dropped",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_s4_7_inv6_inv7.py::test_perf_measurement_validates_every_run_and_observes_python_allocations",
+          "files": [
+            "tests/harness/scale.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.6
+        },
+        {
+          "label": "s4-7-perf-tracemalloc-peak-forced-zero",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_s4_7_inv6_inv7.py::test_perf_measurement_validates_every_run_and_observes_python_allocations",
+          "files": [
+            "tests/harness/scale.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.6
+        },
+        {
+          "label": "s4-7-inv6-growth-budget-guard-disabled",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_s4_7_inv6_inv7.py::test_inv6_shipped_rebind_wall_growth_exceeds_the_preregistered_bar",
+          "files": [
+            "tests/harness/scale.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.61
+        },
+        {
+          "label": "s4-7-inv7-depth-shrunk-after-preregistration",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_s4_7_inv6_inv7.py::test_priority4_preregistered_constants_and_upward_only_ladder_are_pinned",
+          "files": [
+            "tests/harness/scale.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.55
+        },
+        {
+          "label": "s4-7-inv7-wall-ceiling-relaxed-after-measurement",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_s4_7_inv6_inv7.py::test_inv7_deep_evidence_wall_clock_exceeds_the_preregistered_ceiling",
+          "files": [
+            "tests/harness/scale.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.48
+        },
+        {
+          "label": "s4-7-perf-baseline-source-identity-check-disabled",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_s4_7_inv6_inv7.py::test_priority4_baseline_rejects_stale_source_identity",
+          "files": [
+            "tests/harness/scale.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.69
+        },
+        {
+          "label": "restamp-ignores-the-bottom-up-subtree-gate",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_rebind.py::test_ancestor_not_restamped_while_a_descendant_is_unresolved",
+          "files": [
+            "src/engine/structure/rebind.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.61
+        },
+        {
+          "label": "stale-decision-never-detected",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_rebind.py::test_stale_decision_is_a_finding_not_a_restamp",
+          "files": [
+            "src/engine/structure/rebind.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.56
+        },
+        {
+          "label": "stale-decision-node-kept-bound",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_rebind.py::test_stale_decision_is_a_finding_not_a_restamp",
+          "files": [
+            "src/engine/structure/rebind.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.5
+        },
+        {
+          "label": "typed-anchor-dropped-on-load",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_structure_map.py::test_v2_map_exposes_typed_rebind_anchors_to_readers",
+          "files": [
+            "src/engine/structure/structure_map.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.61
+        },
+        {
+          "label": "region-page-floor-allows-zero",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_rebind.py::test_region_model_rejects_a_page_below_one",
+          "files": [
+            "src/engine/structure/projection.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.49
+        },
+        {
+          "label": "v2-schema-not-born",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_structure_born_gate.py::test_v2_fingerprint_fixture_validates_and_v2_is_born",
+          "files": [
+            "src/engine/structure/artifacts.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.72
+        }
+      ],
+      "summary": {
+        "total": 50,
+        "detected": 50,
+        "survived": 0,
+        "errors": 0
+      },
+      "restore_verified": true,
+      "interrupted": false,
+      "harness_error": null
+    }
+  },
+  "carried_red_demonstrations": [
+    {
+      "argv": [
+        "/Users/ben_mpa/LLM/PER_LA_LIBERTA/engine/.venv/bin/python",
+        "-m",
+        "pytest",
+        "tests/unit/test_s4_7_inv6_inv7.py::test_inv6_shipped_rebind_wall_growth_exceeds_the_preregistered_bar",
+        "--runxfail",
+        "-q",
+        "-p",
+        "no:cacheprovider"
+      ],
+      "rc": 1,
+      "output": "F                                                                        [100%]\n=================================== FAILURES ===================================\n______ test_inv6_shipped_rebind_wall_growth_exceeds_the_preregistered_bar ______\n\n    @pytest.mark.xfail(strict=True, reason=TRACKER)\n    def test_inv6_shipped_rebind_wall_growth_exceeds_the_preregistered_bar():\n>       assert_growth_within_limits(\n            _growth(\"rebind\", \"wall_clock\"), metric=\"rebind wall clock\"\n        )\n\ntests/unit/test_s4_7_inv6_inv7.py:168: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nsummary = {'slope': 3.18863043985273, 'adjacent_ratios': [4.147065079954391, 0.9916001467659195, 30.018130267137284, 93.55044466430714], 'max_slope': 1.5, 'max_adjacent_ratio': 50.0}\nmetric = 'rebind wall clock'\n\n    def assert_growth_within_limits(summary: Mapping[str, object], *, metric: str) -> None:\n        slope = float(summary[\"slope\"])\n        ratios = tuple(float(value) for value in summary[\"adjacent_ratios\"])\n        if slope > INV6_MAX_SLOPE:\n>           raise AssertionError(\n                f\"INV-6 {metric} log-log slope {slope:.6f} exceeds preregistered {INV6_MAX_SLOPE}\"\n            )\nE           AssertionError: INV-6 rebind wall clock log-log slope 3.188630 exceeds preregistered 1.5\n\ntests/harness/scale.py:472: AssertionError\n=========================== short test summary info ============================\nFAILED tests/unit/test_s4_7_inv6_inv7.py::test_inv6_shipped_rebind_wall_growth_exceeds_the_preregistered_bar\n1 failed in 0.17s\n"
+    },
+    {
+      "argv": [
+        "/Users/ben_mpa/LLM/PER_LA_LIBERTA/engine/.venv/bin/python",
+        "-m",
+        "pytest",
+        "tests/unit/test_s4_7_inv6_inv7.py::test_inv6_shipped_end_to_end_wall_growth_exceeds_the_preregistered_bar",
+        "--runxfail",
+        "-q",
+        "-p",
+        "no:cacheprovider"
+      ],
+      "rc": 1,
+      "output": "F                                                                        [100%]\n=================================== FAILURES ===================================\n____ test_inv6_shipped_end_to_end_wall_growth_exceeds_the_preregistered_bar ____\n\n    @pytest.mark.xfail(strict=True, reason=TRACKER)\n    def test_inv6_shipped_end_to_end_wall_growth_exceeds_the_preregistered_bar():\n>       assert_growth_within_limits(\n            _growth(\"end_to_end\", \"wall_clock\"), metric=\"end-to-end wall clock\"\n        )\n\ntests/unit/test_s4_7_inv6_inv7.py:175: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nsummary = {'slope': 1.884790436120118, 'adjacent_ratios': [1.1356042479923045, 1.222150700421026, 3.7008294254518885, 62.88246117230105], 'max_slope': 1.5, 'max_adjacent_ratio': 50.0}\nmetric = 'end-to-end wall clock'\n\n    def assert_growth_within_limits(summary: Mapping[str, object], *, metric: str) -> None:\n        slope = float(summary[\"slope\"])\n        ratios = tuple(float(value) for value in summary[\"adjacent_ratios\"])\n        if slope > INV6_MAX_SLOPE:\n>           raise AssertionError(\n                f\"INV-6 {metric} log-log slope {slope:.6f} exceeds preregistered {INV6_MAX_SLOPE}\"\n            )\nE           AssertionError: INV-6 end-to-end wall clock log-log slope 1.884790 exceeds preregistered 1.5\n\ntests/harness/scale.py:472: AssertionError\n=========================== short test summary info ============================\nFAILED tests/unit/test_s4_7_inv6_inv7.py::test_inv6_shipped_end_to_end_wall_growth_exceeds_the_preregistered_bar\n1 failed in 0.16s\n"
+    },
+    {
+      "argv": [
+        "/Users/ben_mpa/LLM/PER_LA_LIBERTA/engine/.venv/bin/python",
+        "-m",
+        "pytest",
+        "tests/unit/test_s4_7_inv6_inv7.py::test_inv7_deep_evidence_wall_clock_exceeds_the_preregistered_ceiling",
+        "--runxfail",
+        "-q",
+        "-p",
+        "no:cacheprovider"
+      ],
+      "rc": 1,
+      "output": "F                                                                        [100%]\n=================================== FAILURES ===================================\n_____ test_inv7_deep_evidence_wall_clock_exceeds_the_preregistered_ceiling _____\n\n    @pytest.mark.xfail(strict=True, reason=INV7_TRACKER)\n    def test_inv7_deep_evidence_wall_clock_exceeds_the_preregistered_ceiling():\n        observed = BASELINE[\"inv7\"][\"evidence_findings\"][\"median_seconds\"]\n>       assert observed <= INV7_MAX_SECONDS, (\n            f\"INV-7 evidence_findings median {observed:.6f}s exceeds preregistered \"\n            f\"{INV7_MAX_SECONDS:.1f}s\"\n        )\nE       AssertionError: INV-7 evidence_findings median 4.109154s exceeds preregistered 2.0s\nE       assert 4.109154375037178 <= 2.0\n\ntests/unit/test_s4_7_inv6_inv7.py:189: AssertionError\n=========================== short test summary info ============================\nFAILED tests/unit/test_s4_7_inv6_inv7.py::test_inv7_deep_evidence_wall_clock_exceeds_the_preregistered_ceiling\n1 failed in 0.14s\n"
+    }
+  ],
+  "green": {
+    "argv": [
+      "/Users/ben_mpa/LLM/PER_LA_LIBERTA/engine/.venv/bin/python",
+      "-m",
+      "pytest",
+      "tests/unit/test_s4_7_inv6_inv7.py",
+      "-k",
+      "s4_7_inv6_inv7",
+      "-q",
+      "-p",
+      "no:cacheprovider"
+    ],
+    "rc": 0,
+    "output": "..........xx.x                                                           [100%]\n11 passed, 3 xfailed in 0.28s\n"
+  }
+}

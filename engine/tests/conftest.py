@@ -15,6 +15,11 @@ import pytest
 # SUT), instead of trusting each harness to remember PYTHONDONTWRITEBYTECODE=1.
 sys.dont_write_bytecode = True
 
+# The S4.7 item-2 harness package (tests/harness/) is test-support code, deliberately outside
+# src/ (spec §1: the oracle must stay independent of production alignment code); tests/ is not
+# itself a package, so its root goes on sys.path for `from harness import ...`.
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
 ENGINE_ROOT = Path(__file__).resolve().parents[1]
 SYNTHETIC_INPUTS = ENGINE_ROOT / "books" / "synthetic" / "inputs"
 

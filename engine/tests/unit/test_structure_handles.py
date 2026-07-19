@@ -31,6 +31,7 @@ from __future__ import annotations
 import inspect
 
 import pytest
+import engine.structure.handles as handles_module
 
 from engine.structure import (
     Alias,
@@ -463,6 +464,46 @@ def test_position_shaped_node_id_is_not_derived_when_not_its_own_position():
     vocab = (NodeClassSpec("document", "container"), NodeClassSpec("para", "leaf"))
     policies = {"document": "position-path", "para": "position-path"}
     validate_handle_policies(_map("root", nodes), vocab, policies)  # no raise
+
+
+@pytest.mark.parametrize("derived_id", ("0-0", "0_0"))
+def test_position_path_derivation_check_preserves_both_wire_formats(derived_id):
+    root = _cont("root", children=(derived_id,), node_class="document")
+    leaf = _leaf(derived_id)
+    vocab = (NodeClassSpec("document", "container"), NodeClassSpec("para", "leaf"))
+    policies = {"document": "position-path", "para": "position-path"}
+    with pytest.raises(StructureValidationError) as ei:
+        validate_handle_policies(_map("root", (root, leaf)), vocab, policies)
+    assert _codes(ei.value) == {EC.NODE_ID_DERIVED}
+
+
+def test_handle_policy_validation_builds_the_tree_index_once(monkeypatch):
+    # S4.7 regression: validation renders multiple derivation witnesses per node. Rebuilding the
+    # complete parent table for every witness made index construction quadratic at A=100,000.
+    pmap = _policy_base()
+    original = handles_module._parent_map
+    calls = 0
+
+    def metered_parent_map(value):
+        nonlocal calls
+        calls += 1
+        return original(value)
+
+    monkeypatch.setattr(handles_module, "_parent_map", metered_parent_map)
+    validate_handle_policies(pmap, _VOCAB, _POLICIES)
+    assert calls == 1
+
+
+def test_handle_policy_validation_does_not_walk_ancestors_per_node(monkeypatch):
+    # The batched resolver carries the nearest explicit override down once. Calling the legacy
+    # single-node resolver here would restore O(nodes * depth) behavior on the registered deep map.
+    def forbidden_single_node_walk(*_args, **_kwargs):
+        raise AssertionError("single-node ancestor walk used by batch validation")
+
+    monkeypatch.setattr(
+        handles_module, "_effective_policy", forbidden_single_node_walk
+    )
+    validate_handle_policies(_policy_base(), _VOCAB, _POLICIES)
 
 
 # ================================================================================================ #

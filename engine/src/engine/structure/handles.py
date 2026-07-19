@@ -209,6 +209,77 @@ def _parent_map(pmap: ProjectionMap) -> dict[str, str]:
     return parents
 
 
+@dataclass(frozen=True, slots=True)
+class _HandleRenderContext:
+    """One-pass tree indexes shared by a handle-rendering batch.
+
+    Public :func:`render_handle` still builds a fresh context for its single requested render.  The
+    structure-map validator, however, renders four derivation witnesses per node; sharing this
+    context prevents it from rebuilding and rescanning the complete tree for every witness.
+    """
+
+    parents: Mapping[str, str]
+    child_indices: Mapping[str, int]
+    designation_collision_ranks: Mapping[str, tuple[int, int]] | None = None
+    title_collision_ranks: Mapping[str, tuple[int, int]] | None = None
+
+
+def _collision_ranks(
+    pmap: ProjectionMap,
+    parents: Mapping[str, str],
+    source: Callable[[Node], str],
+) -> dict[str, tuple[int, int]]:
+    """Return ``node_id -> (same-slug sibling count, one-based rank)`` in linear time."""
+    ranks: dict[str, tuple[int, int]] = {}
+    for parent in pmap.nodes:
+        if not isinstance(parent, ContainerNode):
+            continue
+        groups: dict[str, list[str]] = {}
+        for child in parent.children:
+            # Match _parent_map's first-parent rule on malformed multi-parent input.
+            if parents.get(child) != parent.node_id:
+                continue
+            node = pmap.by_id.get(child)
+            if node is None:
+                continue
+            own = _slugify(source(node), "-")
+            if own:
+                groups.setdefault(own, []).append(child)
+        for siblings in groups.values():
+            count = len(siblings)
+            for rank, child in enumerate(siblings, start=1):
+                # A duplicate child ref historically used list.index(), hence its first rank.
+                ranks.setdefault(child, (count, rank))
+    return ranks
+
+
+def _render_context(
+    pmap: ProjectionMap, *, include_collision_ranks: bool = False
+) -> _HandleRenderContext:
+    parents = _parent_map(pmap)
+    child_indices: dict[str, int] = {}
+    for parent in pmap.nodes:
+        if not isinstance(parent, ContainerNode):
+            continue
+        for index, child in enumerate(parent.children):
+            if parents.get(child) == parent.node_id:
+                child_indices.setdefault(child, index)
+    return _HandleRenderContext(
+        parents=parents,
+        child_indices=child_indices,
+        designation_collision_ranks=(
+            _collision_ranks(pmap, parents, _designation_source)
+            if include_collision_ranks
+            else None
+        ),
+        title_collision_ranks=(
+            _collision_ranks(pmap, parents, _title_source)
+            if include_collision_ranks
+            else None
+        ),
+    )
+
+
 def _self_and_ancestors(node_id: str, parents: Mapping[str, str]) -> set[str]:
     """The node plus every ancestor reachable by walking ``parents`` up to the root (cycle-guarded)."""
     out = {node_id}
@@ -241,7 +312,11 @@ def _chain_top_down(
 
 
 def _index_path(
-    pmap: ProjectionMap, node_id: str, scope: str, parents: Mapping[str, str]
+    pmap: ProjectionMap,
+    node_id: str,
+    scope: str,
+    parents: Mapping[str, str],
+    child_indices: Mapping[str, int],
 ) -> list[int]:
     """The child-index path for the ``position-path`` policy: each node's index in its parent's
     ``children`` (the ``scope`` root — the top of the chain — indexes as ``0``).
@@ -256,12 +331,7 @@ def _index_path(
         if scope != SCOPE_GLOBAL and nid == scope:
             out.append(0)  # scope == this node (scope=self): it is the root of its own scope
             continue
-        parent_id = parents.get(nid)
-        parent = pmap.by_id.get(parent_id) if parent_id is not None else None
-        if isinstance(parent, ContainerNode) and nid in parent.children:
-            out.append(parent.children.index(nid))
-        else:
-            out.append(0)  # the scope/global root (no parent within scope) — index 0
+        out.append(child_indices.get(nid, 0))
     return out
 
 
@@ -299,6 +369,7 @@ def _sibling_disambiguator(
     parents: Mapping[str, str],
     source: Callable[[Node], str],
     sep: str,
+    collision_ranks: Mapping[str, tuple[int, int]] | None = None,
 ) -> str:
     """The slug-disambiguation suffix (§3.D.2, inv 8): among the node's siblings that slug to the
     **same** own segment (in ``children`` order), the first keeps the bare slug and each subsequent one
@@ -320,14 +391,19 @@ def _sibling_disambiguator(
         return ""  # an empty own slug (no designation/title) is not a handle to disambiguate — a
         # "{sep}{sep}{rank}" suffix on nothing is meaningless and would spuriously match a digit node_id
         # in the own-scoped derivation check (audit finding: title-less siblings → own handle "--3").
-    same = [
-        c
-        for c in parent.children
-        if c in pmap.by_id and _slugify(source(pmap.by_id[c]), "-") == own
-    ]
-    if len(same) <= 1 or node_id not in same:
-        return ""
-    rank = same.index(node_id) + 1
+    if collision_ranks is not None:
+        count, rank = collision_ranks.get(node_id, (0, 0))
+        if count <= 1:
+            return ""
+    else:
+        same = [
+            c
+            for c in parent.children
+            if c in pmap.by_id and _slugify(source(pmap.by_id[c]), "-") == own
+        ]
+        if len(same) <= 1 or node_id not in same:
+            return ""
+        rank = same.index(node_id) + 1
     return "" if rank == 1 else f"{sep}{sep}{rank}"
 
 
@@ -342,6 +418,25 @@ def render_handle(
     is a caller programming error (``ValueError``) — the *validators* raise ``EC`` codes; the renderer
     presumes a resolved policy and a real node.
     """
+    return _render_handle(
+        pmap,
+        node_id,
+        policy,
+        target_format,
+        scope,
+        _render_context(pmap),
+    )
+
+
+def _render_handle(
+    pmap: ProjectionMap,
+    node_id: str,
+    policy: str,
+    target_format: str,
+    scope: str,
+    context: _HandleRenderContext,
+) -> str:
+    """Internal renderer accepting the validator's shared, one-pass tree indexes."""
     if policy not in HANDLE_POLICIES:
         raise ValueError(f"render_handle: unknown policy {policy!r} (expected one of {sorted(HANDLE_POLICIES)})")
     if target_format not in TARGET_FORMATS:
@@ -350,7 +445,7 @@ def render_handle(
         )
     if node_id not in pmap.by_id:
         raise ValueError(f"render_handle: node_id {node_id!r} is not in the map")
-    parents = _parent_map(pmap)
+    parents = context.parents
     if scope != SCOPE_GLOBAL:
         if scope not in pmap.by_id:
             raise ValueError(f"render_handle: scope {scope!r} names no node")
@@ -358,7 +453,12 @@ def render_handle(
             raise ValueError(f"render_handle: scope {scope!r} is not an ancestor of {node_id!r}")
 
     if policy == POLICY_POSITION_PATH:
-        parts = [str(i) for i in _index_path(pmap, node_id, scope, parents)]
+        parts = [
+            str(i)
+            for i in _index_path(
+                pmap, node_id, scope, parents, context.child_indices
+            )
+        ]
         if target_format == TARGET_SHORT:
             return ".".join(parts)
         sep = "_" if target_format == TARGET_PARSE_MD else "-"
@@ -374,7 +474,14 @@ def render_handle(
         raw = " ".join(source(pmap.by_id[nid]) for nid in chain)  # ancestor context
     else:  # POLICY_TITLE — own field only
         raw = source(node)
-    return _slugify(raw, sep) + _sibling_disambiguator(pmap, node_id, parents, source, sep)
+    collision_ranks = (
+        context.designation_collision_ranks
+        if policy == POLICY_DESIGNATION
+        else context.title_collision_ranks
+    )
+    return _slugify(raw, sep) + _sibling_disambiguator(
+        pmap, node_id, parents, source, sep, collision_ranks
+    )
 
 
 def resolve(
@@ -440,6 +547,42 @@ def _effective_policy(
     return handle_policies.get(node.node_class)
 
 
+def _effective_policy_map(
+    pmap: ProjectionMap,
+    parents: Mapping[str, str],
+    handle_policies: HandlePolicies,
+) -> dict[str, str | None]:
+    """Resolve every node's nearest explicit override once, without repeated ancestor walks."""
+    nearest_override: dict[str, str | None] = {}
+    for node in pmap.nodes:
+        if node.node_id in nearest_override:
+            continue
+        trail: list[str] = []
+        seen: set[str] = set()
+        current: Node | None = node
+        resolved: str | None = None
+        while current is not None and current.node_id not in seen:
+            if current.node_id in nearest_override:
+                resolved = nearest_override[current.node_id]
+                break
+            seen.add(current.node_id)
+            if current.handle_policy:
+                resolved = current.handle_policy
+                nearest_override[current.node_id] = resolved
+                break
+            trail.append(current.node_id)
+            parent_id = parents.get(current.node_id)
+            current = pmap.by_id.get(parent_id) if parent_id is not None else None
+        for node_id in trail:
+            nearest_override[node_id] = resolved
+
+    return {
+        node.node_id: nearest_override.get(node.node_id)
+        or handle_policies.get(node.node_class)
+        for node in pmap.nodes
+    }
+
+
 def validate_handle_policies(
     pmap: ProjectionMap,
     block_vocabulary: Sequence[NodeClassSpec],
@@ -458,7 +601,10 @@ def validate_handle_policies(
     """
     findings: list[tuple[EC, str]] = []
     kind_by_class = {spec.name: spec.kind for spec in block_vocabulary}
-    parents = _parent_map(pmap)
+    context = _render_context(pmap, include_collision_ranks=True)
+    effective_policies = _effective_policy_map(
+        pmap, context.parents, handle_policies
+    )
 
     for key in handle_policies:
         if key not in kind_by_class:
@@ -478,7 +624,7 @@ def validate_handle_policies(
             )
 
     for node in pmap.nodes:
-        policy = _effective_policy(node, pmap, parents, handle_policies)
+        policy = effective_policies[node.node_id]
         if policy not in HANDLE_POLICIES:
             findings.append(
                 (
@@ -488,7 +634,9 @@ def validate_handle_policies(
                 )
             )
             continue  # cannot render under an unresolved policy — the derivation clause is skipped
-        if node.node_id and _node_id_derived_from_handle(pmap, node, policy):
+        if node.node_id and _node_id_derived_from_handle(
+            pmap, node, policy, context
+        ):
             findings.append(
                 (
                     EC.NODE_ID_DERIVED,
@@ -501,7 +649,33 @@ def validate_handle_policies(
         raise StructureValidationError(findings)
 
 
-def _node_id_derived_from_handle(pmap: ProjectionMap, node: Node, policy: str) -> bool:
+def _position_path_equals_node_id(
+    node_id: str,
+    separator: str,
+    context: _HandleRenderContext,
+) -> bool:
+    """Compare an id to its global index path without materializing an O(depth) handle string."""
+    parts = node_id.split(separator)
+    if not parts or any(not part.isdigit() or str(int(part)) != part for part in parts):
+        return False
+    part_index = len(parts) - 1
+    current: str | None = node_id
+    seen: set[str] = set()
+    while current is not None and current not in seen and part_index >= 0:
+        seen.add(current)
+        if parts[part_index] != str(context.child_indices.get(current, 0)):
+            return False
+        part_index -= 1
+        current = context.parents.get(current)
+    return current is None and part_index == -1
+
+
+def _node_id_derived_from_handle(
+    pmap: ProjectionMap,
+    node: Node,
+    policy: str,
+    context: _HandleRenderContext,
+) -> bool:
     """Whether ``node.node_id`` looks derived from its rendered handle — the S4.3 arm of inv 6 (§3.C.3).
 
     Two shapes, tested across both slug formats (``-`` and ``_``): the id **equals the full**
@@ -523,9 +697,21 @@ def _node_id_derived_from_handle(pmap: ProjectionMap, node: Node, policy: str) -
     exact/slug/position cheats are unaffected.
     """
     nid = node.node_id
+    if policy == POLICY_POSITION_PATH:
+        # The own-scoped position path is always "0".  Compare the two possible global wire forms
+        # directly against the candidate id so a deep valid map does not construct every ancestor
+        # prefix four times, which would make validation quadratic in depth.
+        return nid == "0" or any(
+            _position_path_equals_node_id(nid, separator, context)
+            for separator in ("-", "_")
+        )
     for target_format in (TARGET_HTML_SLUG, TARGET_PARSE_MD):
-        full = render_handle(pmap, nid, policy, target_format, SCOPE_GLOBAL)
-        own = render_handle(pmap, nid, policy, target_format, nid)  # scope=self → no ancestor prefix
+        full = _render_handle(
+            pmap, nid, policy, target_format, SCOPE_GLOBAL, context
+        )
+        own = _render_handle(
+            pmap, nid, policy, target_format, nid, context
+        )  # scope=self → no ancestor prefix
         if nid == full or nid in own:
             return True
     return False

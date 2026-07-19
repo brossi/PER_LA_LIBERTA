@@ -129,10 +129,12 @@ PUBLIC_SURFACE_BY_CONCERN = {
     "handles": ("render_handle", "resolve", "Alias"),
     "projection": ("Node", "ContainerNode", "LeafNode", "FurnitureAtom", "ProjectionMap",
                    "validate_projection", "StructureValidationError", "mint_node_id",
-                   "RebindAnchors", "Region", "SlotFingerprint", "FINGERPRINT_SLOTS"),
+                   "RebindAnchors", "Region", "SlotFingerprint", "SlotBoundaryAnchors",
+                   "FINGERPRINT_SLOTS"),
     # the rebind() function is intentionally NOT package-exported (it would shadow the rebind
     # submodule) — it stays public via ``from engine.structure.rebind import rebind``.
     "rebind": ("RebindContext", "RebindPolicy", "RebindResult", "RebindReport", "RebindError",
+               "RebindNotConsumableError",
                "ModeProvenance", "NodeOutcome", "SlotOutcome", "assert_all_bound",
                "fingerprint_slot", "slot_similarity", "resolve_mode",
                "DEFAULT_FINGERPRINT_THRESHOLD", "REBIND_UNRESOLVED_REASONS"),
@@ -238,6 +240,7 @@ EXPECTED_PUBLIC_SURFACE = frozenset(
         "RebindAnchors",
         "Region",
         "SlotFingerprint",
+        "SlotBoundaryAnchors",
         "FINGERPRINT_SLOTS",
         # S5.1 — the store-and-rebind engine + fingerprint producer
         "RebindContext",
@@ -245,6 +248,7 @@ EXPECTED_PUBLIC_SURFACE = frozenset(
         "RebindResult",
         "RebindReport",
         "RebindError",
+        "RebindNotConsumableError",
         "ModeProvenance",
         "NodeOutcome",
         "SlotOutcome",

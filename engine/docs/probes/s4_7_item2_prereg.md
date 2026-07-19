@@ -61,11 +61,29 @@ scale points stress size, not an alien shape. Deep-vs-wide results are reported 
 
 ## 4. INV-6 red sizes + calibration rationale
 
+**Dated upward-only amendment — 2026-07-18, after the first diagnostic measurement and before
+measuring any added point.** The original ladder below maps through §2 to
+`(L, K, A) = (1, 1, 8) / (1, 1, 17) / (1, 1, 33)`. Because `K` therefore remains one, the
+shipped assignment has only the whole-stream window at each point and the registered ladder does
+not activate the multi-slot window enumeration whose growth it is meant to expose. The first run
+was correspondingly too fast to discriminate the cubic defect. Exercising an invariant with a
+degenerate constant-`K` family would be a false-green risk, not a permissible favorable result.
+
+Per the already-registered upward-extension rule, the red ladder is extended—never reduced—to
+**`T ∈ {300, 600, 1200, 2400, 4800}`**. The added values are fixed from the ledger before they are
+measured: they produce `(L, K, A) = (2, 2, 67)` and `(3, 3, 133)` under nearest-integer fixture
+rounding, so both the named token axis and proportional slot axis finally grow. Each leaf owns one
+non-empty **contiguous** canonical-atom block in reading order; the scale family does not introduce
+the separate non-contiguous-slot precondition while measuring assignment growth. All original
+points remain in the artifact. The slope/ratio acceptance bounds, repetition count, instrument,
+and target profile are unchanged; this amendment corrects fixture discriminating power only.
+
 The red runs against the **shipped cubic `_Assignment`/`resolve_slot`** (O(K·N³)) before #48
 deletes it. Two full decades of the cubic are infeasible (#48: tens of hours extrapolated at
 PLL's T = 171k), so the red uses a calibrated smaller ladder:
 
-- **Red ladder (JUDGMENT):** `T ∈ {300, 600, 1200}` (family ratios per §2; ≥2 doublings).
+- **Red ladder (JUDGMENT, upward-amended above):**
+  `T ∈ {300, 600, 1200, 2400, 4800}` (family ratios per §2; ≥4 doublings).
 - **Calibration rationale:** scaling the #33/#48 finding (tens of hours at T ≈ 1.7·10⁵) by
   (1200/171,181)³ puts the largest red point in the seconds-to-minutes range on the §1 profile —
   each doubling of a cubic multiplies cost ≈8×, so three points spanning 4× expose a fitted
@@ -78,6 +96,18 @@ PLL's T = 171k), so the red uses a calibrated smaller ladder:
   delete the tests' meaning.
 
 ## 5. INV-7 ceiling (the evidence-op budget — INV-7's own number)
+
+**Dated fixture clarification — 2026-07-18, before the first INV-7 measurement.** The deep
+evidence family is the §2/B-7 **isolated topology core**, not the PLL-density rebind family: a
+depth-3,000 container backbone has one terminal machine leaf at each level, and each leaf owns one
+one-token atom. Its reported ledger is therefore `L = K = A = T = D = 3,000`. This keeps both
+causes visible—the live gate walks `Θ(D²)` descendants and the decoded evidence witnesses contain
+`Θ(D²)` atom-id references—without multiplying that already-quadratic input by PLL's 40
+atoms-per-leaf density. Applying every wide-family density ratio here would materialize about
+180 million decoded witness ids before the named op and would measure fixture inflation rather
+than the isolated deep-topology defect. The artifact reports node count and serialized/decoded
+input sizes separately, as B-7 requires. The ceiling, repetition count, and instrument are
+unchanged.
 
 - **Ceiling (JUDGMENT): 2.0 s wall-clock (median of 5) and 512 MB `tracemalloc` peak** for the
   named evidence op (`evidence_findings` over the registered deep-chain fixture).
@@ -111,7 +141,10 @@ exploration; lowering is a visible, diffed change, never silent.
 
 ## 7. DR-3 lock record (pointer convention)
 
-The DR-3 lock (confidence gate locked only when INV-1 never-a-false-bind is seen red→green) will
-be recorded **here, as a pointer only**: the run-manifest artifact's repo path + content hash.
-The hashes, fixture matrix, seeds, and modes live once, in that manifest (spec §0) — this doc
-never duplicates them. Until the pointer lands, DR-3 remains build-direction, not locked.
+The DR-3 confidence gate is **locked** by the item-3 run manifest at
+`docs/probes/s4_7_priority5_mutation_manifest.json`, SHA-256
+`d041252acdc30a71ca868f3201b321d129402bc290835f0344dc7d3acf25a627`. The hashes, fixture
+matrix, seeds, modes, normalized 136-mutant table, zero carried residuals, and green command live
+once in that manifest (spec §0); this document records only the immutable pointer. The manifest
+intentionally excludes this pointer document from its own source-identity set to avoid a circular
+content hash.

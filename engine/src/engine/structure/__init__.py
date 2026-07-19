@@ -50,6 +50,7 @@ from engine.structure.projection import (
     RebindAnchors,
     Region,
     SlotFingerprint,
+    SlotBoundaryAnchors,
     mint_node_id,
     validate_projection,
 )
@@ -222,6 +223,7 @@ from engine.structure.rebind import (
     NodeOutcome,
     RebindContext,
     RebindError,
+    RebindNotConsumableError,
     RebindPolicy,
     RebindReport,
     RebindResult,
@@ -256,6 +258,7 @@ __all__ = [
     "RebindAnchors",
     "Region",
     "SlotFingerprint",
+    "SlotBoundaryAnchors",
     "FINGERPRINT_SLOTS",
     # S5.1 — the store-and-rebind engine (context/policy/DP/re-stamp/outputs) + fingerprint producer
     "RebindContext",
@@ -263,6 +266,7 @@ __all__ = [
     "RebindResult",
     "RebindReport",
     "RebindError",
+    "RebindNotConsumableError",
     "ModeProvenance",
     "NodeOutcome",
     "SlotOutcome",

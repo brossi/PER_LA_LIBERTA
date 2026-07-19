@@ -1,0 +1,5025 @@
+{
+  "schema": "s4.7-item2-priority2-red-manifest@v1",
+  "profile": "priority2",
+  "created_at": "2026-07-18T08:01:29.393778+00:00",
+  "repo": "/Users/ben_mpa/LLM/PER_LA_LIBERTA/engine",
+  "git": {
+    "head": "6b65a4fd975ce27bb8216aff799764c50bb7ee09",
+    "branch": "spike/s4_7",
+    "status": "M docs/probes/s4_7_item2_prereg.md\n M tests/harness/relation.py\n M tests/hunts/hunt_rebind.py\n M tests/unit/test_harness_relation_laws.py\n?? docs/probes/s4_7_priority1_component0_audit.md\n?? docs/probes/s4_7_priority2_inv1_inv2_audit.md\n?? docs/probes/s4_7_priority2_red_manifest.json\n?? docs/probes/s4_7_priority3_inv3_inv5_audit.md\n?? docs/probes/s4_7_priority3_red_manifest.json\n?? docs/probes/s4_7_priority4_perf_baseline.json\n?? docs/probes/s4_7_priority4_red_manifest.json\n?? src/engine/structure/boundary_anchor.py\n?? tests/harness/boundary.py\n?? tests/harness/invariants_3_5.py\n?? tests/harness/materialize.py\n?? tests/harness/oracle.py\n?? tests/harness/scale.py\n?? tests/unit/test_harness_materialize.py\n?? tests/unit/test_s4_7_inv1_inv2.py\n?? tests/unit/test_s4_7_inv3_inv5.py\n?? tests/unit/test_s4_7_inv6_inv7.py\n?? tools/s4_7_hunt_manifest.py\n?? tools/s4_7_perf_baseline.py"
+  },
+  "seeds": [
+    2700,
+    2701,
+    2702,
+    2703,
+    2704,
+    2705,
+    2706,
+    2707,
+    2708,
+    2709,
+    2710,
+    2711,
+    2712,
+    2713,
+    2714,
+    2715
+  ],
+  "modes": [
+    "no-geometry"
+  ],
+  "case_matrix": [
+    "char-sub",
+    "drop-insert",
+    "duplicate",
+    "split-token-boundary",
+    "merge-repeat",
+    "split-boundary",
+    "move-container-edge",
+    "merge-cross-slot-seam",
+    "heavy-resegmentation",
+    "inv2-interior-char-sub",
+    "inv2-atom-merge",
+    "anchor-poor-within-container",
+    "anchor-poor-cross-container",
+    "shared-random-seed-2700",
+    "shared-random-seed-2701",
+    "shared-random-seed-2702",
+    "shared-random-seed-2703",
+    "shared-random-seed-2704",
+    "shared-random-seed-2705",
+    "shared-random-seed-2706",
+    "shared-random-seed-2707",
+    "shared-random-seed-2708",
+    "shared-random-seed-2709",
+    "shared-random-seed-2710",
+    "shared-random-seed-2711",
+    "shared-random-seed-2712",
+    "shared-random-seed-2713",
+    "shared-random-seed-2714",
+    "shared-random-seed-2715"
+  ],
+  "diagnostics": [
+    {
+      "case": "char-sub",
+      "seed": 101,
+      "config": {
+        "name": "char-sub",
+        "seed": 101,
+        "operations": [
+          {
+            "op": "char_sub",
+            "targets": [
+              "a0"
+            ],
+            "outputs": [
+              "a0-edit"
+            ],
+            "texts": [
+              "alpha beto "
+            ],
+            "output_pages": [],
+            "position": null
+          }
+        ],
+        "geometry_mode": "no-geometry",
+        "composition_tags": [],
+        "permitted_compositions": []
+      },
+      "bound_correct": 3,
+      "abstained": 2,
+      "wrong": 0,
+      "allowed_pair_count": 4,
+      "required_inv2": []
+    },
+    {
+      "case": "drop-insert",
+      "seed": 102,
+      "config": {
+        "name": "drop-insert",
+        "seed": 102,
+        "operations": [
+          {
+            "op": "drop",
+            "targets": [
+              "c1"
+            ],
+            "outputs": [],
+            "texts": [],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "insert",
+            "targets": [],
+            "outputs": [
+              "new0"
+            ],
+            "texts": [
+              "nu xi"
+            ],
+            "output_pages": [],
+            "position": 9
+          }
+        ],
+        "geometry_mode": "no-geometry",
+        "composition_tags": [],
+        "permitted_compositions": [
+          [
+            "drop",
+            "insert"
+          ]
+        ]
+      },
+      "bound_correct": 2,
+      "abstained": 3,
+      "wrong": 0,
+      "allowed_pair_count": 4,
+      "required_inv2": []
+    },
+    {
+      "case": "duplicate",
+      "seed": 103,
+      "config": {
+        "name": "duplicate",
+        "seed": 103,
+        "operations": [
+          {
+            "op": "duplicate",
+            "targets": [
+              "b0"
+            ],
+            "outputs": [
+              "b0-copy"
+            ],
+            "texts": [],
+            "output_pages": [],
+            "position": null
+          }
+        ],
+        "geometry_mode": "no-geometry",
+        "composition_tags": [],
+        "permitted_compositions": []
+      },
+      "bound_correct": 3,
+      "abstained": 1,
+      "wrong": 1,
+      "allowed_pair_count": 3,
+      "required_inv2": []
+    },
+    {
+      "case": "split-token-boundary",
+      "seed": 104,
+      "config": {
+        "name": "split-token-boundary",
+        "seed": 104,
+        "operations": [
+          {
+            "op": "split",
+            "targets": [
+              "a1"
+            ],
+            "outputs": [
+              "a1-left",
+              "a1-right"
+            ],
+            "texts": [
+              "gamma ",
+              "delta "
+            ],
+            "output_pages": [],
+            "position": null
+          }
+        ],
+        "geometry_mode": "no-geometry",
+        "composition_tags": [],
+        "permitted_compositions": []
+      },
+      "bound_correct": 3,
+      "abstained": 2,
+      "wrong": 0,
+      "allowed_pair_count": 5,
+      "required_inv2": [
+        {
+          "node_id": "l0",
+          "slot_name": "body",
+          "fresh_atom_ids": [
+            "fresh-00000068-000-001-a0",
+            "fresh-00000068-000-002-p0",
+            "fresh-00000068-001-000-a1-left",
+            "fresh-00000068-001-001-a1-right",
+            "fresh-00000068-000-004-p1"
+          ],
+          "observed": false
+        }
+      ]
+    },
+    {
+      "case": "merge-repeat",
+      "seed": 105,
+      "config": {
+        "name": "merge-repeat",
+        "seed": 105,
+        "operations": [
+          {
+            "op": "merge",
+            "targets": [
+              "b0",
+              "b1"
+            ],
+            "outputs": [
+              "b-merge"
+            ],
+            "texts": [],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "duplicate",
+            "targets": [
+              "b-merge"
+            ],
+            "outputs": [
+              "b-merge-copy"
+            ],
+            "texts": [],
+            "output_pages": [],
+            "position": null
+          }
+        ],
+        "geometry_mode": "no-geometry",
+        "composition_tags": [
+          "merge\u00d7repeat"
+        ],
+        "permitted_compositions": [
+          [
+            "duplicate",
+            "merge"
+          ]
+        ]
+      },
+      "bound_correct": 2,
+      "abstained": 2,
+      "wrong": 1,
+      "allowed_pair_count": 2,
+      "required_inv2": []
+    },
+    {
+      "case": "split-boundary",
+      "seed": 106,
+      "config": {
+        "name": "split-boundary",
+        "seed": 106,
+        "operations": [
+          {
+            "op": "split",
+            "targets": [
+              "a1"
+            ],
+            "outputs": [
+              "a1-left",
+              "a1-right"
+            ],
+            "texts": [
+              "gamma ",
+              "delta "
+            ],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "insert",
+            "targets": [],
+            "outputs": [
+              "seam-new"
+            ],
+            "texts": [
+              "boundary addition"
+            ],
+            "output_pages": [],
+            "position": 6
+          }
+        ],
+        "geometry_mode": "no-geometry",
+        "composition_tags": [
+          "split\u00d7boundary"
+        ],
+        "permitted_compositions": [
+          [
+            "insert",
+            "split"
+          ]
+        ]
+      },
+      "bound_correct": 3,
+      "abstained": 1,
+      "wrong": 1,
+      "allowed_pair_count": 3,
+      "required_inv2": []
+    },
+    {
+      "case": "move-container-edge",
+      "seed": 107,
+      "config": {
+        "name": "move-container-edge",
+        "seed": 107,
+        "operations": [
+          {
+            "op": "move",
+            "targets": [
+              "b0",
+              "b1"
+            ],
+            "outputs": [],
+            "texts": [],
+            "output_pages": [],
+            "position": 8
+          }
+        ],
+        "geometry_mode": "no-geometry",
+        "composition_tags": [
+          "move\u00d7container-edge"
+        ],
+        "permitted_compositions": []
+      },
+      "bound_correct": 1,
+      "abstained": 4,
+      "wrong": 0,
+      "allowed_pair_count": 3,
+      "required_inv2": []
+    },
+    {
+      "case": "merge-cross-slot-seam",
+      "seed": 108,
+      "config": {
+        "name": "merge-cross-slot-seam",
+        "seed": 108,
+        "operations": [
+          {
+            "op": "merge",
+            "targets": [
+              "p1",
+              "b0"
+            ],
+            "outputs": [
+              "seam-merge"
+            ],
+            "texts": [],
+            "output_pages": [],
+            "position": null
+          }
+        ],
+        "geometry_mode": "no-geometry",
+        "composition_tags": [],
+        "permitted_compositions": []
+      },
+      "bound_correct": 3,
+      "abstained": 0,
+      "wrong": 2,
+      "allowed_pair_count": 3,
+      "required_inv2": []
+    },
+    {
+      "case": "heavy-resegmentation",
+      "seed": 109,
+      "config": {
+        "name": "heavy-resegmentation",
+        "seed": 109,
+        "operations": [
+          {
+            "op": "split",
+            "targets": [
+              "a0"
+            ],
+            "outputs": [
+              "a0-left",
+              "a0-right"
+            ],
+            "texts": [
+              "alpha ",
+              "beta "
+            ],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "merge",
+            "targets": [
+              "b0",
+              "b1"
+            ],
+            "outputs": [
+              "b-heavy-merge"
+            ],
+            "texts": [],
+            "output_pages": [],
+            "position": null
+          }
+        ],
+        "geometry_mode": "no-geometry",
+        "composition_tags": [],
+        "permitted_compositions": [
+          [
+            "merge",
+            "split"
+          ]
+        ]
+      },
+      "bound_correct": 3,
+      "abstained": 2,
+      "wrong": 0,
+      "allowed_pair_count": 5,
+      "required_inv2": []
+    },
+    {
+      "case": "inv2-interior-char-sub",
+      "seed": 2601,
+      "config": {
+        "name": "inv2-interior-char-sub",
+        "seed": 2601,
+        "operations": [
+          {
+            "op": "char_sub",
+            "targets": [
+              "b1"
+            ],
+            "outputs": [
+              "b1-edit"
+            ],
+            "texts": [
+              "saurcea sourceb sourcec sourced sourcee sourcef sourceg sourceh sourcei sourcej sourcek sourcel sourcem sourcen sourceo sourcep sourceq sourcer sources sourcet sourceu sourcev sourcew sourcex sourcey sourcez sourceaa sourceab sourceac sourcead sourceae sourceaf sourceag sourceah sourceai sourceaj "
+            ],
+            "output_pages": [],
+            "position": null
+          }
+        ],
+        "geometry_mode": "no-geometry",
+        "composition_tags": [],
+        "permitted_compositions": []
+      },
+      "bound_correct": 3,
+      "abstained": 2,
+      "wrong": 0,
+      "allowed_pair_count": 5,
+      "required_inv2": [
+        {
+          "node_id": "l1",
+          "slot_name": "body",
+          "fresh_atom_ids": [
+            "fresh-00000a29-000-004-b0",
+            "fresh-00000a29-001-000-b1-edit"
+          ],
+          "observed": false
+        }
+      ]
+    },
+    {
+      "case": "inv2-atom-merge",
+      "seed": 2602,
+      "config": {
+        "name": "inv2-atom-merge",
+        "seed": 2602,
+        "operations": [
+          {
+            "op": "merge",
+            "targets": [
+              "b0",
+              "b1"
+            ],
+            "outputs": [
+              "b-merge"
+            ],
+            "texts": [],
+            "output_pages": [],
+            "position": null
+          }
+        ],
+        "geometry_mode": "no-geometry",
+        "composition_tags": [],
+        "permitted_compositions": []
+      },
+      "bound_correct": 3,
+      "abstained": 2,
+      "wrong": 0,
+      "allowed_pair_count": 5,
+      "required_inv2": [
+        {
+          "node_id": "l1",
+          "slot_name": "body",
+          "fresh_atom_ids": [
+            "fresh-00000a2a-001-000-b-merge"
+          ],
+          "observed": false
+        }
+      ]
+    },
+    {
+      "case": "anchor-poor-within-container",
+      "seed": 2802,
+      "config": {
+        "name": "anchor-density-within-copies-2",
+        "seed": 2802,
+        "operations": [],
+        "geometry_mode": "no-geometry",
+        "composition_tags": [],
+        "permitted_compositions": []
+      },
+      "bound_correct": 1,
+      "abstained": 0,
+      "wrong": 4,
+      "allowed_pair_count": 1,
+      "required_inv2": []
+    },
+    {
+      "case": "anchor-poor-cross-container",
+      "seed": 2852,
+      "config": {
+        "name": "anchor-density-cross-copies-2",
+        "seed": 2852,
+        "operations": [],
+        "geometry_mode": "no-geometry",
+        "composition_tags": [],
+        "permitted_compositions": []
+      },
+      "bound_correct": 1,
+      "abstained": 0,
+      "wrong": 4,
+      "allowed_pair_count": 1,
+      "required_inv2": []
+    },
+    {
+      "case": "shared-random-seed-2700",
+      "seed": 2700,
+      "config": {
+        "name": "random-seed-2700",
+        "seed": 2700,
+        "operations": [
+          {
+            "op": "char_sub",
+            "targets": [
+              "b0"
+            ],
+            "outputs": [
+              "rnd-char-2700-b0"
+            ],
+            "texts": [
+              "cpsilon zeta "
+            ],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "split",
+            "targets": [
+              "c1"
+            ],
+            "outputs": [
+              "rnd-split-2700-c1-0",
+              "rnd-split-2700-c1-1"
+            ],
+            "texts": [
+              "lambda ",
+              "mu"
+            ],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "merge",
+            "targets": [
+              "p0",
+              "a1"
+            ],
+            "outputs": [
+              "rnd-merge-2700-p0-a1"
+            ],
+            "texts": [],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "duplicate",
+            "targets": [
+              "h0"
+            ],
+            "outputs": [
+              "rnd-dup-2700-h0"
+            ],
+            "texts": [],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "drop",
+            "targets": [
+              "b1"
+            ],
+            "outputs": [],
+            "texts": [],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "insert",
+            "targets": [],
+            "outputs": [
+              "rnd-insert-2700"
+            ],
+            "texts": [
+              "supplemental insertion 2700"
+            ],
+            "output_pages": [],
+            "position": 0
+          },
+          {
+            "op": "move",
+            "targets": [
+              "a0"
+            ],
+            "outputs": [],
+            "texts": [],
+            "output_pages": [],
+            "position": 1
+          }
+        ],
+        "geometry_mode": "no-geometry",
+        "composition_tags": [],
+        "permitted_compositions": [
+          [
+            "char_sub",
+            "drop"
+          ],
+          [
+            "char_sub",
+            "duplicate"
+          ],
+          [
+            "char_sub",
+            "insert"
+          ],
+          [
+            "char_sub",
+            "merge"
+          ],
+          [
+            "char_sub",
+            "move"
+          ],
+          [
+            "char_sub",
+            "split"
+          ],
+          [
+            "drop",
+            "duplicate"
+          ],
+          [
+            "drop",
+            "insert"
+          ],
+          [
+            "drop",
+            "merge"
+          ],
+          [
+            "drop",
+            "move"
+          ],
+          [
+            "drop",
+            "split"
+          ],
+          [
+            "duplicate",
+            "insert"
+          ],
+          [
+            "duplicate",
+            "merge"
+          ],
+          [
+            "duplicate",
+            "move"
+          ],
+          [
+            "duplicate",
+            "split"
+          ],
+          [
+            "insert",
+            "merge"
+          ],
+          [
+            "insert",
+            "move"
+          ],
+          [
+            "insert",
+            "split"
+          ],
+          [
+            "merge",
+            "move"
+          ],
+          [
+            "merge",
+            "split"
+          ],
+          [
+            "move",
+            "split"
+          ]
+        ]
+      },
+      "bound_correct": 2,
+      "abstained": 3,
+      "wrong": 0,
+      "allowed_pair_count": 2,
+      "required_inv2": []
+    },
+    {
+      "case": "shared-random-seed-2701",
+      "seed": 2701,
+      "config": {
+        "name": "random-seed-2701",
+        "seed": 2701,
+        "operations": [
+          {
+            "op": "char_sub",
+            "targets": [
+              "c1"
+            ],
+            "outputs": [
+              "rnd-char-2701-c1"
+            ],
+            "texts": [
+              "iambda mu"
+            ],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "split",
+            "targets": [
+              "b0"
+            ],
+            "outputs": [
+              "rnd-split-2701-b0-0",
+              "rnd-split-2701-b0-1"
+            ],
+            "texts": [
+              "epsilon ",
+              "zeta "
+            ],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "merge",
+            "targets": [
+              "rnd-split-2701-b0-1",
+              "b1"
+            ],
+            "outputs": [
+              "rnd-merge-2701-rnd-split-2701-b0-1-b1"
+            ],
+            "texts": [],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "duplicate",
+            "targets": [
+              "rnd-merge-2701-rnd-split-2701-b0-1-b1"
+            ],
+            "outputs": [
+              "rnd-dup-2701-rnd-merge-2701-rnd-split-2701-b0-1-b1"
+            ],
+            "texts": [],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "drop",
+            "targets": [
+              "p1"
+            ],
+            "outputs": [],
+            "texts": [],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "insert",
+            "targets": [],
+            "outputs": [
+              "rnd-insert-2701"
+            ],
+            "texts": [
+              "supplemental insertion 2701"
+            ],
+            "output_pages": [],
+            "position": 0
+          },
+          {
+            "op": "move",
+            "targets": [
+              "a1"
+            ],
+            "outputs": [],
+            "texts": [],
+            "output_pages": [],
+            "position": 1
+          }
+        ],
+        "geometry_mode": "no-geometry",
+        "composition_tags": [],
+        "permitted_compositions": [
+          [
+            "char_sub",
+            "drop"
+          ],
+          [
+            "char_sub",
+            "duplicate"
+          ],
+          [
+            "char_sub",
+            "insert"
+          ],
+          [
+            "char_sub",
+            "merge"
+          ],
+          [
+            "char_sub",
+            "move"
+          ],
+          [
+            "char_sub",
+            "split"
+          ],
+          [
+            "drop",
+            "duplicate"
+          ],
+          [
+            "drop",
+            "insert"
+          ],
+          [
+            "drop",
+            "merge"
+          ],
+          [
+            "drop",
+            "move"
+          ],
+          [
+            "drop",
+            "split"
+          ],
+          [
+            "duplicate",
+            "insert"
+          ],
+          [
+            "duplicate",
+            "merge"
+          ],
+          [
+            "duplicate",
+            "move"
+          ],
+          [
+            "duplicate",
+            "split"
+          ],
+          [
+            "insert",
+            "merge"
+          ],
+          [
+            "insert",
+            "move"
+          ],
+          [
+            "insert",
+            "split"
+          ],
+          [
+            "merge",
+            "move"
+          ],
+          [
+            "merge",
+            "split"
+          ],
+          [
+            "move",
+            "split"
+          ]
+        ]
+      },
+      "bound_correct": 1,
+      "abstained": 4,
+      "wrong": 0,
+      "allowed_pair_count": 1,
+      "required_inv2": []
+    },
+    {
+      "case": "shared-random-seed-2702",
+      "seed": 2702,
+      "config": {
+        "name": "random-seed-2702",
+        "seed": 2702,
+        "operations": [
+          {
+            "op": "char_sub",
+            "targets": [
+              "a1"
+            ],
+            "outputs": [
+              "rnd-char-2702-a1"
+            ],
+            "texts": [
+              "gomma delta "
+            ],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "split",
+            "targets": [
+              "c0"
+            ],
+            "outputs": [
+              "rnd-split-2702-c0-0",
+              "rnd-split-2702-c0-1"
+            ],
+            "texts": [
+              "iota ",
+              "kappa "
+            ],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "merge",
+            "targets": [
+              "b0",
+              "b1"
+            ],
+            "outputs": [
+              "rnd-merge-2702-b0-b1"
+            ],
+            "texts": [],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "duplicate",
+            "targets": [
+              "rnd-merge-2702-b0-b1"
+            ],
+            "outputs": [
+              "rnd-dup-2702-rnd-merge-2702-b0-b1"
+            ],
+            "texts": [],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "drop",
+            "targets": [
+              "c1"
+            ],
+            "outputs": [],
+            "texts": [],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "insert",
+            "targets": [],
+            "outputs": [
+              "rnd-insert-2702"
+            ],
+            "texts": [
+              "supplemental insertion 2702"
+            ],
+            "output_pages": [],
+            "position": 1
+          },
+          {
+            "op": "move",
+            "targets": [
+              "rnd-dup-2702-rnd-merge-2702-b0-b1"
+            ],
+            "outputs": [],
+            "texts": [],
+            "output_pages": [],
+            "position": 1
+          }
+        ],
+        "geometry_mode": "no-geometry",
+        "composition_tags": [],
+        "permitted_compositions": [
+          [
+            "char_sub",
+            "drop"
+          ],
+          [
+            "char_sub",
+            "duplicate"
+          ],
+          [
+            "char_sub",
+            "insert"
+          ],
+          [
+            "char_sub",
+            "merge"
+          ],
+          [
+            "char_sub",
+            "move"
+          ],
+          [
+            "char_sub",
+            "split"
+          ],
+          [
+            "drop",
+            "duplicate"
+          ],
+          [
+            "drop",
+            "insert"
+          ],
+          [
+            "drop",
+            "merge"
+          ],
+          [
+            "drop",
+            "move"
+          ],
+          [
+            "drop",
+            "split"
+          ],
+          [
+            "duplicate",
+            "insert"
+          ],
+          [
+            "duplicate",
+            "merge"
+          ],
+          [
+            "duplicate",
+            "move"
+          ],
+          [
+            "duplicate",
+            "split"
+          ],
+          [
+            "insert",
+            "merge"
+          ],
+          [
+            "insert",
+            "move"
+          ],
+          [
+            "insert",
+            "split"
+          ],
+          [
+            "merge",
+            "move"
+          ],
+          [
+            "merge",
+            "split"
+          ],
+          [
+            "move",
+            "split"
+          ]
+        ]
+      },
+      "bound_correct": 1,
+      "abstained": 3,
+      "wrong": 1,
+      "allowed_pair_count": 1,
+      "required_inv2": []
+    },
+    {
+      "case": "shared-random-seed-2703",
+      "seed": 2703,
+      "config": {
+        "name": "random-seed-2703",
+        "seed": 2703,
+        "operations": [
+          {
+            "op": "char_sub",
+            "targets": [
+              "c0"
+            ],
+            "outputs": [
+              "rnd-char-2703-c0"
+            ],
+            "texts": [
+              "lota kappa "
+            ],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "split",
+            "targets": [
+              "rnd-char-2703-c0"
+            ],
+            "outputs": [
+              "rnd-split-2703-rnd-char-2703-c0-0",
+              "rnd-split-2703-rnd-char-2703-c0-1"
+            ],
+            "texts": [
+              "lota ",
+              "kappa "
+            ],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "merge",
+            "targets": [
+              "b0",
+              "b1"
+            ],
+            "outputs": [
+              "rnd-merge-2703-b0-b1"
+            ],
+            "texts": [],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "duplicate",
+            "targets": [
+              "a1"
+            ],
+            "outputs": [
+              "rnd-dup-2703-a1"
+            ],
+            "texts": [],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "drop",
+            "targets": [
+              "h0"
+            ],
+            "outputs": [],
+            "texts": [],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "insert",
+            "targets": [],
+            "outputs": [
+              "rnd-insert-2703"
+            ],
+            "texts": [
+              "supplemental insertion 2703"
+            ],
+            "output_pages": [],
+            "position": 7
+          },
+          {
+            "op": "move",
+            "targets": [
+              "rnd-split-2703-rnd-char-2703-c0-0"
+            ],
+            "outputs": [],
+            "texts": [],
+            "output_pages": [],
+            "position": 2
+          }
+        ],
+        "geometry_mode": "no-geometry",
+        "composition_tags": [],
+        "permitted_compositions": [
+          [
+            "char_sub",
+            "drop"
+          ],
+          [
+            "char_sub",
+            "duplicate"
+          ],
+          [
+            "char_sub",
+            "insert"
+          ],
+          [
+            "char_sub",
+            "merge"
+          ],
+          [
+            "char_sub",
+            "move"
+          ],
+          [
+            "char_sub",
+            "split"
+          ],
+          [
+            "drop",
+            "duplicate"
+          ],
+          [
+            "drop",
+            "insert"
+          ],
+          [
+            "drop",
+            "merge"
+          ],
+          [
+            "drop",
+            "move"
+          ],
+          [
+            "drop",
+            "split"
+          ],
+          [
+            "duplicate",
+            "insert"
+          ],
+          [
+            "duplicate",
+            "merge"
+          ],
+          [
+            "duplicate",
+            "move"
+          ],
+          [
+            "duplicate",
+            "split"
+          ],
+          [
+            "insert",
+            "merge"
+          ],
+          [
+            "insert",
+            "move"
+          ],
+          [
+            "insert",
+            "split"
+          ],
+          [
+            "merge",
+            "move"
+          ],
+          [
+            "merge",
+            "split"
+          ],
+          [
+            "move",
+            "split"
+          ]
+        ]
+      },
+      "bound_correct": 0,
+      "abstained": 4,
+      "wrong": 1,
+      "allowed_pair_count": 0,
+      "required_inv2": []
+    },
+    {
+      "case": "shared-random-seed-2704",
+      "seed": 2704,
+      "config": {
+        "name": "random-seed-2704",
+        "seed": 2704,
+        "operations": [
+          {
+            "op": "char_sub",
+            "targets": [
+              "a0"
+            ],
+            "outputs": [
+              "rnd-char-2704-a0"
+            ],
+            "texts": [
+              "olpha beta "
+            ],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "split",
+            "targets": [
+              "s0"
+            ],
+            "outputs": [
+              "rnd-split-2704-s0-0",
+              "rnd-split-2704-s0-1"
+            ],
+            "texts": [
+              "closing ",
+              "signature"
+            ],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "merge",
+            "targets": [
+              "c0",
+              "c1"
+            ],
+            "outputs": [
+              "rnd-merge-2704-c0-c1"
+            ],
+            "texts": [],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "duplicate",
+            "targets": [
+              "b1"
+            ],
+            "outputs": [
+              "rnd-dup-2704-b1"
+            ],
+            "texts": [],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "drop",
+            "targets": [
+              "rnd-char-2704-a0"
+            ],
+            "outputs": [],
+            "texts": [],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "insert",
+            "targets": [],
+            "outputs": [
+              "rnd-insert-2704"
+            ],
+            "texts": [
+              "supplemental insertion 2704"
+            ],
+            "output_pages": [],
+            "position": 5
+          },
+          {
+            "op": "move",
+            "targets": [
+              "rnd-dup-2704-b1"
+            ],
+            "outputs": [],
+            "texts": [],
+            "output_pages": [],
+            "position": 3
+          }
+        ],
+        "geometry_mode": "no-geometry",
+        "composition_tags": [],
+        "permitted_compositions": [
+          [
+            "char_sub",
+            "drop"
+          ],
+          [
+            "char_sub",
+            "duplicate"
+          ],
+          [
+            "char_sub",
+            "insert"
+          ],
+          [
+            "char_sub",
+            "merge"
+          ],
+          [
+            "char_sub",
+            "move"
+          ],
+          [
+            "char_sub",
+            "split"
+          ],
+          [
+            "drop",
+            "duplicate"
+          ],
+          [
+            "drop",
+            "insert"
+          ],
+          [
+            "drop",
+            "merge"
+          ],
+          [
+            "drop",
+            "move"
+          ],
+          [
+            "drop",
+            "split"
+          ],
+          [
+            "duplicate",
+            "insert"
+          ],
+          [
+            "duplicate",
+            "merge"
+          ],
+          [
+            "duplicate",
+            "move"
+          ],
+          [
+            "duplicate",
+            "split"
+          ],
+          [
+            "insert",
+            "merge"
+          ],
+          [
+            "insert",
+            "move"
+          ],
+          [
+            "insert",
+            "split"
+          ],
+          [
+            "merge",
+            "move"
+          ],
+          [
+            "merge",
+            "split"
+          ],
+          [
+            "move",
+            "split"
+          ]
+        ]
+      },
+      "bound_correct": 2,
+      "abstained": 3,
+      "wrong": 0,
+      "allowed_pair_count": 3,
+      "required_inv2": []
+    },
+    {
+      "case": "shared-random-seed-2705",
+      "seed": 2705,
+      "config": {
+        "name": "random-seed-2705",
+        "seed": 2705,
+        "operations": [
+          {
+            "op": "char_sub",
+            "targets": [
+              "a1"
+            ],
+            "outputs": [
+              "rnd-char-2705-a1"
+            ],
+            "texts": [
+              "gomma delta "
+            ],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "split",
+            "targets": [
+              "c1"
+            ],
+            "outputs": [
+              "rnd-split-2705-c1-0",
+              "rnd-split-2705-c1-1"
+            ],
+            "texts": [
+              "lambda ",
+              "mu"
+            ],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "merge",
+            "targets": [
+              "p0",
+              "rnd-char-2705-a1"
+            ],
+            "outputs": [
+              "rnd-merge-2705-p0-rnd-char-2705-a1"
+            ],
+            "texts": [],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "duplicate",
+            "targets": [
+              "b0"
+            ],
+            "outputs": [
+              "rnd-dup-2705-b0"
+            ],
+            "texts": [],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "drop",
+            "targets": [
+              "s0"
+            ],
+            "outputs": [],
+            "texts": [],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "insert",
+            "targets": [],
+            "outputs": [
+              "rnd-insert-2705"
+            ],
+            "texts": [
+              "supplemental insertion 2705"
+            ],
+            "output_pages": [],
+            "position": 10
+          },
+          {
+            "op": "move",
+            "targets": [
+              "rnd-merge-2705-p0-rnd-char-2705-a1"
+            ],
+            "outputs": [],
+            "texts": [],
+            "output_pages": [],
+            "position": 0
+          }
+        ],
+        "geometry_mode": "no-geometry",
+        "composition_tags": [],
+        "permitted_compositions": [
+          [
+            "char_sub",
+            "drop"
+          ],
+          [
+            "char_sub",
+            "duplicate"
+          ],
+          [
+            "char_sub",
+            "insert"
+          ],
+          [
+            "char_sub",
+            "merge"
+          ],
+          [
+            "char_sub",
+            "move"
+          ],
+          [
+            "char_sub",
+            "split"
+          ],
+          [
+            "drop",
+            "duplicate"
+          ],
+          [
+            "drop",
+            "insert"
+          ],
+          [
+            "drop",
+            "merge"
+          ],
+          [
+            "drop",
+            "move"
+          ],
+          [
+            "drop",
+            "split"
+          ],
+          [
+            "duplicate",
+            "insert"
+          ],
+          [
+            "duplicate",
+            "merge"
+          ],
+          [
+            "duplicate",
+            "move"
+          ],
+          [
+            "duplicate",
+            "split"
+          ],
+          [
+            "insert",
+            "merge"
+          ],
+          [
+            "insert",
+            "move"
+          ],
+          [
+            "insert",
+            "split"
+          ],
+          [
+            "merge",
+            "move"
+          ],
+          [
+            "merge",
+            "split"
+          ],
+          [
+            "move",
+            "split"
+          ]
+        ]
+      },
+      "bound_correct": 0,
+      "abstained": 4,
+      "wrong": 1,
+      "allowed_pair_count": 0,
+      "required_inv2": []
+    },
+    {
+      "case": "shared-random-seed-2706",
+      "seed": 2706,
+      "config": {
+        "name": "random-seed-2706",
+        "seed": 2706,
+        "operations": [
+          {
+            "op": "char_sub",
+            "targets": [
+              "b0"
+            ],
+            "outputs": [
+              "rnd-char-2706-b0"
+            ],
+            "texts": [
+              "cpsilon zeta "
+            ],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "split",
+            "targets": [
+              "s0"
+            ],
+            "outputs": [
+              "rnd-split-2706-s0-0",
+              "rnd-split-2706-s0-1"
+            ],
+            "texts": [
+              "closing ",
+              "signature"
+            ],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "merge",
+            "targets": [
+              "a0",
+              "p0"
+            ],
+            "outputs": [
+              "rnd-merge-2706-a0-p0"
+            ],
+            "texts": [],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "duplicate",
+            "targets": [
+              "h0"
+            ],
+            "outputs": [
+              "rnd-dup-2706-h0"
+            ],
+            "texts": [],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "drop",
+            "targets": [
+              "rnd-dup-2706-h0"
+            ],
+            "outputs": [],
+            "texts": [],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "insert",
+            "targets": [],
+            "outputs": [
+              "rnd-insert-2706"
+            ],
+            "texts": [
+              "supplemental insertion 2706"
+            ],
+            "output_pages": [],
+            "position": 2
+          },
+          {
+            "op": "move",
+            "targets": [
+              "rnd-merge-2706-a0-p0"
+            ],
+            "outputs": [],
+            "texts": [],
+            "output_pages": [],
+            "position": 4
+          }
+        ],
+        "geometry_mode": "no-geometry",
+        "composition_tags": [],
+        "permitted_compositions": [
+          [
+            "char_sub",
+            "drop"
+          ],
+          [
+            "char_sub",
+            "duplicate"
+          ],
+          [
+            "char_sub",
+            "insert"
+          ],
+          [
+            "char_sub",
+            "merge"
+          ],
+          [
+            "char_sub",
+            "move"
+          ],
+          [
+            "char_sub",
+            "split"
+          ],
+          [
+            "drop",
+            "duplicate"
+          ],
+          [
+            "drop",
+            "insert"
+          ],
+          [
+            "drop",
+            "merge"
+          ],
+          [
+            "drop",
+            "move"
+          ],
+          [
+            "drop",
+            "split"
+          ],
+          [
+            "duplicate",
+            "insert"
+          ],
+          [
+            "duplicate",
+            "merge"
+          ],
+          [
+            "duplicate",
+            "move"
+          ],
+          [
+            "duplicate",
+            "split"
+          ],
+          [
+            "insert",
+            "merge"
+          ],
+          [
+            "insert",
+            "move"
+          ],
+          [
+            "insert",
+            "split"
+          ],
+          [
+            "merge",
+            "move"
+          ],
+          [
+            "merge",
+            "split"
+          ],
+          [
+            "move",
+            "split"
+          ]
+        ]
+      },
+      "bound_correct": 2,
+      "abstained": 2,
+      "wrong": 1,
+      "allowed_pair_count": 2,
+      "required_inv2": []
+    },
+    {
+      "case": "shared-random-seed-2707",
+      "seed": 2707,
+      "config": {
+        "name": "random-seed-2707",
+        "seed": 2707,
+        "operations": [
+          {
+            "op": "char_sub",
+            "targets": [
+              "s0"
+            ],
+            "outputs": [
+              "rnd-char-2707-s0"
+            ],
+            "texts": [
+              "elosing signature"
+            ],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "split",
+            "targets": [
+              "b0"
+            ],
+            "outputs": [
+              "rnd-split-2707-b0-0",
+              "rnd-split-2707-b0-1"
+            ],
+            "texts": [
+              "epsilon ",
+              "zeta "
+            ],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "merge",
+            "targets": [
+              "p0",
+              "a1"
+            ],
+            "outputs": [
+              "rnd-merge-2707-p0-a1"
+            ],
+            "texts": [],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "duplicate",
+            "targets": [
+              "p1"
+            ],
+            "outputs": [
+              "rnd-dup-2707-p1"
+            ],
+            "texts": [],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "drop",
+            "targets": [
+              "c1"
+            ],
+            "outputs": [],
+            "texts": [],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "insert",
+            "targets": [],
+            "outputs": [
+              "rnd-insert-2707"
+            ],
+            "texts": [
+              "supplemental insertion 2707"
+            ],
+            "output_pages": [],
+            "position": 8
+          },
+          {
+            "op": "move",
+            "targets": [
+              "rnd-char-2707-s0"
+            ],
+            "outputs": [],
+            "texts": [],
+            "output_pages": [],
+            "position": 6
+          }
+        ],
+        "geometry_mode": "no-geometry",
+        "composition_tags": [],
+        "permitted_compositions": [
+          [
+            "char_sub",
+            "drop"
+          ],
+          [
+            "char_sub",
+            "duplicate"
+          ],
+          [
+            "char_sub",
+            "insert"
+          ],
+          [
+            "char_sub",
+            "merge"
+          ],
+          [
+            "char_sub",
+            "move"
+          ],
+          [
+            "char_sub",
+            "split"
+          ],
+          [
+            "drop",
+            "duplicate"
+          ],
+          [
+            "drop",
+            "insert"
+          ],
+          [
+            "drop",
+            "merge"
+          ],
+          [
+            "drop",
+            "move"
+          ],
+          [
+            "drop",
+            "split"
+          ],
+          [
+            "duplicate",
+            "insert"
+          ],
+          [
+            "duplicate",
+            "merge"
+          ],
+          [
+            "duplicate",
+            "move"
+          ],
+          [
+            "duplicate",
+            "split"
+          ],
+          [
+            "insert",
+            "merge"
+          ],
+          [
+            "insert",
+            "move"
+          ],
+          [
+            "insert",
+            "split"
+          ],
+          [
+            "merge",
+            "move"
+          ],
+          [
+            "merge",
+            "split"
+          ],
+          [
+            "move",
+            "split"
+          ]
+        ]
+      },
+      "bound_correct": 1,
+      "abstained": 4,
+      "wrong": 0,
+      "allowed_pair_count": 2,
+      "required_inv2": []
+    },
+    {
+      "case": "shared-random-seed-2708",
+      "seed": 2708,
+      "config": {
+        "name": "random-seed-2708",
+        "seed": 2708,
+        "operations": [
+          {
+            "op": "char_sub",
+            "targets": [
+              "b0"
+            ],
+            "outputs": [
+              "rnd-char-2708-b0"
+            ],
+            "texts": [
+              "cpsilon zeta "
+            ],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "split",
+            "targets": [
+              "h0"
+            ],
+            "outputs": [
+              "rnd-split-2708-h0-0",
+              "rnd-split-2708-h0-1"
+            ],
+            "texts": [
+              "Opening ",
+              "heading"
+            ],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "merge",
+            "targets": [
+              "a1",
+              "p1"
+            ],
+            "outputs": [
+              "rnd-merge-2708-a1-p1"
+            ],
+            "texts": [],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "duplicate",
+            "targets": [
+              "rnd-char-2708-b0"
+            ],
+            "outputs": [
+              "rnd-dup-2708-rnd-char-2708-b0"
+            ],
+            "texts": [],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "drop",
+            "targets": [
+              "a0"
+            ],
+            "outputs": [],
+            "texts": [],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "insert",
+            "targets": [],
+            "outputs": [
+              "rnd-insert-2708"
+            ],
+            "texts": [
+              "supplemental insertion 2708"
+            ],
+            "output_pages": [],
+            "position": 9
+          },
+          {
+            "op": "move",
+            "targets": [
+              "s0"
+            ],
+            "outputs": [],
+            "texts": [],
+            "output_pages": [],
+            "position": 2
+          }
+        ],
+        "geometry_mode": "no-geometry",
+        "composition_tags": [],
+        "permitted_compositions": [
+          [
+            "char_sub",
+            "drop"
+          ],
+          [
+            "char_sub",
+            "duplicate"
+          ],
+          [
+            "char_sub",
+            "insert"
+          ],
+          [
+            "char_sub",
+            "merge"
+          ],
+          [
+            "char_sub",
+            "move"
+          ],
+          [
+            "char_sub",
+            "split"
+          ],
+          [
+            "drop",
+            "duplicate"
+          ],
+          [
+            "drop",
+            "insert"
+          ],
+          [
+            "drop",
+            "merge"
+          ],
+          [
+            "drop",
+            "move"
+          ],
+          [
+            "drop",
+            "split"
+          ],
+          [
+            "duplicate",
+            "insert"
+          ],
+          [
+            "duplicate",
+            "merge"
+          ],
+          [
+            "duplicate",
+            "move"
+          ],
+          [
+            "duplicate",
+            "split"
+          ],
+          [
+            "insert",
+            "merge"
+          ],
+          [
+            "insert",
+            "move"
+          ],
+          [
+            "insert",
+            "split"
+          ],
+          [
+            "merge",
+            "move"
+          ],
+          [
+            "merge",
+            "split"
+          ],
+          [
+            "move",
+            "split"
+          ]
+        ]
+      },
+      "bound_correct": 1,
+      "abstained": 4,
+      "wrong": 0,
+      "allowed_pair_count": 1,
+      "required_inv2": []
+    },
+    {
+      "case": "shared-random-seed-2709",
+      "seed": 2709,
+      "config": {
+        "name": "random-seed-2709",
+        "seed": 2709,
+        "operations": [
+          {
+            "op": "char_sub",
+            "targets": [
+              "a1"
+            ],
+            "outputs": [
+              "rnd-char-2709-a1"
+            ],
+            "texts": [
+              "gomma delta "
+            ],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "split",
+            "targets": [
+              "s0"
+            ],
+            "outputs": [
+              "rnd-split-2709-s0-0",
+              "rnd-split-2709-s0-1"
+            ],
+            "texts": [
+              "closing ",
+              "signature"
+            ],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "merge",
+            "targets": [
+              "a0",
+              "p0"
+            ],
+            "outputs": [
+              "rnd-merge-2709-a0-p0"
+            ],
+            "texts": [],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "duplicate",
+            "targets": [
+              "rnd-merge-2709-a0-p0"
+            ],
+            "outputs": [
+              "rnd-dup-2709-rnd-merge-2709-a0-p0"
+            ],
+            "texts": [],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "drop",
+            "targets": [
+              "b0"
+            ],
+            "outputs": [],
+            "texts": [],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "insert",
+            "targets": [],
+            "outputs": [
+              "rnd-insert-2709"
+            ],
+            "texts": [
+              "supplemental insertion 2709"
+            ],
+            "output_pages": [],
+            "position": 2
+          },
+          {
+            "op": "move",
+            "targets": [
+              "p1"
+            ],
+            "outputs": [],
+            "texts": [],
+            "output_pages": [],
+            "position": 3
+          }
+        ],
+        "geometry_mode": "no-geometry",
+        "composition_tags": [],
+        "permitted_compositions": [
+          [
+            "char_sub",
+            "drop"
+          ],
+          [
+            "char_sub",
+            "duplicate"
+          ],
+          [
+            "char_sub",
+            "insert"
+          ],
+          [
+            "char_sub",
+            "merge"
+          ],
+          [
+            "char_sub",
+            "move"
+          ],
+          [
+            "char_sub",
+            "split"
+          ],
+          [
+            "drop",
+            "duplicate"
+          ],
+          [
+            "drop",
+            "insert"
+          ],
+          [
+            "drop",
+            "merge"
+          ],
+          [
+            "drop",
+            "move"
+          ],
+          [
+            "drop",
+            "split"
+          ],
+          [
+            "duplicate",
+            "insert"
+          ],
+          [
+            "duplicate",
+            "merge"
+          ],
+          [
+            "duplicate",
+            "move"
+          ],
+          [
+            "duplicate",
+            "split"
+          ],
+          [
+            "insert",
+            "merge"
+          ],
+          [
+            "insert",
+            "move"
+          ],
+          [
+            "insert",
+            "split"
+          ],
+          [
+            "merge",
+            "move"
+          ],
+          [
+            "merge",
+            "split"
+          ],
+          [
+            "move",
+            "split"
+          ]
+        ]
+      },
+      "bound_correct": 3,
+      "abstained": 2,
+      "wrong": 0,
+      "allowed_pair_count": 3,
+      "required_inv2": []
+    },
+    {
+      "case": "shared-random-seed-2710",
+      "seed": 2710,
+      "config": {
+        "name": "random-seed-2710",
+        "seed": 2710,
+        "operations": [
+          {
+            "op": "char_sub",
+            "targets": [
+              "b0"
+            ],
+            "outputs": [
+              "rnd-char-2710-b0"
+            ],
+            "texts": [
+              "cpsilon zeta "
+            ],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "split",
+            "targets": [
+              "c1"
+            ],
+            "outputs": [
+              "rnd-split-2710-c1-0",
+              "rnd-split-2710-c1-1"
+            ],
+            "texts": [
+              "lambda ",
+              "mu"
+            ],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "merge",
+            "targets": [
+              "a1",
+              "p1"
+            ],
+            "outputs": [
+              "rnd-merge-2710-a1-p1"
+            ],
+            "texts": [],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "duplicate",
+            "targets": [
+              "rnd-char-2710-b0"
+            ],
+            "outputs": [
+              "rnd-dup-2710-rnd-char-2710-b0"
+            ],
+            "texts": [],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "drop",
+            "targets": [
+              "c0"
+            ],
+            "outputs": [],
+            "texts": [],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "insert",
+            "targets": [],
+            "outputs": [
+              "rnd-insert-2710"
+            ],
+            "texts": [
+              "supplemental insertion 2710"
+            ],
+            "output_pages": [],
+            "position": 9
+          },
+          {
+            "op": "move",
+            "targets": [
+              "rnd-insert-2710"
+            ],
+            "outputs": [],
+            "texts": [],
+            "output_pages": [],
+            "position": 5
+          }
+        ],
+        "geometry_mode": "no-geometry",
+        "composition_tags": [],
+        "permitted_compositions": [
+          [
+            "char_sub",
+            "drop"
+          ],
+          [
+            "char_sub",
+            "duplicate"
+          ],
+          [
+            "char_sub",
+            "insert"
+          ],
+          [
+            "char_sub",
+            "merge"
+          ],
+          [
+            "char_sub",
+            "move"
+          ],
+          [
+            "char_sub",
+            "split"
+          ],
+          [
+            "drop",
+            "duplicate"
+          ],
+          [
+            "drop",
+            "insert"
+          ],
+          [
+            "drop",
+            "merge"
+          ],
+          [
+            "drop",
+            "move"
+          ],
+          [
+            "drop",
+            "split"
+          ],
+          [
+            "duplicate",
+            "insert"
+          ],
+          [
+            "duplicate",
+            "merge"
+          ],
+          [
+            "duplicate",
+            "move"
+          ],
+          [
+            "duplicate",
+            "split"
+          ],
+          [
+            "insert",
+            "merge"
+          ],
+          [
+            "insert",
+            "move"
+          ],
+          [
+            "insert",
+            "split"
+          ],
+          [
+            "merge",
+            "move"
+          ],
+          [
+            "merge",
+            "split"
+          ],
+          [
+            "move",
+            "split"
+          ]
+        ]
+      },
+      "bound_correct": 2,
+      "abstained": 2,
+      "wrong": 1,
+      "allowed_pair_count": 2,
+      "required_inv2": []
+    },
+    {
+      "case": "shared-random-seed-2711",
+      "seed": 2711,
+      "config": {
+        "name": "random-seed-2711",
+        "seed": 2711,
+        "operations": [
+          {
+            "op": "char_sub",
+            "targets": [
+              "b1"
+            ],
+            "outputs": [
+              "rnd-char-2711-b1"
+            ],
+            "texts": [
+              "cta theta "
+            ],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "split",
+            "targets": [
+              "s0"
+            ],
+            "outputs": [
+              "rnd-split-2711-s0-0",
+              "rnd-split-2711-s0-1"
+            ],
+            "texts": [
+              "closing ",
+              "signature"
+            ],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "merge",
+            "targets": [
+              "a1",
+              "p1"
+            ],
+            "outputs": [
+              "rnd-merge-2711-a1-p1"
+            ],
+            "texts": [],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "duplicate",
+            "targets": [
+              "p0"
+            ],
+            "outputs": [
+              "rnd-dup-2711-p0"
+            ],
+            "texts": [],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "drop",
+            "targets": [
+              "c1"
+            ],
+            "outputs": [],
+            "texts": [],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "insert",
+            "targets": [],
+            "outputs": [
+              "rnd-insert-2711"
+            ],
+            "texts": [
+              "supplemental insertion 2711"
+            ],
+            "output_pages": [],
+            "position": 4
+          },
+          {
+            "op": "move",
+            "targets": [
+              "rnd-split-2711-s0-0"
+            ],
+            "outputs": [],
+            "texts": [],
+            "output_pages": [],
+            "position": 3
+          }
+        ],
+        "geometry_mode": "no-geometry",
+        "composition_tags": [],
+        "permitted_compositions": [
+          [
+            "char_sub",
+            "drop"
+          ],
+          [
+            "char_sub",
+            "duplicate"
+          ],
+          [
+            "char_sub",
+            "insert"
+          ],
+          [
+            "char_sub",
+            "merge"
+          ],
+          [
+            "char_sub",
+            "move"
+          ],
+          [
+            "char_sub",
+            "split"
+          ],
+          [
+            "drop",
+            "duplicate"
+          ],
+          [
+            "drop",
+            "insert"
+          ],
+          [
+            "drop",
+            "merge"
+          ],
+          [
+            "drop",
+            "move"
+          ],
+          [
+            "drop",
+            "split"
+          ],
+          [
+            "duplicate",
+            "insert"
+          ],
+          [
+            "duplicate",
+            "merge"
+          ],
+          [
+            "duplicate",
+            "move"
+          ],
+          [
+            "duplicate",
+            "split"
+          ],
+          [
+            "insert",
+            "merge"
+          ],
+          [
+            "insert",
+            "move"
+          ],
+          [
+            "insert",
+            "split"
+          ],
+          [
+            "merge",
+            "move"
+          ],
+          [
+            "merge",
+            "split"
+          ],
+          [
+            "move",
+            "split"
+          ]
+        ]
+      },
+      "bound_correct": 1,
+      "abstained": 4,
+      "wrong": 0,
+      "allowed_pair_count": 1,
+      "required_inv2": []
+    },
+    {
+      "case": "shared-random-seed-2712",
+      "seed": 2712,
+      "config": {
+        "name": "random-seed-2712",
+        "seed": 2712,
+        "operations": [
+          {
+            "op": "char_sub",
+            "targets": [
+              "b1"
+            ],
+            "outputs": [
+              "rnd-char-2712-b1"
+            ],
+            "texts": [
+              "cta theta "
+            ],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "split",
+            "targets": [
+              "rnd-char-2712-b1"
+            ],
+            "outputs": [
+              "rnd-split-2712-rnd-char-2712-b1-0",
+              "rnd-split-2712-rnd-char-2712-b1-1"
+            ],
+            "texts": [
+              "cta ",
+              "theta "
+            ],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "merge",
+            "targets": [
+              "a1",
+              "p1"
+            ],
+            "outputs": [
+              "rnd-merge-2712-a1-p1"
+            ],
+            "texts": [],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "duplicate",
+            "targets": [
+              "p0"
+            ],
+            "outputs": [
+              "rnd-dup-2712-p0"
+            ],
+            "texts": [],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "drop",
+            "targets": [
+              "a0"
+            ],
+            "outputs": [],
+            "texts": [],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "insert",
+            "targets": [],
+            "outputs": [
+              "rnd-insert-2712"
+            ],
+            "texts": [
+              "supplemental insertion 2712"
+            ],
+            "output_pages": [],
+            "position": 6
+          },
+          {
+            "op": "move",
+            "targets": [
+              "rnd-split-2712-rnd-char-2712-b1-1"
+            ],
+            "outputs": [],
+            "texts": [],
+            "output_pages": [],
+            "position": 10
+          }
+        ],
+        "geometry_mode": "no-geometry",
+        "composition_tags": [],
+        "permitted_compositions": [
+          [
+            "char_sub",
+            "drop"
+          ],
+          [
+            "char_sub",
+            "duplicate"
+          ],
+          [
+            "char_sub",
+            "insert"
+          ],
+          [
+            "char_sub",
+            "merge"
+          ],
+          [
+            "char_sub",
+            "move"
+          ],
+          [
+            "char_sub",
+            "split"
+          ],
+          [
+            "drop",
+            "duplicate"
+          ],
+          [
+            "drop",
+            "insert"
+          ],
+          [
+            "drop",
+            "merge"
+          ],
+          [
+            "drop",
+            "move"
+          ],
+          [
+            "drop",
+            "split"
+          ],
+          [
+            "duplicate",
+            "insert"
+          ],
+          [
+            "duplicate",
+            "merge"
+          ],
+          [
+            "duplicate",
+            "move"
+          ],
+          [
+            "duplicate",
+            "split"
+          ],
+          [
+            "insert",
+            "merge"
+          ],
+          [
+            "insert",
+            "move"
+          ],
+          [
+            "insert",
+            "split"
+          ],
+          [
+            "merge",
+            "move"
+          ],
+          [
+            "merge",
+            "split"
+          ],
+          [
+            "move",
+            "split"
+          ]
+        ]
+      },
+      "bound_correct": 0,
+      "abstained": 4,
+      "wrong": 1,
+      "allowed_pair_count": 1,
+      "required_inv2": []
+    },
+    {
+      "case": "shared-random-seed-2713",
+      "seed": 2713,
+      "config": {
+        "name": "random-seed-2713",
+        "seed": 2713,
+        "operations": [
+          {
+            "op": "char_sub",
+            "targets": [
+              "c1"
+            ],
+            "outputs": [
+              "rnd-char-2713-c1"
+            ],
+            "texts": [
+              "iambda mu"
+            ],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "split",
+            "targets": [
+              "b0"
+            ],
+            "outputs": [
+              "rnd-split-2713-b0-0",
+              "rnd-split-2713-b0-1"
+            ],
+            "texts": [
+              "epsilon ",
+              "zeta "
+            ],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "merge",
+            "targets": [
+              "c0",
+              "rnd-char-2713-c1"
+            ],
+            "outputs": [
+              "rnd-merge-2713-c0-rnd-char-2713-c1"
+            ],
+            "texts": [],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "duplicate",
+            "targets": [
+              "p1"
+            ],
+            "outputs": [
+              "rnd-dup-2713-p1"
+            ],
+            "texts": [],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "drop",
+            "targets": [
+              "a1"
+            ],
+            "outputs": [],
+            "texts": [],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "insert",
+            "targets": [],
+            "outputs": [
+              "rnd-insert-2713"
+            ],
+            "texts": [
+              "supplemental insertion 2713"
+            ],
+            "output_pages": [],
+            "position": 5
+          },
+          {
+            "op": "move",
+            "targets": [
+              "p1"
+            ],
+            "outputs": [],
+            "texts": [],
+            "output_pages": [],
+            "position": 1
+          }
+        ],
+        "geometry_mode": "no-geometry",
+        "composition_tags": [],
+        "permitted_compositions": [
+          [
+            "char_sub",
+            "drop"
+          ],
+          [
+            "char_sub",
+            "duplicate"
+          ],
+          [
+            "char_sub",
+            "insert"
+          ],
+          [
+            "char_sub",
+            "merge"
+          ],
+          [
+            "char_sub",
+            "move"
+          ],
+          [
+            "char_sub",
+            "split"
+          ],
+          [
+            "drop",
+            "duplicate"
+          ],
+          [
+            "drop",
+            "insert"
+          ],
+          [
+            "drop",
+            "merge"
+          ],
+          [
+            "drop",
+            "move"
+          ],
+          [
+            "drop",
+            "split"
+          ],
+          [
+            "duplicate",
+            "insert"
+          ],
+          [
+            "duplicate",
+            "merge"
+          ],
+          [
+            "duplicate",
+            "move"
+          ],
+          [
+            "duplicate",
+            "split"
+          ],
+          [
+            "insert",
+            "merge"
+          ],
+          [
+            "insert",
+            "move"
+          ],
+          [
+            "insert",
+            "split"
+          ],
+          [
+            "merge",
+            "move"
+          ],
+          [
+            "merge",
+            "split"
+          ],
+          [
+            "move",
+            "split"
+          ]
+        ]
+      },
+      "bound_correct": 1,
+      "abstained": 3,
+      "wrong": 1,
+      "allowed_pair_count": 2,
+      "required_inv2": []
+    },
+    {
+      "case": "shared-random-seed-2714",
+      "seed": 2714,
+      "config": {
+        "name": "random-seed-2714",
+        "seed": 2714,
+        "operations": [
+          {
+            "op": "char_sub",
+            "targets": [
+              "c1"
+            ],
+            "outputs": [
+              "rnd-char-2714-c1"
+            ],
+            "texts": [
+              "iambda mu"
+            ],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "split",
+            "targets": [
+              "h0"
+            ],
+            "outputs": [
+              "rnd-split-2714-h0-0",
+              "rnd-split-2714-h0-1"
+            ],
+            "texts": [
+              "Opening ",
+              "heading"
+            ],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "merge",
+            "targets": [
+              "c0",
+              "rnd-char-2714-c1"
+            ],
+            "outputs": [
+              "rnd-merge-2714-c0-rnd-char-2714-c1"
+            ],
+            "texts": [],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "duplicate",
+            "targets": [
+              "b0"
+            ],
+            "outputs": [
+              "rnd-dup-2714-b0"
+            ],
+            "texts": [],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "drop",
+            "targets": [
+              "p1"
+            ],
+            "outputs": [],
+            "texts": [],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "insert",
+            "targets": [],
+            "outputs": [
+              "rnd-insert-2714"
+            ],
+            "texts": [
+              "supplemental insertion 2714"
+            ],
+            "output_pages": [],
+            "position": 6
+          },
+          {
+            "op": "move",
+            "targets": [
+              "rnd-merge-2714-c0-rnd-char-2714-c1"
+            ],
+            "outputs": [],
+            "texts": [],
+            "output_pages": [],
+            "position": 8
+          }
+        ],
+        "geometry_mode": "no-geometry",
+        "composition_tags": [],
+        "permitted_compositions": [
+          [
+            "char_sub",
+            "drop"
+          ],
+          [
+            "char_sub",
+            "duplicate"
+          ],
+          [
+            "char_sub",
+            "insert"
+          ],
+          [
+            "char_sub",
+            "merge"
+          ],
+          [
+            "char_sub",
+            "move"
+          ],
+          [
+            "char_sub",
+            "split"
+          ],
+          [
+            "drop",
+            "duplicate"
+          ],
+          [
+            "drop",
+            "insert"
+          ],
+          [
+            "drop",
+            "merge"
+          ],
+          [
+            "drop",
+            "move"
+          ],
+          [
+            "drop",
+            "split"
+          ],
+          [
+            "duplicate",
+            "insert"
+          ],
+          [
+            "duplicate",
+            "merge"
+          ],
+          [
+            "duplicate",
+            "move"
+          ],
+          [
+            "duplicate",
+            "split"
+          ],
+          [
+            "insert",
+            "merge"
+          ],
+          [
+            "insert",
+            "move"
+          ],
+          [
+            "insert",
+            "split"
+          ],
+          [
+            "merge",
+            "move"
+          ],
+          [
+            "merge",
+            "split"
+          ],
+          [
+            "move",
+            "split"
+          ]
+        ]
+      },
+      "bound_correct": 2,
+      "abstained": 3,
+      "wrong": 0,
+      "allowed_pair_count": 2,
+      "required_inv2": []
+    },
+    {
+      "case": "shared-random-seed-2715",
+      "seed": 2715,
+      "config": {
+        "name": "random-seed-2715",
+        "seed": 2715,
+        "operations": [
+          {
+            "op": "char_sub",
+            "targets": [
+              "c0"
+            ],
+            "outputs": [
+              "rnd-char-2715-c0"
+            ],
+            "texts": [
+              "lota kappa "
+            ],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "split",
+            "targets": [
+              "b0"
+            ],
+            "outputs": [
+              "rnd-split-2715-b0-0",
+              "rnd-split-2715-b0-1"
+            ],
+            "texts": [
+              "epsilon ",
+              "zeta "
+            ],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "merge",
+            "targets": [
+              "a0",
+              "p0"
+            ],
+            "outputs": [
+              "rnd-merge-2715-a0-p0"
+            ],
+            "texts": [],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "duplicate",
+            "targets": [
+              "p1"
+            ],
+            "outputs": [
+              "rnd-dup-2715-p1"
+            ],
+            "texts": [],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "drop",
+            "targets": [
+              "h0"
+            ],
+            "outputs": [],
+            "texts": [],
+            "output_pages": [],
+            "position": null
+          },
+          {
+            "op": "insert",
+            "targets": [],
+            "outputs": [
+              "rnd-insert-2715"
+            ],
+            "texts": [
+              "supplemental insertion 2715"
+            ],
+            "output_pages": [],
+            "position": 9
+          },
+          {
+            "op": "move",
+            "targets": [
+              "s0"
+            ],
+            "outputs": [],
+            "texts": [],
+            "output_pages": [],
+            "position": 3
+          }
+        ],
+        "geometry_mode": "no-geometry",
+        "composition_tags": [],
+        "permitted_compositions": [
+          [
+            "char_sub",
+            "drop"
+          ],
+          [
+            "char_sub",
+            "duplicate"
+          ],
+          [
+            "char_sub",
+            "insert"
+          ],
+          [
+            "char_sub",
+            "merge"
+          ],
+          [
+            "char_sub",
+            "move"
+          ],
+          [
+            "char_sub",
+            "split"
+          ],
+          [
+            "drop",
+            "duplicate"
+          ],
+          [
+            "drop",
+            "insert"
+          ],
+          [
+            "drop",
+            "merge"
+          ],
+          [
+            "drop",
+            "move"
+          ],
+          [
+            "drop",
+            "split"
+          ],
+          [
+            "duplicate",
+            "insert"
+          ],
+          [
+            "duplicate",
+            "merge"
+          ],
+          [
+            "duplicate",
+            "move"
+          ],
+          [
+            "duplicate",
+            "split"
+          ],
+          [
+            "insert",
+            "merge"
+          ],
+          [
+            "insert",
+            "move"
+          ],
+          [
+            "insert",
+            "split"
+          ],
+          [
+            "merge",
+            "move"
+          ],
+          [
+            "merge",
+            "split"
+          ],
+          [
+            "move",
+            "split"
+          ]
+        ]
+      },
+      "bound_correct": 0,
+      "abstained": 5,
+      "wrong": 0,
+      "allowed_pair_count": 0,
+      "required_inv2": []
+    }
+  ],
+  "environment": {
+    "python": "3.13.0",
+    "python_executable": "/Users/ben_mpa/LLM/PER_LA_LIBERTA/engine/.venv/bin/python",
+    "platform": "macOS-26.5.1-arm64-arm-64bit-Mach-O",
+    "machine": "arm64",
+    "processor": "arm",
+    "uv_lock_sha256": "d56c32c65aa5c185d35f8bb75024ccb0a57939025ba11b3d7d93cc553ffffd27"
+  },
+  "imported_module": {
+    "module": "engine.structure.rebind",
+    "path": "/Users/ben_mpa/LLM/PER_LA_LIBERTA/engine/src/engine/structure/rebind.py"
+  },
+  "source_identity": {
+    "files": [
+      "docs/probes/s4_7_item2_prereg.md",
+      "docs/probes/s4_7_priority4_perf_baseline.json",
+      "src/engine/structure/artifacts.py",
+      "src/engine/structure/boundary_anchor.py",
+      "src/engine/structure/projection.py",
+      "src/engine/structure/rebind.py",
+      "src/engine/structure/structure_map.py",
+      "tests/harness/boundary.py",
+      "tests/harness/invariants_3_5.py",
+      "tests/harness/materialize.py",
+      "tests/harness/oracle.py",
+      "tests/harness/relation.py",
+      "tests/harness/scale.py",
+      "tests/unit/test_s4_7_inv1_inv2.py",
+      "tests/unit/test_s4_7_inv3_inv5.py",
+      "tests/unit/test_s4_7_inv6_inv7.py",
+      "tools/s4_7_hunt_manifest.py",
+      "tools/s4_7_perf_baseline.py"
+    ],
+    "pre": {
+      "docs/probes/s4_7_item2_prereg.md": "98b1b06287f64a8459e4ec64ff94eb724304345678b003932966c4bb5acc8d9b",
+      "docs/probes/s4_7_priority4_perf_baseline.json": "6eb8ed5c12b2272adb538cb62c7ce3ba082a7559b0093188cd4d6927b45408f7",
+      "src/engine/structure/artifacts.py": "dc136b7e69ace830f6795093cc72d009e7c1e1c00185cb0ea1d06fac297ec9c0",
+      "src/engine/structure/boundary_anchor.py": "2c361a379f033f32f69fca8fdd9e9bba179f3f25932c18ac9fca465d01b69d92",
+      "src/engine/structure/projection.py": "39f510f7e7490e5c99f25ed084b6b687adfdf9b79ed7b0f5be13bb923f698623",
+      "src/engine/structure/rebind.py": "7e7e9cdc9fb233d7be824ca1ab53f9a98ae516aaa4d36d5e722b55f465b67d2c",
+      "src/engine/structure/structure_map.py": "cb18a88a2f8d148da6a78f3f10538659e61e053957d7ab2f05803012acf72015",
+      "tests/harness/boundary.py": "6e0184612c1aa787eecbcdef977de8647abb05be9308afaf7f2e0b7990da4704",
+      "tests/harness/invariants_3_5.py": "084da84855f71d706380404cf257f422051165ec8ec2798858ad56b0cbd0e6b1",
+      "tests/harness/materialize.py": "159adc3b0056e7b3d29a6555c40306e7f9befe31f87d5659f8264eb35de947c6",
+      "tests/harness/oracle.py": "5fc5245b950362639874c7871e16bba6e4bd43c1daafa58840fd7c3f561e0712",
+      "tests/harness/relation.py": "4f778a2d9dfff66dd4be1b8d55fc3de9bdbf3b4b0161146edd07f37fd0647594",
+      "tests/harness/scale.py": "b624e397cd83d20b85595da5dd3e76b4a2287255fe543c44db22a3f3760a1f25",
+      "tests/unit/test_s4_7_inv1_inv2.py": "bda167b09eb2f3f9d1df47e7d646449689855fa70be819c0a639c492052aca18",
+      "tests/unit/test_s4_7_inv3_inv5.py": "bf4fec8a8fc002b6d8636e67cd1f923b7e6edf99f3c317a2f5b73fe6beb0da5b",
+      "tests/unit/test_s4_7_inv6_inv7.py": "7dba0bd5a8252de282f1041f7c3dc72f67a6b98e498ff2baf8650630f9e962e4",
+      "tools/s4_7_hunt_manifest.py": "0ed648cba619fa31febe82bb3b0e195e68e1a60ac91a43457f46506e696ad07b",
+      "tools/s4_7_perf_baseline.py": "8f56d1feeec5b93c7fb77c069c11bda6f58330c097b99154973ec03e17e74dd1"
+    },
+    "post": {
+      "docs/probes/s4_7_item2_prereg.md": "98b1b06287f64a8459e4ec64ff94eb724304345678b003932966c4bb5acc8d9b",
+      "docs/probes/s4_7_priority4_perf_baseline.json": "6eb8ed5c12b2272adb538cb62c7ce3ba082a7559b0093188cd4d6927b45408f7",
+      "src/engine/structure/artifacts.py": "dc136b7e69ace830f6795093cc72d009e7c1e1c00185cb0ea1d06fac297ec9c0",
+      "src/engine/structure/boundary_anchor.py": "2c361a379f033f32f69fca8fdd9e9bba179f3f25932c18ac9fca465d01b69d92",
+      "src/engine/structure/projection.py": "39f510f7e7490e5c99f25ed084b6b687adfdf9b79ed7b0f5be13bb923f698623",
+      "src/engine/structure/rebind.py": "7e7e9cdc9fb233d7be824ca1ab53f9a98ae516aaa4d36d5e722b55f465b67d2c",
+      "src/engine/structure/structure_map.py": "cb18a88a2f8d148da6a78f3f10538659e61e053957d7ab2f05803012acf72015",
+      "tests/harness/boundary.py": "6e0184612c1aa787eecbcdef977de8647abb05be9308afaf7f2e0b7990da4704",
+      "tests/harness/invariants_3_5.py": "084da84855f71d706380404cf257f422051165ec8ec2798858ad56b0cbd0e6b1",
+      "tests/harness/materialize.py": "159adc3b0056e7b3d29a6555c40306e7f9befe31f87d5659f8264eb35de947c6",
+      "tests/harness/oracle.py": "5fc5245b950362639874c7871e16bba6e4bd43c1daafa58840fd7c3f561e0712",
+      "tests/harness/relation.py": "4f778a2d9dfff66dd4be1b8d55fc3de9bdbf3b4b0161146edd07f37fd0647594",
+      "tests/harness/scale.py": "b624e397cd83d20b85595da5dd3e76b4a2287255fe543c44db22a3f3760a1f25",
+      "tests/unit/test_s4_7_inv1_inv2.py": "bda167b09eb2f3f9d1df47e7d646449689855fa70be819c0a639c492052aca18",
+      "tests/unit/test_s4_7_inv3_inv5.py": "bf4fec8a8fc002b6d8636e67cd1f923b7e6edf99f3c317a2f5b73fe6beb0da5b",
+      "tests/unit/test_s4_7_inv6_inv7.py": "7dba0bd5a8252de282f1041f7c3dc72f67a6b98e498ff2baf8650630f9e962e4",
+      "tools/s4_7_hunt_manifest.py": "0ed648cba619fa31febe82bb3b0e195e68e1a60ac91a43457f46506e696ad07b",
+      "tools/s4_7_perf_baseline.py": "8f56d1feeec5b93c7fb77c069c11bda6f58330c097b99154973ec03e17e74dd1"
+    },
+    "pre_aggregate_sha256": "00dcbb28fc67ac531f91384efb0e9883c62ddb7b67dd8bef100142e92f263ca4",
+    "post_aggregate_sha256": "00dcbb28fc67ac531f91384efb0e9883c62ddb7b67dd8bef100142e92f263ca4",
+    "byte_identical_after": true
+  },
+  "mutant_table": {
+    "path": "tests/hunts/hunt_rebind.py",
+    "sha256": "8860017f8966574cb55c00e1bada6ebbb6ecba1004d68012b7934522d471ca5c",
+    "normalized_mutants": [
+      {
+        "label": "empty-slot-returns-empty-shingle-fingerprint",
+        "scope": "tests/unit/test_rebind.py::test_fingerprint_slot_empty_is_none_never_empty_set",
+        "patches": [
+          {
+            "file": "src/engine/structure/rebind.py",
+            "old": "    if not toks:\n        return None",
+            "new": "    if not toks:\n        return SlotFingerprint(algo_id=FINGERPRINT_ALGO_ID, normalizer_id=FINGERPRINT_NORMALIZER_ID, k=1, token_count=0, shingles=())"
+          }
+        ]
+      },
+      {
+        "label": "short-slot-no-k-fallback",
+        "scope": "tests/unit/test_rebind.py::test_fingerprint_slot_short_slot_falls_back_to_available_k",
+        "patches": [
+          {
+            "file": "src/engine/structure/rebind.py",
+            "old": "    k_eff = min(k, len(toks)) if k >= 1 else 1",
+            "new": "    k_eff = k"
+          }
+        ]
+      },
+      {
+        "label": "empty-window-scores-one-not-zero",
+        "scope": "tests/unit/test_rebind.py::test_slot_similarity_empty_window_scores_zero",
+        "patches": [
+          {
+            "file": "src/engine/structure/rebind.py",
+            "old": "    if fresh is None:\n        return 0.0",
+            "new": "    if fresh is None:\n        return 1.0"
+          }
+        ]
+      },
+      {
+        "label": "jaccard-collapses-to-all-or-nothing-substring",
+        "scope": "tests/unit/test_rebind.py::test_r2_superstring_does_not_auto_bind_at_full_score",
+        "patches": [
+          {
+            "file": "src/engine/structure/rebind.py",
+            "old": "    return len(a & b) / len(union)",
+            "new": "    return 1.0 if (a & b) else 0.0"
+          }
+        ]
+      },
+      {
+        "label": "unknown-mode-defaults-instead-of-failing-loud",
+        "scope": "tests/unit/test_rebind.py::test_resolve_mode_unknown_fails_loud",
+        "patches": [
+          {
+            "file": "src/engine/structure/rebind.py",
+            "old": "    if geometry_mode in GEOMETRY_MODES:",
+            "new": "    if True:"
+          }
+        ]
+      },
+      {
+        "label": "none-mode-reported-as-manifest-not-fallback",
+        "scope": "tests/unit/test_rebind.py::test_resolve_mode_none_is_conditional_primary_fallback",
+        "patches": [
+          {
+            "file": "src/engine/structure/rebind.py",
+            "old": "        return (MODE_TIE_BREAK, FALLBACK_REPORTED_MODE, \"fallback\")",
+            "new": "        return (MODE_TIE_BREAK, MODE_TIE_BREAK, \"manifest\")"
+          }
+        ]
+      },
+      {
+        "label": "policy-ordering-guard-dropped",
+        "scope": "tests/unit/test_rebind.py::test_policy_inverted_ordering_is_rejected_at_construction",
+        "patches": [
+          {
+            "file": "src/engine/structure/rebind.py",
+            "old": "        if not (self.tau_no_geometry >= self.tau_tie_break >= self.tau_primary):",
+            "new": "        if False:"
+          }
+        ]
+      },
+      {
+        "label": "policy-default-primary-margin-inverted",
+        "scope": "tests/unit/test_rebind.py::test_policy_default_ordering_holds_on_the_named_default",
+        "patches": [
+          {
+            "file": "src/engine/structure/rebind.py",
+            "old": "    tau_primary: float = DEFAULT_FINGERPRINT_THRESHOLD - _DEFAULT_MODE_MARGIN",
+            "new": "    tau_primary: float = DEFAULT_FINGERPRINT_THRESHOLD + _DEFAULT_MODE_MARGIN"
+          }
+        ]
+      },
+      {
+        "label": "baseline-content-hash-gate-dropped",
+        "scope": "tests/unit/test_rebind.py::test_rebind_context_refuses_a_content_hash_mismatch",
+        "patches": [
+          {
+            "file": "src/engine/structure/rebind.py",
+            "old": "        if live_content != manifest.get(\"canonical_content_hash\"):",
+            "new": "        if False:"
+          }
+        ]
+      },
+      {
+        "label": "fingerprint-less-slot-binds-instead-of-missing-anchor",
+        "scope": "tests/unit/test_rebind.py::test_missing_anchor_node_never_binds_on_geometry_alone",
+        "patches": [
+          {
+            "file": "src/engine/structure/rebind.py",
+            "old": "                slot_name=slot.slot_name, bound=False, reason=\"missing-anchor\", score=None,",
+            "new": "                slot_name=slot.slot_name, bound=True, reason=None, score=None,"
+          }
+        ]
+      },
+      {
+        "label": "below-threshold-binds-any-score",
+        "scope": "tests/unit/test_rebind.py::test_below_threshold_when_fresh_content_diverges",
+        "patches": [
+          {
+            "file": "src/engine/structure/rebind.py",
+            "old": "                if score >= self.tau:",
+            "new": "                if score >= 0.0:"
+          }
+        ]
+      },
+      {
+        "label": "no-rescue-geometry-lifts-subtau-over-tau",
+        "scope": "tests/unit/test_rebind.py::test_no_rescue_geometry_does_not_lift_a_subtau_fingerprint",
+        "patches": [
+          {
+            "file": "src/engine/structure/rebind.py",
+            "old": "                if score >= self.tau:",
+            "new": "                if score >= self.tau or self._on_region_page(slot, a, b):"
+          }
+        ]
+      },
+      {
+        "label": "ambiguous-picks-first-candidate",
+        "scope": "tests/unit/test_rebind.py::test_ambiguous_repeated_content_fails_loud",
+        "patches": [
+          {
+            "file": "src/engine/structure/rebind.py",
+            "old": "        if len(chosen) == 1:",
+            "new": "        if len(chosen) >= 1:"
+          }
+        ]
+      },
+      {
+        "label": "primary-pin-ignores-mode",
+        "scope": "tests/unit/test_rebind.py::test_primary_mode_hard_pin_excludes_a_wrong_page_and_yields_zero_candidate",
+        "patches": [
+          {
+            "file": "src/engine/structure/rebind.py",
+            "old": "        if self.dp_mode == MODE_PRIMARY and slot.region is not None:",
+            "new": "        if False and slot.region is not None:"
+          }
+        ]
+      },
+      {
+        "label": "global-validate-gate-disabled",
+        "scope": "tests/unit/test_rebind.py::test_empty_container_makes_the_rebound_map_fail_global_validation",
+        "patches": [
+          {
+            "file": "src/engine/structure/rebind.py",
+            "old": "    if all_bound and not _map_validates(migrated_projection, context):",
+            "new": "    if False and not _map_validates(migrated_projection, context):"
+          }
+        ]
+      },
+      {
+        "label": "bound-subset-disjointness-disabled",
+        "scope": "tests/unit/test_rebind.py::test_partial_rebind_never_silently_double_claims_a_fresh_atom",
+        "patches": [
+          {
+            "file": "src/engine/structure/rebind.py",
+            "old": "    return {nid for owners in claims.values() if len(owners) > 1 for nid in owners}",
+            "new": "    return set()"
+          }
+        ]
+      },
+      {
+        "label": "s4-7-inv1-oracle-pairwise-disabled",
+        "scope": "tests/unit/test_s4_7_inv1_inv2.py::test_inv1_shipped_rebind_bound_set_is_subset_of_shared_corpus_oracle",
+        "patches": [
+          {
+            "file": "tests/harness/oracle.py",
+            "old": "    if unexpected:\n",
+            "new": "    if False and unexpected:\n"
+          }
+        ]
+      },
+      {
+        "label": "s4-7-repeated-passage-uniqueness-guard-disabled",
+        "scope": "tests/unit/test_s4_7_inv1_inv2.py::test_inv1_anchor_poor_sentinels_abstain_within_and_cross_container",
+        "patches": [
+          {
+            "file": "tests/harness/oracle.py",
+            "old": "    if unexpected:\n",
+            "new": "    if False and unexpected:\n"
+          }
+        ]
+      },
+      {
+        "label": "s4-7-inv1-oracle-global-disjointness-disabled",
+        "scope": "tests/unit/test_s4_7_inv1_inv2.py::test_oracle_global_conjunct_rejects_two_pairwise_allowed_claims_of_one_atom",
+        "patches": [
+          {
+            "file": "tests/harness/oracle.py",
+            "old": "    if contested:\n",
+            "new": "    if False and contested:\n"
+          }
+        ]
+      },
+      {
+        "label": "s4-7-inv1-duplicate-slot-outcome-guard-disabled",
+        "scope": "tests/unit/test_s4_7_inv1_inv2.py::test_oracle_rejects_duplicate_outcome_records_for_one_slot",
+        "patches": [
+          {
+            "file": "tests/harness/oracle.py",
+            "old": "    if len(observed_slots) != len(set(observed_slots)):\n",
+            "new": "    if False:\n"
+          }
+        ]
+      },
+      {
+        "label": "s4-7-positional-confirmation-accepts-maps-far",
+        "scope": "tests/unit/test_s4_7_inv1_inv2.py::test_unique_anchor_that_maps_far_is_not_confirmed",
+        "patches": [
+          {
+            "file": "src/engine/structure/boundary_anchor.py",
+            "old": "            and self.located_fresh_boundary == self.projected_fresh_boundary\n",
+            "new": "            and self.located_fresh_boundary is not None\n"
+          }
+        ]
+      },
+      {
+        "label": "s4-7-anchor-footprint-widened-without-lock-rerun",
+        "scope": "tests/unit/test_s4_7_inv1_inv2.py::test_anchor_interface_is_content_only_bounded_and_has_separate_confidence_hook",
+        "patches": [
+          {
+            "file": "src/engine/structure/boundary_anchor.py",
+            "old": "BOUNDARY_ANCHOR_FOOTPRINT_W = 24\n",
+            "new": "BOUNDARY_ANCHOR_FOOTPRINT_W = 240\n"
+          }
+        ]
+      },
+      {
+        "label": "s4-7-anchor-determinism-contract-disabled",
+        "scope": "tests/unit/test_s4_7_inv1_inv2.py::test_anchor_interface_wrapper_enforces_determinism_and_content_contiguity",
+        "patches": [
+          {
+            "file": "src/engine/structure/boundary_anchor.py",
+            "old": "    if first != second:\n",
+            "new": "    if False:\n"
+          }
+        ]
+      },
+      {
+        "label": "s4-7-anchor-content-only-contract-disabled",
+        "scope": "tests/unit/test_s4_7_inv1_inv2.py::test_anchor_interface_wrapper_enforces_determinism_and_content_contiguity",
+        "patches": [
+          {
+            "file": "src/engine/structure/boundary_anchor.py",
+            "old": "    if not matches_boundary:\n",
+            "new": "    if False:\n"
+          }
+        ]
+      },
+      {
+        "label": "s4-7-seam-insert-silent-drop-guard-disabled",
+        "scope": "tests/unit/test_s4_7_inv1_inv2.py::test_shared_seam_insert_cannot_be_silently_dropped_when_both_owners_bind",
+        "patches": [
+          {
+            "file": "tests/harness/oracle.py",
+            "old": "        if legal_slots and legal_slots.isdisjoint(observed.unresolved_slots):\n",
+            "new": "        if False:\n"
+          }
+        ]
+      },
+      {
+        "label": "s4-7-inv3-planted-destination-guard-disabled",
+        "scope": "tests/unit/test_s4_7_inv3_inv5.py::test_inv3_planted_greedy_wrong_span_is_rejected",
+        "patches": [
+          {
+            "file": "tests/harness/invariants_3_5.py",
+            "old": "        if observation.fresh_atom_ids not in planted:\n",
+            "new": "        if False:\n"
+          }
+        ]
+      },
+      {
+        "label": "s4-7-inv3-duplicate-observation-guard-disabled",
+        "scope": "tests/unit/test_s4_7_inv3_inv5.py::test_inv3_duplicate_observation_for_one_moved_slot_is_rejected",
+        "patches": [
+          {
+            "file": "tests/harness/invariants_3_5.py",
+            "old": "    if len(by_slot) != len(observations):\n",
+            "new": "    if False:\n"
+          }
+        ]
+      },
+      {
+        "label": "s4-7-inv3-global-map-validity-guard-disabled",
+        "scope": "tests/unit/test_s4_7_inv3_inv5.py::test_inv3_destination_atom_bind_with_invalid_map_is_rejected",
+        "patches": [
+          {
+            "file": "tests/harness/invariants_3_5.py",
+            "old": "        if not observation.map_globally_valid:\n",
+            "new": "        if False:\n"
+          }
+        ]
+      },
+      {
+        "label": "s4-7-inv4-insert-precedence-disabled",
+        "scope": "tests/unit/test_s4_7_inv3_inv5.py::test_inv4_analytic_half_open_boundary_classes[insert-at-gap]",
+        "patches": [
+          {
+            "file": "tests/harness/boundary.py",
+            "old": "    if any(block.tag == \"insert\" and block.old_lo == boundary for block in blocks):\n",
+            "new": "    if False:\n"
+          }
+        ]
+      },
+      {
+        "label": "s4-7-inv4-strict-interior-class-disabled",
+        "scope": "tests/unit/test_s4_7_inv3_inv5.py::test_inv4_analytic_half_open_boundary_classes[replace-interior]",
+        "patches": [
+          {
+            "file": "tests/harness/boundary.py",
+            "old": "        and block.old_lo < boundary < block.old_hi\n",
+            "new": "        and False\n"
+          }
+        ]
+      },
+      {
+        "label": "s4-7-inv4-capped-gap-interior-class-disabled",
+        "scope": "tests/unit/test_s4_7_inv3_inv5.py::test_inv4_analytic_half_open_boundary_classes[capped-gap]",
+        "patches": [
+          {
+            "file": "tests/harness/boundary.py",
+            "old": "        and block.old_lo < boundary < block.old_hi\n",
+            "new": "        and False\n"
+          }
+        ]
+      },
+      {
+        "label": "s4-7-inv4-edge-class-disabled",
+        "scope": "tests/unit/test_s4_7_inv3_inv5.py::test_inv4_analytic_half_open_boundary_classes[replace-edge]",
+        "patches": [
+          {
+            "file": "tests/harness/boundary.py",
+            "old": "    if token_tag(boundary - 1) != \"equal\" or token_tag(boundary) != \"equal\":\n",
+            "new": "    if False:\n"
+          }
+        ]
+      },
+      {
+        "label": "s4-7-inv4-adjacent-non-equal-tiling-accepted",
+        "scope": "tests/unit/test_s4_7_inv3_inv5.py::test_inv4_analytic_tiling_rejects_adjacent_non_equal_blocks",
+        "patches": [
+          {
+            "file": "tests/harness/boundary.py",
+            "old": "        if left.tag != \"equal\" and right.tag != \"equal\":\n",
+            "new": "        if False:\n"
+          }
+        ]
+      },
+      {
+        "label": "s4-7-inv4-clean-class-corrupted",
+        "scope": "tests/unit/test_s4_7_inv3_inv5.py::test_inv4_analytic_half_open_boundary_classes[clean]",
+        "patches": [
+          {
+            "file": "tests/harness/boundary.py",
+            "old": "    return \"clean-candidate\"\n",
+            "new": "    return \"edge-candidate\"\n"
+          }
+        ]
+      },
+      {
+        "label": "s4-7-inv5-tie-break-branch-disabled",
+        "scope": "tests/unit/test_s4_7_inv3_inv5.py::test_inv5_tie_break_uses_page_only_to_reduce_an_above_tau_tie",
+        "patches": [
+          {
+            "file": "src/engine/structure/rebind.py",
+            "old": "        if len(chosen) >= 2 and self.dp_mode == MODE_TIE_BREAK and slot.region is not None:\n",
+            "new": "        if False:\n"
+          }
+        ]
+      },
+      {
+        "label": "s4-7-inv5-no-geometry-illegally-hard-pins-region",
+        "scope": "tests/unit/test_rebind.py::test_no_geometry_mode_ignores_the_region_and_binds_on_fingerprint",
+        "patches": [
+          {
+            "file": "src/engine/structure/rebind.py",
+            "old": "        if self.dp_mode == MODE_PRIMARY and slot.region is not None:\n",
+            "new": "        if self.dp_mode in (MODE_PRIMARY, MODE_NO_GEOMETRY) and slot.region is not None:\n"
+          }
+        ]
+      },
+      {
+        "label": "s4-7-inv6-slope-estimator-forced-linear",
+        "scope": "tests/unit/test_s4_7_inv6_inv7.py::test_growth_estimator_distinguishes_linear_from_quadratic_and_keeps_ratios",
+        "patches": [
+          {
+            "file": "tests/harness/scale.py",
+            "old": "    logs_y = tuple(math.log(value) for value in ys)\n",
+            "new": "    logs_y = logs_x\n"
+          }
+        ]
+      },
+      {
+        "label": "s4-7-inv6-adjacent-ratios-erased",
+        "scope": "tests/unit/test_s4_7_inv6_inv7.py::test_growth_estimator_distinguishes_linear_from_quadratic_and_keeps_ratios",
+        "patches": [
+          {
+            "file": "tests/harness/scale.py",
+            "old": "    return tuple(right / left for left, right in zip(values, values[1:]))\n",
+            "new": "    return tuple(1.0 for left, right in zip(values, values[1:]))\n"
+          }
+        ]
+      },
+      {
+        "label": "s4-7-perf-time-phase-completion-validation-dropped",
+        "scope": "tests/unit/test_s4_7_inv6_inv7.py::test_perf_measurement_validates_every_run_and_observes_python_allocations",
+        "patches": [
+          {
+            "file": "tests/harness/scale.py",
+            "old": "        validate(result)\n        samples.append(elapsed)\n",
+            "new": "        if False:\n            validate(result)\n        samples.append(elapsed)\n"
+          }
+        ]
+      },
+      {
+        "label": "s4-7-perf-tracemalloc-peak-forced-zero",
+        "scope": "tests/unit/test_s4_7_inv6_inv7.py::test_perf_measurement_validates_every_run_and_observes_python_allocations",
+        "patches": [
+          {
+            "file": "tests/harness/scale.py",
+            "old": "            _, peak = tracemalloc.get_traced_memory()\n",
+            "new": "            _, peak = (0, 0)\n"
+          }
+        ]
+      },
+      {
+        "label": "s4-7-inv6-growth-budget-guard-disabled",
+        "scope": "tests/unit/test_s4_7_inv6_inv7.py::test_inv6_shipped_rebind_wall_growth_exceeds_the_preregistered_bar",
+        "patches": [
+          {
+            "file": "tests/harness/scale.py",
+            "old": "def assert_growth_within_limits(summary: Mapping[str, object], *, metric: str) -> None:\n    slope = float(summary[\"slope\"])\n",
+            "new": "def assert_growth_within_limits(summary: Mapping[str, object], *, metric: str) -> None:\n    return\n    slope = float(summary[\"slope\"])\n"
+          }
+        ]
+      },
+      {
+        "label": "s4-7-inv7-depth-shrunk-after-preregistration",
+        "scope": "tests/unit/test_s4_7_inv6_inv7.py::test_priority4_preregistered_constants_and_upward_only_ladder_are_pinned",
+        "patches": [
+          {
+            "file": "tests/harness/scale.py",
+            "old": "INV7_DEPTH = 3_000\n",
+            "new": "INV7_DEPTH = 300\n"
+          }
+        ]
+      },
+      {
+        "label": "s4-7-inv7-wall-ceiling-relaxed-after-measurement",
+        "scope": "tests/unit/test_s4_7_inv6_inv7.py::test_inv7_deep_evidence_wall_clock_exceeds_the_preregistered_ceiling",
+        "patches": [
+          {
+            "file": "tests/harness/scale.py",
+            "old": "INV7_MAX_SECONDS = 2.0\n",
+            "new": "INV7_MAX_SECONDS = 20.0\n"
+          }
+        ]
+      },
+      {
+        "label": "s4-7-perf-baseline-source-identity-check-disabled",
+        "scope": "tests/unit/test_s4_7_inv6_inv7.py::test_priority4_baseline_rejects_stale_source_identity",
+        "patches": [
+          {
+            "file": "tests/harness/scale.py",
+            "old": "    if verify_source_identity:\n",
+            "new": "    if False:\n"
+          }
+        ]
+      },
+      {
+        "label": "restamp-ignores-the-bottom-up-subtree-gate",
+        "scope": "tests/unit/test_rebind.py::test_ancestor_not_restamped_while_a_descendant_is_unresolved",
+        "patches": [
+          {
+            "file": "src/engine/structure/rebind.py",
+            "old": "        if not _subtree_ids(entry.node_id, migrated_projection).issubset(bound_node_ids):",
+            "new": "        if False:"
+          }
+        ]
+      },
+      {
+        "label": "stale-decision-never-detected",
+        "scope": "tests/unit/test_rebind.py::test_stale_decision_is_a_finding_not_a_restamp",
+        "patches": [
+          {
+            "file": "src/engine/structure/rebind.py",
+            "old": "        and entry.decision_digest != decision_digest(node)",
+            "new": "        and False"
+          }
+        ]
+      },
+      {
+        "label": "stale-decision-node-kept-bound",
+        "scope": "tests/unit/test_rebind.py::test_stale_decision_is_a_finding_not_a_restamp",
+        "patches": [
+          {
+            "file": "src/engine/structure/rebind.py",
+            "old": "        bound_node_ids -= stale_decisions",
+            "new": "        bound_node_ids -= set()"
+          }
+        ]
+      },
+      {
+        "label": "typed-anchor-dropped-on-load",
+        "scope": "tests/unit/test_structure_map.py::test_v2_map_exposes_typed_rebind_anchors_to_readers",
+        "patches": [
+          {
+            "file": "src/engine/structure/structure_map.py",
+            "old": "        rebind_anchors=_rebind_anchors_from_json(data.get(\"rebind_anchors\")),",
+            "new": "        rebind_anchors=None,"
+          }
+        ]
+      },
+      {
+        "label": "region-page-floor-allows-zero",
+        "scope": "tests/unit/test_rebind.py::test_region_model_rejects_a_page_below_one",
+        "patches": [
+          {
+            "file": "src/engine/structure/projection.py",
+            "old": "        if isinstance(self.page, bool) or not isinstance(self.page, int) or self.page < 1:",
+            "new": "        if isinstance(self.page, bool) or not isinstance(self.page, int) or self.page < 0:"
+          }
+        ]
+      },
+      {
+        "label": "v2-schema-not-born",
+        "scope": "tests/unit/test_structure_born_gate.py::test_v2_fingerprint_fixture_validates_and_v2_is_born",
+        "patches": [
+          {
+            "file": "src/engine/structure/artifacts.py",
+            "old": "STRUCTURE_MAP_SCHEMA_STATUS: dict[int, str] = {1: SCHEMA_STATUS_BORN, 2: SCHEMA_STATUS_BORN}",
+            "new": "STRUCTURE_MAP_SCHEMA_STATUS: dict[int, str] = {1: SCHEMA_STATUS_BORN, 2: SCHEMA_STATUS_PROVISIONAL}"
+          }
+        ]
+      }
+    ]
+  },
+  "runner": {
+    "path": "/Users/ben_mpa/.claude/skills/mutation-hunt/hunt.py",
+    "sha256": "698b60f6d3e892963c8a0d2da18ec586a8c85d780f01ea698bccbfae0d73d1c4",
+    "invocation": {
+      "argv": [
+        "/Users/ben_mpa/LLM/PER_LA_LIBERTA/engine/.venv/bin/python",
+        "/Users/ben_mpa/.claude/skills/mutation-hunt/hunt.py",
+        "--table",
+        "/Users/ben_mpa/LLM/PER_LA_LIBERTA/engine/tests/hunts/hunt_rebind.py",
+        "--artifact",
+        "/var/folders/zm/_hwkfvc13wbcq1b08lk_lz0h0000gn/T/s4_7_runner_g41t1sm9.json"
+      ],
+      "rc": 0,
+      "output": "KILLED           empty-slot-returns-empty-shingle-fingerprint\nKILLED           short-slot-no-k-fallback\nKILLED           empty-window-scores-one-not-zero\nKILLED           jaccard-collapses-to-all-or-nothing-substring\nKILLED           unknown-mode-defaults-instead-of-failing-loud\nKILLED           none-mode-reported-as-manifest-not-fallback\nKILLED           policy-ordering-guard-dropped\nKILLED           policy-default-primary-margin-inverted\nKILLED           baseline-content-hash-gate-dropped\nKILLED           fingerprint-less-slot-binds-instead-of-missing-anchor\nKILLED           below-threshold-binds-any-score\nKILLED           no-rescue-geometry-lifts-subtau-over-tau\nKILLED           ambiguous-picks-first-candidate\nKILLED           primary-pin-ignores-mode\nKILLED           global-validate-gate-disabled\nKILLED           bound-subset-disjointness-disabled\nKILLED           s4-7-inv1-oracle-pairwise-disabled\nKILLED           s4-7-repeated-passage-uniqueness-guard-disabled\nKILLED           s4-7-inv1-oracle-global-disjointness-disabled\nKILLED           s4-7-inv1-duplicate-slot-outcome-guard-disabled\nKILLED           s4-7-positional-confirmation-accepts-maps-far\nKILLED           s4-7-anchor-footprint-widened-without-lock-rerun\nKILLED           s4-7-anchor-determinism-contract-disabled\nKILLED           s4-7-anchor-content-only-contract-disabled\nKILLED           s4-7-seam-insert-silent-drop-guard-disabled\nKILLED           s4-7-inv3-planted-destination-guard-disabled\nKILLED           s4-7-inv3-duplicate-observation-guard-disabled\nKILLED           s4-7-inv3-global-map-validity-guard-disabled\nKILLED           s4-7-inv4-insert-precedence-disabled\nKILLED           s4-7-inv4-strict-interior-class-disabled\nKILLED           s4-7-inv4-capped-gap-interior-class-disabled\nKILLED           s4-7-inv4-edge-class-disabled\nKILLED           s4-7-inv4-adjacent-non-equal-tiling-accepted\nKILLED           s4-7-inv4-clean-class-corrupted\nKILLED           s4-7-inv5-tie-break-branch-disabled\nKILLED           s4-7-inv5-no-geometry-illegally-hard-pins-region\nKILLED           s4-7-inv6-slope-estimator-forced-linear\nKILLED           s4-7-inv6-adjacent-ratios-erased\nKILLED           s4-7-perf-time-phase-completion-validation-dropped\nKILLED           s4-7-perf-tracemalloc-peak-forced-zero\nKILLED           s4-7-inv6-growth-budget-guard-disabled\nKILLED           s4-7-inv7-depth-shrunk-after-preregistration\nKILLED           s4-7-inv7-wall-ceiling-relaxed-after-measurement\nKILLED           s4-7-perf-baseline-source-identity-check-disabled\nKILLED           restamp-ignores-the-bottom-up-subtree-gate\nKILLED           stale-decision-never-detected\nKILLED           stale-decision-node-kept-bound\nKILLED           typed-anchor-dropped-on-load\nKILLED           region-page-floor-allows-zero\nKILLED           v2-schema-not-born\n\n50/50 detected; undetected: none\n"
+    },
+    "artifact": {
+      "runner": "mutation-hunt/hunt.py",
+      "version": "1.0.0",
+      "mode": "hunt",
+      "repo": "/Users/ben_mpa/LLM/PER_LA_LIBERTA/engine",
+      "test_cmd": [
+        "/Users/ben_mpa/LLM/PER_LA_LIBERTA/engine/.venv/bin/python",
+        "-m",
+        "pytest",
+        "{scope}",
+        "-q",
+        "--no-header",
+        "-x",
+        "-p",
+        "no:cacheprovider"
+      ],
+      "timeout": 300.0,
+      "purge": true,
+      "baseline": {
+        "ran": true,
+        "results": {
+          "tests/unit/test_rebind.py::test_fingerprint_slot_empty_is_none_never_empty_set": 0,
+          "tests/unit/test_rebind.py::test_fingerprint_slot_short_slot_falls_back_to_available_k": 0,
+          "tests/unit/test_rebind.py::test_slot_similarity_empty_window_scores_zero": 0,
+          "tests/unit/test_rebind.py::test_r2_superstring_does_not_auto_bind_at_full_score": 0,
+          "tests/unit/test_rebind.py::test_resolve_mode_unknown_fails_loud": 0,
+          "tests/unit/test_rebind.py::test_resolve_mode_none_is_conditional_primary_fallback": 0,
+          "tests/unit/test_rebind.py::test_policy_inverted_ordering_is_rejected_at_construction": 0,
+          "tests/unit/test_rebind.py::test_policy_default_ordering_holds_on_the_named_default": 0,
+          "tests/unit/test_rebind.py::test_rebind_context_refuses_a_content_hash_mismatch": 0,
+          "tests/unit/test_rebind.py::test_missing_anchor_node_never_binds_on_geometry_alone": 0,
+          "tests/unit/test_rebind.py::test_below_threshold_when_fresh_content_diverges": 0,
+          "tests/unit/test_rebind.py::test_no_rescue_geometry_does_not_lift_a_subtau_fingerprint": 0,
+          "tests/unit/test_rebind.py::test_ambiguous_repeated_content_fails_loud": 0,
+          "tests/unit/test_rebind.py::test_primary_mode_hard_pin_excludes_a_wrong_page_and_yields_zero_candidate": 0,
+          "tests/unit/test_rebind.py::test_empty_container_makes_the_rebound_map_fail_global_validation": 0,
+          "tests/unit/test_rebind.py::test_partial_rebind_never_silently_double_claims_a_fresh_atom": 0,
+          "tests/unit/test_s4_7_inv1_inv2.py::test_inv1_shipped_rebind_bound_set_is_subset_of_shared_corpus_oracle": 0,
+          "tests/unit/test_s4_7_inv1_inv2.py::test_inv1_anchor_poor_sentinels_abstain_within_and_cross_container": 0,
+          "tests/unit/test_s4_7_inv1_inv2.py::test_oracle_global_conjunct_rejects_two_pairwise_allowed_claims_of_one_atom": 0,
+          "tests/unit/test_s4_7_inv1_inv2.py::test_oracle_rejects_duplicate_outcome_records_for_one_slot": 0,
+          "tests/unit/test_s4_7_inv1_inv2.py::test_unique_anchor_that_maps_far_is_not_confirmed": 0,
+          "tests/unit/test_s4_7_inv1_inv2.py::test_anchor_interface_is_content_only_bounded_and_has_separate_confidence_hook": 0,
+          "tests/unit/test_s4_7_inv1_inv2.py::test_anchor_interface_wrapper_enforces_determinism_and_content_contiguity": 0,
+          "tests/unit/test_s4_7_inv1_inv2.py::test_shared_seam_insert_cannot_be_silently_dropped_when_both_owners_bind": 0,
+          "tests/unit/test_s4_7_inv3_inv5.py::test_inv3_planted_greedy_wrong_span_is_rejected": 0,
+          "tests/unit/test_s4_7_inv3_inv5.py::test_inv3_duplicate_observation_for_one_moved_slot_is_rejected": 0,
+          "tests/unit/test_s4_7_inv3_inv5.py::test_inv3_destination_atom_bind_with_invalid_map_is_rejected": 0,
+          "tests/unit/test_s4_7_inv3_inv5.py::test_inv4_analytic_half_open_boundary_classes[insert-at-gap]": 0,
+          "tests/unit/test_s4_7_inv3_inv5.py::test_inv4_analytic_half_open_boundary_classes[replace-interior]": 0,
+          "tests/unit/test_s4_7_inv3_inv5.py::test_inv4_analytic_half_open_boundary_classes[capped-gap]": 0,
+          "tests/unit/test_s4_7_inv3_inv5.py::test_inv4_analytic_half_open_boundary_classes[replace-edge]": 0,
+          "tests/unit/test_s4_7_inv3_inv5.py::test_inv4_analytic_tiling_rejects_adjacent_non_equal_blocks": 0,
+          "tests/unit/test_s4_7_inv3_inv5.py::test_inv4_analytic_half_open_boundary_classes[clean]": 0,
+          "tests/unit/test_s4_7_inv3_inv5.py::test_inv5_tie_break_uses_page_only_to_reduce_an_above_tau_tie": 0,
+          "tests/unit/test_rebind.py::test_no_geometry_mode_ignores_the_region_and_binds_on_fingerprint": 0,
+          "tests/unit/test_s4_7_inv6_inv7.py::test_growth_estimator_distinguishes_linear_from_quadratic_and_keeps_ratios": 0,
+          "tests/unit/test_s4_7_inv6_inv7.py::test_perf_measurement_validates_every_run_and_observes_python_allocations": 0,
+          "tests/unit/test_s4_7_inv6_inv7.py::test_inv6_shipped_rebind_wall_growth_exceeds_the_preregistered_bar": 0,
+          "tests/unit/test_s4_7_inv6_inv7.py::test_priority4_preregistered_constants_and_upward_only_ladder_are_pinned": 0,
+          "tests/unit/test_s4_7_inv6_inv7.py::test_inv7_deep_evidence_wall_clock_exceeds_the_preregistered_ceiling": 0,
+          "tests/unit/test_s4_7_inv6_inv7.py::test_priority4_baseline_rejects_stale_source_identity": 0,
+          "tests/unit/test_rebind.py::test_ancestor_not_restamped_while_a_descendant_is_unresolved": 0,
+          "tests/unit/test_rebind.py::test_stale_decision_is_a_finding_not_a_restamp": 0,
+          "tests/unit/test_structure_map.py::test_v2_map_exposes_typed_rebind_anchors_to_readers": 0,
+          "tests/unit/test_rebind.py::test_region_model_rejects_a_page_below_one": 0,
+          "tests/unit/test_structure_born_gate.py::test_v2_fingerprint_fixture_validates_and_v2_is_born": 0
+        }
+      },
+      "post_verify": {
+        "ran": true,
+        "results": {
+          "tests/unit/test_rebind.py::test_fingerprint_slot_empty_is_none_never_empty_set": 0,
+          "tests/unit/test_rebind.py::test_fingerprint_slot_short_slot_falls_back_to_available_k": 0,
+          "tests/unit/test_rebind.py::test_slot_similarity_empty_window_scores_zero": 0,
+          "tests/unit/test_rebind.py::test_r2_superstring_does_not_auto_bind_at_full_score": 0,
+          "tests/unit/test_rebind.py::test_resolve_mode_unknown_fails_loud": 0,
+          "tests/unit/test_rebind.py::test_resolve_mode_none_is_conditional_primary_fallback": 0,
+          "tests/unit/test_rebind.py::test_policy_inverted_ordering_is_rejected_at_construction": 0,
+          "tests/unit/test_rebind.py::test_policy_default_ordering_holds_on_the_named_default": 0,
+          "tests/unit/test_rebind.py::test_rebind_context_refuses_a_content_hash_mismatch": 0,
+          "tests/unit/test_rebind.py::test_missing_anchor_node_never_binds_on_geometry_alone": 0,
+          "tests/unit/test_rebind.py::test_below_threshold_when_fresh_content_diverges": 0,
+          "tests/unit/test_rebind.py::test_no_rescue_geometry_does_not_lift_a_subtau_fingerprint": 0,
+          "tests/unit/test_rebind.py::test_ambiguous_repeated_content_fails_loud": 0,
+          "tests/unit/test_rebind.py::test_primary_mode_hard_pin_excludes_a_wrong_page_and_yields_zero_candidate": 0,
+          "tests/unit/test_rebind.py::test_empty_container_makes_the_rebound_map_fail_global_validation": 0,
+          "tests/unit/test_rebind.py::test_partial_rebind_never_silently_double_claims_a_fresh_atom": 0,
+          "tests/unit/test_s4_7_inv1_inv2.py::test_inv1_shipped_rebind_bound_set_is_subset_of_shared_corpus_oracle": 0,
+          "tests/unit/test_s4_7_inv1_inv2.py::test_inv1_anchor_poor_sentinels_abstain_within_and_cross_container": 0,
+          "tests/unit/test_s4_7_inv1_inv2.py::test_oracle_global_conjunct_rejects_two_pairwise_allowed_claims_of_one_atom": 0,
+          "tests/unit/test_s4_7_inv1_inv2.py::test_oracle_rejects_duplicate_outcome_records_for_one_slot": 0,
+          "tests/unit/test_s4_7_inv1_inv2.py::test_unique_anchor_that_maps_far_is_not_confirmed": 0,
+          "tests/unit/test_s4_7_inv1_inv2.py::test_anchor_interface_is_content_only_bounded_and_has_separate_confidence_hook": 0,
+          "tests/unit/test_s4_7_inv1_inv2.py::test_anchor_interface_wrapper_enforces_determinism_and_content_contiguity": 0,
+          "tests/unit/test_s4_7_inv1_inv2.py::test_shared_seam_insert_cannot_be_silently_dropped_when_both_owners_bind": 0,
+          "tests/unit/test_s4_7_inv3_inv5.py::test_inv3_planted_greedy_wrong_span_is_rejected": 0,
+          "tests/unit/test_s4_7_inv3_inv5.py::test_inv3_duplicate_observation_for_one_moved_slot_is_rejected": 0,
+          "tests/unit/test_s4_7_inv3_inv5.py::test_inv3_destination_atom_bind_with_invalid_map_is_rejected": 0,
+          "tests/unit/test_s4_7_inv3_inv5.py::test_inv4_analytic_half_open_boundary_classes[insert-at-gap]": 0,
+          "tests/unit/test_s4_7_inv3_inv5.py::test_inv4_analytic_half_open_boundary_classes[replace-interior]": 0,
+          "tests/unit/test_s4_7_inv3_inv5.py::test_inv4_analytic_half_open_boundary_classes[capped-gap]": 0,
+          "tests/unit/test_s4_7_inv3_inv5.py::test_inv4_analytic_half_open_boundary_classes[replace-edge]": 0,
+          "tests/unit/test_s4_7_inv3_inv5.py::test_inv4_analytic_tiling_rejects_adjacent_non_equal_blocks": 0,
+          "tests/unit/test_s4_7_inv3_inv5.py::test_inv4_analytic_half_open_boundary_classes[clean]": 0,
+          "tests/unit/test_s4_7_inv3_inv5.py::test_inv5_tie_break_uses_page_only_to_reduce_an_above_tau_tie": 0,
+          "tests/unit/test_rebind.py::test_no_geometry_mode_ignores_the_region_and_binds_on_fingerprint": 0,
+          "tests/unit/test_s4_7_inv6_inv7.py::test_growth_estimator_distinguishes_linear_from_quadratic_and_keeps_ratios": 0,
+          "tests/unit/test_s4_7_inv6_inv7.py::test_perf_measurement_validates_every_run_and_observes_python_allocations": 0,
+          "tests/unit/test_s4_7_inv6_inv7.py::test_inv6_shipped_rebind_wall_growth_exceeds_the_preregistered_bar": 0,
+          "tests/unit/test_s4_7_inv6_inv7.py::test_priority4_preregistered_constants_and_upward_only_ladder_are_pinned": 0,
+          "tests/unit/test_s4_7_inv6_inv7.py::test_inv7_deep_evidence_wall_clock_exceeds_the_preregistered_ceiling": 0,
+          "tests/unit/test_s4_7_inv6_inv7.py::test_priority4_baseline_rejects_stale_source_identity": 0,
+          "tests/unit/test_rebind.py::test_ancestor_not_restamped_while_a_descendant_is_unresolved": 0,
+          "tests/unit/test_rebind.py::test_stale_decision_is_a_finding_not_a_restamp": 0,
+          "tests/unit/test_structure_map.py::test_v2_map_exposes_typed_rebind_anchors_to_readers": 0,
+          "tests/unit/test_rebind.py::test_region_model_rejects_a_page_below_one": 0,
+          "tests/unit/test_structure_born_gate.py::test_v2_fingerprint_fixture_validates_and_v2_is_born": 0
+        }
+      },
+      "refusals": [],
+      "mutants": [
+        {
+          "label": "empty-slot-returns-empty-shingle-fingerprint",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_rebind.py::test_fingerprint_slot_empty_is_none_never_empty_set",
+          "files": [
+            "src/engine/structure/rebind.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.31
+        },
+        {
+          "label": "short-slot-no-k-fallback",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_rebind.py::test_fingerprint_slot_short_slot_falls_back_to_available_k",
+          "files": [
+            "src/engine/structure/rebind.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.31
+        },
+        {
+          "label": "empty-window-scores-one-not-zero",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_rebind.py::test_slot_similarity_empty_window_scores_zero",
+          "files": [
+            "src/engine/structure/rebind.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.31
+        },
+        {
+          "label": "jaccard-collapses-to-all-or-nothing-substring",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_rebind.py::test_r2_superstring_does_not_auto_bind_at_full_score",
+          "files": [
+            "src/engine/structure/rebind.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.34
+        },
+        {
+          "label": "unknown-mode-defaults-instead-of-failing-loud",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_rebind.py::test_resolve_mode_unknown_fails_loud",
+          "files": [
+            "src/engine/structure/rebind.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.62
+        },
+        {
+          "label": "none-mode-reported-as-manifest-not-fallback",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_rebind.py::test_resolve_mode_none_is_conditional_primary_fallback",
+          "files": [
+            "src/engine/structure/rebind.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.7
+        },
+        {
+          "label": "policy-ordering-guard-dropped",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_rebind.py::test_policy_inverted_ordering_is_rejected_at_construction",
+          "files": [
+            "src/engine/structure/rebind.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.73
+        },
+        {
+          "label": "policy-default-primary-margin-inverted",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_rebind.py::test_policy_default_ordering_holds_on_the_named_default",
+          "files": [
+            "src/engine/structure/rebind.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.69
+        },
+        {
+          "label": "baseline-content-hash-gate-dropped",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_rebind.py::test_rebind_context_refuses_a_content_hash_mismatch",
+          "files": [
+            "src/engine/structure/rebind.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.78
+        },
+        {
+          "label": "fingerprint-less-slot-binds-instead-of-missing-anchor",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_rebind.py::test_missing_anchor_node_never_binds_on_geometry_alone",
+          "files": [
+            "src/engine/structure/rebind.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.69
+        },
+        {
+          "label": "below-threshold-binds-any-score",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_rebind.py::test_below_threshold_when_fresh_content_diverges",
+          "files": [
+            "src/engine/structure/rebind.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.72
+        },
+        {
+          "label": "no-rescue-geometry-lifts-subtau-over-tau",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_rebind.py::test_no_rescue_geometry_does_not_lift_a_subtau_fingerprint",
+          "files": [
+            "src/engine/structure/rebind.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.79
+        },
+        {
+          "label": "ambiguous-picks-first-candidate",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_rebind.py::test_ambiguous_repeated_content_fails_loud",
+          "files": [
+            "src/engine/structure/rebind.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.78
+        },
+        {
+          "label": "primary-pin-ignores-mode",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_rebind.py::test_primary_mode_hard_pin_excludes_a_wrong_page_and_yields_zero_candidate",
+          "files": [
+            "src/engine/structure/rebind.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.78
+        },
+        {
+          "label": "global-validate-gate-disabled",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_rebind.py::test_empty_container_makes_the_rebound_map_fail_global_validation",
+          "files": [
+            "src/engine/structure/rebind.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.71
+        },
+        {
+          "label": "bound-subset-disjointness-disabled",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_rebind.py::test_partial_rebind_never_silently_double_claims_a_fresh_atom",
+          "files": [
+            "src/engine/structure/rebind.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.66
+        },
+        {
+          "label": "s4-7-inv1-oracle-pairwise-disabled",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_s4_7_inv1_inv2.py::test_inv1_shipped_rebind_bound_set_is_subset_of_shared_corpus_oracle",
+          "files": [
+            "tests/harness/oracle.py"
+          ],
+          "rc": 1,
+          "duration_s": 3.78
+        },
+        {
+          "label": "s4-7-repeated-passage-uniqueness-guard-disabled",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_s4_7_inv1_inv2.py::test_inv1_anchor_poor_sentinels_abstain_within_and_cross_container",
+          "files": [
+            "tests/harness/oracle.py"
+          ],
+          "rc": 1,
+          "duration_s": 2.95
+        },
+        {
+          "label": "s4-7-inv1-oracle-global-disjointness-disabled",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_s4_7_inv1_inv2.py::test_oracle_global_conjunct_rejects_two_pairwise_allowed_claims_of_one_atom",
+          "files": [
+            "tests/harness/oracle.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.54
+        },
+        {
+          "label": "s4-7-inv1-duplicate-slot-outcome-guard-disabled",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_s4_7_inv1_inv2.py::test_oracle_rejects_duplicate_outcome_records_for_one_slot",
+          "files": [
+            "tests/harness/oracle.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.51
+        },
+        {
+          "label": "s4-7-positional-confirmation-accepts-maps-far",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_s4_7_inv1_inv2.py::test_unique_anchor_that_maps_far_is_not_confirmed",
+          "files": [
+            "src/engine/structure/boundary_anchor.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.84
+        },
+        {
+          "label": "s4-7-anchor-footprint-widened-without-lock-rerun",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_s4_7_inv1_inv2.py::test_anchor_interface_is_content_only_bounded_and_has_separate_confidence_hook",
+          "files": [
+            "src/engine/structure/boundary_anchor.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.74
+        },
+        {
+          "label": "s4-7-anchor-determinism-contract-disabled",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_s4_7_inv1_inv2.py::test_anchor_interface_wrapper_enforces_determinism_and_content_contiguity",
+          "files": [
+            "src/engine/structure/boundary_anchor.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.66
+        },
+        {
+          "label": "s4-7-anchor-content-only-contract-disabled",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_s4_7_inv1_inv2.py::test_anchor_interface_wrapper_enforces_determinism_and_content_contiguity",
+          "files": [
+            "src/engine/structure/boundary_anchor.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.6
+        },
+        {
+          "label": "s4-7-seam-insert-silent-drop-guard-disabled",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_s4_7_inv1_inv2.py::test_shared_seam_insert_cannot_be_silently_dropped_when_both_owners_bind",
+          "files": [
+            "tests/harness/oracle.py"
+          ],
+          "rc": 1,
+          "duration_s": 2.61
+        },
+        {
+          "label": "s4-7-inv3-planted-destination-guard-disabled",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_s4_7_inv3_inv5.py::test_inv3_planted_greedy_wrong_span_is_rejected",
+          "files": [
+            "tests/harness/invariants_3_5.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.55
+        },
+        {
+          "label": "s4-7-inv3-duplicate-observation-guard-disabled",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_s4_7_inv3_inv5.py::test_inv3_duplicate_observation_for_one_moved_slot_is_rejected",
+          "files": [
+            "tests/harness/invariants_3_5.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.47
+        },
+        {
+          "label": "s4-7-inv3-global-map-validity-guard-disabled",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_s4_7_inv3_inv5.py::test_inv3_destination_atom_bind_with_invalid_map_is_rejected",
+          "files": [
+            "tests/harness/invariants_3_5.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.61
+        },
+        {
+          "label": "s4-7-inv4-insert-precedence-disabled",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_s4_7_inv3_inv5.py::test_inv4_analytic_half_open_boundary_classes[insert-at-gap]",
+          "files": [
+            "tests/harness/boundary.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.61
+        },
+        {
+          "label": "s4-7-inv4-strict-interior-class-disabled",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_s4_7_inv3_inv5.py::test_inv4_analytic_half_open_boundary_classes[replace-interior]",
+          "files": [
+            "tests/harness/boundary.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.55
+        },
+        {
+          "label": "s4-7-inv4-capped-gap-interior-class-disabled",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_s4_7_inv3_inv5.py::test_inv4_analytic_half_open_boundary_classes[capped-gap]",
+          "files": [
+            "tests/harness/boundary.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.68
+        },
+        {
+          "label": "s4-7-inv4-edge-class-disabled",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_s4_7_inv3_inv5.py::test_inv4_analytic_half_open_boundary_classes[replace-edge]",
+          "files": [
+            "tests/harness/boundary.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.58
+        },
+        {
+          "label": "s4-7-inv4-adjacent-non-equal-tiling-accepted",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_s4_7_inv3_inv5.py::test_inv4_analytic_tiling_rejects_adjacent_non_equal_blocks",
+          "files": [
+            "tests/harness/boundary.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.63
+        },
+        {
+          "label": "s4-7-inv4-clean-class-corrupted",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_s4_7_inv3_inv5.py::test_inv4_analytic_half_open_boundary_classes[clean]",
+          "files": [
+            "tests/harness/boundary.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.57
+        },
+        {
+          "label": "s4-7-inv5-tie-break-branch-disabled",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_s4_7_inv3_inv5.py::test_inv5_tie_break_uses_page_only_to_reduce_an_above_tau_tie",
+          "files": [
+            "src/engine/structure/rebind.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.64
+        },
+        {
+          "label": "s4-7-inv5-no-geometry-illegally-hard-pins-region",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_rebind.py::test_no_geometry_mode_ignores_the_region_and_binds_on_fingerprint",
+          "files": [
+            "src/engine/structure/rebind.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.53
+        },
+        {
+          "label": "s4-7-inv6-slope-estimator-forced-linear",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_s4_7_inv6_inv7.py::test_growth_estimator_distinguishes_linear_from_quadratic_and_keeps_ratios",
+          "files": [
+            "tests/harness/scale.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.6
+        },
+        {
+          "label": "s4-7-inv6-adjacent-ratios-erased",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_s4_7_inv6_inv7.py::test_growth_estimator_distinguishes_linear_from_quadratic_and_keeps_ratios",
+          "files": [
+            "tests/harness/scale.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.51
+        },
+        {
+          "label": "s4-7-perf-time-phase-completion-validation-dropped",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_s4_7_inv6_inv7.py::test_perf_measurement_validates_every_run_and_observes_python_allocations",
+          "files": [
+            "tests/harness/scale.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.81
+        },
+        {
+          "label": "s4-7-perf-tracemalloc-peak-forced-zero",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_s4_7_inv6_inv7.py::test_perf_measurement_validates_every_run_and_observes_python_allocations",
+          "files": [
+            "tests/harness/scale.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.64
+        },
+        {
+          "label": "s4-7-inv6-growth-budget-guard-disabled",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_s4_7_inv6_inv7.py::test_inv6_shipped_rebind_wall_growth_exceeds_the_preregistered_bar",
+          "files": [
+            "tests/harness/scale.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.6
+        },
+        {
+          "label": "s4-7-inv7-depth-shrunk-after-preregistration",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_s4_7_inv6_inv7.py::test_priority4_preregistered_constants_and_upward_only_ladder_are_pinned",
+          "files": [
+            "tests/harness/scale.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.62
+        },
+        {
+          "label": "s4-7-inv7-wall-ceiling-relaxed-after-measurement",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_s4_7_inv6_inv7.py::test_inv7_deep_evidence_wall_clock_exceeds_the_preregistered_ceiling",
+          "files": [
+            "tests/harness/scale.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.59
+        },
+        {
+          "label": "s4-7-perf-baseline-source-identity-check-disabled",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_s4_7_inv6_inv7.py::test_priority4_baseline_rejects_stale_source_identity",
+          "files": [
+            "tests/harness/scale.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.75
+        },
+        {
+          "label": "restamp-ignores-the-bottom-up-subtree-gate",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_rebind.py::test_ancestor_not_restamped_while_a_descendant_is_unresolved",
+          "files": [
+            "src/engine/structure/rebind.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.6
+        },
+        {
+          "label": "stale-decision-never-detected",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_rebind.py::test_stale_decision_is_a_finding_not_a_restamp",
+          "files": [
+            "src/engine/structure/rebind.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.63
+        },
+        {
+          "label": "stale-decision-node-kept-bound",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_rebind.py::test_stale_decision_is_a_finding_not_a_restamp",
+          "files": [
+            "src/engine/structure/rebind.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.64
+        },
+        {
+          "label": "typed-anchor-dropped-on-load",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_structure_map.py::test_v2_map_exposes_typed_rebind_anchors_to_readers",
+          "files": [
+            "src/engine/structure/structure_map.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.81
+        },
+        {
+          "label": "region-page-floor-allows-zero",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_rebind.py::test_region_model_rejects_a_page_below_one",
+          "files": [
+            "src/engine/structure/projection.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.57
+        },
+        {
+          "label": "v2-schema-not-born",
+          "status": "KILLED",
+          "detected": true,
+          "scope": "tests/unit/test_structure_born_gate.py::test_v2_fingerprint_fixture_validates_and_v2_is_born",
+          "files": [
+            "src/engine/structure/artifacts.py"
+          ],
+          "rc": 1,
+          "duration_s": 0.52
+        }
+      ],
+      "summary": {
+        "total": 50,
+        "detected": 50,
+        "survived": 0,
+        "errors": 0
+      },
+      "restore_verified": true,
+      "interrupted": false,
+      "harness_error": null
+    }
+  },
+  "carried_red_demonstrations": [
+    {
+      "argv": [
+        "/Users/ben_mpa/LLM/PER_LA_LIBERTA/engine/.venv/bin/python",
+        "-m",
+        "pytest",
+        "tests/unit/test_s4_7_inv1_inv2.py::test_inv1_shipped_rebind_bound_set_is_subset_of_shared_corpus_oracle",
+        "--runxfail",
+        "-q",
+        "-p",
+        "no:cacheprovider"
+      ],
+      "rc": 1,
+      "output": "F                                                                        [100%]\n=================================== FAILURES ===================================\n_____ test_inv1_shipped_rebind_bound_set_is_subset_of_shared_corpus_oracle _____\n\n    @pytest.mark.xfail(strict=True, reason=TRACKER)\n    def test_inv1_shipped_rebind_bound_set_is_subset_of_shared_corpus_oracle():\n        for case in priority2_shared_corpus().cases:\n            observed = _observed_case(case)\n            try:\n>               assert_bound_subset_and_disjoint(\n                    observed.binds, allowed_bind_set(case.bundle)\n                )\n\ntests/unit/test_s4_7_inv1_inv2.py:384: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nobserved = (ObservedBind(slot=SlotRef(node_id='n-sec', slot_name='heading'), fresh_atom_ids=('fresh-00000067-000-000-h0',)), Obse...ot=SlotRef(node_id='l2', slot_name='body'), fresh_atom_ids=('fresh-00000067-000-008-c0', 'fresh-00000067-000-009-c1')))\nallowed = frozenset({AllowedBind(slot=SlotRef(node_id='n-sec', slot_name='signature'), fresh_atom_ids=('fresh-00000067-000-007-s...c1')), AllowedBind(slot=SlotRef(node_id='n-sec', slot_name='heading'), fresh_atom_ids=('fresh-00000067-000-000-h0',))})\n\n    def assert_bound_subset_and_disjoint(\n        observed: Iterable[ObservedBind], allowed: frozenset[AllowedBind]\n    ) -> None:\n        \"\"\"INV-1's pairwise ceiling plus always-on fresh-atom disjointness conjunct.\"\"\"\n        observed_tuple = tuple(observed)\n        observed_slots = [bind.slot for bind in observed_tuple]\n        if len(observed_slots) != len(set(observed_slots)):\n            raise AssertionError(\n                \"INV-1 mechanism reported more than one bind for the same slot\"\n            )\n        observed_as_allowed = {\n            AllowedBind(bind.slot, tuple(bind.fresh_atom_ids)) for bind in observed_tuple\n        }\n        unexpected = observed_as_allowed - allowed\n        if unexpected:\n            rendered = sorted(\n                (bind.slot.node_id, bind.slot.slot_name, bind.fresh_atom_ids)\n                for bind in unexpected\n            )\n>           raise AssertionError(\n                f\"INV-1 false bind(s) outside provenance/reference oracle: {rendered}\"\n            )\nE           AssertionError: INV-1 false bind(s) outside provenance/reference oracle: [('l1', 'body', ('fresh-00000067-001-000-b0-copy', 'fresh-00000067-000-006-b1'))]\n\ntests/harness/oracle.py:657: AssertionError\n\nThe above exception was the direct cause of the following exception:\n\n    @pytest.mark.xfail(strict=True, reason=TRACKER)\n    def test_inv1_shipped_rebind_bound_set_is_subset_of_shared_corpus_oracle():\n        for case in priority2_shared_corpus().cases:\n            observed = _observed_case(case)\n            try:\n                assert_bound_subset_and_disjoint(\n                    observed.binds, allowed_bind_set(case.bundle)\n                )\n                assert_insert_coverage_not_silent(case.bundle, observed)\n            except AssertionError as exc:\n>               raise AssertionError(\n                    f\"case={case.name!r} seed={case.bundle.config.seed} \"\n                    f\"config={case.bundle.config!r}: {exc}\"\n                ) from exc\nE               AssertionError: case='duplicate' seed=103 config=DriftConfig(name='duplicate', seed=103, operations=(DriftOperation(op='duplicate', targets=('b0',), outputs=('b0-copy',), texts=(), output_pages=(), position=None),), geometry_mode='no-geometry', composition_tags=frozenset(), permitted_compositions=frozenset()): INV-1 false bind(s) outside provenance/reference oracle: [('l1', 'body', ('fresh-00000067-001-000-b0-copy', 'fresh-00000067-000-006-b1'))]\n\ntests/unit/test_s4_7_inv1_inv2.py:389: AssertionError\n=========================== short test summary info ============================\nFAILED tests/unit/test_s4_7_inv1_inv2.py::test_inv1_shipped_rebind_bound_set_is_subset_of_shared_corpus_oracle\n1 failed in 1.22s\n"
+    },
+    {
+      "argv": [
+        "/Users/ben_mpa/LLM/PER_LA_LIBERTA/engine/.venv/bin/python",
+        "-m",
+        "pytest",
+        "tests/unit/test_s4_7_inv1_inv2.py::test_inv1_anchor_poor_sentinels_abstain_within_and_cross_container",
+        "--runxfail",
+        "-q",
+        "-p",
+        "no:cacheprovider"
+      ],
+      "rc": 1,
+      "output": "F                                                                        [100%]\n=================================== FAILURES ===================================\n______ test_inv1_anchor_poor_sentinels_abstain_within_and_cross_container ______\n\n    @pytest.mark.xfail(strict=True, reason=TRACKER)\n    def test_inv1_anchor_poor_sentinels_abstain_within_and_cross_container():\n        violations = {}\n        for case_name in (\n            \"anchor-poor-within-container\",\n            \"anchor-poor-cross-container\",\n        ):\n            case = _case(case_name)\n            observed = _observed_case(case)\n            try:\n                assert_bound_subset_and_disjoint(\n                    observed.binds, allowed_bind_set(case.bundle)\n                )\n            except AssertionError as exc:\n                violations[case_name] = str(exc)\n>       assert violations == {}\nE       assert {'anchor-poor...1-right',))]\"} == {}\nE         \nE         Left contains 2 more items:\nE         {'anchor-poor-cross-container': 'INV-1 false bind(s) outside '\nE                                         \"provenance/reference oracle: [('leaf-0-left', \"\nE                                         \"'body', \"\nE                                         \"('fresh-00000b24-000-000-atom-0-left',)), \"\nE                                         \"('leaf-0-right', 'body', \"...\nE         \nE         ...Full output truncated (16 lines hidden), use '-vv' to show\n\ntests/unit/test_s4_7_inv1_inv2.py:376: AssertionError\n=========================== short test summary info ============================\nFAILED tests/unit/test_s4_7_inv1_inv2.py::test_inv1_anchor_poor_sentinels_abstain_within_and_cross_container\n1 failed in 1.52s\n"
+    },
+    {
+      "argv": [
+        "/Users/ben_mpa/LLM/PER_LA_LIBERTA/engine/.venv/bin/python",
+        "-m",
+        "pytest",
+        "tests/unit/test_s4_7_inv1_inv2.py::test_inv1_cross_slot_merge_fails_both_affected_nodes_as_global_conflict",
+        "--runxfail",
+        "-q",
+        "-p",
+        "no:cacheprovider"
+      ],
+      "rc": 1,
+      "output": "F                                                                        [100%]\n=================================== FAILURES ===================================\n___ test_inv1_cross_slot_merge_fails_both_affected_nodes_as_global_conflict ____\n\n    @pytest.mark.xfail(strict=True, reason=TRACKER)\n    def test_inv1_cross_slot_merge_fails_both_affected_nodes_as_global_conflict():\n        report = _result(_case(\"merge-cross-slot-seam\")).report\n        affected = {\n            node.node_id: (node.bound, node.reason)\n            for node in report.nodes\n            if node.node_id in {\"l0\", \"l1\"}\n        }\n>       assert affected == {\n            \"l0\": (False, \"global-conflict\"),\n            \"l1\": (False, \"global-conflict\"),\n        }\nE       AssertionError: assert {'l0': (True,... (True, None)} == {'l0': (False...al-conflict')}\nE         \nE         Differing items:\nE         {'l1': (True, None)} != {'l1': (False, 'global-conflict')}\nE         {'l0': (True, None)} != {'l0': (False, 'global-conflict')}\nE         Use -v to get more diff\n\ntests/unit/test_s4_7_inv1_inv2.py:403: AssertionError\n=========================== short test summary info ============================\nFAILED tests/unit/test_s4_7_inv1_inv2.py::test_inv1_cross_slot_merge_fails_both_affected_nodes_as_global_conflict\n1 failed in 1.16s\n"
+    },
+    {
+      "argv": [
+        "/Users/ben_mpa/LLM/PER_LA_LIBERTA/engine/.venv/bin/python",
+        "-m",
+        "pytest",
+        "tests/unit/test_s4_7_inv1_inv2.py::test_inv2_interior_char_substitution_with_unchanged_boundaries_binds",
+        "--runxfail",
+        "-q",
+        "-p",
+        "no:cacheprovider"
+      ],
+      "rc": 1,
+      "output": "F                                                                        [100%]\n=================================== FAILURES ===================================\n_____ test_inv2_interior_char_substitution_with_unchanged_boundaries_binds _____\n\n    @pytest.mark.xfail(strict=True, reason=TRACKER)\n    def test_inv2_interior_char_substitution_with_unchanged_boundaries_binds():\n>       _assert_required_inv2_case(\"inv2-interior-char-sub\")\n\ntests/unit/test_s4_7_inv1_inv2.py:420: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\ncase_name = 'inv2-interior-char-sub'\n\n    def _assert_required_inv2_case(case_name: str) -> None:\n        case = _case(case_name)\n        expected = set(required_inv2_binds(priority2_shared_corpus())[case_name])\n        observed = {AllowedBind(bind.slot, bind.fresh_atom_ids) for bind in _observed(case)}\n>       assert expected <= observed, (\n            f\"{case_name}: missing required bind(s) {expected - observed}\"\n        )\nE       AssertionError: inv2-interior-char-sub: missing required bind(s) {AllowedBind(slot=SlotRef(node_id='l1', slot_name='body'), fresh_atom_ids=('fresh-00000a29-000-004-b0', 'fresh-00000a29-001-000-b1-edit'))}\nE       assert {AllowedBind(...00-b1-edit'))} <= {AllowedBind(...00-000-h0',))}\nE         \nE         Extra items in the left set:\nE         AllowedBind(slot=SlotRef(node_id='l1', slot_name='body'), fresh_atom_ids=('fresh-00000a29-000-004-b0', 'fresh-00000a29-001-000-b1-edit'))\n\ntests/unit/test_s4_7_inv1_inv2.py:413: AssertionError\n=========================== short test summary info ============================\nFAILED tests/unit/test_s4_7_inv1_inv2.py::test_inv2_interior_char_substitution_with_unchanged_boundaries_binds\n1 failed in 1.74s\n"
+    },
+    {
+      "argv": [
+        "/Users/ben_mpa/LLM/PER_LA_LIBERTA/engine/.venv/bin/python",
+        "-m",
+        "pytest",
+        "tests/unit/test_s4_7_inv1_inv2.py::test_inv2_atom_split_with_unchanged_tokens_binds_exact_descendant_tuple",
+        "--runxfail",
+        "-q",
+        "-p",
+        "no:cacheprovider"
+      ],
+      "rc": 1,
+      "output": "F                                                                        [100%]\n=================================== FAILURES ===================================\n___ test_inv2_atom_split_with_unchanged_tokens_binds_exact_descendant_tuple ____\n\n    @pytest.mark.xfail(strict=True, reason=TRACKER)\n    def test_inv2_atom_split_with_unchanged_tokens_binds_exact_descendant_tuple():\n>       _assert_required_inv2_case(\"split-token-boundary\")\n\ntests/unit/test_s4_7_inv1_inv2.py:425: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\ncase_name = 'split-token-boundary'\n\n    def _assert_required_inv2_case(case_name: str) -> None:\n        case = _case(case_name)\n        expected = set(required_inv2_binds(priority2_shared_corpus())[case_name])\n        observed = {AllowedBind(bind.slot, bind.fresh_atom_ids) for bind in _observed(case)}\n>       assert expected <= observed, (\n            f\"{case_name}: missing required bind(s) {expected - observed}\"\n        )\nE       AssertionError: split-token-boundary: missing required bind(s) {AllowedBind(slot=SlotRef(node_id='l0', slot_name='body'), fresh_atom_ids=('fresh-00000068-000-001-a0', 'fresh-00000068-000-002-p0', 'fresh-00000068-001-000-a1-left', 'fresh-00000068-001-001-a1-right', 'fresh-00000068-000-004-p1'))}\nE       assert {AllowedBind(...000-004-p1'))} <= {AllowedBind(...00-007-s0',))}\nE         \nE         Extra items in the left set:\nE         AllowedBind(slot=SlotRef(node_id='l0', slot_name='body'), fresh_atom_ids=('fresh-00000068-000-001-a0', 'fresh-00000068-000-002-p0', 'fresh-00000068-001-000-a1-left', 'fresh-00000068-001-001-a1-right', 'fresh-00000068-000-004-p1'))\n\ntests/unit/test_s4_7_inv1_inv2.py:413: AssertionError\n=========================== short test summary info ============================\nFAILED tests/unit/test_s4_7_inv1_inv2.py::test_inv2_atom_split_with_unchanged_tokens_binds_exact_descendant_tuple\n1 failed in 1.70s\n"
+    },
+    {
+      "argv": [
+        "/Users/ben_mpa/LLM/PER_LA_LIBERTA/engine/.venv/bin/python",
+        "-m",
+        "pytest",
+        "tests/unit/test_s4_7_inv1_inv2.py::test_inv2_atom_merge_with_unambiguous_ownership_binds",
+        "--runxfail",
+        "-q",
+        "-p",
+        "no:cacheprovider"
+      ],
+      "rc": 1,
+      "output": "F                                                                        [100%]\n=================================== FAILURES ===================================\n____________ test_inv2_atom_merge_with_unambiguous_ownership_binds _____________\n\n    @pytest.mark.xfail(strict=True, reason=TRACKER)\n    def test_inv2_atom_merge_with_unambiguous_ownership_binds():\n>       _assert_required_inv2_case(\"inv2-atom-merge\")\n\ntests/unit/test_s4_7_inv1_inv2.py:430: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\ncase_name = 'inv2-atom-merge'\n\n    def _assert_required_inv2_case(case_name: str) -> None:\n        case = _case(case_name)\n        expected = set(required_inv2_binds(priority2_shared_corpus())[case_name])\n        observed = {AllowedBind(bind.slot, bind.fresh_atom_ids) for bind in _observed(case)}\n>       assert expected <= observed, (\n            f\"{case_name}: missing required bind(s) {expected - observed}\"\n        )\nE       AssertionError: inv2-atom-merge: missing required bind(s) {AllowedBind(slot=SlotRef(node_id='l1', slot_name='body'), fresh_atom_ids=('fresh-00000a2a-001-000-b-merge',))}\nE       assert {AllowedBind(...0-b-merge',))} <= {AllowedBind(...00-000-h0',))}\nE         \nE         Extra items in the left set:\nE         AllowedBind(slot=SlotRef(node_id='l1', slot_name='body'), fresh_atom_ids=('fresh-00000a2a-001-000-b-merge',))\n\ntests/unit/test_s4_7_inv1_inv2.py:413: AssertionError\n=========================== short test summary info ============================\nFAILED tests/unit/test_s4_7_inv1_inv2.py::test_inv2_atom_merge_with_unambiguous_ownership_binds\n1 failed in 1.70s\n"
+    }
+  ],
+  "green": {
+    "argv": [
+      "/Users/ben_mpa/LLM/PER_LA_LIBERTA/engine/.venv/bin/python",
+      "-m",
+      "pytest",
+      "tests/unit/test_s4_7_inv1_inv2.py",
+      "-k",
+      "s4_7_inv1_inv2",
+      "-q",
+      "-p",
+      "no:cacheprovider"
+    ],
+    "rc": 0,
+    "output": "................xxxxxx                                                   [100%]\n16 passed, 6 xfailed in 7.74s\n"
+  }
+}

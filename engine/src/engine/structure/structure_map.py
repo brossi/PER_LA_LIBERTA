@@ -56,9 +56,11 @@ from __future__ import annotations
 import json
 from collections.abc import Mapping
 from dataclasses import dataclass
+from functools import lru_cache
 from pathlib import Path
 
 import jsonschema
+import jsonschema_rs
 
 from engine.errors import MissingInputError, StaleArtifactError
 from engine.paths import BookWorkspace
@@ -74,9 +76,15 @@ from engine.structure.artifacts import (
     structure_map_path,
     structure_map_snapshot_path,
 )
-from engine.structure.atom_store import CANONICAL, WITNESS, AtomStream, load_workspace_streams
+from engine.structure.atom_store import (
+    CANONICAL,
+    WITNESS,
+    AtomStream,
+    load_workspace_streams,
+)
 from engine.structure.atom_store import to_json as stream_envelope_json
 from engine.structure.atoms import PROCESSING_SCOPE_INCLUDED
+from engine.structure.boundary_anchor import BoundaryAnchor
 from engine.structure.errors import EC, StructureValidationError
 from engine.structure.handles import (
     HANDLE_RENDERER_VERSION,
@@ -95,10 +103,15 @@ from engine.structure.projection import (
     ProjectionMap,
     RebindAnchors,
     Region,
+    SlotBoundaryAnchors,
     SlotFingerprint,
     validate_atom_existence,
     validate_projection,
     validate_reference_integrity,
+)
+from engine.structure.rebind_telemetry import (
+    NULL_REBIND_TELEMETRY,
+    RebindTelemetry,
 )
 from engine.util.jsonio import atomic_write_text, read_json
 
@@ -110,6 +123,25 @@ def load_schema() -> dict:
     """The parsed Tier-1 JSON-Schema, read fresh from :data:`SCHEMA_PATH` (a fresh dict per call, so
     no caller can mutate a shared cache)."""
     return json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
+
+
+@lru_cache(maxsize=1)
+def _tier1_authority_validator() -> jsonschema.Draft202012Validator:
+    """The established Python Draft 2020-12 authority, compiled once."""
+    schema = load_schema()
+    jsonschema.Draft202012Validator.check_schema(schema)
+    return jsonschema.Draft202012Validator(schema)
+
+
+@lru_cache(maxsize=1)
+def _tier1_schema_validator() -> jsonschema_rs.Draft202012Validator:
+    """Compile the packaged Draft 2020-12 schema once for native-speed instance validation.
+
+    ``jsonschema`` remains the schema authority: its Draft 2020-12 meta-validator checks the
+    definition before the native validator is constructed.  :func:`load_schema` still returns a
+    fresh dictionary on every public call; only this private immutable compiled form is cached.
+    """
+    return jsonschema_rs.Draft202012Validator(_tier1_authority_validator().schema)
 
 
 def schema_version_const(schema: Mapping | None = None) -> int:
@@ -178,9 +210,9 @@ class StructureMap:
 
 def _rebind_anchors_from_json(data: object) -> RebindAnchors | None:
     """One Tier-1-valid ``rebind_anchors`` object → the typed :class:`RebindAnchors`, or ``None`` when
-    the node stores none. The S5.1 v2 read path (the inv-25 carve-out: ``rebind_anchors`` IS modeled,
-    ``decision`` is not). A ``region: null`` is first-class (absent seed); ``content_fingerprint`` is
-    slot-keyed. Presumes Tier-1 shape (a direct call with malformed data may raise ``KeyError`` /
+    the node stores none. The v3 read path models region, slot fingerprints, and stored start/end
+    boundary anchors (the inv-25 carve-out; ``decision`` remains inert). A ``region: null`` is
+    first-class. Presumes Tier-1 shape (a direct call with malformed data may raise ``KeyError`` /
     ``TypeError``; the loader wraps those as :class:`~engine.errors.StaleArtifactError`)."""
     if data is None:
         return None
@@ -203,7 +235,29 @@ def _rebind_anchors_from_json(data: object) -> RebindAnchors | None:
         )
         for slot, fp in data.get("content_fingerprint", {}).items()
     )
-    return RebindAnchors(region=region, content_fingerprint=fingerprints)
+
+    def boundary_anchor(raw: Mapping) -> BoundaryAnchor:
+        return BoundaryAnchor(
+            prefix=tuple(raw["prefix"]),
+            exact=tuple(raw["exact"]),
+            suffix=tuple(raw["suffix"]),
+        )
+
+    boundaries = tuple(
+        (
+            slot,
+            SlotBoundaryAnchors(
+                start=boundary_anchor(pair["start"]),
+                end=boundary_anchor(pair["end"]),
+            ),
+        )
+        for slot, pair in data.get("boundary_anchors", {}).items()
+    )
+    return RebindAnchors(
+        region=region,
+        content_fingerprint=fingerprints,
+        boundary_anchors=boundaries,
+    )
 
 
 def _node_from_json(data: Mapping) -> Node:
@@ -234,7 +288,9 @@ def _strict_int(value: object, where: str) -> int:
     into a revision/version field would corrupt CAS arithmetic or round-trip as a float, so both
     are rejected here (the audit's numeric-boundary finding; the ``Alias.__post_init__`` idiom)."""
     if isinstance(value, bool) or not isinstance(value, int):
-        raise ValueError(f"{where} must be a JSON integer (not bool/float), got {value!r}")
+        raise ValueError(
+            f"{where} must be a JSON integer (not bool/float), got {value!r}"
+        )
     return value
 
 
@@ -291,12 +347,21 @@ def _tier1_validate(doc: object) -> None:
     :class:`~engine.errors.StaleArtifactError` naming the offending location — never an ``EC`` code
     (the closed set is semantic; shape rejection is the load boundary's)."""
     try:
-        jsonschema.validate(doc, load_schema())
-    except jsonschema.ValidationError as exc:
-        location = "/".join(str(p) for p in exc.absolute_path) or "<root>"
-        raise StaleArtifactError(
-            f"structure map failed Tier-1 shape validation at {location}: {exc.message}"
-        ) from exc
+        _tier1_schema_validator().validate(doc)
+    except jsonschema_rs.ValidationError:
+        # Preserve the established Python implementation's edge semantics and diagnostics on the
+        # cold invalid path.  In particular, it treats an in-memory NaN as a number and leaves the
+        # writer's allow_nan=False renderer to produce the long-standing "not renderable" error,
+        # while the native implementation rejects that value during oneOf evaluation.  A native
+        # rejection is authoritative only when the Python Draft 2020-12 validator agrees.
+        try:
+            _tier1_authority_validator().validate(doc)
+        except jsonschema.ValidationError as authority_exc:
+            location = "/".join(str(p) for p in authority_exc.absolute_path) or "<root>"
+            raise StaleArtifactError(
+                "structure map failed Tier-1 shape validation at "
+                f"{location}: {authority_exc.message}"
+            ) from authority_exc
 
 
 def validate_structure_map(smap: StructureMap, atom_store) -> None:
@@ -331,7 +396,9 @@ def validate_structure_map(smap: StructureMap, atom_store) -> None:
         lambda: validate_projection(projection, atom_store),
         lambda: validate_reference_integrity(projection),
         lambda: validate_atom_existence(projection, atom_store),
-        lambda: validate_handle_policies(projection, smap.block_vocabulary, smap.handle_policies),
+        lambda: validate_handle_policies(
+            projection, smap.block_vocabulary, smap.handle_policies
+        ),
         lambda: validate_block_vocabulary(smap.block_vocabulary, projection),
         lambda: validate_aliases(projection, smap.aliases, smap.map_revision),
     )
@@ -344,7 +411,12 @@ def validate_structure_map(smap: StructureMap, atom_store) -> None:
         raise StructureValidationError(findings)
 
 
-def load_structure_map(path: Path, atom_store) -> StructureMap:
+def load_structure_map(
+    path: Path,
+    atom_store,
+    *,
+    telemetry: RebindTelemetry | None = None,
+) -> StructureMap:
     """Read + validate a persisted structure map: **parse JSON → Tier-1 → Tier-2**, in that order,
     raising on the first tier that fails (X15). Returns the typed :class:`StructureMap`.
 
@@ -360,35 +432,51 @@ def load_structure_map(path: Path, atom_store) -> StructureMap:
     semantic violation is :class:`~engine.structure.errors.StructureValidationError` carrying the
     collected ``EC`` payload. Nothing else escapes.
     """
+    recorder = telemetry or NULL_REBIND_TELEMETRY
     path = Path(path)
     if not path.is_file():
         raise MissingInputError(f"structure map not found at {path}")
-    try:
-        text = path.read_text(encoding="utf-8")
-    except OSError as exc:
-        # is_file() passed but the read failed (permissions, TOCTOU): still inside the total
-        # contract, never a PermissionError traceback.
-        raise StaleArtifactError(f"structure map at {path} is unreadable: {exc}") from exc
-    except UnicodeDecodeError as exc:
-        raise StaleArtifactError(f"structure map at {path} is not valid UTF-8: {exc}") from exc
-    try:
-        doc = json.loads(text, parse_constant=_reject_non_finite)
-    except RecursionError as exc:
-        # A pathologically nested document blows json's recursive parser — unparseable content,
-        # not an engine crash.
-        raise StaleArtifactError(
-            f"structure map at {path} is not valid JSON: nested beyond parseable depth"
-        ) from exc
-    except ValueError as exc:  # json.JSONDecodeError subclasses ValueError; also _reject_non_finite
-        raise StaleArtifactError(f"structure map at {path} is not valid JSON: {exc}") from exc
-    _tier1_validate(doc)
-    try:
-        smap = structure_map_from_json(doc)
-    except StructureValidationError:
-        raise  # Tier-2a (DUPLICATE_NODE_ID) — a semantic finding, not a malformed artifact
-    except (ValueError, TypeError) as exc:
-        raise StaleArtifactError(f"malformed structure map at {path}: {exc}") from exc
-    validate_structure_map(smap, atom_store)
+    with recorder.span("structure-map.load.read") as span:
+        try:
+            text = path.read_text(encoding="utf-8")
+            span.update(byte_count=path.stat().st_size)
+        except OSError as exc:
+            # is_file() passed but the read failed (permissions, TOCTOU): still inside the total
+            # contract, never a PermissionError traceback.
+            raise StaleArtifactError(
+                f"structure map at {path} is unreadable: {exc}"
+            ) from exc
+        except UnicodeDecodeError as exc:
+            raise StaleArtifactError(
+                f"structure map at {path} is not valid UTF-8: {exc}"
+            ) from exc
+    with recorder.span("structure-map.load.parse"):
+        try:
+            doc = json.loads(text, parse_constant=_reject_non_finite)
+        except RecursionError as exc:
+            # A pathologically nested document blows json's recursive parser — unparseable
+            # content, not an engine crash.
+            raise StaleArtifactError(
+                f"structure map at {path} is not valid JSON: nested beyond parseable depth"
+            ) from exc
+        except ValueError as exc:
+            # json.JSONDecodeError subclasses ValueError; also _reject_non_finite.
+            raise StaleArtifactError(
+                f"structure map at {path} is not valid JSON: {exc}"
+            ) from exc
+    with recorder.span("structure-map.load.tier1"):
+        _tier1_validate(doc)
+    with recorder.span("structure-map.load.typed-build"):
+        try:
+            smap = structure_map_from_json(doc)
+        except StructureValidationError:
+            raise  # Tier-2a (DUPLICATE_NODE_ID) — semantic, not malformed.
+        except (ValueError, TypeError) as exc:
+            raise StaleArtifactError(
+                f"malformed structure map at {path}: {exc}"
+            ) from exc
+    with recorder.span("structure-map.load.tier2"):
+        validate_structure_map(smap, atom_store)
     return smap
 
 
@@ -396,7 +484,9 @@ def _reject_non_finite(token: str) -> float:
     """``json.loads`` hook: the ``NaN``/``Infinity``/``-Infinity`` tokens are rejected outright — a
     map carrying one would load "clean" and then crash the ``allow_nan=False`` renderer, breaking
     the dump→load→dump property on a Tier-1-"valid" document (audit finding)."""
-    raise ValueError(f"non-finite float token {token!r} is not valid structure-map JSON")
+    raise ValueError(
+        f"non-finite float token {token!r} is not valid structure-map JSON"
+    )
 
 
 # --- the §4-header atom_store adapter --------------------------------------------------------------- #
@@ -415,7 +505,9 @@ class StreamAtomReader:
       stream alone could not resolve a ``furniture_atoms`` entry (inv 17).
     """
 
-    def __init__(self, streams: Mapping[str, AtomStream], canonical_stream_id: str = "canonical") -> None:
+    def __init__(
+        self, streams: Mapping[str, AtomStream], canonical_stream_id: str = "canonical"
+    ) -> None:
         canonical = streams.get(canonical_stream_id)
         if canonical is None or canonical.kind != CANONICAL:
             raise ValueError(
@@ -423,12 +515,16 @@ class StreamAtomReader:
                 f"canonical-kind stream (have {sorted(streams)})"
             )
         self._included = tuple(
-            a.atom_id for a in canonical.atoms if a.processing_scope == PROCESSING_SCOPE_INCLUDED
+            a.atom_id
+            for a in canonical.atoms
+            if a.processing_scope == PROCESSING_SCOPE_INCLUDED
         )
         # The canonical stream's scopes win unconditionally on an id collision (audit hardening: a
         # witness stream sorting before "canonical" must not shadow a canonical atom's scope into a
         # spurious OWNED_EXCLUDED_ATOM); the remaining witnesses merge deterministically by sorted id.
-        self._scope: dict[str, str] = {a.atom_id: a.processing_scope for a in canonical.atoms}
+        self._scope: dict[str, str] = {
+            a.atom_id: a.processing_scope for a in canonical.atoms
+        }
         for stream_id in sorted(streams):
             if stream_id == canonical_stream_id:
                 continue
@@ -597,7 +693,11 @@ def render_structure_map(doc: Mapping) -> str:
 
 
 def write_structure_map(
-    workspace: BookWorkspace, doc: Mapping, *, supersede_revision: int | None = None
+    workspace: BookWorkspace,
+    doc: Mapping,
+    *,
+    supersede_revision: int | None = None,
+    telemetry: RebindTelemetry | None = None,
 ) -> Path:
     """The production writer, **regen-guarded** (§3.E.8, inv 21): ``structure_map.json`` is
     irreproducible hand-authored data, so overwriting a present map without the explicit licensed
@@ -623,6 +723,7 @@ def write_structure_map(
     built here. Fixture/test generation under ``tests/fixtures/`` writes freely — this guard is
     the *production* path.
     """
+    recorder = telemetry or NULL_REBIND_TELEMETRY
     if supersede_revision is not None and (
         isinstance(supersede_revision, bool) or not isinstance(supersede_revision, int)
     ):
@@ -630,18 +731,23 @@ def write_structure_map(
         raise ValueError(
             f"supersede_revision must be an int map_revision (not bool/float), got {supersede_revision!r}"
         )
-    _tier1_validate(doc)
+    with recorder.span("structure-map.write.tier1"):
+        _tier1_validate(doc)
     try:
-        _strict_int(doc["map_revision"], "map_revision")  # Tier-1 "integer" admits 2.0; CAS needs an int
+        _strict_int(
+            doc["map_revision"], "map_revision"
+        )  # Tier-1 "integer" admits 2.0; CAS needs an int
     except ValueError as exc:
         raise StaleArtifactError(f"structure map document is malformed: {exc}") from exc
-    try:
-        rendered = render_structure_map(doc)
-    except ValueError as exc:
-        raise StaleArtifactError(
-            f"structure map document is not renderable ({exc}) — refusing to persist what no "
-            f"subsequent load could read"
-        ) from exc
+    with recorder.span("structure-map.write.render") as span:
+        try:
+            rendered = render_structure_map(doc)
+            span.update(character_count=len(rendered))
+        except ValueError as exc:
+            raise StaleArtifactError(
+                f"structure map document is not renderable ({exc}) — refusing to persist what no "
+                f"subsequent load could read"
+            ) from exc
     path = structure_map_path(workspace)
     if supersede_revision is not None and not path.exists():
         raise StructureValidationError(
@@ -713,6 +819,9 @@ def write_structure_map(
             )
         snapshot.parent.mkdir(parents=True, exist_ok=True)
         atomic_write_text(snapshot, path.read_text(encoding="utf-8"))
-    path.parent.mkdir(parents=True, exist_ok=True)  # a fresh checkout may not be .ensure()d yet
-    atomic_write_text(path, rendered)
+    path.parent.mkdir(
+        parents=True, exist_ok=True
+    )  # a fresh checkout may not be .ensure()d yet
+    with recorder.span("structure-map.write.io"):
+        atomic_write_text(path, rendered)
     return path

@@ -12,6 +12,9 @@ on:
     paths:
       - "engine/**"
       - ".github/workflows/engine.yml"
+  workflow_dispatch:
+  schedule:
+    - cron: "23 7 * * 1"
 
 defaults:
   run:
@@ -66,3 +69,34 @@ jobs:
           ! grep -rEn --exclude='_generate_*.py' \
             'from (download|ocr|reconcile|triage|cleanup|adjudicate|validate|translate|multi_translate|refine|typeset|companion|pipeline|utils|providers|typography|edgren|hoare|vision_review) import|^[[:space:]]*import (pipeline|utils|providers)$' \
             src tests
+
+  scale:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    defaults:
+      run:
+        working-directory: engine
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Sync scale-harness dependencies
+        run: uv sync
+
+      - name: S4.7 full production scale gate (10^3/10^4/10^5)
+        env:
+          S4_7_SCALE_ARTIFACT: ${{ runner.temp }}/s4_7_scale.json
+        run: uv run pytest -q --capture=tee-sys -m scale
+
+      - name: Upload S4.7 scale evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: s4-7-production-scale
+          path: ${{ runner.temp }}/s4_7_scale*.json
+          if-no-files-found: warn
